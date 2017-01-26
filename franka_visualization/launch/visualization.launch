@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+
+<launch>
+  <node name="simple_viz_node" pkg="franka_visualization" type="simple_viz_node" output="screen">
+    <rosparam command="load" file="$(find franka_visualization)/param/joint_names.yaml" />
+  </node>
+</launch>
