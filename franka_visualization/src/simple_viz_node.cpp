@@ -1,6 +1,5 @@
+#include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include "ros/ros.h"
-// include lib_franka ...
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "simple_viz_node");
@@ -33,7 +32,7 @@ int main(int argc, char **argv) {
   }
 
   while (ros::ok()) {
-    // read sensors from franka using libfranka
+    // TODO: read sensors from franka using libfranka
 
     // update joint_states to msgs
     states.header.stamp = ros::Time::now();
