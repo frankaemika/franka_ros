@@ -1,6 +1,8 @@
-
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE HEADERS include/*.h src/*.h)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
 
 find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
