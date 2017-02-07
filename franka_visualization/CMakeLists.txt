@@ -9,17 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
 
-#HACK
-#list(INSERT CMAKE_MODULE_PATH 0 /home/jaeh_ch/Code/libfranka/cmake)
-#find_package(Poco REQUIRED COMPONENTS Net Foundation)
-#set(Franka_DIR "/home/jaeh_ch/Code/libfranka/build/")
 find_package(Franka REQUIRED)
 
 catkin_package(CATKIN_DEPENDS sensor_msgs roscpp)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-#  /home/jaeh_ch/Code/libfranka/include
 )
 
 add_executable(simple_viz_node
