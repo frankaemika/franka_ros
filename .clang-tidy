@@ -1,5 +1,5 @@
 Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*'
-HeaderFilterRegex: '.*,-franka/robot_state\.h'
+HeaderFilterRegex: '.*'
 CheckOptions:
 # Classes, structs, ...
   - key:    readability-identifier-naming.NamespaceCase
