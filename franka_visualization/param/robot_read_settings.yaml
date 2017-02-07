@@ -6,3 +6,5 @@ joint_names:
   - joint5
   - joint6
   - joint7
+  
+robot_ip: 127.0.0.1

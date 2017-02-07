@@ -2,6 +2,6 @@
 
 <launch>
   <node name="simple_viz_node" pkg="franka_visualization" type="simple_viz_node" output="screen">
-    <rosparam command="load" file="$(find franka_visualization)/param/joint_names.yaml" />
+    <rosparam command="load" file="$(find franka_visualization)/param/robot_read_settings.yaml" />
   </node>
 </launch>
