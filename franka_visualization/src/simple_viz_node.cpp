@@ -32,21 +32,20 @@ int main(int argc, char** argv) {
   try {
     ROS_INFO("connecting to robot... ");
     franka::Robot robot(robot_ip);
-    long int secnr(1);
+    uint64_t secnr = 1;
 
     while (ros::ok() && robot.waitForRobotState()) {
       // read sensors from franka using libfranka
-      const franka::RobotState& robotState = robot.robotState();
-      // std::cout << robotState << std::endl;
+      const franka::RobotState& robot_state = robot.robotState();
 
       // update joint_states to msgs
       states.header.stamp = ros::Time::now();
       states.header.seq = secnr;
       for (int i = 0; i < joint_names.size(); ++i) {
         states.name.at(i) = joint_names.at(i);
-        states.position.at(i) = robotState.q[i];
-        states.velocity.at(i) = robotState.dq[i];
-        states.effort.at(i) = robotState.tau_J[i];
+        states.position.at(i) = robot_state.q[i];
+        states.velocity.at(i) = robot_state.dq[i];
+        states.effort.at(i) = robot_state.tau_J[i];
       }
       joint_pub.publish(states);
       ros::spinOnce();
