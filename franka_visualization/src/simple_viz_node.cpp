@@ -7,21 +7,20 @@ int main(int argc, char **argv) {
     ros::NodeHandle nh("~");
     ros::NodeHandle nhp;
     ros::Rate rate(1000);
-    ros::Publisher joint_pub =
-            nhp.advertise<sensor_msgs::JointState>("joint_states", 1);
+    ros::Publisher joint_pub = nhp.advertise<sensor_msgs::JointState>("joint_states", 1);
     std::vector<std::string> joint_names;
 
-    // parse yaml with joint names and robot-IP from yaml
+    // parse yaml with joint names and robot-IP
     XmlRpc::XmlRpcValue params;
     nh.getParam("joint_names", params);
     joint_names.resize(params.size());
     for (int i = 0; i < params.size(); ++i) {
         joint_names[i] = static_cast<std::string>(params[i]);
-        ROS_INFO("joint %d: %s", i, joint_names[i].c_str());
+        ROS_INFO("parsed jointname[%d]= %s", i, joint_names[i].c_str());
     }
     std::string robot_ip;
     nh.getParam("robot_ip", robot_ip);
-    ROS_INFO("parsed IP to connect to: %s", robot_ip.c_str());
+    ROS_INFO("parsed franka robot IP: %s", robot_ip.c_str());
 
     sensor_msgs::JointState states;
     states.effort.resize(joint_names.size());
@@ -29,17 +28,18 @@ int main(int argc, char **argv) {
     states.position.resize(joint_names.size());
     states.velocity.resize(joint_names.size());
 
-
     try
     {
-        long int secnr = 1;
+        ROS_INFO("connecting to robot... ");
         franka::Robot robot(robot_ip);
+        long int secnr(1);
+
         while (ros::ok() && robot.waitForRobotState())
         {
             // read sensors from franka using libfranka
-            const franka::RobotState& robotState = robot.getRobotState();
+            const franka::RobotState& robotState = robot.robotState();
             // std::cout << robotState << std::endl;
-            
+
             // update joint_states to msgs
             states.header.stamp = ros::Time::now();
             states.header.seq = secnr;
@@ -58,7 +58,8 @@ int main(int argc, char **argv) {
     }
     catch(franka::NetworkException const& e)
     {
-        std::cout << e.what() << std::endl << std::endl << std::endl << std::endl << std::endl << std::endl ;
+        ROS_ERROR_STREAM(""<< e.what());
+        // std::cout << e.what() << std::endl;
         return -1;
     }
     
