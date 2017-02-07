@@ -1,0 +1,14 @@
+# make the namespace match the name you use to instantiate the arm in the xacro
+franka:
+  joint_names:
+    - joint1
+    - joint2
+    - joint3
+    - joint4
+    - joint5
+    - joint6
+    - joint7
+
+  robot_ip: 127.0.0.1
+#  root: link0   # TODO needed?
+#  tip: link6    # TODO needed?
