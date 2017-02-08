@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   roscpp
+  pluginlib
 )
 
 find_package(Franka REQUIRED)
@@ -23,8 +24,12 @@ include_directories(
   include
 )
 
+add_executable(franka_hw_node
+  src/franka_hw_node.cpp
+)
+
 add_library(franka_hw
-   src/franka_hw.cpp
+  src/franka_hw.cpp
 )
 
 add_dependencies(franka_hw
@@ -32,9 +37,20 @@ add_dependencies(franka_hw
   ${catkin_EXPORTED_TARGETS}
 )
 
+add_dependencies(franka_hw_node
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
 target_link_libraries(franka_hw
-   ${catkin_LIBRARIES}
-   Franka::franka
+  ${catkin_LIBRARIES}
+  Franka::franka
+)
+
+target_link_libraries(franka_hw_node
+  ${catkin_LIBRARIES}
+  Franka::franka
+  franka_hw
 )
 
 target_include_directories(franka_hw PUBLIC

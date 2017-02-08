@@ -12,7 +12,7 @@ namespace hardware_interface
 class FrankaCartesianStateHandle
 {
 public:
-  FrankaCartesianStateHandle(): collision_(0), contact_(0), O_F_ext_hat_EE_(0), EE_F_ext_hat_EE_(0), O_T_EE_start_(0) {}
+  FrankaCartesianStateHandle(): name_(""), collision_(0), contact_(0), O_F_ext_hat_EE_(0), EE_F_ext_hat_EE_(0), O_T_EE_start_(0) {}
 
   /**
    * \param collision The collision state of the arm
@@ -21,12 +21,14 @@ public:
    * \param EE_F_ext_hat_EE The external wrench exerted to the arm w.r.t. end-effector coordinates
    * \param O_T_EE_start The homogeneous transformation matrix from end-effector to base_link frame
    */
-  FrankaCartesianStateHandle(const std::vector<double>* collision,
+  FrankaCartesianStateHandle(const std::string name,
+                             const std::vector<double>* collision,
                              const std::vector<double>* contact,
                              const std::vector<double>* O_F_ext_hat_EE,
                              const std::vector<double>* EE_F_ext_hat_EE,
                              const std::vector<std::vector<double> >* O_T_EE_start)
-    : collision_(collision),
+    : name_(name),
+      collision_(collision),
       contact_(contact),
       O_F_ext_hat_EE_(O_F_ext_hat_EE),
       EE_F_ext_hat_EE_(EE_F_ext_hat_EE),
@@ -55,6 +57,7 @@ public:
     }
   }
 
+  std::string getName() const {return name_;}
   std::vector<double> getCollision()  const {assert(collision_); return *collision_;}
   std::vector<double> getContact()  const {assert(contact_); return *contact_;}
   std::vector<double> getFExtO()  const {assert(O_F_ext_hat_EE_); return *O_F_ext_hat_EE_;}
@@ -62,6 +65,7 @@ public:
   std::vector<std::vector<double> > getTransform()  const {assert(O_T_EE_start_); return *O_T_EE_start_;}
 
 private:
+  std::string name_;
   const std::vector<double>* collision_;
   const std::vector<double>* contact_;
   const std::vector<double>* O_F_ext_hat_EE_;

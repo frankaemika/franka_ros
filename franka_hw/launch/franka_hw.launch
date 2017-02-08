@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<launch>
+  <!-- <param name="robot_description" command="$(find xacro)/xacro -inorder $(find franka_description)/robots/franka.urdf.xacro" /> -->
+  <node name="franka_hw_node" pkg="franka_hw" type="franka_hw_node" output="screen">
+    <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
+  </node>
+  <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" /> -->
+  <!-- <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_description)/rviz/franka_description.rviz"/> -->
+</launch>

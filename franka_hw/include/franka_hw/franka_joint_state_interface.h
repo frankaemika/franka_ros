@@ -17,10 +17,10 @@ public:
         joint_collision_(0), joint_contact_(0) {}
 
    /**
-   * \param name_ The name of the joint
+   * \param name The name of the joint
    * \param q A pointer to the storage for this joint's position
    * \param dq A pointer to the storage for this joint's velocity
-   * \param tau_J A pointer to the storage for this joint's torque
+   * \param tauJ A pointer to the storage for this joint's torque
    * \param q_d A pointer to the storage for this joint's desired position
    * \param q_start A pointer to the storage for this joint's TODO
    * \param dtau_J A pointer to the storage for this joint's torque's time derivative
