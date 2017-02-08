@@ -32,4 +32,10 @@ target_include_directories(franka_joint_state_publisher PUBLIC
 )
 
 ## Tools
+file(GLOB_RECURSE CLANG_TOOLS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE CLANG_TOOLS_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
+set(CLANG_TIDY_DEPENDS franka_joint_state_publisher)
 include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ClangTools.cmake)
