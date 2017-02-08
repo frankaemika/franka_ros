@@ -17,4 +17,5 @@
   <depend>sensor_msgs</depend>
   <depend>roscpp</depend>
   <depend>Franka</depend>
+  <exec_depend>xacro</exec_depend>
 </package>
