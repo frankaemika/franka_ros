@@ -3,7 +3,7 @@
 #include <sensor_msgs/JointState.h>
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "simple_viz_node");
+  ros::init(argc, argv, "franka_joint_state_publisher");
   ros::NodeHandle nh("~");
   ros::NodeHandle nhp;
   ros::Rate rate(1000);
