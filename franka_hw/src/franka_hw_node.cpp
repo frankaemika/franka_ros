@@ -11,8 +11,10 @@ int main(int argc, char** argv) {
 
   ros::NodeHandle nh("~");
   franka_ros.init(nh);
-
+  ros::Time cycle_start = ros::Time::now();
   while (ros::ok()) {
+    ROS_INFO_THROTTLE(1, "cycle: %f s", (ros::Time::now()-cycle_start).toSec());
+    cycle_start = ros::Time::now();
     if (franka_ros.update() == false) {
       ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
       return -1;
