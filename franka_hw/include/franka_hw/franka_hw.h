@@ -44,7 +44,9 @@ private:
 
     realtime_tools::RealtimePublisher<franka_hw::FrankaState> *pub_franka_states_;
     realtime_tools::RealtimePublisher<sensor_msgs::JointState> *pub_joint_states_;
-    uint64_t sec_nr_ = 0;
+    uint64_t seq_nr_jnt_ = 0;
+    uint64_t seq_nr_fra_ = 0;
+
 
     std::vector<std::string> joint_name_;  // joint_names
 

@@ -2,6 +2,7 @@
 
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/FrankaState.h>
+
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/MultiArrayDimension.h>
 
@@ -9,7 +10,7 @@
 
 #include <math.h>  // floor()
 #include <string>
-#include <iostream>
+#include <iostream>  // std::cout
 
 franka_hw::FrankaHW::FrankaHW() {}
 
@@ -86,7 +87,7 @@ void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
     pub_franka_states_ = new realtime_tools::RealtimePublisher<franka_hw::FrankaState>(nh, "franka_states", 1);
     pub_joint_states_ = new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(nh, "joint_states", 1);
 
-    // resize messages:
+    // resize publisher messages:
     pub_franka_states_->msg_.cartesian_collision.resize(cartesian_collision_.size());
     pub_franka_states_->msg_.cartesian_contact.resize(cartesian_contact_.size());
     pub_franka_states_->msg_.dq.resize(dq_.size());
@@ -112,22 +113,30 @@ void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].stride = 1;
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].label = "column";
     pub_franka_states_->msg_.O_T_EE_start.data.resize(16);
+
+    pub_joint_states_->msg_.name.resize(joint_name_.size());
+    pub_joint_states_->msg_.position.resize(q_.size());
+    pub_joint_states_->msg_.velocity.resize(dq_.size());
+    pub_joint_states_->msg_.effort.resize(tau_J_.size());
 }
 
 bool franka_hw::FrankaHW::update() {
     try {
         // read from franka
         if (robot_->waitForRobotState()) {
-            // write data and to members
+            // write data and to members/state_interfaces
             updateStates(robot_->robotState());
-            // publishFrankaStates();
-            // publishJointStates();
+
+            // publish from members
+            publishFrankaStates();
+            publishJointStates();
             return true;
         } else {
             ROS_ERROR_THROTTLE(1, "failed to read franka state ");
             return false;
         }
-    } catch (franka::NetworkException const& e) {
+    }
+    catch (franka::NetworkException const& e) {
         std::cout << e.what() << std::endl;
         return false;
     }
@@ -172,11 +181,8 @@ void franka_hw::FrankaHW::updateStates(const franka::RobotState& robot_state) {
 }
 
 void franka_hw::FrankaHW::publishFrankaStates() {
-    // fill message with data
     if (pub_franka_states_->trylock()){
-        // fill message with data:
-
-        try{
+        try{  // fill message with data:
             std_msgs::Float64 tmp;
             for (size_t i = 0; i < cartesian_collision_.size(); ++i)
             {
@@ -225,7 +231,6 @@ void franka_hw::FrankaHW::publishFrankaStates() {
                     pub_franka_states_->msg_.O_T_EE_start.data.at(row + col) = O_T_EE_start_[row][col];
                 }
             }
-
         }
         catch (const std::out_of_range& e)
         {
@@ -234,22 +239,44 @@ void franka_hw::FrankaHW::publishFrankaStates() {
             return;
         }
 
-
-        // std_msgs/Header header
-        pub_franka_states_->msg_.header.seq = sec_nr_;
+        pub_franka_states_->msg_.header.seq = seq_nr_fra_;
         pub_franka_states_->msg_.header.stamp = ros::Time::now();
         pub_franka_states_->unlockAndPublish();
-        sec_nr_++;
+        seq_nr_fra_++;
     }
     else  // could not lock franka_states to publish
     {
         ROS_WARN("could not lock franka_states for publishing");
-        sec_nr_++;  // package loss can be detected when sec_nr jumps
+        seq_nr_fra_++;  // package loss can be detected when seq_nr jumps
     }
 }
 
 void franka_hw::FrankaHW::publishJointStates() {
-    // TODO
+    if (pub_joint_states_->trylock()){
+        try{
+            for (size_t i = 0; i < joint_name_.size(); ++i) {
+                pub_joint_states_->msg_.name.at(i) = joint_name_.at(i);
+                pub_joint_states_->msg_.position.at(i) = q_[i];
+                pub_joint_states_->msg_.velocity.at(i) = dq_[i];
+                pub_joint_states_->msg_.effort.at(i) = tau_J_[i];
+            }
+        }
+        catch (const std::out_of_range& e)
+        {
+            std::cout << "Out of Range error." << e.what();
+            pub_joint_states_->unlock();
+            return;
+        }
+        pub_joint_states_->msg_.header.stamp = ros::Time::now();
+        pub_joint_states_->msg_.header.seq = seq_nr_jnt_;
+        pub_joint_states_->unlockAndPublish();
+        seq_nr_jnt_++;
+    }
+    else
+    {
+        ROS_WARN("could not lock joint_states for publishing");
+        seq_nr_jnt_++;  // package loss can be detected when seq_nr jumps
+    }
 }
 
 /**
