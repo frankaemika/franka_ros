@@ -8,16 +8,31 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   roscpp
   pluginlib
+  std_msgs
+  sensor_msgs
+  message_generation
+  realtime_tools
 )
 
 find_package(Franka REQUIRED)
 
+add_message_files(
+  FILES
+  FrankaState.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw
-  CATKIN_DEPENDS hardware_interface roscpp
+  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
   DEPENDS Franka
 )
+
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
@@ -35,11 +50,13 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  franka_hw_generate_messages_cpp
 )
 
 add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  franka_hw_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw

@@ -5,6 +5,10 @@
 
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <realtime_tools/realtime_publisher.h>
+
+#include <franka_hw/FrankaState.h>
+#include <sensor_msgs/JointState.h>
 
 #include <franka_hw/franka_joint_state_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
@@ -37,6 +41,10 @@ private:
     hardware_interface::FrankaCartesianStateInterface franka_cart_state_interface_;
 
     franka::Robot *robot_;  // libfranka robot
+
+    realtime_tools::RealtimePublisher<franka_hw::FrankaState> *pub_franka_states_;
+    realtime_tools::RealtimePublisher<sensor_msgs::JointState> *pub_joint_states_;
+    uint64_t sec_nr_ = 0;
 
     std::vector<std::string> joint_name_;  // joint_names
 
