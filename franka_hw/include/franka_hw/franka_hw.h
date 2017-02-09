@@ -10,62 +10,60 @@
 #include <franka_hw/FrankaState.h>
 #include <sensor_msgs/JointState.h>
 
-#include <franka_hw/franka_joint_state_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
+#include <franka_hw/franka_joint_state_interface.h>
 
 #include <franka/robot.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace franka_hw
-{
+namespace franka_hw {
 
-class FrankaHW: public hardware_interface::RobotHW
-{
-public:
-    FrankaHW();
-    ~FrankaHW();
-    void init(const ros::NodeHandle& nh);
-    bool update();
-    void publishFrankaStates();
-    void publishJointStates();
-    void updateStates(const franka::RobotState& robot_state);
-    ros::Duration get_period() const;
-    bool setUpRobot(std::string ip);
-    std::string getRobotIp() const;
+class FrankaHW : public hardware_interface::RobotHW {
+ public:
+  FrankaHW();
+  ~FrankaHW();
+  void init(const ros::NodeHandle& nh);
+  bool update();
+  void publishFrankaStates();
+  void publishJointStates();
+  void updateStates(const franka::RobotState& robot_state);
+  ros::Duration get_period() const;
+  bool setUpRobot(std::string ip);
+  std::string getRobotIp() const;
 
-private:
-    hardware_interface::JointStateInterface jnt_state_interface_;  // interfaces
-    hardware_interface::FrankaJointStateInterface franka_jnt_state_interface_;
-    hardware_interface::FrankaCartesianStateInterface franka_cart_state_interface_;
+ private:
+  hardware_interface::JointStateInterface jnt_state_interface_;  // interfaces
+  hardware_interface::FrankaJointStateInterface franka_jnt_state_interface_;
+  hardware_interface::FrankaCartesianStateInterface
+      franka_cart_state_interface_;
 
-    franka::Robot *robot_;  // libfranka robot
+  franka::Robot* robot_;  // libfranka robot
 
-    realtime_tools::RealtimePublisher<franka_hw::FrankaState> *pub_franka_states_;
-    realtime_tools::RealtimePublisher<sensor_msgs::JointState> *pub_joint_states_;
-    uint64_t seq_nr_jnt_ = 0;
-    uint64_t seq_nr_fra_ = 0;
+  realtime_tools::RealtimePublisher<franka_hw::FrankaState>* pub_franka_states_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState>* pub_joint_states_;
+  uint64_t seq_nr_jnt_ = 0;
+  uint64_t seq_nr_fra_ = 0;
 
+  std::vector<std::string> joint_name_;  // joint_names
 
-    std::vector<std::string> joint_name_;  // joint_names
-
-    std::string robot_ip_;  // robot state variables
-    std::vector<double> q_;
-    std::vector<double> dq_;
-    std::vector<double> q_d_;
-    std::vector<double> q_start_;
-    std::vector<double> tau_J_;
-    std::vector<double> dtau_J_;
-    std::vector<double> tau_ext_hat_filtered_;
-    std::vector<double> cartesian_collision_;
-    std::vector<double> cartesian_contact_;
-    std::vector<double> joint_collision_;
-    std::vector<double> joint_contact_;
-    std::vector<double> EE_F_ext_hat_EE_;
-    std::vector<double> O_F_ext_hat_EE_;
-    std::vector<double> elbow_start_;
-    std::vector<std::vector<double> > O_T_EE_start_;
+  std::string robot_ip_;  // robot state variables
+  std::vector<double> q_;
+  std::vector<double> dq_;
+  std::vector<double> q_d_;
+  std::vector<double> q_start_;
+  std::vector<double> tau_J_;
+  std::vector<double> dtau_J_;
+  std::vector<double> tau_ext_hat_filtered_;
+  std::vector<double> cartesian_collision_;
+  std::vector<double> cartesian_contact_;
+  std::vector<double> joint_collision_;
+  std::vector<double> joint_contact_;
+  std::vector<double> EE_F_ext_hat_EE_;
+  std::vector<double> O_F_ext_hat_EE_;
+  std::vector<double> elbow_start_;
+  std::vector<std::vector<double> > O_T_EE_start_;
 };
 
 }  // namespace franka_hw
