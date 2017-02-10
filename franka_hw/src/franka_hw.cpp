@@ -20,8 +20,8 @@ franka_hw::FrankaHW::~FrankaHW() {
 }
 
 /**
-* \param nh A private node_handle needed to parse parameters like joint_names
-* and Franka robot IP etc.
+* \param nh A private node_handle needed to parse parameters like joint_names,
+* the Franka robot IP etc.
 */
 void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
     // parse robot_hw yaml with joint names and robot-IP:
@@ -30,13 +30,13 @@ void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
     joint_name_.resize(params.size());
     for (int i = 0; i < params.size(); ++i) {
         joint_name_[i] = static_cast<std::string>(params[i]);
-        ROS_INFO("joint %d: %s", i, joint_name_.at(i).c_str());
+        ROS_INFO("parsed name of joint %d: %s", i, joint_name_[i].c_str());
     }
     nh.getParam("robot_ip", robot_ip_);
 
     setUpRobot(robot_ip_);
 
-    // resize members for state storage
+    // resize members for state storage:
     q_.resize(joint_name_.size());
     dq_.resize(joint_name_.size());
     q_d_.resize(joint_name_.size());
@@ -65,31 +65,40 @@ void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
         jnt_state_interface_.registerHandle(jnt_handle1);
 
         // connect the franka joint state interface
-        hardware_interface::FrankaJointStateHandle jnt_handle2(
-                    joint_name_[i], &q_[i], &dq_[i], &tau_J_[i], &q_d_[i], &q_start_[i],
-                    &dtau_J_[i], &tau_ext_hat_filtered_[i], &joint_collision_[i],
-                    &joint_contact_[i]);
+        hardware_interface::FrankaJointStateHandle jnt_handle2(joint_name_[i],
+                                                               &q_[i],
+                                                               &dq_[i],
+                                                               &tau_J_[i],
+                                                               &q_d_[i],
+                                                               &q_start_[i],
+                                                               &dtau_J_[i],
+                                                               &tau_ext_hat_filtered_[i],
+                                                               &joint_collision_[i],
+                                                               &joint_contact_[i]);
         franka_jnt_state_interface_.registerHandle(jnt_handle2);
     }
 
     // register cartesian handle:
-    hardware_interface::FrankaCartesianStateHandle cart_handle(
-                std::string("franka_emika_cartesian_data"), &cartesian_collision_,
-                &cartesian_contact_, &O_F_ext_hat_EE_, &EE_F_ext_hat_EE_, &O_T_EE_start_);
+    hardware_interface::FrankaCartesianStateHandle cart_handle(std::string("franka_emika_cartesian_data"),
+                                                               &cartesian_collision_,
+                                                               &cartesian_contact_,
+                                                               &O_F_ext_hat_EE_,
+                                                               &EE_F_ext_hat_EE_,
+                                                               &O_T_EE_start_);
+
+    // connect cartesian interface
     franka_cart_state_interface_.registerHandle(cart_handle);
 
-    // register interfaces:
+    // register all interfaces:
     registerInterface(&jnt_state_interface_);
     registerInterface(&franka_jnt_state_interface_);
     registerInterface(&franka_cart_state_interface_);
 
     // register realtime publishers:
     pub_franka_states_ =
-            new realtime_tools::RealtimePublisher<franka_hw::FrankaState>(
-                nh, "franka_states", 1);
+            new realtime_tools::RealtimePublisher<franka_hw::FrankaState>(nh, "franka_states", 1);
     pub_joint_states_ =
-            new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(
-                nh, "joint_states", 1);
+            new realtime_tools::RealtimePublisher<sensor_msgs::JointState>(nh, "joint_states", 1);
 
     // resize publisher messages:
     pub_franka_states_->msg_.cartesian_collision.resize(
@@ -109,19 +118,17 @@ void franka_hw::FrankaHW::init(const ros::NodeHandle& nh) {
                 tau_ext_hat_filtered_.size());
     pub_franka_states_->msg_.tau_J.resize(tau_J_.size());
 
+    pub_franka_states_->msg_.O_T_EE_start.layout.data_offset = 0;
     pub_franka_states_->msg_.O_T_EE_start.layout.dim.clear();
-    pub_franka_states_->msg_.O_T_EE_start.layout.dim.push_back(
-                std_msgs::MultiArrayDimension());
+    pub_franka_states_->msg_.O_T_EE_start.layout.dim.push_back(std_msgs::MultiArrayDimension());
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[0].size = 4;
-    pub_franka_states_->msg_.O_T_EE_start.layout.dim[0].stride = 1;
+    pub_franka_states_->msg_.O_T_EE_start.layout.dim[0].stride = 4*4;
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[0].label = "row";
-    pub_franka_states_->msg_.O_T_EE_start.layout.dim.push_back(
-                std_msgs::MultiArrayDimension());
+    pub_franka_states_->msg_.O_T_EE_start.layout.dim.push_back(std_msgs::MultiArrayDimension());
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].size = 4;
-    pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].stride = 1;
+    pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].stride = 4;
     pub_franka_states_->msg_.O_T_EE_start.layout.dim[1].label = "column";
     pub_franka_states_->msg_.O_T_EE_start.data.resize(16);
-
 
     pub_joint_states_->msg_.name.resize(joint_name_.size());
     pub_joint_states_->msg_.position.resize(q_.size());
@@ -133,15 +140,15 @@ bool franka_hw::FrankaHW::update() {
     try {
         // read from franka
         if (robot_->waitForRobotState()) {
-            // write data and to members/state_interfaces
+            // write data to members/state_interfaces:
             updateStates(robot_->robotState());
 
-            // publish from members
+            // publish from members:
             publishFrankaStates();
             publishJointStates();
             return true;
         } else {
-            ROS_ERROR_THROTTLE(1, "failed to read franka state ");
+            ROS_ERROR_THROTTLE(1, "failed to read franka state");
             return false;
         }
     } catch (franka::NetworkException const& e) {
@@ -155,108 +162,70 @@ bool franka_hw::FrankaHW::update() {
 * libfranka
 */
 void franka_hw::FrankaHW::updateStates(const franka::RobotState& robot_state) {
-    std::cout << std::endl << robot_state << std::endl;
     for (size_t i = 0; i < q_.size(); ++i) {
-        q_.at(i) = robot_state.q[i];
-        dq_.at(i) = robot_state.dq[i];
-        q_d_.at(i) = robot_state.q_d[i];
-        q_start_.at(i) = robot_state.q_start[i];
-        tau_J_.at(i) = robot_state.tau_J[i];
-        dtau_J_.at(i) = robot_state.dtau_J[i];
-        tau_ext_hat_filtered_.at(i) = robot_state.tau_ext_hat_filtered[i];
-        joint_collision_.at(i) = robot_state.joint_collision[i];
-        joint_contact_.at(i) = robot_state.joint_contact[i];
+        q_[i] = robot_state.q[i];
+        dq_[i] = robot_state.dq[i];
+        q_d_[i] = robot_state.q_d[i];
+        q_start_[i] = robot_state.q_start[i];
+        tau_J_[i] = robot_state.tau_J[i];
+        dtau_J_[i] = robot_state.dtau_J[i];
+        tau_ext_hat_filtered_[i] = robot_state.tau_ext_hat_filtered[i];
+        joint_collision_[i] = robot_state.joint_collision[i];
+        joint_contact_[i] = robot_state.joint_contact[i];
     }
 
     for (size_t i = 0; i < cartesian_collision_.size(); ++i) {
-        cartesian_collision_.at(i) = robot_state.cartesian_collision[i];
-        cartesian_contact_.at(i) = robot_state.cartesian_contact[i];
+        cartesian_collision_[i] = robot_state.cartesian_collision[i];
+        cartesian_contact_[i] = robot_state.cartesian_contact[i];
     }
 
     for (size_t i = 0; i < EE_F_ext_hat_EE_.size(); ++i) {
-        EE_F_ext_hat_EE_.at(i) = robot_state.EE_F_ext_hat_EE[i];
-        O_F_ext_hat_EE_.at(i) = robot_state.O_F_ext_hat_EE[i];
+        EE_F_ext_hat_EE_[i] = robot_state.EE_F_ext_hat_EE[i];
+        O_F_ext_hat_EE_[i] = robot_state.O_F_ext_hat_EE[i];
     }
 
     for (size_t i = 0; i < elbow_start_.size(); ++i) {
-        elbow_start_.at(i) = robot_state.elbow_start[i];
+        elbow_start_[i] = robot_state.elbow_start[i];
     }
 
     for (size_t i = 0; i < robot_state.O_T_EE_start.size(); ++i) {
         size_t col = floor(i / 4);
         size_t row = i % 4;
         O_T_EE_start_[row][col] = robot_state.O_T_EE_start[i];
-        ROS_INFO("row = %i, col = %i, index = %i, or_value = %f, mem_value = %f ", int(row), int(col), int(i),
-                 robot_state.O_T_EE_start[i], O_T_EE_start_[row][col]);
     }
 }
 
 void franka_hw::FrankaHW::publishFrankaStates() {
     if (pub_franka_states_->trylock()) {
         try {  // fill message with data:
-            std_msgs::Float64 tmp;
             for (size_t i = 0; i < cartesian_collision_.size(); ++i) {
-                tmp.data = cartesian_collision_.at(i);
-                pub_franka_states_->msg_.cartesian_collision[i] = tmp;
-                tmp.data = cartesian_contact_.at(i);
-                pub_franka_states_->msg_.cartesian_contact[i] = tmp;
-                tmp.data = EE_F_ext_hat_EE_.at(i);
-                pub_franka_states_->msg_.EE_F_ext_hat_EE[i] = tmp;
-                tmp.data = O_F_ext_hat_EE_.at(i);
-                pub_franka_states_->msg_.O_F_ext_hat_EE[i] = tmp;
+                pub_franka_states_->msg_.cartesian_collision[i] = cartesian_collision_[i];
+                pub_franka_states_->msg_.cartesian_contact[i] = cartesian_contact_[i];
+                pub_franka_states_->msg_.EE_F_ext_hat_EE[i] = EE_F_ext_hat_EE_[i];
+                pub_franka_states_->msg_.O_F_ext_hat_EE[i] = O_F_ext_hat_EE_[i];
             }
 
             for (size_t i = 0; i < q_.size(); ++i) {
-                tmp.data = q_.at(i);
-                pub_franka_states_->msg_.q.at(i) = tmp;
-                tmp.data = dq_.at(i);
-                pub_franka_states_->msg_.dq.at(i) = tmp;
-                tmp.data = tau_J_.at(i);
-                pub_franka_states_->msg_.tau_J.at(i) = tmp;
-                tmp.data = dtau_J_.at(i);
-                pub_franka_states_->msg_.dtau_J.at(i) = tmp;
-                tmp.data = joint_collision_.at(i);
-                pub_franka_states_->msg_.joint_collision.at(i) = tmp;
-                tmp.data = joint_contact_.at(i);
-                pub_franka_states_->msg_.joint_contact.at(i) = tmp;
-                tmp.data = q_d_.at(i);
-                pub_franka_states_->msg_.q_d.at(i) = tmp;
-                tmp.data = q_start_.at(i);
-                pub_franka_states_->msg_.q_start.at(i) = tmp;
-                tmp.data = tau_ext_hat_filtered_.at(i);
-                pub_franka_states_->msg_.tau_ext_hat_filtered.at(i) = tmp;
+                pub_franka_states_->msg_.q[i] = q_[i];
+                pub_franka_states_->msg_.dq[i] = dq_[i];
+                pub_franka_states_->msg_.tau_J[i] = tau_J_[i];
+                pub_franka_states_->msg_.dtau_J[i] = dtau_J_[i];
+                pub_franka_states_->msg_.joint_collision[i] = joint_collision_[i];
+                pub_franka_states_->msg_.joint_contact[i] = joint_contact_[i];
+                pub_franka_states_->msg_.q_d[i] = q_d_[i];
+                pub_franka_states_->msg_.q_start[i] = q_start_[i];
+                pub_franka_states_->msg_.tau_ext_hat_filtered[i] = tau_ext_hat_filtered_[i];
             }
 
             for (size_t i = 0; i < elbow_start_.size(); ++i) {
-                tmp.data = elbow_start_.at(i);
-                pub_franka_states_->msg_.elbow_start.at(i) = tmp;
+                pub_franka_states_->msg_.elbow_start[i] = elbow_start_[i];
             }
 
             for (size_t row = 0; row < 4; ++row) {
                 for (size_t col = 0; col < 4; ++col) {
-                    pub_franka_states_->msg_.O_T_EE_start.data[row + col] =
-                                                O_T_EE_start_[row][col];
-                    ROS_INFO("Multiarraywrite \n row = %i, col = %i, or_val = %f, cp_val = %f", int(row), int(col), O_T_EE_start_[row][col], pub_franka_states_->msg_.O_T_EE_start.data[row, col] );
-                    // pub_franka_states_->msg_.O_T_EE_start.data.at(row + col) =
-                    //        O_T_EE_start_[row][col];
+                    pub_franka_states_->msg_.O_T_EE_start.data[4*row + col] = O_T_EE_start_[row][col];
                 }
             }
-            std::cout << std::endl << "test: member vect O_T_E_start:  "<< std::endl << O_T_EE_start_[0][0] << " "
-                            << O_T_EE_start_[0][1] << " "
-                            << O_T_EE_start_[0][2] << " "
-                            << O_T_EE_start_[0][3] << std::endl
-                            << O_T_EE_start_[1][0] << " "
-                            << O_T_EE_start_[1][1] << " "
-                            << O_T_EE_start_[1][2] << " "
-                            << O_T_EE_start_[1][3] << std::endl
-                            << O_T_EE_start_[2][0] << " "
-                            << O_T_EE_start_[2][1] << " "
-                            << O_T_EE_start_[2][2] << " "
-                            << O_T_EE_start_[2][3] << std::endl
-                            << O_T_EE_start_[3][0] << " "
-                            << O_T_EE_start_[3][1] << " "
-                            << O_T_EE_start_[3][2] << " "
-                            << O_T_EE_start_[3][3] << " " << std::endl;
         } catch (const std::out_of_range& e) {
             std::cout << "Out of Range error." << e.what();
             pub_franka_states_->unlock();
@@ -269,8 +238,9 @@ void franka_hw::FrankaHW::publishFrankaStates() {
         seq_nr_fra_++;
     } else  // could not lock franka_states to publish
     {
-        missed_pulishes_++;
-        ROS_WARN("could not lock franka_states for publishing, missed %i of %i", missed_pulishes_, int(seq_nr_fra_));
+        missed_pulishes_franka_++;
+        ROS_WARN("could not lock franka_states for publishing, missed %i of %i",
+                 int(missed_pulishes_franka_), int(seq_nr_fra_));
         seq_nr_fra_++;  // package loss can be detected when seq_nr jumps
     }
 }
@@ -278,13 +248,15 @@ void franka_hw::FrankaHW::publishFrankaStates() {
 void franka_hw::FrankaHW::publishJointStates() {
     if (pub_joint_states_->trylock()) {
         try {
+
             for (size_t i = 0; i < joint_name_.size(); ++i) {
-                pub_joint_states_->msg_.name.at(i) = joint_name_.at(i);
-                pub_joint_states_->msg_.position.at(i) = q_[i];
-                pub_joint_states_->msg_.velocity.at(i) = dq_[i];
-                pub_joint_states_->msg_.effort.at(i) = tau_J_[i];
+                pub_joint_states_->msg_.name[i] = joint_name_[i];
+                pub_joint_states_->msg_.position[i] = q_[i];
+                pub_joint_states_->msg_.velocity[i] = dq_[i];
+                pub_joint_states_->msg_.effort[i] = tau_J_[i];
             }
-        } catch (const std::out_of_range& e) {
+        }
+        catch (const std::out_of_range& e) {
             std::cout << "Out of Range error." << e.what();
             pub_joint_states_->unlock();
             return;
@@ -293,8 +265,11 @@ void franka_hw::FrankaHW::publishJointStates() {
         pub_joint_states_->msg_.header.seq = seq_nr_jnt_;
         pub_joint_states_->unlockAndPublish();
         seq_nr_jnt_++;
-    } else {
-        ROS_WARN("could not lock joint_states for publishing");
+    }
+    else {
+        missed_pulishes_joint_++;
+        ROS_WARN("could not lock joint_states for publishing, missed %i of %i",
+                 int(missed_pulishes_joint_), int(seq_nr_jnt_));
         seq_nr_jnt_++;  // package loss can be detected when seq_nr jumps
     }
 }

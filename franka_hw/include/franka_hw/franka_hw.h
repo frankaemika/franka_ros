@@ -45,7 +45,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   realtime_tools::RealtimePublisher<sensor_msgs::JointState>* pub_joint_states_;
   uint64_t seq_nr_jnt_ = 0;
   uint64_t seq_nr_fra_ = 0;
-  int missed_pulishes_ = 0;
+  uint64_t missed_pulishes_franka_ = 0;
+  uint64_t missed_pulishes_joint_ = 0;
 
   std::vector<std::string> joint_name_;  // joint_names
 
