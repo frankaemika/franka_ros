@@ -24,15 +24,30 @@ if(CLANG_TIDY_PROG)
   add_custom_target(tidy
     COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-    DEPENDS simple_viz_node
+    DEPENDS franka_hw_node
     COMMENT "Running clang-tidy"
     VERBATIM
   )
   add_custom_target(check-tidy
     COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-    DEPENDS simple_viz_node
+    DEPENDS franka_hw_node
     COMMENT "Running clang-tidy"
     VERBATIM
   )
+  add_custom_target(tidy
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
+    DEPENDS franka_joint_state_publisher 
+    COMMENT "Running clang-tidy"
+    VERBATIM
+  )
+  add_custom_target(check-tidy
+    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
+    DEPENDS franka_joint_state_publisher
+    COMMENT "Running clang-tidy"
+    VERBATIM
+  )
+
 endif()
