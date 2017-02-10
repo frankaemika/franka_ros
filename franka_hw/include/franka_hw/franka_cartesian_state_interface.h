@@ -1,9 +1,9 @@
-#ifndef HARDWARE_INTERFACE_FRANKA_CARTESIAN_STATE_INTERFACE_H
-#define HARDWARE_INTERFACE_FRANKA_CARTESIAN_STATE_INTERFACE_H
+#pragma once
 
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <cassert>
 #include <string>
+#include <array>
 
 namespace hardware_interface {
 
@@ -30,11 +30,11 @@ class FrankaCartesianStateHandle {
    */
   FrankaCartesianStateHandle(
       const std::string name,
-      const std::vector<double>* collision,
-      const std::vector<double>* contact,
-      const std::vector<double>* O_F_ext_hat_EE,
-      const std::vector<double>* EE_F_ext_hat_EE,
-      const std::vector<std::vector<double> >* O_T_EE_start)
+      const std::array<double, 6>* collision,
+      const std::array<double, 6>* contact,
+      const std::array<double, 6>* O_F_ext_hat_EE,
+      const std::array<double, 6>* EE_F_ext_hat_EE,
+      const std::array<std::array<double, 4>, 4>* O_T_EE_start)
       : name_(name),
         collision_(collision),
         contact_(contact),
@@ -67,34 +67,34 @@ class FrankaCartesianStateHandle {
   }
 
   std::string getName() const { return name_; }
-  std::vector<double> getCollision() const {
+  std::array<double, 6> getCollision() const {
     assert(collision_);
     return *collision_;
   }
-  std::vector<double> getContact() const {
+  std::array<double, 6> getContact() const {
     assert(contact_);
     return *contact_;
   }
-  std::vector<double> getFExtO() const {
+  std::array<double, 6> getFExtO() const {
     assert(O_F_ext_hat_EE_);
     return *O_F_ext_hat_EE_;
   }
-  std::vector<double> getFExtEE() const {
+  std::array<double, 6> getFExtEE() const {
     assert(EE_F_ext_hat_EE_);
     return *EE_F_ext_hat_EE_;
   }
-  std::vector<std::vector<double> > getTransform() const {
+  std::array<std::array<double, 4>, 4> getTransform() const {
     assert(O_T_EE_start_);
     return *O_T_EE_start_;
   }
 
  private:
   std::string name_;
-  const std::vector<double>* collision_;
-  const std::vector<double>* contact_;
-  const std::vector<double>* O_F_ext_hat_EE_;
-  const std::vector<double>* EE_F_ext_hat_EE_;
-  const std::vector<std::vector<double> >* O_T_EE_start_;
+  const std::array<double, 6>* collision_;
+  const std::array<double, 6>* contact_;
+  const std::array<double, 6>* O_F_ext_hat_EE_;
+  const std::array<double, 6>* EE_F_ext_hat_EE_;
+  const std::array<std::array<double, 4>, 4>* O_T_EE_start_;
 };
 
 /** \brief Hardware interface to support reading the cartesian state of a franka
@@ -111,5 +111,3 @@ class FrankaCartesianStateInterface
     : public HardwareResourceManager<FrankaCartesianStateHandle> {};
 
 }  // namespace hardware_interface
-
-#endif  // HARDWARE_INTERFACE_FRANKA_CARTESIAN_STATE_INTERFACE_H
