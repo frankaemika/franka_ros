@@ -1,9 +1,9 @@
 #pragma once
 
 #include <hardware_interface/internal/hardware_resource_manager.h>
+#include <array>
 #include <cassert>
 #include <string>
-#include <array>
 
 namespace hardware_interface {
 
