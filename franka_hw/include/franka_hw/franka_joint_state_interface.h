@@ -9,92 +9,38 @@ namespace hardware_interface {
 /** A handle used to read the state of a single Franka joint. */
 class FrankaJointStateHandle {
  public:
-  FrankaJointStateHandle()
-      : name_(),
-        q_(0),
-        dq_(0),
-        tau_J_(0),
-        q_d_(0),
-        q_start_(0),
-        dtau_J_(0),
-        tau_ext_hat_filtered_(0),
-        joint_collision_(0),
-        joint_contact_(0) {}
-
   /**
 * \param name The name of the joint
 * \param q A pointer to the storage for this joint's position
 * \param dq A pointer to the storage for this joint's velocity
 * \param tauJ A pointer to the storage for this joint's torque
 * \param q_d A pointer to the storage for this joint's desired position
-* \param q_start A pointer to the storage for this joint's TODO
-* \param dtau_J A pointer to the storage for this joint's torque's time
-* derivative
-* \param tau_ext_hat_filtered A pointer to the storage for this joint's TODO
-* \param joint_collision A pointer to the storage for this joint's TODO
-* \param joint_contact A pointer to the storage for this joint's TODO
-*
+* \param q_start A pointer to the storage for this joint's interpolator start pose
+* \param dtau_J A pointer to the storage for this joint's torque's time derivative
+* \param tau_ext_hat_filtered A pointer to the storage for this joint's external torque
+* \param joint_collision A pointer to the storage for this joint's collision state
+* \param joint_contact A pointer to the storage for this joint's contact state
 */
-  FrankaJointStateHandle(const std::string& name,
-                         const double* q,
-                         const double* dq,
-                         const double* tau_J,
-                         const double* q_d,
-                         const double* q_start,
-                         const double* dtau_J,
-                         const double* tau_ext_hat_filtered,
-                         const double* joint_collision,
-                         const double* joint_contact)
+  FrankaJointStateHandle(const std::string &name,
+                         const double &q,
+                         const double &dq,
+                         const double &tau_J,
+                         const double &q_d,
+                         const double &q_start,
+                         const double &dtau_J,
+                         const double &tau_ext_hat_filtered,
+                         const double &joint_collision,
+                         const double &joint_contact)
       : name_(name),
-        q_(q),
-        dq_(dq),
-        tau_J_(tau_J),
-        q_d_(q_d),
-        q_start_(q_start),
-        dtau_J_(dtau_J),
-        tau_ext_hat_filtered_(tau_ext_hat_filtered),
-        joint_collision_(joint_collision),
-        joint_contact_(joint_contact) {
-    if (!q) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. q data pointer is null.");
-    }
-    if (!dq) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. dq data pointer is null.");
-    }
-    if (!tau_J) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. tau_J data pointer is null.");
-    }
-    if (!q_d) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. q_d data pointer is null.");
-    }
-    if (!q_start) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. q_start data pointer is null.");
-    }
-    if (!dtau_J) {
-      throw HardwareInterfaceException("Cannot create handle '" + name +
-                                       "'. dtau_J data pointer is null.");
-    }
-    if (!tau_ext_hat_filtered) {
-      throw HardwareInterfaceException(
-          "Cannot create handle '" + name +
-          "'. tau_ext_hat_filtered data pointer is null.");
-    }
-    if (!joint_collision) {
-      throw HardwareInterfaceException(
-          "Cannot create handle '" + name +
-          "'. joint_collision data pointer is null.");
-    }
-    if (!joint_contact) {
-      throw HardwareInterfaceException(
-          "Cannot create handle '" + name +
-          "'. joint_contact data pointer is null.");
-    }
-  }
+        q_(&q),
+        dq_(&dq),
+        tau_J_(&tau_J),
+        q_d_(&q_d),
+        q_start_(&q_start),
+        dtau_J_(&dtau_J),
+        tau_ext_hat_filtered_(&tau_ext_hat_filtered),
+        joint_collision_(&joint_collision),
+        joint_contact_(&joint_contact) {}
 
   std::string getName() const { return name_; }
   double getPosition() const {

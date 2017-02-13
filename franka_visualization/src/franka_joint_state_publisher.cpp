@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
   try {
     ROS_INFO("connecting to robot... ");
     franka::Robot robot(robot_ip);
-    uint64_t secnr = 1;
+    uint64_t sequence_number = 1;
 
     while (ros::ok() && robot.waitForRobotState()) {
       // read sensors from franka using libfranka
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 
       // update joint_states to msgs
       states.header.stamp = ros::Time::now();
-      states.header.seq = secnr;
+      states.header.seq = sequence_number;
       for (int i = 0; i < joint_names.size(); ++i) {
         states.name[i] = joint_names[i];
         states.position[i] = robot_state.q[i];
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
       joint_pub.publish(states);
       ros::spinOnce();
       rate.sleep();
-      secnr++;
+      sequence_number++;
     }
   } catch (franka::NetworkException const& e) {
     ROS_ERROR_STREAM("" << e.what());
