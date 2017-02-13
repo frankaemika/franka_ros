@@ -4,23 +4,23 @@
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_joint_state_publisher");
-  ros::NodeHandle nh("~");
-  ros::NodeHandle nhp;
+  ros::NodeHandle private_nodehandle("~");
+  ros::NodeHandle public_nodehandle;
   ros::Rate rate(1000);
   ros::Publisher joint_pub =
-      nhp.advertise<sensor_msgs::JointState>("joint_states", 1);
+      public_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
   std::vector<std::string> joint_names;
 
   // parse yaml with joint names and robot-IP
   XmlRpc::XmlRpcValue params;
-  nh.getParam("joint_names", params);
+  private_nodehandle.getParam("joint_names", params);
   joint_names.resize(params.size());
   for (int i = 0; i < params.size(); ++i) {
     joint_names[i] = static_cast<std::string>(params[i]);
     ROS_INFO("parsed jointname[%d]= %s", i, joint_names[i].c_str());
   }
   std::string robot_ip;
-  nh.getParam("robot_ip", robot_ip);
+  private_nodehandle.getParam("robot_ip", robot_ip);
   ROS_INFO("parsed franka robot IP: %s", robot_ip.c_str());
 
   sensor_msgs::JointState states;
@@ -42,10 +42,10 @@ int main(int argc, char** argv) {
       states.header.stamp = ros::Time::now();
       states.header.seq = secnr;
       for (int i = 0; i < joint_names.size(); ++i) {
-        states.name.at(i) = joint_names.at(i);
-        states.position.at(i) = robot_state.q[i];
-        states.velocity.at(i) = robot_state.dq[i];
-        states.effort.at(i) = robot_state.tau_J[i];
+        states.name[i] = joint_names[i];
+        states.position[i] = robot_state.q[i];
+        states.velocity[i] = robot_state.dq[i];
+        states.effort[i] = robot_state.tau_J[i];
       }
       joint_pub.publish(states);
       ros::spinOnce();
