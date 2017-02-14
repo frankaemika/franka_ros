@@ -21,7 +21,9 @@ namespace franka_hw {
 class FrankaHW : public hardware_interface::RobotHW {
  public:
   FrankaHW();
-  FrankaHW(const std::vector<std::string> &joint_names, const std::string &ip, const ros::NodeHandle &nh);
+  FrankaHW(const std::vector<std::string>& joint_names,
+           const std::string& ip,
+           const ros::NodeHandle& nh);
   ~FrankaHW();
   bool update();
   void publishFrankaStates();
@@ -31,10 +33,13 @@ class FrankaHW : public hardware_interface::RobotHW {
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
   hardware_interface::FrankaJointStateInterface franka_joint_state_interface_;
-  hardware_interface::FrankaCartesianStateInterface franka_cartesian_state_interface_;
+  hardware_interface::FrankaCartesianStateInterface
+      franka_cartesian_state_interface_;
   franka::Robot robot_;
-  realtime_tools::RealtimePublisher<franka_hw::FrankaState> publisher_franka_states_;
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher_joint_states_;
+  realtime_tools::RealtimePublisher<franka_hw::FrankaState>
+      publisher_franka_states_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState>
+      publisher_joint_states_;
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
   uint64_t missed_pulishes_franka_states_ = 0;

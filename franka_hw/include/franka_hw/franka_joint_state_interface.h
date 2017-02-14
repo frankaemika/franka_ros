@@ -15,22 +15,26 @@ class FrankaJointStateHandle {
 * \param dq A pointer to the storage for this joint's velocity
 * \param tauJ A pointer to the storage for this joint's torque
 * \param q_d A pointer to the storage for this joint's desired position
-* \param q_start A pointer to the storage for this joint's interpolator start pose
-* \param dtau_J A pointer to the storage for this joint's torque's time derivative
-* \param tau_ext_hat_filtered A pointer to the storage for this joint's external torque
-* \param joint_collision A pointer to the storage for this joint's collision state
+* \param q_start A pointer to the storage for this joint's interpolator start
+* pose
+* \param dtau_J A pointer to the storage for this joint's torque's time
+* derivative
+* \param tau_ext_hat_filtered A pointer to the storage for this joint's external
+* torque
+* \param joint_collision A pointer to the storage for this joint's collision
+* state
 * \param joint_contact A pointer to the storage for this joint's contact state
 */
-  FrankaJointStateHandle(const std::string &name,
-                         const double &q,
-                         const double &dq,
-                         const double &tau_J,
-                         const double &q_d,
-                         const double &q_start,
-                         const double &dtau_J,
-                         const double &tau_ext_hat_filtered,
-                         const double &joint_collision,
-                         const double &joint_contact)
+  FrankaJointStateHandle(const std::string& name,
+                         const double& q,
+                         const double& dq,
+                         const double& tau_J,
+                         const double& q_d,
+                         const double& q_start,
+                         const double& dtau_J,
+                         const double& tau_ext_hat_filtered,
+                         const double& joint_collision,
+                         const double& joint_contact)
       : name_(name),
         q_(&q),
         dq_(&dq),
