@@ -47,33 +47,15 @@ class FrankaJointStateHandle {
         joint_contact_(&joint_contact) {}
 
   std::string getName() const { return name_; }
-  const double& getPosition() const {
-    return *q_;
-  }
-  const double& getVelocity() const {
-    return *dq_;
-  }
-  const double& getEffort() const {
-    return *tau_J_;
-  }
-  const double& getQd() const {
-    return *q_d_;
-  }
-  const double& getQstart() const {
-    return *q_start_;
-  }
-  const double& getDtauj() const {
-    return *dtau_J_;
-  }
-  const double& getTauExtHatFiltered() const {
-    return *tau_ext_hat_filtered_;
-  }
-  const double& getJointCollision() const {
-    return *joint_collision_;
-  }
-  const double& getJointContact() const {
-    return *joint_contact_;
-  }
+  const double& getPosition() const { return *q_; }
+  const double& getVelocity() const { return *dq_; }
+  const double& getEffort() const { return *tau_J_; }
+  const double& getQd() const { return *q_d_; }
+  const double& getQstart() const { return *q_start_; }
+  const double& getDtauj() const { return *dtau_J_; }
+  const double& getTauExtHatFiltered() const { return *tau_ext_hat_filtered_; }
+  const double& getJointCollision() const { return *joint_collision_; }
+  const double& getJointContact() const { return *joint_contact_; }
 
  private:
   std::string name_;
