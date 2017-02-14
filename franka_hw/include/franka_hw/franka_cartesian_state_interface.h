@@ -33,25 +33,20 @@ class FrankaCartesianStateHandle {
         EE_F_ext_hat_EE_(&EE_F_ext_hat_EE),
         O_T_EE_start_(&O_T_EE_start) {}
 
-  std::string getName() const { return name_; }
-  std::array<double, 6> getCollision() const {
-    assert(collision_);
+  const std::string& getName() const { return name_; }
+  const std::array<double, 6>& getCollision() const {
     return *collision_;
   }
-  std::array<double, 6> getContact() const {
-    assert(contact_);
+  const std::array<double, 6>& getContact() const {
     return *contact_;
   }
-  std::array<double, 6> getFExtO() const {
-    assert(O_F_ext_hat_EE_);
+  const std::array<double, 6>& getFExtO() const {
     return *O_F_ext_hat_EE_;
   }
-  std::array<double, 6> getFExtEE() const {
-    assert(EE_F_ext_hat_EE_);
+  const std::array<double, 6>& getFExtEE() const {
     return *EE_F_ext_hat_EE_;
   }
-  std::array<double, 16> getTransform() const {
-    assert(O_T_EE_start_);
+  const std::array<double, 16>& getTransform() const {
     return *O_T_EE_start_;
   }
 
