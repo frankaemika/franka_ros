@@ -22,8 +22,8 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                               const ros::NodeHandle& nh)
     : robot_(ip.c_str()),
       joint_name_(joint_names),
-      publisher_franka_states_(nh, "joint_states", 1),
-      publisher_joint_states_(nh, "franka_states", 1)
+      publisher_franka_states_(nh, "franka_states", 1),
+      publisher_joint_states_(nh, "joint_states", 1)
 
 {
   for (size_t i = 0; i < joint_name_.size(); ++i) {
