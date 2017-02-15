@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_hw)
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -77,10 +79,14 @@ install(FILES franka_hw_plugin.xml
 )
 
 ## Tools
-file(GLOB_RECURSE CLANG_TOOLS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE CLANG_TOOLS_HEADERS
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
-set(CLANG_TIDY_DEPENDS franka_hw_node franka_hw)
-#include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ClangTools.cmake)
+include(ClangTools)
+add_format_target(franka_hw FILES ${SOURCES} ${HEADERS})
+add_tidy_target(franka_hw
+  FILES ${SOURCES}
+  DEPENDS franka_hw franka_hw_node
+)
