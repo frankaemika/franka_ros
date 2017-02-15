@@ -38,8 +38,7 @@ class FrankaHW : public hardware_interface::RobotHW {
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
   franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
-  franka_hw::FrankaCartesianStateInterface
-      franka_cartesian_state_interface_;
+  franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
   franka::Robot robot_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;

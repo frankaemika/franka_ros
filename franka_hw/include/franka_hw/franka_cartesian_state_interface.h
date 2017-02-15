@@ -62,6 +62,7 @@ class FrankaCartesianStateHandle {
  * End-effector frame to base_link frame
  */
 class FrankaCartesianStateInterface
-    : public hardware_interface::HardwareResourceManager<FrankaCartesianStateHandle> {};
+    : public hardware_interface::HardwareResourceManager<
+          FrankaCartesianStateHandle> {};
 
 }  // namespace franka_hw

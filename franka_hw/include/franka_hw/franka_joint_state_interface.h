@@ -37,16 +37,16 @@ class FrankaJointStateHandle {
                          const double& tau_ext_hat_filtered,
                          const double& joint_collision,
                          const double& joint_contact)
-    : name_(name),
-      q_(&q),
-      dq_(&dq),
-      tau_J_(&tau_J),
-      q_d_(&q_d),
-      q_start_(&q_start),
-      dtau_J_(&dtau_J),
-      tau_ext_hat_filtered_(&tau_ext_hat_filtered),
-      joint_collision_(&joint_collision),
-      joint_contact_(&joint_contact) {}
+      : name_(name),
+        q_(&q),
+        dq_(&dq),
+        tau_J_(&tau_J),
+        q_d_(&q_d),
+        q_start_(&q_start),
+        dtau_J_(&dtau_J),
+        tau_ext_hat_filtered_(&tau_ext_hat_filtered),
+        joint_collision_(&joint_collision),
+        joint_contact_(&joint_contact) {}
 
   std::string getName() const { return name_; }
   const double& getPosition() const { return *q_; }
@@ -82,6 +82,7 @@ class FrankaJointStateHandle {
  *
  */
 class FrankaJointStateInterface
-    : public hardware_interface::HardwareResourceManager<FrankaJointStateHandle> {};
+    : public hardware_interface::HardwareResourceManager<
+          FrankaJointStateHandle> {};
 
 }  // namespace franka_hw
