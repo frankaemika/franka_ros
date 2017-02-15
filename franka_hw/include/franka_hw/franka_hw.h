@@ -30,7 +30,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW(const std::vector<std::string>& joint_names,
            const std::string& ip,
            const ros::NodeHandle& nh);
-  ~FrankaHW();
+  ~FrankaHW() override = default;
   bool update();
   void publishFrankaStates();
   void publishJointStates();

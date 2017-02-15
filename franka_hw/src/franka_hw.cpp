@@ -16,8 +16,6 @@
 // pluginlib
 franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
 
-franka_hw::FrankaHW::~FrankaHW() {}
-
 franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                               const std::string& ip,
                               const ros::NodeHandle& nh)
@@ -102,11 +100,10 @@ bool franka_hw::FrankaHW::update() {
       publishFrankaStates();
       publishJointStates();
       return true;
-    } else {
-      ROS_ERROR_THROTTLE(
-          1, "failed to read franka state as connection to robot was closed");
-      return false;
     }
+    ROS_ERROR_THROTTLE(
+        1, "failed to read franka state as connection to robot was closed");
+    return false;
   } catch (franka::NetworkException const& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;
