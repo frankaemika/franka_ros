@@ -4,6 +4,7 @@
 #include <array>
 #include <mutex>
 #include <string>
+#include <cinttypes>
 
 #include <franka/robot.h>
 #include <realtime_tools/realtime_publisher.h>
@@ -156,9 +157,9 @@ void franka_hw::FrankaHW::publishFrankaStates() {
     sequence_number_franka_states_++;
   } else {
     missed_publishes_franka_states_++;
-    ROS_WARN("could not lock franka_states for publishing, missed %i of %i",
-             int(missed_publishes_franka_states_),
-             int(sequence_number_franka_states_));
+    ROS_WARN("could not lock franka_states for publishing, missed %" PRIu64 " of %" PRIu64 "",
+             missed_publishes_franka_states_,
+             sequence_number_franka_states_);
     sequence_number_franka_states_++;
   }
 }
@@ -177,9 +178,9 @@ void franka_hw::FrankaHW::publishJointStates() {
     sequence_number_joint_states_++;
   } else {
     missed_publishes_joint_states_++;
-    ROS_WARN("could not lock joint_states for publishing, missed %i of %i",
-             int(missed_publishes_joint_states_),
-             int(sequence_number_joint_states_));
+    ROS_WARN("could not lock joint_states for publishing, missed %" PRIu64 " of %" PRIu64 "",
+             missed_publishes_joint_states_,
+             sequence_number_joint_states_);
     sequence_number_joint_states_++;
   }
 }
