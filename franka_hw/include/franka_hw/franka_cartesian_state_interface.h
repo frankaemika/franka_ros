@@ -10,6 +10,8 @@ namespace hardware_interface {
 /** A handle used to read the cartesian state of an end-effector. */
 class FrankaCartesianStateHandle {
  public:
+  FrankaCartesianStateHandle() = delete;
+
   /**
  * \param collision The collision state of the arm
  * \param contact The contact state of the arm
