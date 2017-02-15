@@ -33,16 +33,6 @@ catkin_package(
   DEPENDS Franka
 )
 
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
-  include
-)
-
-add_executable(franka_hw_node
-  src/franka_hw_node.cpp
-)
-
 add_library(franka_hw
   src/franka_hw.cpp
 )
@@ -53,24 +43,32 @@ add_dependencies(franka_hw
   franka_hw_generate_messages_cpp
 )
 
+target_link_libraries(franka_hw
+  ${catkin_LIBRARIES}
+  Franka::franka
+)
+
+target_include_directories(franka_hw PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
+)
+
+add_executable(franka_hw_node
+  src/franka_hw_node.cpp
+)
+
 add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   franka_hw_generate_messages_cpp
 )
 
-target_link_libraries(franka_hw
-  ${catkin_LIBRARIES}
-  Franka::franka
-)
-
 target_link_libraries(franka_hw_node
   ${catkin_LIBRARIES}
-  Franka::franka
   franka_hw
 )
 
-target_include_directories(franka_hw PUBLIC
+target_include_directories(franka_hw_node PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -78,3 +76,11 @@ install(FILES franka_hw_plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
+## Tools
+file(GLOB_RECURSE CLANG_TOOLS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE CLANG_TOOLS_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
+set(CLANG_TIDY_DEPENDS franka_hw_node franka_hw)
+#include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ClangTools.cmake)

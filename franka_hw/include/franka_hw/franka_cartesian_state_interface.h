@@ -5,7 +5,7 @@
 #include <cassert>
 #include <string>
 
-namespace hardware_interface {
+namespace franka_hw {
 
 /** A handle used to read the cartesian state of an end-effector. */
 class FrankaCartesianStateHandle {
@@ -62,6 +62,6 @@ class FrankaCartesianStateHandle {
  * End-effector frame to base_link frame
  */
 class FrankaCartesianStateInterface
-    : public HardwareResourceManager<FrankaCartesianStateHandle> {};
+    : public hardware_interface::HardwareResourceManager<FrankaCartesianStateHandle> {};
 
-}  // namespace hardware_interface
+}  // namespace franka_hw

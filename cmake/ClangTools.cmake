@@ -29,19 +29,4 @@ if(CLANG_TIDY_PROG)
     COMMENT "Running clang-tidy"
     VERBATIM
   )
-  add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-    DEPENDS franka_joint_state_publisher 
-    COMMENT "Running clang-tidy"
-    VERBATIM
-  )
-  add_custom_target(check-tidy
-    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-    DEPENDS franka_joint_state_publisher
-    COMMENT "Running clang-tidy"
-    VERBATIM
-  )
-
 endif()

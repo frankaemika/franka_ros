@@ -4,7 +4,7 @@
 #include <cassert>
 #include <string>
 
-namespace hardware_interface {
+namespace franka_hw {
 
 /** A handle used to read the state of a single Franka joint. */
 class FrankaJointStateHandle {
@@ -82,6 +82,6 @@ class FrankaJointStateHandle {
  *
  */
 class FrankaJointStateInterface
-    : public HardwareResourceManager<FrankaJointStateHandle> {};
+    : public hardware_interface::HardwareResourceManager<FrankaJointStateHandle> {};
 
-}  // namespace hardware_interface
+}  // namespace franka_hw

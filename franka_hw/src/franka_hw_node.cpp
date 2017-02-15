@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
                       (ros::Time::now() - cycle_start).toSec());
     cycle_start = ros::Time::now();
 
-    if (franka_ros.update() == false) {
+    if (!franka_ros.update()) {
       ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
       return -1;
     }
