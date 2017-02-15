@@ -4,10 +4,12 @@
 #include <pluginlib/class_list_macros.h>
 #include <array>
 #include <string>
+#include <mutex>
 
 #include <franka/robot.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/MultiArrayDimension.h>
+#include <realtime_tools/realtime_publisher.h>
 
 #include <franka_hw/FrankaState.h>
 
@@ -23,9 +25,8 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     : robot_(ip.c_str()),
       joint_name_(joint_names),
       publisher_franka_states_(nh, "franka_states", 1),
-      publisher_joint_states_(nh, "joint_states", 1)
+      publisher_joint_states_(nh, "joint_states", 1) {
 
-{
   for (size_t i = 0; i < joint_name_.size(); ++i) {
     hardware_interface::JointStateHandle joint_handle1(
         joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
@@ -50,56 +51,50 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&franka_joint_state_interface_);
   registerInterface(&franka_cartesian_state_interface_);
 
-  if (publisher_franka_states_.trylock()) {
-    publisher_franka_states_.msg_.cartesian_collision.resize(
-        robot_state_.cartesian_collision.size());
-    publisher_franka_states_.msg_.cartesian_contact.resize(
-        robot_state_.cartesian_contact.size());
-    publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
-    publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
-    publisher_franka_states_.msg_.EE_F_ext_hat_EE.resize(
-        robot_state_.EE_F_ext_hat_EE.size());
-    publisher_franka_states_.msg_.elbow_start.resize(
-        robot_state_.elbow_start.size());
-    publisher_franka_states_.msg_.joint_collision.resize(
-        robot_state_.joint_collision.size());
-    publisher_franka_states_.msg_.joint_contact.resize(
-        robot_state_.joint_contact.size());
-    publisher_franka_states_.msg_.O_F_ext_hat_EE.resize(
-        robot_state_.O_F_ext_hat_EE.size());
-    publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
-    publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
-    publisher_franka_states_.msg_.q_start.resize(robot_state_.q_start.size());
-    publisher_franka_states_.msg_.tau_ext_hat_filtered.resize(
-        robot_state_.tau_ext_hat_filtered.size());
-    publisher_franka_states_.msg_.tau_J.resize(robot_state_.tau_J.size());
-    publisher_franka_states_.msg_.O_T_EE_start.layout.data_offset = 0;
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim.clear();
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
-        std_msgs::MultiArrayDimension());
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].size = 4;
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].stride = 4 * 4;
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].label = "row";
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
-        std_msgs::MultiArrayDimension());
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].size = 4;
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].stride = 4;
-    publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].label = "column";
-    publisher_franka_states_.msg_.O_T_EE_start.data.resize(16);
-    publisher_franka_states_.unlock();
-  } else {
-    ROS_ERROR("Could not lock publisher_franka_states for resizing.");
-  }
+  std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
+          lock_franka_states(publisher_franka_states_);
+  publisher_franka_states_.msg_.cartesian_collision.resize(
+              robot_state_.cartesian_collision.size());
+  publisher_franka_states_.msg_.cartesian_contact.resize(
+              robot_state_.cartesian_contact.size());
+  publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
+  publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
+  publisher_franka_states_.msg_.EE_F_ext_hat_EE.resize(
+              robot_state_.EE_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.elbow_start.resize(
+              robot_state_.elbow_start.size());
+  publisher_franka_states_.msg_.joint_collision.resize(
+              robot_state_.joint_collision.size());
+  publisher_franka_states_.msg_.joint_contact.resize(
+              robot_state_.joint_contact.size());
+  publisher_franka_states_.msg_.O_F_ext_hat_EE.resize(
+              robot_state_.O_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
+  publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
+  publisher_franka_states_.msg_.q_start.resize(robot_state_.q_start.size());
+  publisher_franka_states_.msg_.tau_ext_hat_filtered.resize(
+              robot_state_.tau_ext_hat_filtered.size());
+  publisher_franka_states_.msg_.tau_J.resize(robot_state_.tau_J.size());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.data_offset = 0;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.clear();
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
+              std_msgs::MultiArrayDimension());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].size = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].stride = 4 * 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].label = "row";
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
+              std_msgs::MultiArrayDimension());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].size = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].stride = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].label = "column";
+  publisher_franka_states_.msg_.O_T_EE_start.data.resize(16);
 
-  if (publisher_joint_states_.trylock()) {
+  std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
+          lock_joint_states(publisher_joint_states_);
     publisher_joint_states_.msg_.name.resize(joint_name_.size());
     publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
     publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
     publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
-    publisher_joint_states_.unlock();
-  } else {
-    ROS_ERROR("Could not lock publisher_joint_states for resizing.");
-  }
 }
 
 bool franka_hw::FrankaHW::update() {
