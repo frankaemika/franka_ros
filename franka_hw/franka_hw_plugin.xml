@@ -1,0 +1,7 @@
+<library path="lib/libfranka_hw">
+  <class name="franka_hw/FrankaHW" type="franka_hw::FrankaHW" base_class_type="hardware_interface::RobotHW">
+  <description>
+    A RobotHW to interface with the franka emika arm
+  </description>
+  </class>
+</library>

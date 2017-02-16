@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<launch>
+  <node name="franka_hw_node" pkg="franka_hw" type="franka_hw_node" output="screen">
+    <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
+  </node>
+</launch>

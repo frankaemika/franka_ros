@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package>
+  <name>franka_hw</name>
+  <version>0.0.0</version>
+  <description>This package implements the franka_hw of Franka Emika for the use with ros_control</description>
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
+  <author>FRANKA EMIKA Research Interface Team</author>
+  
+  <license>NONE</license>
+
+  <url type="website">http://wiki.ros.org/franka_hw</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>Franka</build_depend>
+  <build_depend>hardware_interface</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>realtime_tools</build_depend>
+  
+  <run_depend>Franka</run_depend>
+  <run_depend>hardware_interface</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>realtime_tools</run_depend>
+
+  <export>
+    <hardware_interface plugin="${prefix}/franka_hw_plugin.xml"/>
+  </export>
+</package>

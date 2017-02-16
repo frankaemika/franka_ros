@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_visualization)
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
@@ -32,10 +33,14 @@ target_include_directories(franka_joint_state_publisher PUBLIC
 )
 
 ## Tools
-file(GLOB_RECURSE CLANG_TOOLS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE CLANG_TOOLS_HEADERS
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
-set(CLANG_TIDY_DEPENDS franka_joint_state_publisher)
-include(${CMAKE_CURRENT_SOURCE_DIR}/../cmake/ClangTools.cmake)
+include(ClangTools)
+add_format_target(franka_visualization FILES ${SOURCES} ${HEADERS})
+add_tidy_target(franka_visualization
+  FILES ${SOURCES}
+  DEPENDS franka_joint_state_publisher
+)

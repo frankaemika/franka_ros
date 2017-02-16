@@ -1,0 +1,188 @@
+#include <franka_hw/franka_hw.h>
+
+#include <pluginlib/class_list_macros.h>
+#include <array>
+#include <cinttypes>
+#include <mutex>
+#include <string>
+
+#include <franka/robot.h>
+#include <realtime_tools/realtime_publisher.h>
+#include <sensor_msgs/JointState.h>
+#include <std_msgs/MultiArrayDimension.h>
+
+#include <franka_hw/FrankaState.h>
+
+// apparently a default constructor is required to export the plugin with
+// pluginlib
+franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
+
+franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
+                              const std::string& ip,
+                              const ros::NodeHandle& nh)
+    : robot_(ip),
+      joint_name_(joint_names),
+      publisher_franka_states_(nh, "franka_states", 1),
+      publisher_joint_states_(nh, "joint_states", 1) {
+  for (size_t i = 0; i < joint_name_.size(); ++i) {
+    hardware_interface::JointStateHandle joint_handle(
+        joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
+        &robot_state_.tau_J[i]);
+    joint_state_interface_.registerHandle(joint_handle);
+    franka_hw::FrankaJointStateHandle franka_joint_handle(
+        joint_name_[i], robot_state_.q[i], robot_state_.dq[i],
+        robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.q_start[i],
+        robot_state_.dtau_J[i], robot_state_.tau_ext_hat_filtered[i],
+        robot_state_.joint_collision[i], robot_state_.joint_contact[i]);
+    franka_joint_state_interface_.registerHandle(franka_joint_handle);
+  }
+
+  franka_hw::FrankaCartesianStateHandle franka_cartesian_handle(
+      std::string("franka_emika_cartesian_data"),
+      robot_state_.cartesian_collision, robot_state_.cartesian_contact,
+      robot_state_.O_F_ext_hat_EE, robot_state_.EE_F_ext_hat_EE,
+      robot_state_.O_T_EE_start);
+  franka_cartesian_state_interface_.registerHandle(franka_cartesian_handle);
+
+  registerInterface(&joint_state_interface_);
+  registerInterface(&franka_joint_state_interface_);
+  registerInterface(&franka_cartesian_state_interface_);
+
+  std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
+      lock_franka_states(publisher_franka_states_);
+  publisher_franka_states_.msg_.cartesian_collision.resize(
+      robot_state_.cartesian_collision.size());
+  publisher_franka_states_.msg_.cartesian_contact.resize(
+      robot_state_.cartesian_contact.size());
+  publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
+  publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
+  publisher_franka_states_.msg_.EE_F_ext_hat_EE.resize(
+      robot_state_.EE_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.elbow_start.resize(
+      robot_state_.elbow_start.size());
+  publisher_franka_states_.msg_.joint_collision.resize(
+      robot_state_.joint_collision.size());
+  publisher_franka_states_.msg_.joint_contact.resize(
+      robot_state_.joint_contact.size());
+  publisher_franka_states_.msg_.O_F_ext_hat_EE.resize(
+      robot_state_.O_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
+  publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
+  publisher_franka_states_.msg_.q_start.resize(robot_state_.q_start.size());
+  publisher_franka_states_.msg_.tau_ext_hat_filtered.resize(
+      robot_state_.tau_ext_hat_filtered.size());
+  publisher_franka_states_.msg_.tau_J.resize(robot_state_.tau_J.size());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.data_offset = 0;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.clear();
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
+      std_msgs::MultiArrayDimension());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].size = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].stride = 4 * 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[0].label = "row";
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim.push_back(
+      std_msgs::MultiArrayDimension());
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].size = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].stride = 4;
+  publisher_franka_states_.msg_.O_T_EE_start.layout.dim[1].label = "column";
+  publisher_franka_states_.msg_.O_T_EE_start.data.resize(16);
+
+  std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
+      lock_joint_states(publisher_joint_states_);
+  publisher_joint_states_.msg_.name.resize(joint_name_.size());
+  publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
+  publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
+  publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
+}
+
+bool franka_hw::FrankaHW::update() {
+  try {
+    if (robot_.waitForRobotState()) {
+      robot_state_ = robot_.robotState();
+      publishFrankaStates();
+      publishJointStates();
+      return true;
+    }
+    ROS_ERROR_THROTTLE(
+        1, "failed to read franka state as connection to robot was closed");
+    return false;
+  } catch (franka::NetworkException const& e) {
+    ROS_ERROR_STREAM("" << e.what());
+    return false;
+  }
+}
+
+void franka_hw::FrankaHW::publishFrankaStates() {
+  if (publisher_franka_states_.trylock()) {
+    for (size_t i = 0; i < robot_state_.cartesian_collision.size(); ++i) {
+      publisher_franka_states_.msg_.cartesian_collision[i] =
+          robot_state_.cartesian_collision[i];
+      publisher_franka_states_.msg_.cartesian_contact[i] =
+          robot_state_.cartesian_contact[i];
+      publisher_franka_states_.msg_.EE_F_ext_hat_EE[i] =
+          robot_state_.EE_F_ext_hat_EE[i];
+      publisher_franka_states_.msg_.O_F_ext_hat_EE[i] =
+          robot_state_.O_F_ext_hat_EE[i];
+    }
+
+    for (size_t i = 0; i < robot_state_.q.size(); ++i) {
+      publisher_franka_states_.msg_.q[i] = robot_state_.q[i];
+      publisher_franka_states_.msg_.dq[i] = robot_state_.dq[i];
+      publisher_franka_states_.msg_.tau_J[i] = robot_state_.tau_J[i];
+      publisher_franka_states_.msg_.dtau_J[i] = robot_state_.dtau_J[i];
+      publisher_franka_states_.msg_.joint_collision[i] =
+          robot_state_.joint_collision[i];
+      publisher_franka_states_.msg_.joint_contact[i] =
+          robot_state_.joint_contact[i];
+      publisher_franka_states_.msg_.q_d[i] = robot_state_.q_d[i];
+      publisher_franka_states_.msg_.q_start[i] = robot_state_.q_start[i];
+      publisher_franka_states_.msg_.tau_ext_hat_filtered[i] =
+          robot_state_.tau_ext_hat_filtered[i];
+    }
+
+    for (size_t i = 0; i < robot_state_.elbow_start.size(); ++i) {
+      publisher_franka_states_.msg_.elbow_start[i] =
+          robot_state_.elbow_start[i];
+    }
+
+    for (size_t row = 0; row < 4; ++row) {
+      for (size_t col = 0; col < 4; ++col) {
+        publisher_franka_states_.msg_.O_T_EE_start.data[4 * row + col] =
+            robot_state_.O_T_EE_start[4 * col + row];
+      }
+    }
+
+    publisher_franka_states_.msg_.header.seq = sequence_number_franka_states_;
+    publisher_franka_states_.msg_.header.stamp = ros::Time::now();
+    publisher_franka_states_.unlockAndPublish();
+    sequence_number_franka_states_++;
+  } else {
+    missed_publishes_franka_states_++;
+    ROS_WARN("could not lock franka_states for publishing, missed %" PRIu64
+             " of %" PRIu64 "",
+             missed_publishes_franka_states_, sequence_number_franka_states_);
+    sequence_number_franka_states_++;
+  }
+}
+
+void franka_hw::FrankaHW::publishJointStates() {
+  if (publisher_joint_states_.trylock()) {
+    for (size_t i = 0; i < joint_name_.size(); ++i) {
+      publisher_joint_states_.msg_.name[i] = joint_name_[i];
+      publisher_joint_states_.msg_.position[i] = robot_state_.q[i];
+      publisher_joint_states_.msg_.velocity[i] = robot_state_.dq[i];
+      publisher_joint_states_.msg_.effort[i] = robot_state_.tau_J[i];
+    }
+    publisher_joint_states_.msg_.header.stamp = ros::Time::now();
+    publisher_joint_states_.msg_.header.seq = sequence_number_joint_states_;
+    publisher_joint_states_.unlockAndPublish();
+    sequence_number_joint_states_++;
+  } else {
+    missed_publishes_joint_states_++;
+    ROS_WARN("could not lock joint_states for publishing, missed %" PRIu64
+             " of %" PRIu64 "",
+             missed_publishes_joint_states_, sequence_number_joint_states_);
+    sequence_number_joint_states_++;
+  }
+}
+
+PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaHW, hardware_interface::RobotHW)
