@@ -40,7 +40,7 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   franka_hw::FrankaCartesianStateHandle franka_cartesian_handle(
       std::string("franka_emika_cartesian_data"),
       robot_state_.cartesian_collision, robot_state_.cartesian_contact,
-      robot_state_.O_F_ext_hat_EE, robot_state_.EE_F_ext_hat_EE,
+      robot_state_.O_F_ext_hat_K, robot_state_.K_F_ext_hat_K,
       robot_state_.O_T_EE_start);
   franka_cartesian_state_interface_.registerHandle(franka_cartesian_handle);
 
@@ -56,16 +56,16 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       robot_state_.cartesian_contact.size());
   publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
   publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
-  publisher_franka_states_.msg_.EE_F_ext_hat_EE.resize(
-      robot_state_.EE_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.K_F_ext_hat_K.resize(
+      robot_state_.K_F_ext_hat_K.size());
   publisher_franka_states_.msg_.elbow_start.resize(
       robot_state_.elbow_start.size());
   publisher_franka_states_.msg_.joint_collision.resize(
       robot_state_.joint_collision.size());
   publisher_franka_states_.msg_.joint_contact.resize(
       robot_state_.joint_contact.size());
-  publisher_franka_states_.msg_.O_F_ext_hat_EE.resize(
-      robot_state_.O_F_ext_hat_EE.size());
+  publisher_franka_states_.msg_.O_F_ext_hat_K.resize(
+      robot_state_.O_F_ext_hat_K.size());
   publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
   publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
   publisher_franka_states_.msg_.q_start.resize(robot_state_.q_start.size());
@@ -118,10 +118,10 @@ void franka_hw::FrankaHW::publishFrankaStates() {
           robot_state_.cartesian_collision[i];
       publisher_franka_states_.msg_.cartesian_contact[i] =
           robot_state_.cartesian_contact[i];
-      publisher_franka_states_.msg_.EE_F_ext_hat_EE[i] =
-          robot_state_.EE_F_ext_hat_EE[i];
-      publisher_franka_states_.msg_.O_F_ext_hat_EE[i] =
-          robot_state_.O_F_ext_hat_EE[i];
+      publisher_franka_states_.msg_.K_F_ext_hat_K[i] =
+          robot_state_.K_F_ext_hat_K[i];
+      publisher_franka_states_.msg_.O_F_ext_hat_K[i] =
+          robot_state_.O_F_ext_hat_K[i];
     }
 
     for (size_t i = 0; i < robot_state_.q.size(); ++i) {
