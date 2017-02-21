@@ -15,9 +15,9 @@ class FrankaCartesianStateHandle {
   /**
  * \param collision The collision state of the arm
  * \param contact The contact state of the arm
- * \param O_F_ext_hat_EE The external wrench exerted to the arm w.r.t.
+ * \param O_F_ext_hat_K The external wrench exerted to the arm w.r.t.
  * base_link coordinates
- * \param EE_F_ext_hat_EE The external wrench exerted to the arm w.r.t.
+ * \param K_F_ext_hat_K The external wrench exerted to the arm w.r.t.
  * end-effector coordinates
  * \param O_T_EE_start The homogeneous transformation matrix from end-effector
  * to base_link frame
@@ -25,29 +25,29 @@ class FrankaCartesianStateHandle {
   FrankaCartesianStateHandle(const std::string& name,
                              const std::array<double, 6>& collision,
                              const std::array<double, 6>& contact,
-                             const std::array<double, 6>& O_F_ext_hat_EE,
-                             const std::array<double, 6>& EE_F_ext_hat_EE,
+                             const std::array<double, 6>& O_F_ext_hat_K,
+                             const std::array<double, 6>& K_F_ext_hat_K,
                              const std::array<double, 16>& O_T_EE_start)
       : name_(name),
         collision_(&collision),
         contact_(&contact),
-        O_F_ext_hat_EE_(&O_F_ext_hat_EE),
-        EE_F_ext_hat_EE_(&EE_F_ext_hat_EE),
+        O_F_ext_hat_K_(&O_F_ext_hat_K),
+        K_F_ext_hat_K_(&K_F_ext_hat_K),
         O_T_EE_start_(&O_T_EE_start) {}
 
   const std::string& getName() const { return name_; }
   const std::array<double, 6>& getCollision() const { return *collision_; }
   const std::array<double, 6>& getContact() const { return *contact_; }
-  const std::array<double, 6>& getFExtO() const { return *O_F_ext_hat_EE_; }
-  const std::array<double, 6>& getFExtEE() const { return *EE_F_ext_hat_EE_; }
+  const std::array<double, 6>& getFExtO() const { return *O_F_ext_hat_K_; }
+  const std::array<double, 6>& getFExtK() const { return *K_F_ext_hat_K_; }
   const std::array<double, 16>& getTransform() const { return *O_T_EE_start_; }
 
  private:
   std::string name_;
   const std::array<double, 6>* collision_;
   const std::array<double, 6>* contact_;
-  const std::array<double, 6>* O_F_ext_hat_EE_;
-  const std::array<double, 6>* EE_F_ext_hat_EE_;
+  const std::array<double, 6>* O_F_ext_hat_K_;
+  const std::array<double, 6>* K_F_ext_hat_K_;
   const std::array<double, 16>* O_T_EE_start_;
 };
 

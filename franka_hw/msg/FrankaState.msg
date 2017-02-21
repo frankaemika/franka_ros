@@ -5,11 +5,11 @@ float64[] q
 float64[] dq
 float64[] tau_J
 float64[] dtau_J
-float64[] EE_F_ext_hat_EE
+float64[] K_F_ext_hat_K
 float64[] elbow_start
 float64[] joint_collision
 float64[] joint_contact
-float64[] O_F_ext_hat_EE
+float64[] O_F_ext_hat_K
 float64[] q_d
 float64[] q_start
 float64[] tau_ext_hat_filtered
