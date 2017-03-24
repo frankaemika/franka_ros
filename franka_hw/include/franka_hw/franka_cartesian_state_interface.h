@@ -19,7 +19,7 @@ class FrankaCartesianStateHandle {
  * base_link coordinates
  * \param K_F_ext_hat_K The external wrench exerted to the arm w.r.t.
  * end-effector coordinates
- * \param O_T_EE_start The homogeneous transformation matrix from end-effector
+ * \param O_T_EE The homogeneous transformation matrix from end-effector
  * to base_link frame
  */
   FrankaCartesianStateHandle(const std::string& name,
@@ -27,20 +27,20 @@ class FrankaCartesianStateHandle {
                              const std::array<double, 6>& contact,
                              const std::array<double, 6>& O_F_ext_hat_K,
                              const std::array<double, 6>& K_F_ext_hat_K,
-                             const std::array<double, 16>& O_T_EE_start)
+                             const std::array<double, 16>& O_T_EE)
       : name_(name),
         collision_(&collision),
         contact_(&contact),
         O_F_ext_hat_K_(&O_F_ext_hat_K),
         K_F_ext_hat_K_(&K_F_ext_hat_K),
-        O_T_EE_start_(&O_T_EE_start) {}
+        O_T_EE_(&O_T_EE) {}
 
   const std::string& getName() const { return name_; }
   const std::array<double, 6>& getCollision() const { return *collision_; }
   const std::array<double, 6>& getContact() const { return *contact_; }
   const std::array<double, 6>& getFExtO() const { return *O_F_ext_hat_K_; }
   const std::array<double, 6>& getFExtK() const { return *K_F_ext_hat_K_; }
-  const std::array<double, 16>& getTransform() const { return *O_T_EE_start_; }
+  const std::array<double, 16>& getTransform() const { return *O_T_EE_; }
 
  private:
   std::string name_;
@@ -48,7 +48,7 @@ class FrankaCartesianStateHandle {
   const std::array<double, 6>* contact_;
   const std::array<double, 6>* O_F_ext_hat_K_;
   const std::array<double, 6>* K_F_ext_hat_K_;
-  const std::array<double, 16>* O_T_EE_start_;
+  const std::array<double, 16>* O_T_EE_;
 };
 
 /** \brief Hardware interface to support reading the cartesian state of a franka

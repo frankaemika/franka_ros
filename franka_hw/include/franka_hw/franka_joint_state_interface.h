@@ -17,8 +17,6 @@ class FrankaJointStateHandle {
 * \param dq A pointer to the storage for this joint's velocity
 * \param tauJ A pointer to the storage for this joint's torque
 * \param q_d A pointer to the storage for this joint's desired position
-* \param q_start A pointer to the storage for this joint's interpolator start
-* pose
 * \param dtau_J A pointer to the storage for this joint's torque's time
 * derivative
 * \param tau_ext_hat_filtered A pointer to the storage for this joint's external
@@ -32,7 +30,6 @@ class FrankaJointStateHandle {
                          const double& dq,
                          const double& tau_J,
                          const double& q_d,
-                         const double& q_start,
                          const double& dtau_J,
                          const double& tau_ext_hat_filtered,
                          const double& joint_collision,
@@ -42,7 +39,6 @@ class FrankaJointStateHandle {
         dq_(&dq),
         tau_J_(&tau_J),
         q_d_(&q_d),
-        q_start_(&q_start),
         dtau_J_(&dtau_J),
         tau_ext_hat_filtered_(&tau_ext_hat_filtered),
         joint_collision_(&joint_collision),
@@ -53,7 +49,6 @@ class FrankaJointStateHandle {
   const double& getVelocity() const { return *dq_; }
   const double& getEffort() const { return *tau_J_; }
   const double& getQd() const { return *q_d_; }
-  const double& getQstart() const { return *q_start_; }
   const double& getDtauj() const { return *dtau_J_; }
   const double& getTauExtHatFiltered() const { return *tau_ext_hat_filtered_; }
   const double& getJointCollision() const { return *joint_collision_; }
@@ -65,7 +60,6 @@ class FrankaJointStateHandle {
   const double* dq_;
   const double* tau_J_;
   const double* q_d_;
-  const double* q_start_;
   const double* dtau_J_;
   const double* tau_ext_hat_filtered_;
   const double* joint_collision_;

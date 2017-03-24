@@ -19,7 +19,10 @@ int main(int argc, char** argv) {
   }
   std::string robot_ip;
   nh.getParam("robot_ip", robot_ip);
-  franka_hw::FrankaHW franka_ros(joint_names, robot_ip, nh);
+  double franka_states_publish_rate = 30.0;
+  nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
+  franka_hw::FrankaHW franka_ros(joint_names, robot_ip, franka_states_publish_rate, nh);
+
   ros::Time cycle_start = ros::Time::now();
   while (ros::ok()) {
     ROS_INFO_THROTTLE(1, "cycle: %f s",

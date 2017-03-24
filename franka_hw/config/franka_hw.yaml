@@ -8,4 +8,5 @@ joint_names:
   - joint7
 
 robot_ip: 127.0.0.1
+franka_states_publish_rate: 30.0  # [Hz]
 

@@ -12,8 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
   std_msgs
   sensor_msgs
+  geometry_msgs
   message_generation
   realtime_tools
+  tf2_msgs
+  tf
 )
 
 find_package(Franka REQUIRED)
@@ -37,6 +40,7 @@ catkin_package(
 
 add_library(franka_hw
   src/franka_hw.cpp
+  src/realtime_tf_publisher.cpp
 )
 
 add_dependencies(franka_hw
