@@ -4,8 +4,8 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
-#include <cmath>
 #include <array>
+#include <cmath>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_joint_state_publisher");
@@ -45,8 +45,7 @@ int main(int argc, char** argv) {
     double time(0.0);
     double initial_pose[16];
     std::copy(robot.robotState().O_T_EE.cbegin(),
-              robot.robotState().O_T_EE.cend(),
-              initial_pose);
+              robot.robotState().O_T_EE.cend(), initial_pose);
     ROS_INFO_STREAM("initial pose: " << initial_pose);
     uint64_t sequence_number = 1;
     sleep(1);
