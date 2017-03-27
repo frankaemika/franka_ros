@@ -1,7 +1,9 @@
+
 #include <franka/robot.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-// #include <O_T_J9_file.h>
+
 #include <cmath>
 
 int main(int argc, char** argv) {
@@ -42,50 +44,49 @@ int main(int argc, char** argv) {
     double radius(0.3);
     double time(0.0);
     double initial_pose[16];
-    double unity[16] {1.0, 0.0 , 0.0, 0.0,
-                 0.0, 1.0, 0.0, 0.0,
-                 0.0, 0.0, 1.0, 0.0,
-                 0.0, 0.0, 0.0, 1.0 };
-    double q_init[7] {robot.robotState().q[0], robot.robotState().q[1], robot.robotState().q[2],
-                   robot.robotState().q[3], robot.robotState().q[4], robot.robotState().q[5],
-                   robot.robotState().q[6]};
-  //   O_T_J9_file(q_init, unity, initial_pose);
-    ROS_INFO_STREAM("initial pose: " << initial_pose );
+    double unity[16]{1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                     0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+    double q_init[7]{robot.robotState().q[0], robot.robotState().q[1],
+                     robot.robotState().q[2], robot.robotState().q[3],
+                     robot.robotState().q[4], robot.robotState().q[5],
+                     robot.robotState().q[6]};
+    //   O_T_J9_file(q_init, unity, initial_pose);
+    ROS_INFO_STREAM("initial pose: " << initial_pose);
     uint64_t sequence_number = 1;
     sleep(1);
     ROS_INFO("Starting control loop");
 
     while (ros::ok() && robot.update()) {
-
-    if (std::fabs(std::fmod(time, 1.0/30.0)) < 0.001) {
-      const franka::RobotState& robot_state = robot.robotState();
-      states.header.stamp = ros::Time::now();
-      states.header.seq = sequence_number;
-      for (int i = 0; i < joint_names.size(); ++i) {
-        states.name[i] = joint_names[i];
-        states.position[i] = robot_state.q[i];
-        states.velocity[i] = robot_state.dq[i];
-        states.effort[i] = robot_state.tau_J[i];
+      if (std::fabs(std::fmod(time, 1.0 / 30.0)) < 0.001) {
+        const franka::RobotState& robot_state = robot.robotState();
+        states.header.stamp = ros::Time::now();
+        states.header.seq = sequence_number;
+        for (int i = 0; i < joint_names.size(); ++i) {
+          states.name[i] = joint_names[i];
+          states.position[i] = robot_state.q[i];
+          states.velocity[i] = robot_state.dq[i];
+          states.effort[i] = robot_state.tau_J[i];
+        }
+        joint_pub.publish(states);
+        ros::spinOnce();
+        rate.sleep();
+        sequence_number++;
       }
-      joint_pub.publish(states);
-      ros::spinOnce();
-      rate.sleep();
-      sequence_number++;
-    }
 
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
       double delta_x = radius * std::sin(angle);
       double delta_z = radius * (std::cos(angle) - 1);
-      ROS_INFO("set position: %f, %f, %f where delta x/z: %f %f",initial_pose[12] + delta_x,
-                                                                 initial_pose[13],
-                                                                 initial_pose[14] + delta_z,
-                                                                 delta_x, delta_z);
+      ROS_INFO("set position: %f, %f, %f where delta x/z: %f %f",
+               initial_pose[12] + delta_x, initial_pose[13],
+               initial_pose[14] + delta_z, delta_x, delta_z);
       try {
-        motion_generator.setDesiredPose(
-            {{initial_pose[0], initial_pose[1], initial_pose[2], initial_pose[3],
-              initial_pose[4], initial_pose[5], initial_pose[6], initial_pose[7],
-              initial_pose[8], initial_pose[9], initial_pose[10], initial_pose[11],
-              initial_pose[12] + delta_x, initial_pose[13], initial_pose[14] + delta_z, initial_pose[15],}});
+        motion_generator.setDesiredPose({{
+            initial_pose[0], initial_pose[1], initial_pose[2], initial_pose[3],
+            initial_pose[4], initial_pose[5], initial_pose[6], initial_pose[7],
+            initial_pose[8], initial_pose[9], initial_pose[10],
+            initial_pose[11], initial_pose[12] + delta_x, initial_pose[13],
+            initial_pose[14] + delta_z, initial_pose[15],
+        }});
       } catch (franka::MotionGeneratorException const& e) {
         std::cout << e.what() << std::endl;
       }
