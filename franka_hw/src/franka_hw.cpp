@@ -66,8 +66,7 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
   publisher_franka_states_.msg_.K_F_ext_hat_K.resize(
       robot_state_.K_F_ext_hat_K.size());
-  publisher_franka_states_.msg_.elbow.resize(
-      robot_state_.elbow.size());
+  publisher_franka_states_.msg_.elbow.resize(robot_state_.elbow.size());
   publisher_franka_states_.msg_.joint_collision.resize(
       robot_state_.joint_collision.size());
   publisher_franka_states_.msg_.joint_contact.resize(
@@ -100,8 +99,8 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
   publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
 
-  std::lock_guard<franka_hw::RealTimeTfPublisher>
-          lock_tf_publisher( publisher_k_frame_);
+  std::lock_guard<franka_hw::RealTimeTfPublisher> lock_tf_publisher(
+      publisher_k_frame_);
   tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
   tf::Vector3 translation(0.0, 0.0, 0.0);
   tf::Transform transform(quaternion, translation);
@@ -157,8 +156,7 @@ void franka_hw::FrankaHW::publishFrankaStates() {
     }
 
     for (size_t i = 0; i < robot_state_.elbow.size(); ++i) {
-      publisher_franka_states_.msg_.elbow[i] =
-          robot_state_.elbow[i];
+      publisher_franka_states_.msg_.elbow[i] = robot_state_.elbow[i];
     }
 
     for (size_t row = 0; row < 4; ++row) {
@@ -203,17 +201,16 @@ void franka_hw::FrankaHW::publishJointStates() {
 }
 
 void franka_hw::FrankaHW::broadcastKFrame() {
-    if (publisher_k_frame_.tryLock()) {
-        tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
-        tf::Vector3 translation(0.0, 0.0, 0.05);
-        tf::Transform transform(quaternion, translation);
-        tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
-        publisher_k_frame_.setTransform(trafo);
-        publisher_k_frame_.unlockAndPublish();
-    }
-    else {
-        ROS_WARN("Couldn't lock to publish tf of K frame");
-    }
+  if (publisher_k_frame_.tryLock()) {
+    tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
+    tf::Vector3 translation(0.0, 0.0, 0.05);
+    tf::Transform transform(quaternion, translation);
+    tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
+    publisher_k_frame_.setTransform(trafo);
+    publisher_k_frame_.unlockAndPublish();
+  } else {
+    ROS_WARN("Couldn't lock to publish tf of K frame");
+  }
 }
 
 PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaHW, hardware_interface::RobotHW)

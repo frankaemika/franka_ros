@@ -22,7 +22,7 @@ namespace franka_hw {
 
 class FrankaHW : public hardware_interface::RobotHW {
  public:
-  FrankaHW(): robot_("0.0.0.0") {}
+  FrankaHW() : robot_("0.0.0.0") {}
 
   /**
   * @param joint_names A vector of joint names for all franka joint
