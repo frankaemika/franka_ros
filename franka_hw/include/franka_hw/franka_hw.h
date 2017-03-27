@@ -27,11 +27,12 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
   * @param joint_names A vector of joint names for all franka joint
   * @param ip The ip address of the franka robot to connect to
+  * @param publish_rate Publish rate [Hz] for ROS topics
   * @param nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            const std::string& ip,
-           const double publish_rate,
+           double publish_rate,
            const ros::NodeHandle& nh);
   ~FrankaHW() override = default;
   bool update();
