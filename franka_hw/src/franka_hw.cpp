@@ -16,7 +16,7 @@
 
 // apparently a default constructor is required to export the plugin with
 // pluginlib
-// franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
+franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
 
 franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                               const std::string& ip,
