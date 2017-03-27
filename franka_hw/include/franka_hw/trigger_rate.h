@@ -1,22 +1,17 @@
-
-#include <ros/ros.h>
+#include <ros/time.h>
 
 namespace franka_hw {
 
 class TriggerRate {
  public:
-  explicit TriggerRate(double rate = 30.0)
-      : rate_(rate), time_stamp_(ros::Time::now()) {}
-  ~TriggerRate() {}
-  bool triggers() {
-    if (elapsedCycleTime() > expectedCycleTime()) {
-      time_stamp_ = ros::Time::now();
-      return true;
-    }
-    return false;
+  explicit TriggerRate(double rate = 30.0);
+
+  double elapsedCycleTime() const {
+    return (ros::Time::now() - time_stamp_).toSec();
   }
-  double elapsedCycleTime() { return (ros::Time::now() - time_stamp_).toSec(); }
-  double expectedCycleTime() { return 1.0 / rate_; }
+  double expectedCycleTime() const { return 1.0 / rate_; }
+
+  bool triggers();
 
  private:
   ros::Time time_stamp_;

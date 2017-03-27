@@ -41,6 +41,7 @@ catkin_package(
 add_library(franka_hw
   src/franka_hw.cpp
   src/realtime_tf_publisher.cpp
+  src/trigger_rate.cpp
 )
 
 add_dependencies(franka_hw

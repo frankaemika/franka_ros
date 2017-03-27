@@ -1,22 +1,25 @@
 #include <franka_hw/realtime_tf_publisher.h>
 
-void franka_hw::RealTimeTfPublisher::setTransform(
+namespace franka_hw {
+
+RealTimeTfPublisher::RealTimeTfPublisher(const ros::NodeHandle& nh)
+    : publisher_tf_(nh, "/tf", 1) {}
+
+void RealTimeTfPublisher::setTransform(
     const geometry_msgs::TransformStamped& transform) {
   publisher_tf_.msg_.transforms.resize(1);
   publisher_tf_.msg_.transforms[0] = transform;
 }
 
-void franka_hw::RealTimeTfPublisher::setTransform(
-    const tf::StampedTransform& transform) {
+void RealTimeTfPublisher::setTransform(const tf::StampedTransform& transform) {
   geometry_msgs::TransformStamped transform_message;
   transformStampedTFToMsg(transform, transform_message);
   setTransform(transform_message);
 }
 
-void franka_hw::RealTimeTfPublisher::setTransform(
-    const std::array<double, 16>& transform,
-    const std::string& child_frame_id,
-    const std::string& frame_id) {
+void RealTimeTfPublisher::setTransform(const std::array<double, 16>& transform,
+                                       const std::string& child_frame_id,
+                                       const std::string& frame_id) {
   geometry_msgs::TransformStamped transform_message;
   transform_message.header.stamp = ros::Time::now();
   transform_message.child_frame_id = child_frame_id;
@@ -34,3 +37,5 @@ void franka_hw::RealTimeTfPublisher::setTransform(
   transform_message.transform.rotation = quaternion_message;
   setTransform(transform_message);
 }
+
+}  // namespace franka_hw
