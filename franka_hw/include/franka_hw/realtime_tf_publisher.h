@@ -21,7 +21,7 @@ class RealTimeTfPublisher {
   void setTransform(const geometry_msgs::TransformStamped& transform);
   void setTransform(const std::array<double, 16>& transform,
                     const std::string& child_frame_id,
-                    const std::string frame_id);
+                    const std::string& frame_id);
   void setTransform(const tf::StampedTransform& transform);
 
  private:

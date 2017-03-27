@@ -16,7 +16,7 @@ void franka_hw::RealTimeTfPublisher::setTransform(
 void franka_hw::RealTimeTfPublisher::setTransform(
     const std::array<double, 16>& transform,
     const std::string& child_frame_id,
-    const std::string frame_id) {
+    const std::string& frame_id) {
   geometry_msgs::TransformStamped transform_message;
   transform_message.header.stamp = ros::Time::now();
   transform_message.child_frame_id = child_frame_id;

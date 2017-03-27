@@ -5,6 +5,7 @@
 #include <sensor_msgs/JointState.h>
 
 #include <cmath>
+#include <array>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_joint_state_publisher");
@@ -15,7 +16,6 @@ int main(int argc, char** argv) {
       public_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
   std::vector<std::string> joint_names;
 
-  // parse yaml with joint names and robot-IP
   XmlRpc::XmlRpcValue params;
   private_nodehandle.getParam("joint_names", params);
   joint_names.resize(params.size());
@@ -44,13 +44,9 @@ int main(int argc, char** argv) {
     double radius(0.3);
     double time(0.0);
     double initial_pose[16];
-    double unity[16]{1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-                     0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};
-    double q_init[7]{robot.robotState().q[0], robot.robotState().q[1],
-                     robot.robotState().q[2], robot.robotState().q[3],
-                     robot.robotState().q[4], robot.robotState().q[5],
-                     robot.robotState().q[6]};
-    //   O_T_J9_file(q_init, unity, initial_pose);
+    std::copy(robot.robotState().O_T_EE.cbegin(),
+              robot.robotState().O_T_EE.cend(),
+              initial_pose);
     ROS_INFO_STREAM("initial pose: " << initial_pose);
     uint64_t sequence_number = 1;
     sleep(1);
@@ -88,7 +84,7 @@ int main(int argc, char** argv) {
             initial_pose[14] + delta_z, initial_pose[15],
         }});
       } catch (franka::MotionGeneratorException const& e) {
-        std::cout << e.what() << std::endl;
+        ROS_ERROR_STREAM("" << e.what());
       }
       ROS_INFO("Set desired pose");
       time += 0.001;

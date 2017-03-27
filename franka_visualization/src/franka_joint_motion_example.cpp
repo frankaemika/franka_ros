@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
               initial_pose[3] + delta_angle, initial_pose[4] + delta_angle,
               initial_pose[5], initial_pose[6] + delta_angle}});
       } catch (franka::MotionGeneratorException const& e) {
-        std::cout << e.what() << std::endl;
+        ROS_ERROR_STREAM("" << e.what());
       }
 
       ROS_INFO_STREAM("Set desired pose:"
