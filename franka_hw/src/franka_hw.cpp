@@ -14,12 +14,14 @@
 
 #include <franka_hw/FrankaState.h>
 
-// A default constructor is required to export the plugin with pluginlib
-franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
+namespace franka_hw {
 
-franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
+// A default constructor is required to export the plugin with pluginlib
+FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
+
+FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                               const std::string& ip,
-                              const franka_hw::TriggerRate& publish_rate,
+                              const double& publish_rate,
                               const ros::NodeHandle& nh)
     : joint_state_interface_(),
       franka_joint_state_interface_(),
@@ -44,7 +46,7 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     franka_joint_state_interface_.registerHandle(franka_joint_handle);
   }
 
-  franka_hw::FrankaCartesianStateHandle franka_cartesian_handle(
+  FrankaCartesianStateHandle franka_cartesian_handle(
       std::string("franka_emika_cartesian_data"),
       robot_state_.cartesian_collision, robot_state_.cartesian_contact,
       robot_state_.O_F_ext_hat_K, robot_state_.K_F_ext_hat_K,
@@ -56,7 +58,7 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&franka_cartesian_state_interface_);
 
   std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
-      lock_franka_states(publisher_franka_states_);
+      lock1(publisher_franka_states_);
   publisher_franka_states_.msg_.cartesian_collision.resize(
       robot_state_.cartesian_collision.size());
   publisher_franka_states_.msg_.cartesian_contact.resize(
@@ -92,14 +94,13 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_franka_states_.msg_.O_T_EE.data.resize(16);
 
   std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
-      lock_joint_states(publisher_joint_states_);
+      lock2(publisher_joint_states_);
   publisher_joint_states_.msg_.name.resize(joint_name_.size());
   publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
   publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
   publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
 
-  std::lock_guard<franka_hw::RealTimeTfPublisher> lock_tf_publisher(
-      publisher_k_frame_);
+  std::lock_guard<franka_hw::RealTimeTfPublisher> lock3(publisher_k_frame_);
   tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
   tf::Vector3 translation(0.0, 0.0, 0.0);
   tf::Transform transform(quaternion, translation);
@@ -107,7 +108,7 @@ franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_k_frame_.setTransform(trafo);
 }
 
-bool franka_hw::FrankaHW::update() {
+bool FrankaHW::update() {
   try {
     if (robot_.update()) {
       robot_state_ = robot_.robotState();
@@ -127,7 +128,7 @@ bool franka_hw::FrankaHW::update() {
   }
 }
 
-void franka_hw::FrankaHW::publishFrankaStates() {
+void FrankaHW::publishFrankaStates() {
   if (publisher_franka_states_.trylock()) {
     for (size_t i = 0; i < robot_state_.cartesian_collision.size(); ++i) {
       publisher_franka_states_.msg_.cartesian_collision[i] =
@@ -178,7 +179,7 @@ void franka_hw::FrankaHW::publishFrankaStates() {
   }
 }
 
-void franka_hw::FrankaHW::publishJointStates() {
+void FrankaHW::publishJointStates() {
   if (publisher_joint_states_.trylock()) {
     for (size_t i = 0; i < joint_name_.size(); ++i) {
       publisher_joint_states_.msg_.name[i] = joint_name_[i];
@@ -199,7 +200,7 @@ void franka_hw::FrankaHW::publishJointStates() {
   }
 }
 
-void franka_hw::FrankaHW::broadcastKFrame() {
+void FrankaHW::broadcastKFrame() {
   if (publisher_k_frame_.tryLock()) {
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
@@ -211,5 +212,7 @@ void franka_hw::FrankaHW::broadcastKFrame() {
     ROS_WARN("Couldn't lock to publish tf of K frame");
   }
 }
+
+}  // namespace franka_hw
 
 PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaHW, hardware_interface::RobotHW)
