@@ -3,10 +3,10 @@
 namespace franka_hw {
 
 TriggerRate::TriggerRate(double rate)
-    : rate_(rate), time_stamp_(ros::Time::now()) {}
+    : period_(1.0/rate), time_stamp_(ros::Time::now()) {}
 
 bool TriggerRate::triggers() {
-  if (elapsedCycleTime() > expectedCycleTime()) {
+  if ((ros::Time::now() - time_stamp_).toSec() > period_) {
     time_stamp_ = ros::Time::now();
     return true;
   }

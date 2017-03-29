@@ -1,3 +1,5 @@
+#pragma once
+
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
 #include <tf/transform_datatypes.h>

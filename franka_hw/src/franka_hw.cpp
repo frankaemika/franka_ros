@@ -19,7 +19,7 @@ franka_hw::FrankaHW::FrankaHW() : robot_("0.0.0.0") {}
 
 franka_hw::FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                               const std::string& ip,
-                              double publish_rate,
+                              const franka_hw::TriggerRate& publish_rate,
                               const ros::NodeHandle& nh)
     : joint_state_interface_(),
       franka_joint_state_interface_(),
