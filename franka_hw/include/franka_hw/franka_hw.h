@@ -9,13 +9,14 @@
 #include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
+#include <tf/transform_datatypes.h>
+#include <tf2_msgs/TFMessage.h>
 
 #include <franka/robot.h>
 
 #include <franka_hw/FrankaState.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
-#include <franka_hw/realtime_tf_publisher.h>
 #include <franka_hw/trigger_rate.h>
 
 namespace franka_hw {
@@ -46,7 +47,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
   franka_hw::TriggerRate publish_rate_;
   franka::Robot robot_;
-  franka_hw::RealTimeTfPublisher publisher_k_frame_;
+  realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_k_frame_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;
   realtime_tools::RealtimePublisher<sensor_msgs::JointState>

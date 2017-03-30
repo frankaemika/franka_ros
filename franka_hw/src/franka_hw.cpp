@@ -11,6 +11,8 @@
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/MultiArrayDimension.h>
 #include <tf/tf.h>
+#include <tf/transform_datatypes.h>
+#include <tf2_msgs/TFMessage.h>
 
 #include <franka_hw/FrankaState.h>
 
@@ -28,7 +30,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       franka_cartesian_state_interface_(),
       publish_rate_(publish_rate),
       robot_(ip),
-      publisher_k_frame_(nh),
+      publisher_k_frame_(nh, "/tf", 1),
       publisher_franka_states_(nh, "franka_states", 1),
       publisher_joint_states_(nh, "joint_states", 1),
       joint_name_(joint_names),
@@ -100,12 +102,16 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
   publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
 
-  std::lock_guard<franka_hw::RealTimeTfPublisher> lock3(publisher_k_frame_);
+  std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> >
+      lock3(publisher_k_frame_);
   tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
-  tf::Vector3 translation(0.0, 0.0, 0.0);
+  tf::Vector3 translation(0.0, 0.0, 0.05);
   tf::Transform transform(quaternion, translation);
   tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
-  publisher_k_frame_.setTransform(trafo);
+  geometry_msgs::TransformStamped transform_message;
+  transformStampedTFToMsg(trafo, transform_message);
+  publisher_k_frame_.msg_.transforms.resize(1);
+  publisher_k_frame_.msg_.transforms[0] = transform_message;
 }
 
 bool FrankaHW::update() {
@@ -201,12 +207,15 @@ void FrankaHW::publishJointStates() {
 }
 
 void FrankaHW::broadcastKFrame() {
-  if (publisher_k_frame_.tryLock()) {
+  if (publisher_k_frame_.trylock()) {
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
     tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
-    publisher_k_frame_.setTransform(trafo);
+    geometry_msgs::TransformStamped transform_message;
+    transformStampedTFToMsg(trafo, transform_message);
+    publisher_k_frame_.msg_.transforms.resize(1);
+    publisher_k_frame_.msg_.transforms[0] = transform_message;
     publisher_k_frame_.unlockAndPublish();
   } else {
     ROS_WARN("Couldn't lock to publish tf of K frame");
