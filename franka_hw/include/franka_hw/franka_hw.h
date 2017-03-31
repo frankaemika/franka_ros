@@ -9,7 +9,6 @@
 #include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
-#include <tf/transform_datatypes.h>
 #include <tf2_msgs/TFMessage.h>
 
 #include <franka/robot.h>
@@ -33,7 +32,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            const std::string& ip,
-           const double& publish_rate,
+           double publish_rate,
            const ros::NodeHandle& nh);
   ~FrankaHW() override = default;
   bool update();
