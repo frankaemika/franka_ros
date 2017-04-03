@@ -9,6 +9,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/WrenchStamped.h>
 #include <tf2_msgs/TFMessage.h>
 
 #include <franka/robot.h>
@@ -38,7 +39,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   bool update();
   void publishFrankaStates();
   void publishJointStates();
-  void broadcastKFrame();
+  void publishTransforms();
+  void publishExternalWrench();
 
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
@@ -46,11 +48,13 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
   franka_hw::TriggerRate publish_rate_;
   franka::Robot robot_;
-  realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_k_frame_;
+  realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;
   realtime_tools::RealtimePublisher<sensor_msgs::JointState>
       publisher_joint_states_;
+  realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
+      publisher_external_wrench_;
   std::vector<std::string> joint_name_;
   franka::RobotState robot_state_;
   uint64_t sequence_number_joint_states_ = 0;

@@ -30,9 +30,10 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       franka_cartesian_state_interface_(),
       publish_rate_(publish_rate),
       robot_(ip),
-      publisher_k_frame_(nh, "/tf", 1),
+      publisher_transforms_(nh, "/tf", 1),
       publisher_franka_states_(nh, "franka_states", 1),
       publisher_joint_states_(nh, "joint_states", 1),
+      publisher_external_wrench_(nh, "F_ext", 1),
       joint_name_(joint_names),
       robot_state_() {
   for (size_t i = 0; i < joint_name_.size(); ++i) {
@@ -103,15 +104,30 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
 
   std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> >
-      lock3(publisher_k_frame_);
+      lock3(publisher_transforms_);
+  publisher_transforms_.msg_.transforms.resize(2);
   tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
   tf::Vector3 translation(0.0, 0.0, 0.05);
   tf::Transform transform(quaternion, translation);
-  tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
+  tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "EE");
   geometry_msgs::TransformStamped transform_message;
   transformStampedTFToMsg(trafo, transform_message);
-  publisher_k_frame_.msg_.transforms.resize(1);
-  publisher_k_frame_.msg_.transforms[0] = transform_message;
+  publisher_transforms_.msg_.transforms[0] = transform_message;
+  translation = tf::Vector3(0.0, 0.0, 0.0);
+  transform = tf::Transform(quaternion, translation);
+  trafo = tf::StampedTransform(transform, ros::Time::now(), "EE", "K");
+  transformStampedTFToMsg(trafo, transform_message);
+  publisher_transforms_.msg_.transforms[1] = transform_message;
+
+  std::lock_guard<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
+      lock4(publisher_external_wrench_);
+  publisher_external_wrench_.msg_.header.frame_id = "K";
+  publisher_external_wrench_.msg_.wrench.force.x = 0.0;
+  publisher_external_wrench_.msg_.wrench.force.y = 0.0;
+  publisher_external_wrench_.msg_.wrench.force.z = 0.0;
+  publisher_external_wrench_.msg_.wrench.torque.x = 0.0;
+  publisher_external_wrench_.msg_.wrench.torque.y = 0.0;
+  publisher_external_wrench_.msg_.wrench.torque.z = 0.0;
 }
 
 bool FrankaHW::update() {
@@ -121,7 +137,8 @@ bool FrankaHW::update() {
       if (publish_rate_.triggers()) {
         publishFrankaStates();
         publishJointStates();
-        broadcastKFrame();
+        publishTransforms();
+        publishExternalWrench();
       }
       return true;
     }
@@ -206,19 +223,38 @@ void FrankaHW::publishJointStates() {
   }
 }
 
-void FrankaHW::broadcastKFrame() {
-  if (publisher_k_frame_.trylock()) {
+void FrankaHW::publishTransforms() {
+  if (publisher_transforms_.trylock()) {
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
-    tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "K");
+    tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "EE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(trafo, transform_message);
-    publisher_k_frame_.msg_.transforms.resize(1);
-    publisher_k_frame_.msg_.transforms[0] = transform_message;
-    publisher_k_frame_.unlockAndPublish();
+    publisher_transforms_.msg_.transforms[0] = transform_message;
+    translation = tf::Vector3(0.0, 0.0, 0.0);
+    transform = tf::Transform(quaternion, translation);
+    trafo = tf::StampedTransform(transform, ros::Time::now(), "EE", "K");
+    transformStampedTFToMsg(trafo, transform_message);
+    publisher_transforms_.msg_.transforms[1] = transform_message;
+    publisher_transforms_.unlockAndPublish();
   } else {
     ROS_WARN("Couldn't lock to publish tf of K frame");
+  }
+}
+
+void FrankaHW::publishExternalWrench() {
+  if (publisher_external_wrench_.trylock()) {
+    publisher_external_wrench_.msg_.header.frame_id = "K";
+    publisher_external_wrench_.msg_.wrench.force.x = robot_state_.K_F_ext_hat_K[0];
+    publisher_external_wrench_.msg_.wrench.force.y = robot_state_.K_F_ext_hat_K[1];
+    publisher_external_wrench_.msg_.wrench.force.z = robot_state_.K_F_ext_hat_K[2];
+    publisher_external_wrench_.msg_.wrench.torque.x = robot_state_.K_F_ext_hat_K[3];
+    publisher_external_wrench_.msg_.wrench.torque.y = robot_state_.K_F_ext_hat_K[4];
+    publisher_external_wrench_.msg_.wrench.torque.z = robot_state_.K_F_ext_hat_K[5];
+    publisher_external_wrench_.unlockAndPublish();
+  } else {
+    ROS_WARN("Couldn't lock to publish external wrench");
   }
 }
 
