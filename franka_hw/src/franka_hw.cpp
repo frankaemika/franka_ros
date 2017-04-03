@@ -119,7 +119,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   transformStampedTFToMsg(trafo, transform_message);
   publisher_transforms_.msg_.transforms[1] = transform_message;
 
-  std::lock_guard<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
+  std::lock_guard<
+      realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
       lock4(publisher_external_wrench_);
   publisher_external_wrench_.msg_.header.frame_id = "K";
   publisher_external_wrench_.msg_.wrench.force.x = 0.0;
@@ -246,12 +247,18 @@ void FrankaHW::publishTransforms() {
 void FrankaHW::publishExternalWrench() {
   if (publisher_external_wrench_.trylock()) {
     publisher_external_wrench_.msg_.header.frame_id = "K";
-    publisher_external_wrench_.msg_.wrench.force.x = robot_state_.K_F_ext_hat_K[0];
-    publisher_external_wrench_.msg_.wrench.force.y = robot_state_.K_F_ext_hat_K[1];
-    publisher_external_wrench_.msg_.wrench.force.z = robot_state_.K_F_ext_hat_K[2];
-    publisher_external_wrench_.msg_.wrench.torque.x = robot_state_.K_F_ext_hat_K[3];
-    publisher_external_wrench_.msg_.wrench.torque.y = robot_state_.K_F_ext_hat_K[4];
-    publisher_external_wrench_.msg_.wrench.torque.z = robot_state_.K_F_ext_hat_K[5];
+    publisher_external_wrench_.msg_.wrench.force.x =
+        robot_state_.K_F_ext_hat_K[0];
+    publisher_external_wrench_.msg_.wrench.force.y =
+        robot_state_.K_F_ext_hat_K[1];
+    publisher_external_wrench_.msg_.wrench.force.z =
+        robot_state_.K_F_ext_hat_K[2];
+    publisher_external_wrench_.msg_.wrench.torque.x =
+        robot_state_.K_F_ext_hat_K[3];
+    publisher_external_wrench_.msg_.wrench.torque.y =
+        robot_state_.K_F_ext_hat_K[4];
+    publisher_external_wrench_.msg_.wrench.torque.z =
+        robot_state_.K_F_ext_hat_K[5];
     publisher_external_wrench_.unlockAndPublish();
   } else {
     ROS_WARN("Couldn't lock to publish external wrench");
