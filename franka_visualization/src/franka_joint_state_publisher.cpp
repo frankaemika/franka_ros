@@ -1,3 +1,5 @@
+#include <cinttypes>
+
 #include <franka/robot.h>
 
 #include <ros/ros.h>
@@ -13,32 +15,40 @@ int main(int argc, char** argv) {
   std::vector<std::string> joint_names;
   XmlRpc::XmlRpcValue params;
   private_nodehandle.getParam("joint_names", params);
-  joint_names.resize(params.size());
-  for (int i = 0; i < params.size(); ++i) {
+  const size_t number_of_joints = params.size();
+  joint_names.resize(number_of_joints);
+
+  for (size_t i = 0; i < number_of_joints; i++) {
     joint_names[i] = static_cast<std::string>(params[i]);
-    ROS_INFO("parsed jointname[%d]= %s", i, joint_names[i].c_str());
+    ROS_INFO_STREAM("parsed jointname[" << i << "]= " << joint_names[i]);
   }
+
   std::string robot_ip;
   private_nodehandle.getParam("robot_ip", robot_ip);
   ROS_INFO("parsed franka robot IP: %s", robot_ip.c_str());
 
   sensor_msgs::JointState states;
-  states.effort.resize(joint_names.size());
-  states.name.resize(joint_names.size());
-  states.position.resize(joint_names.size());
-  states.velocity.resize(joint_names.size());
+  states.effort.resize(number_of_joints);
+  states.name.resize(number_of_joints);
+  states.position.resize(number_of_joints);
+  states.velocity.resize(number_of_joints);
+
+  for (size_t i = 0; i < joint_names.size(); i++) {
+    states.name[i] = joint_names[i];
+  }
 
   try {
     ROS_INFO("connecting to robot... ");
     franka::Robot robot(robot_ip);
-    uint64_t sequence_number = 1;
 
-    while (ros::ok() && robot.update()) {
-      const franka::RobotState& robot_state = robot.robotState();
+    robot.read([sequence_number = 1ul,
+                number_of_joints,
+                &states,
+                &rate,
+                &joint_pub](const franka::RobotState& robot_state) mutable {
       states.header.stamp = ros::Time::now();
-      states.header.seq = sequence_number;
-      for (int i = 0; i < joint_names.size(); ++i) {
-        states.name[i] = joint_names[i];
+      states.header.seq = sequence_number++;
+      for (size_t i = 0; i < robot_state.q.size(); i++) {
         states.position[i] = robot_state.q[i];
         states.velocity[i] = robot_state.dq[i];
         states.effort[i] = robot_state.tau_J[i];
@@ -46,9 +56,10 @@ int main(int argc, char** argv) {
       joint_pub.publish(states);
       ros::spinOnce();
       rate.sleep();
-      sequence_number++;
-    }
-  } catch (franka::NetworkException const& e) {
+      return ros::ok();
+    });
+
+  } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return -1;
   }
