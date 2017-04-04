@@ -17,8 +17,6 @@ catkin_package(CATKIN_DEPENDS sensor_msgs roscpp)
 
 set(EXECUTABLES
   franka_joint_state_publisher
-  franka_cartesian_motion_example
-  franka_joint_motion_example
 )
 
 foreach(executable ${EXECUTABLES})
