@@ -1,4 +1,5 @@
 #include <franka/robot.h>
+
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
@@ -6,12 +7,10 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_joint_state_publisher");
   ros::NodeHandle private_nodehandle("~");
   ros::NodeHandle public_nodehandle;
-  ros::Rate rate(1000);
+  ros::Rate rate(30.0);
   ros::Publisher joint_pub =
       public_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
   std::vector<std::string> joint_names;
-
-  // parse yaml with joint names and robot-IP
   XmlRpc::XmlRpcValue params;
   private_nodehandle.getParam("joint_names", params);
   joint_names.resize(params.size());
@@ -34,11 +33,8 @@ int main(int argc, char** argv) {
     franka::Robot robot(robot_ip);
     uint64_t sequence_number = 1;
 
-    while (ros::ok() && robot.waitForRobotState()) {
-      // read sensors from franka using libfranka
+    while (ros::ok() && robot.update()) {
       const franka::RobotState& robot_state = robot.robotState();
-
-      // update joint_states to msgs
       states.header.stamp = ros::Time::now();
       states.header.seq = sequence_number;
       for (int i = 0; i < joint_names.size(); ++i) {

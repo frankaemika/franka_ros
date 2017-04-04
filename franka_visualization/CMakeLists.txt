@@ -15,22 +15,28 @@ find_package(Franka REQUIRED)
 
 catkin_package(CATKIN_DEPENDS sensor_msgs roscpp)
 
-add_executable(franka_joint_state_publisher
-  src/franka_joint_state_publisher.cpp
+set(EXECUTABLES
+  franka_joint_state_publisher
+  franka_cartesian_motion_example
+  franka_joint_motion_example
 )
 
-add_dependencies(franka_joint_state_publisher
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
-
-target_link_libraries(franka_joint_state_publisher
-  ${catkin_LIBRARIES}
-  Franka::franka
-)
-target_include_directories(franka_joint_state_publisher PUBLIC
-  ${catkin_INCLUDE_DIRS}
-)
+foreach(executable ${EXECUTABLES})
+  add_executable(${executable}
+    src/${executable}.cpp
+  )
+  add_dependencies(${executable}
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+  )
+  target_link_libraries(${executable}
+    ${catkin_LIBRARIES}
+    Franka::franka
+  )
+  target_include_directories(${executable} PUBLIC
+    ${catkin_INCLUDE_DIRS}
+  )
+endforeach()
 
 ## Tools
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -42,5 +48,5 @@ include(ClangTools)
 add_format_target(franka_visualization FILES ${SOURCES} ${HEADERS})
 add_tidy_target(franka_visualization
   FILES ${SOURCES}
-  DEPENDS franka_joint_state_publisher
+  DEPENDS ${EXECUTABLES}
 )
