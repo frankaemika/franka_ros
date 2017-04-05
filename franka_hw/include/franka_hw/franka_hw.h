@@ -59,8 +59,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::RobotState robot_state_;
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
-  uint64_t missed_publishes_franka_states_ = 0;
-  uint64_t missed_publishes_joint_states_ = 0;
 };
 
 }  // namespace franka_hw
