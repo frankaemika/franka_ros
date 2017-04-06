@@ -28,6 +28,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     : joint_state_interface_(),
       franka_joint_state_interface_(),
       franka_cartesian_state_interface_(),
+      position_joint_interface_(),
+      velocity_joint_interface_(),
+      effort_joint_interface_(),
+      franka_position_joint_interface_(),
+      franka_velocity_joint_interface_(),
+      franka_effort_joint_interface_(),
+      franka_pose_cartesian_interface_(),
+      franka_velocity_cartesian_interface_(),
       publish_rate_(publish_rate),
       robot_(ip),
       publisher_k_frame_(nh, "/tf", 1),
@@ -40,12 +48,28 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
         &robot_state_.tau_J[i]);
     joint_state_interface_.registerHandle(joint_handle);
+
     franka_hw::FrankaJointStateHandle franka_joint_handle(
         joint_name_[i], robot_state_.q[i], robot_state_.dq[i],
         robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
         robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
         robot_state_.joint_contact[i]);
     franka_joint_state_interface_.registerHandle(franka_joint_handle);
+
+    hardware_interface::JointHandle position_joint_handle(
+                joint_state_interface_.getHandle(joint_name_[i]),
+                &position_joint_command_[i]);
+    position_joint_interface_.registerHandle(position_joint_handle);
+
+    hardware_interface::JointHandle velocity_joint_handle(
+                joint_state_interface_.getHandle(joint_name_[i]),
+                &velocity_joint_command_[i]);
+    velocity_joint_interface_.registerHandle(velocity_joint_handle);
+
+    hardware_interface::JointHandle effort_joint_handle(
+                joint_state_interface_.getHandle(joint_name_[i]),
+                &effort_joint_command_[i]);
+    effort_joint_interface_.registerHandle(effort_joint_handle);
   }
 
   FrankaCartesianStateHandle franka_cartesian_handle(
