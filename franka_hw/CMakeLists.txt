@@ -17,6 +17,8 @@ find_package(catkin REQUIRED COMPONENTS
   realtime_tools
   tf2_msgs
   tf
+  urdf
+  joint_limits_interface
 )
 
 find_package(Franka REQUIRED)

@@ -9,6 +9,7 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <hardware_interface/joint_command_interface.h>
+#include <joint_limits_interface/joint_limits_interface.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
 #include <tf2_msgs/TFMessage.h>
@@ -37,7 +38,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW(const std::vector<std::string>& joint_names,
            const std::string& ip,
            double publish_rate,
-           const ros::NodeHandle& nh);
+           const ros::NodeHandle& nodehandle);
   ~FrankaHW() override = default;
   bool update();
   void publishFrankaStates();
@@ -53,11 +54,15 @@ class FrankaHW : public hardware_interface::RobotHW {
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;
 
-  franka_hw::FrankaPositionJointInterface franka_position_joint_interface_;
-  franka_hw::FrankaVelocityJointInterface franka_velocity_joint_interface_;
-  franka_hw::FrankaEffortJointInterface franka_effort_joint_interface_;
+  // franka_hw::FrankaPositionJointInterface franka_position_joint_interface_;
+  // franka_hw::FrankaVelocityJointInterface franka_velocity_joint_interface_;
+  // franka_hw::FrankaEffortJointInterface franka_effort_joint_interface_;
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
   franka_hw::FrankaVelocityCartesianInterface franka_velocity_cartesian_interface_;
+
+  joint_limits_interface::PositionJointSoftLimitsInterface position_joint_limit_interface_;
+  joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limit_interface_;
+  joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_;
 
   franka_hw::TriggerRate publish_rate_;
   franka::Robot robot_;
@@ -73,6 +78,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<double, 7> position_joint_command_;
   std::array<double, 7> velocity_joint_command_;
   std::array<double, 7> effort_joint_command_;
+  std::array<double, 16> pose_cartesian_command_;
+  std::array<double, 6> velocity_cartesian_command_;
+
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
 };
