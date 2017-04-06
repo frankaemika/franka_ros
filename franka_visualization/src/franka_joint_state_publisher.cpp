@@ -15,10 +15,10 @@ int main(int argc, char** argv) {
   std::vector<std::string> joint_names;
   XmlRpc::XmlRpcValue params;
   private_nodehandle.getParam("joint_names", params);
-  const size_t number_of_joints = params.size();
-  joint_names.resize(number_of_joints);
+  const size_t kNumberOfJoints = params.size();
+  joint_names.resize(kNumberOfJoints);
 
-  for (size_t i = 0; i < number_of_joints; i++) {
+  for (size_t i = 0; i < kNumberOfJoints; i++) {
     joint_names[i] = static_cast<std::string>(params[i]);
     ROS_INFO_STREAM("parsed jointname[" << i << "]= " << joint_names[i]);
   }
@@ -28,10 +28,10 @@ int main(int argc, char** argv) {
   ROS_INFO("parsed franka robot IP: %s", robot_ip.c_str());
 
   sensor_msgs::JointState states;
-  states.effort.resize(number_of_joints);
-  states.name.resize(number_of_joints);
-  states.position.resize(number_of_joints);
-  states.velocity.resize(number_of_joints);
+  states.effort.resize(kNumberOfJoints);
+  states.name.resize(kNumberOfJoints);
+  states.position.resize(kNumberOfJoints);
+  states.velocity.resize(kNumberOfJoints);
 
   for (size_t i = 0; i < joint_names.size(); i++) {
     states.name[i] = joint_names[i];
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     franka::Robot robot(robot_ip);
 
     robot.read([sequence_number = 1ul,
-                number_of_joints,
+                kNumberOfJoints,
                 &states,
                 &rate,
                 &joint_pub](const franka::RobotState& robot_state) mutable {
