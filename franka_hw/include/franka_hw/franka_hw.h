@@ -4,6 +4,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <geometry_msgs/WrenchStamped.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -40,7 +41,10 @@ class FrankaHW : public hardware_interface::RobotHW {
            double publish_rate,
            const ros::NodeHandle& nodehandle);
   ~FrankaHW() override = default;
-  bool update();
+  void initialize(const std::vector<std::string>& joint_names,
+                            double publish_rate,
+                            const ros::NodeHandle& nodehandle);
+  bool update(ros::Duration period);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
@@ -53,10 +57,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   hardware_interface::PositionJointInterface position_joint_interface_;
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;
-
-  // franka_hw::FrankaPositionJointInterface franka_position_joint_interface_;
-  // franka_hw::FrankaVelocityJointInterface franka_velocity_joint_interface_;
-  // franka_hw::FrankaEffortJointInterface franka_effort_joint_interface_;
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
   franka_hw::FrankaVelocityCartesianInterface franka_velocity_cartesian_interface_;
 
@@ -64,8 +64,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limit_interface_;
   joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_;
 
+  std::unique_ptr<franka::Robot> robot_;
+
   franka_hw::TriggerRate publish_rate_;
-  franka::Robot robot_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;
@@ -73,14 +74,15 @@ class FrankaHW : public hardware_interface::RobotHW {
       publisher_joint_states_;
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
       publisher_external_wrench_;
+
   std::vector<std::string> joint_name_;
   franka::RobotState robot_state_;
+
   std::array<double, 7> position_joint_command_;
   std::array<double, 7> velocity_joint_command_;
   std::array<double, 7> effort_joint_command_;
   std::array<double, 16> pose_cartesian_command_;
   std::array<double, 6> velocity_cartesian_command_;
-
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
 };

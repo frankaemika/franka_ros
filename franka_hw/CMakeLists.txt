@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   urdf
   joint_limits_interface
+  xmlrpcpp
 )
 
 find_package(Franka REQUIRED)

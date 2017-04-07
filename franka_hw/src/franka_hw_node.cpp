@@ -10,7 +10,6 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
   ros::NodeHandle nh("~");
 
-  // parse robot_hw yaml with joint names and robot-IP:
   XmlRpc::XmlRpcValue params;
   nh.getParam("joint_names", params);
   std::vector<std::string> joint_names(params.size());
@@ -23,11 +22,16 @@ int main(int argc, char** argv) {
   nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
   franka_hw::FrankaHW franka_ros(joint_names, robot_ip,
                                  franka_states_publish_rate, nh);
+  ros::Duration period(0.001);
+  ros::Time cylce_start(ros::Time::now());
+
   while (ros::ok()) {
-    if (!franka_ros.update()) {
+    cylce_start = ros::Time::now();
+    if (!franka_ros.update(period)) {
       ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
       return -1;
     }
+    period = ros::Time::now() - cylce_start;
   }
   return 0;
 }
