@@ -2,14 +2,14 @@
 
 #include <pluginlib/class_list_macros.h>
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <geometry_msgs/WrenchStamped.h>
+#include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
-#include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
@@ -18,11 +18,11 @@
 #include <franka/robot.h>
 
 #include <franka_hw/FrankaState.h>
+#include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
+#include <franka_hw/franka_joint_command_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
 #include <franka_hw/trigger_rate.h>
-#include <franka_hw/franka_joint_command_interface.h>
-#include <franka_hw/franka_cartesian_command_interface.h>
 
 namespace franka_hw {
 
@@ -42,8 +42,8 @@ class FrankaHW : public hardware_interface::RobotHW {
            const ros::NodeHandle& nodehandle);
   ~FrankaHW() override = default;
   void initialize(const std::vector<std::string>& joint_names,
-                            double publish_rate,
-                            const ros::NodeHandle& nodehandle);
+                  double publish_rate,
+                  const ros::NodeHandle& nodehandle);
   bool update(ros::Duration period);
   void publishFrankaStates();
   void publishJointStates();
@@ -58,11 +58,15 @@ class FrankaHW : public hardware_interface::RobotHW {
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
-  franka_hw::FrankaVelocityCartesianInterface franka_velocity_cartesian_interface_;
+  franka_hw::FrankaVelocityCartesianInterface
+      franka_velocity_cartesian_interface_;
 
-  joint_limits_interface::PositionJointSoftLimitsInterface position_joint_limit_interface_;
-  joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limit_interface_;
-  joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_;
+  joint_limits_interface::PositionJointSoftLimitsInterface
+      position_joint_limit_interface_;
+  joint_limits_interface::VelocityJointSoftLimitsInterface
+      velocity_joint_limit_interface_;
+  joint_limits_interface::EffortJointSoftLimitsInterface
+      effort_joint_limit_interface_;
 
   std::unique_ptr<franka::Robot> robot_;
 

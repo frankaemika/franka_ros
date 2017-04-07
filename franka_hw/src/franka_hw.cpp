@@ -7,6 +7,8 @@
 #include <string>
 
 #include <franka/robot.h>
+#include <joint_limits_interface/joint_limits.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/MultiArrayDimension.h>
@@ -14,8 +16,6 @@
 #include <tf/transform_datatypes.h>
 #include <tf2_msgs/TFMessage.h>
 #include <urdf/model.h>
-#include <joint_limits_interface/joint_limits.h>
-#include <joint_limits_interface/joint_limits_urdf.h>
 
 #include <franka_hw/FrankaState.h>
 
@@ -53,169 +53,175 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 void FrankaHW::initialize(const std::vector<std::string>& joint_names,
                           double publish_rate,
                           const ros::NodeHandle& nodehandle) {
-    joint_name_.resize(joint_names.size());
-    joint_name_ = joint_names;
-    publish_rate_.setRate(publish_rate);
-    urdf::Model urdf_model;
-    urdf_model.initParamWithNodeHandle("robot_description", nodehandle);
-    joint_limits_interface::SoftJointLimits soft_limits;
-    joint_limits_interface::JointLimits limits;
+  joint_name_.resize(joint_names.size());
+  joint_name_ = joint_names;
+  publish_rate_.setRate(publish_rate);
+  urdf::Model urdf_model;
+  urdf_model.initParamWithNodeHandle("robot_description", nodehandle);
+  joint_limits_interface::SoftJointLimits soft_limits;
+  joint_limits_interface::JointLimits limits;
 
-    for (size_t i = 0; i < joint_name_.size(); ++i) {
-      hardware_interface::JointStateHandle joint_handle(
-          joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
-          &robot_state_.tau_J[i]);
-      joint_state_interface_.registerHandle(joint_handle);
+  for (size_t i = 0; i < joint_name_.size(); ++i) {
+    hardware_interface::JointStateHandle joint_handle(
+        joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
+        &robot_state_.tau_J[i]);
+    joint_state_interface_.registerHandle(joint_handle);
 
-      franka_hw::FrankaJointStateHandle franka_joint_handle(
-          joint_name_[i], robot_state_.q[i], robot_state_.dq[i],
-          robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
-          robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
-          robot_state_.joint_contact[i]);
-      franka_joint_state_interface_.registerHandle(franka_joint_handle);
+    franka_hw::FrankaJointStateHandle franka_joint_handle(
+        joint_name_[i], robot_state_.q[i], robot_state_.dq[i],
+        robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
+        robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
+        robot_state_.joint_contact[i]);
+    franka_joint_state_interface_.registerHandle(franka_joint_handle);
 
-      hardware_interface::JointHandle position_joint_handle(
-                  joint_state_interface_.getHandle(joint_name_[i]),
-                  &position_joint_command_[i]);
-      position_joint_interface_.registerHandle(position_joint_handle);
+    hardware_interface::JointHandle position_joint_handle(
+        joint_state_interface_.getHandle(joint_name_[i]),
+        &position_joint_command_[i]);
+    position_joint_interface_.registerHandle(position_joint_handle);
 
-      hardware_interface::JointHandle velocity_joint_handle(
-                  joint_state_interface_.getHandle(joint_name_[i]),
-                  &velocity_joint_command_[i]);
-      velocity_joint_interface_.registerHandle(velocity_joint_handle);
+    hardware_interface::JointHandle velocity_joint_handle(
+        joint_state_interface_.getHandle(joint_name_[i]),
+        &velocity_joint_command_[i]);
+    velocity_joint_interface_.registerHandle(velocity_joint_handle);
 
-      hardware_interface::JointHandle effort_joint_handle(
-                  joint_state_interface_.getHandle(joint_name_[i]),
-                  &effort_joint_command_[i]);
-      effort_joint_interface_.registerHandle(effort_joint_handle);
+    hardware_interface::JointHandle effort_joint_handle(
+        joint_state_interface_.getHandle(joint_name_[i]),
+        &effort_joint_command_[i]);
+    effort_joint_interface_.registerHandle(effort_joint_handle);
 
-      boost::shared_ptr<const urdf::Joint> urdf_joint = urdf_model.getJoint(joint_name_[i]);
-      if (getSoftJointLimits(urdf_joint, soft_limits) && getJointLimits(urdf_joint, limits)) {
-          joint_limits_interface::PositionJointSoftLimitsHandle position_limit_handle(
-                      position_joint_interface_.getHandle(joint_name_[i]),
-                      limits, soft_limits);
-          position_joint_limit_interface_.registerHandle(position_limit_handle);
+    boost::shared_ptr<const urdf::Joint> urdf_joint =
+        urdf_model.getJoint(joint_name_[i]);
+    if (getSoftJointLimits(urdf_joint, soft_limits) &&
+        getJointLimits(urdf_joint, limits)) {
+      joint_limits_interface::PositionJointSoftLimitsHandle
+          position_limit_handle(
+              position_joint_interface_.getHandle(joint_name_[i]), limits,
+              soft_limits);
+      position_joint_limit_interface_.registerHandle(position_limit_handle);
 
-          joint_limits_interface::VelocityJointSoftLimitsHandle velocity_limit_handle(
-                      velocity_joint_interface_.getHandle(joint_name_[i]),
-                      limits, soft_limits);
-          velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
+      joint_limits_interface::VelocityJointSoftLimitsHandle
+          velocity_limit_handle(
+              velocity_joint_interface_.getHandle(joint_name_[i]), limits,
+              soft_limits);
+      velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
 
-          joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
-                      effort_joint_interface_.getHandle(joint_name_[i]),
-                      limits, soft_limits);
-          effort_joint_limit_interface_.registerHandle(effort_limit_handle);
-      }
-      else {
-        ROS_ERROR_STREAM("could not parse joint limit for joint " << joint_name_[i]
-                         << " from robot_description");
-      }
+      joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
+          effort_joint_interface_.getHandle(joint_name_[i]), limits,
+          soft_limits);
+      effort_joint_limit_interface_.registerHandle(effort_limit_handle);
+    } else {
+      ROS_ERROR_STREAM("could not parse joint limit for joint "
+                       << joint_name_[i] << " from robot_description");
     }
+  }
 
-    FrankaCartesianStateHandle franka_cartesian_state_handle(
-        std::string("franka_emika_cartesian_data"),
-        robot_state_.cartesian_collision, robot_state_.cartesian_contact,
-        robot_state_.O_F_ext_hat_K, robot_state_.K_F_ext_hat_K,
-        robot_state_.O_T_EE);
-    franka_cartesian_state_interface_.registerHandle(franka_cartesian_state_handle);
+  FrankaCartesianStateHandle franka_cartesian_state_handle(
+      std::string("franka_emika_cartesian_data"),
+      robot_state_.cartesian_collision, robot_state_.cartesian_contact,
+      robot_state_.O_F_ext_hat_K, robot_state_.K_F_ext_hat_K,
+      robot_state_.O_T_EE);
+  franka_cartesian_state_interface_.registerHandle(
+      franka_cartesian_state_handle);
 
-    franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
-                franka_cartesian_state_interface_.getHandle("franka_emika_cartesian_data"),
-                pose_cartesian_command_);
-    franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
+  franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+      franka_cartesian_state_interface_.getHandle(
+          "franka_emika_cartesian_data"),
+      pose_cartesian_command_);
+  franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
-    franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-                franka_cartesian_state_interface_.getHandle("franka_emika_cartesian_data"),
-                velocity_cartesian_command_);
-    franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
+  franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
+      franka_cartesian_state_interface_.getHandle(
+          "franka_emika_cartesian_data"),
+      velocity_cartesian_command_);
+  franka_velocity_cartesian_interface_.registerHandle(
+      franka_cartesian_velocity_handle);
 
-    registerInterface(&joint_state_interface_);
-    registerInterface(&franka_joint_state_interface_);
-    registerInterface(&franka_cartesian_state_interface_);
-    registerInterface(&position_joint_interface_);
-    registerInterface(&velocity_joint_interface_);
-    registerInterface(&effort_joint_interface_);
-    registerInterface(&franka_pose_cartesian_interface_);
-    registerInterface(&franka_velocity_cartesian_interface_);
+  registerInterface(&joint_state_interface_);
+  registerInterface(&franka_joint_state_interface_);
+  registerInterface(&franka_cartesian_state_interface_);
+  registerInterface(&position_joint_interface_);
+  registerInterface(&velocity_joint_interface_);
+  registerInterface(&effort_joint_interface_);
+  registerInterface(&franka_pose_cartesian_interface_);
+  registerInterface(&franka_velocity_cartesian_interface_);
 
-    {
-      std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
-          lock(publisher_franka_states_);
-      publisher_franka_states_.msg_.cartesian_collision.resize(
-          robot_state_.cartesian_collision.size());
-      publisher_franka_states_.msg_.cartesian_contact.resize(
-          robot_state_.cartesian_contact.size());
-      publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
-      publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
-      publisher_franka_states_.msg_.K_F_ext_hat_K.resize(
-          robot_state_.K_F_ext_hat_K.size());
-      publisher_franka_states_.msg_.elbow.resize(robot_state_.elbow.size());
-      publisher_franka_states_.msg_.joint_collision.resize(
-          robot_state_.joint_collision.size());
-      publisher_franka_states_.msg_.joint_contact.resize(
-          robot_state_.joint_contact.size());
-      publisher_franka_states_.msg_.O_F_ext_hat_K.resize(
-          robot_state_.O_F_ext_hat_K.size());
-      publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
-      publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
-      publisher_franka_states_.msg_.tau_ext_hat_filtered.resize(
-          robot_state_.tau_ext_hat_filtered.size());
-      publisher_franka_states_.msg_.tau_J.resize(robot_state_.tau_J.size());
-      publisher_franka_states_.msg_.O_T_EE.layout.data_offset = 0;
-      publisher_franka_states_.msg_.O_T_EE.layout.dim.clear();
-      publisher_franka_states_.msg_.O_T_EE.layout.dim.push_back(
-          std_msgs::MultiArrayDimension());
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[0].size = 4;
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[0].stride = 4 * 4;
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[0].label = "row";
-      publisher_franka_states_.msg_.O_T_EE.layout.dim.push_back(
-          std_msgs::MultiArrayDimension());
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[1].size = 4;
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[1].stride = 4;
-      publisher_franka_states_.msg_.O_T_EE.layout.dim[1].label = "column";
-      publisher_franka_states_.msg_.O_T_EE.data.resize(16);
-    }
-    {
-      std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
-          lock(publisher_joint_states_);
-      publisher_joint_states_.msg_.name.resize(joint_name_.size());
-      publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
-      publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
-      publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
-    }
-    {
-      std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> >
-          lock(publisher_transforms_);
-      publisher_transforms_.msg_.transforms.resize(2);
-      tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
-      tf::Vector3 translation(0.0, 0.0, 0.05);
-      tf::Transform transform(quaternion, translation);
-      tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "EE");
-      geometry_msgs::TransformStamped transform_message;
-      transformStampedTFToMsg(trafo, transform_message);
-      publisher_transforms_.msg_.transforms[0] = transform_message;
-      translation = tf::Vector3(0.0, 0.0, 0.0);
-      transform = tf::Transform(quaternion, translation);
-      trafo = tf::StampedTransform(transform, ros::Time::now(), "EE", "K");
-      transformStampedTFToMsg(trafo, transform_message);
-      publisher_transforms_.msg_.transforms[1] = transform_message;
-    }
-    {
-      std::lock_guard<
-          realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
-          lock(publisher_external_wrench_);
-      publisher_external_wrench_.msg_.header.frame_id = "K";
-      publisher_external_wrench_.msg_.wrench.force.x = 0.0;
-      publisher_external_wrench_.msg_.wrench.force.y = 0.0;
-      publisher_external_wrench_.msg_.wrench.force.z = 0.0;
-      publisher_external_wrench_.msg_.wrench.torque.x = 0.0;
-      publisher_external_wrench_.msg_.wrench.torque.y = 0.0;
-      publisher_external_wrench_.msg_.wrench.torque.z = 0.0;
-    }
+  {
+    std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
+        lock(publisher_franka_states_);
+    publisher_franka_states_.msg_.cartesian_collision.resize(
+        robot_state_.cartesian_collision.size());
+    publisher_franka_states_.msg_.cartesian_contact.resize(
+        robot_state_.cartesian_contact.size());
+    publisher_franka_states_.msg_.dq.resize(robot_state_.dq.size());
+    publisher_franka_states_.msg_.dtau_J.resize(robot_state_.dtau_J.size());
+    publisher_franka_states_.msg_.K_F_ext_hat_K.resize(
+        robot_state_.K_F_ext_hat_K.size());
+    publisher_franka_states_.msg_.elbow.resize(robot_state_.elbow.size());
+    publisher_franka_states_.msg_.joint_collision.resize(
+        robot_state_.joint_collision.size());
+    publisher_franka_states_.msg_.joint_contact.resize(
+        robot_state_.joint_contact.size());
+    publisher_franka_states_.msg_.O_F_ext_hat_K.resize(
+        robot_state_.O_F_ext_hat_K.size());
+    publisher_franka_states_.msg_.q.resize(robot_state_.q.size());
+    publisher_franka_states_.msg_.q_d.resize(robot_state_.q_d.size());
+    publisher_franka_states_.msg_.tau_ext_hat_filtered.resize(
+        robot_state_.tau_ext_hat_filtered.size());
+    publisher_franka_states_.msg_.tau_J.resize(robot_state_.tau_J.size());
+    publisher_franka_states_.msg_.O_T_EE.layout.data_offset = 0;
+    publisher_franka_states_.msg_.O_T_EE.layout.dim.clear();
+    publisher_franka_states_.msg_.O_T_EE.layout.dim.push_back(
+        std_msgs::MultiArrayDimension());
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[0].size = 4;
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[0].stride = 4 * 4;
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[0].label = "row";
+    publisher_franka_states_.msg_.O_T_EE.layout.dim.push_back(
+        std_msgs::MultiArrayDimension());
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[1].size = 4;
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[1].stride = 4;
+    publisher_franka_states_.msg_.O_T_EE.layout.dim[1].label = "column";
+    publisher_franka_states_.msg_.O_T_EE.data.resize(16);
+  }
+  {
+    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
+        lock(publisher_joint_states_);
+    publisher_joint_states_.msg_.name.resize(joint_name_.size());
+    publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
+    publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
+    publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
+  }
+  {
+    std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> >
+        lock(publisher_transforms_);
+    publisher_transforms_.msg_.transforms.resize(2);
+    tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
+    tf::Vector3 translation(0.0, 0.0, 0.05);
+    tf::Transform transform(quaternion, translation);
+    tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "EE");
+    geometry_msgs::TransformStamped transform_message;
+    transformStampedTFToMsg(trafo, transform_message);
+    publisher_transforms_.msg_.transforms[0] = transform_message;
+    translation = tf::Vector3(0.0, 0.0, 0.0);
+    transform = tf::Transform(quaternion, translation);
+    trafo = tf::StampedTransform(transform, ros::Time::now(), "EE", "K");
+    transformStampedTFToMsg(trafo, transform_message);
+    publisher_transforms_.msg_.transforms[1] = transform_message;
+  }
+  {
+    std::lock_guard<
+        realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
+        lock(publisher_external_wrench_);
+    publisher_external_wrench_.msg_.header.frame_id = "K";
+    publisher_external_wrench_.msg_.wrench.force.x = 0.0;
+    publisher_external_wrench_.msg_.wrench.force.y = 0.0;
+    publisher_external_wrench_.msg_.wrench.force.z = 0.0;
+    publisher_external_wrench_.msg_.wrench.torque.x = 0.0;
+    publisher_external_wrench_.msg_.wrench.torque.y = 0.0;
+    publisher_external_wrench_.msg_.wrench.torque.z = 0.0;
+  }
 }
 
 bool FrankaHW::update(ros::Duration period) {
-
   position_joint_limit_interface_.enforceLimits(period);
   velocity_joint_limit_interface_.enforceLimits(period);
   effort_joint_limit_interface_.enforceLimits(period);

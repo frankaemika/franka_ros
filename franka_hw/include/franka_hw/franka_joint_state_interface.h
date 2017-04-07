@@ -1,8 +1,7 @@
 #pragma once
 
-#include <string>
 #include <hardware_interface/internal/hardware_resource_manager.h>
-
+#include <string>
 
 namespace franka_hw {
 
@@ -19,7 +18,8 @@ class FrankaJointStateHandle {
 * \param q_d A reference to the storage for this joint's desired position
 * \param dtau_J A reference to the storage for this joint's torque's time
 * derivative
-* \param tau_ext_hat_filtered A reference to the storage for this joint's external
+* \param tau_ext_hat_filtered A reference to the storage for this joint's
+* external
 * torque
 * \param joint_collision A reference to the storage for this joint's collision
 * state
