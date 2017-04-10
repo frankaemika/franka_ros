@@ -27,7 +27,7 @@ FrankaHW::FrankaHW() {}
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    const std::string& ip,
                    double publish_rate,
-                   const ros::NodeHandle& nodehandle)
+                   const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
       franka_joint_state_interface_(),
       franka_cartesian_state_interface_(),
@@ -39,84 +39,84 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
-      publish_rate_(publish_rate),
+      publish_rate_(),
       robot_(new franka::Robot(ip)),
-      publisher_transforms_(nodehandle, "/tf", 1),
-      publisher_franka_states_(nodehandle, "franka_states", 1),
-      publisher_joint_states_(nodehandle, "joint_states", 1),
-      publisher_external_wrench_(nodehandle, "F_ext", 1),
-      joint_name_(joint_names),
+      publisher_transforms_(node_handle, "/tf", 1),
+      publisher_franka_states_(node_handle, "franka_states", 1),
+      publisher_joint_states_(node_handle, "joint_states", 1),
+      publisher_external_wrench_(node_handle, "F_ext", 1),
+      joint_names_(),
       robot_state_() {
-  initialize(joint_names, publish_rate, nodehandle);
+  initialize(joint_names, publish_rate, node_handle);
 }
 
 void FrankaHW::initialize(const std::vector<std::string>& joint_names,
                           double publish_rate,
-                          const ros::NodeHandle& nodehandle) {
-  joint_name_.resize(joint_names.size());
-  joint_name_ = joint_names;
+                          const ros::NodeHandle& node_handle) {
+  joint_names_.resize(joint_names.size());
+  joint_names_ = joint_names;
   publish_rate_.setRate(publish_rate);
   urdf::Model urdf_model;
-  urdf_model.initParamWithNodeHandle("robot_description", nodehandle);
+  urdf_model.initParamWithNodeHandle("robot_description", node_handle);
   joint_limits_interface::SoftJointLimits soft_limits;
   joint_limits_interface::JointLimits limits;
 
-  for (size_t i = 0; i < joint_name_.size(); ++i) {
+  for (size_t i = 0; i < joint_names_.size(); ++i) {
     hardware_interface::JointStateHandle joint_handle(
-        joint_name_[i], &robot_state_.q[i], &robot_state_.dq[i],
+        joint_names_[i], &robot_state_.q[i], &robot_state_.dq[i],
         &robot_state_.tau_J[i]);
     joint_state_interface_.registerHandle(joint_handle);
 
     franka_hw::FrankaJointStateHandle franka_joint_handle(
-        joint_name_[i], robot_state_.q[i], robot_state_.dq[i],
+        joint_names_[i], robot_state_.q[i], robot_state_.dq[i],
         robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
         robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
         robot_state_.joint_contact[i]);
     franka_joint_state_interface_.registerHandle(franka_joint_handle);
 
     hardware_interface::JointHandle position_joint_handle(
-        joint_state_interface_.getHandle(joint_name_[i]),
+        joint_state_interface_.getHandle(joint_names_[i]),
         &position_joint_command_[i]);
     position_joint_interface_.registerHandle(position_joint_handle);
 
     hardware_interface::JointHandle velocity_joint_handle(
-        joint_state_interface_.getHandle(joint_name_[i]),
+        joint_state_interface_.getHandle(joint_names_[i]),
         &velocity_joint_command_[i]);
     velocity_joint_interface_.registerHandle(velocity_joint_handle);
 
     hardware_interface::JointHandle effort_joint_handle(
-        joint_state_interface_.getHandle(joint_name_[i]),
+        joint_state_interface_.getHandle(joint_names_[i]),
         &effort_joint_command_[i]);
     effort_joint_interface_.registerHandle(effort_joint_handle);
 
     boost::shared_ptr<const urdf::Joint> urdf_joint =
-        urdf_model.getJoint(joint_name_[i]);
+        urdf_model.getJoint(joint_names_[i]);
     if (getSoftJointLimits(urdf_joint, soft_limits) &&
         getJointLimits(urdf_joint, limits)) {
       joint_limits_interface::PositionJointSoftLimitsHandle
           position_limit_handle(
-              position_joint_interface_.getHandle(joint_name_[i]), limits,
+              position_joint_interface_.getHandle(joint_names_[i]), limits,
               soft_limits);
       position_joint_limit_interface_.registerHandle(position_limit_handle);
 
       joint_limits_interface::VelocityJointSoftLimitsHandle
           velocity_limit_handle(
-              velocity_joint_interface_.getHandle(joint_name_[i]), limits,
+              velocity_joint_interface_.getHandle(joint_names_[i]), limits,
               soft_limits);
       velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
 
       joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
-          effort_joint_interface_.getHandle(joint_name_[i]), limits,
+          effort_joint_interface_.getHandle(joint_names_[i]), limits,
           soft_limits);
       effort_joint_limit_interface_.registerHandle(effort_limit_handle);
     } else {
       ROS_ERROR_STREAM("could not parse joint limit for joint "
-                       << joint_name_[i] << " from robot_description");
+                       << joint_names_[i] << " from robot_description");
     }
   }
 
   FrankaCartesianStateHandle franka_cartesian_state_handle(
-      std::string("franka_emika_cartesian_data"),
+      std::string("franka_cartesian_data"),
       robot_state_.cartesian_collision, robot_state_.cartesian_contact,
       robot_state_.O_F_ext_hat_K, robot_state_.K_F_ext_hat_K,
       robot_state_.O_T_EE);
@@ -125,13 +125,13 @@ void FrankaHW::initialize(const std::vector<std::string>& joint_names,
 
   franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_cartesian_state_interface_.getHandle(
-          "franka_emika_cartesian_data"),
+          "franka_cartesian_data"),
       pose_cartesian_command_);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
   franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
       franka_cartesian_state_interface_.getHandle(
-          "franka_emika_cartesian_data"),
+          "franka_cartesian_data"),
       velocity_cartesian_command_);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
@@ -185,7 +185,7 @@ void FrankaHW::initialize(const std::vector<std::string>& joint_names,
   {
     std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
         lock(publisher_joint_states_);
-    publisher_joint_states_.msg_.name.resize(joint_name_.size());
+    publisher_joint_states_.msg_.name.resize(joint_names_.size());
     publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
     publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
     publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
@@ -295,8 +295,8 @@ void FrankaHW::publishFrankaStates() {
 
 void FrankaHW::publishJointStates() {
   if (publisher_joint_states_.trylock()) {
-    for (size_t i = 0; i < joint_name_.size(); ++i) {
-      publisher_joint_states_.msg_.name[i] = joint_name_[i];
+    for (size_t i = 0; i < joint_names_.size(); ++i) {
+      publisher_joint_states_.msg_.name[i] = joint_names_[i];
       publisher_joint_states_.msg_.position[i] = robot_state_.q[i];
       publisher_joint_states_.msg_.velocity[i] = robot_state_.dq[i];
       publisher_joint_states_.msg_.effort[i] = robot_state_.tau_J[i];

@@ -19,8 +19,7 @@ class FrankaJointStateHandle {
 * \param dtau_J A reference to the storage for this joint's torque's time
 * derivative
 * \param tau_ext_hat_filtered A reference to the storage for this joint's
-* external
-* torque
+* external torque
 * \param joint_collision A reference to the storage for this joint's collision
 * state
 * \param joint_contact A reference to the storage for this joint's contact state

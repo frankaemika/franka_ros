@@ -43,7 +43,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   ~FrankaHW() override = default;
   void initialize(const std::vector<std::string>& joint_names,
                   double publish_rate,
-                  const ros::NodeHandle& nodehandle);
+                  const ros::NodeHandle& node_handle);
   bool update(ros::Duration period);
   void publishFrankaStates();
   void publishJointStates();
@@ -79,7 +79,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
       publisher_external_wrench_;
 
-  std::vector<std::string> joint_name_;
+  std::vector<std::string> joint_names_;
   franka::RobotState robot_state_;
 
   std::array<double, 7> position_joint_command_;

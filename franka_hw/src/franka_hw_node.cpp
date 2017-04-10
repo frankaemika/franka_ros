@@ -2,6 +2,7 @@
 #include <vector>
 
 #include <franka_hw/franka_hw.h>
+#include <xmlrpcpp/XmlRpc.h>
 
 #include <franka/robot.h>
 #include <ros/ros.h>
@@ -23,15 +24,15 @@ int main(int argc, char** argv) {
   franka_hw::FrankaHW franka_ros(joint_names, robot_ip,
                                  franka_states_publish_rate, nh);
   ros::Duration period(0.001);
-  ros::Time cylce_start(ros::Time::now());
+  ros::Time cycle_start(ros::Time::now());
 
   while (ros::ok()) {
-    cylce_start = ros::Time::now();
+    cycle_start = ros::Time::now();
     if (!franka_ros.update(period)) {
       ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
       return -1;
     }
-    period = ros::Time::now() - cylce_start;
+    period = ros::Time::now() - cycle_start;
   }
   return 0;
 }
