@@ -26,7 +26,8 @@ int main(int argc, char** argv) {
   ros::Duration period(0.001);
   ros::Time cycle_start(ros::Time::now());
 
-  return !franka_ros.update([cycle_start = ros::Time::now()](const franka::RobotState&) mutable {
+  return !franka_ros.update([cycle_start = ros::Time::now()](
+      const franka::RobotState&) mutable {
     ROS_INFO_THROTTLE(1, "cycle: %f s",
                       (ros::Time::now() - cycle_start).toSec());
     cycle_start = ros::Time::now();

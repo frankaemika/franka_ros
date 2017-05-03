@@ -41,11 +41,9 @@ int main(int argc, char** argv) {
     ROS_INFO("connecting to robot... ");
     franka::Robot robot(robot_ip);
 
-    robot.read([sequence_number = 1ul,
-                number_of_joints,
-                &states,
-                &rate,
-                &joint_pub](const franka::RobotState& robot_state) mutable {
+    robot.read([
+      sequence_number = 1ul, number_of_joints, &states, &rate, &joint_pub
+    ](const franka::RobotState& robot_state) mutable {
       states.header.stamp = ros::Time::now();
       states.header.seq = sequence_number++;
       for (size_t i = 0; i < robot_state.q.size(); i++) {
