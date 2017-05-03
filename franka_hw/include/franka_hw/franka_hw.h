@@ -44,11 +44,16 @@ class FrankaHW : public hardware_interface::RobotHW {
   void initialize(const std::vector<std::string>& joint_names,
                   double publish_rate,
                   const ros::NodeHandle& node_handle);
-  bool update(ros::Duration period);
+  bool update(const ros::Duration period);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
   void publishExternalWrench();
+  void enforceLimits(const ros::Duration period);
+  bool checkForConflict(const std::list<hardware_interface::ControllerInfo> &info) const;
+  std::array<double, 7> getJointPositionCommand() const;
+  std::array<double, 7> getJointVelocityCommand() const;
+  std::array<double, 7> getJointEffortCommand() const;
 
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
@@ -82,11 +87,13 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::vector<std::string> joint_names_;
   franka::RobotState robot_state_;
 
-  std::array<double, 7> position_joint_command_;
-  std::array<double, 7> velocity_joint_command_;
-  std::array<double, 7> effort_joint_command_;
-  std::array<double, 16> pose_cartesian_command_;
-  std::array<double, 6> velocity_cartesian_command_;
+  std::array<double, 7> position_joint_command_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 7> velocity_joint_command_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 7> effort_joint_command_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 16> pose_cartesian_command_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                                  0.0, 0.0}};
+  std::array<double, 6> velocity_cartesian_command_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
 };

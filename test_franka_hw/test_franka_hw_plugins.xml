@@ -1,0 +1,9 @@
+<library path="lib/libtest_franka_hw">
+
+  <class name="test_franka_hw/JointLimitTestController" type="test_franka_hw::JointLimitTestController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that intentionally exceeds joint limits to see whether the joint limit interfaces work porperly
+    </description>
+  </class>
+
+</library>
