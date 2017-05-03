@@ -218,7 +218,7 @@ void FrankaHW::initialize(const std::vector<std::string>& joint_names,
   }
 }
 
-bool FrankaHW::update(ros::Duration period) {
+bool FrankaHW::update(const ros::Duration &period) {
   position_joint_limit_interface_.enforceLimits(period);
   velocity_joint_limit_interface_.enforceLimits(period);
   effort_joint_limit_interface_.enforceLimits(period);

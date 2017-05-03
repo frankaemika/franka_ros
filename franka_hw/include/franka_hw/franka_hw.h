@@ -44,7 +44,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void initialize(const std::vector<std::string>& joint_names,
                   double publish_rate,
                   const ros::NodeHandle& node_handle);
-  bool update(ros::Duration period);
+  bool update(const ros::Duration& period);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();

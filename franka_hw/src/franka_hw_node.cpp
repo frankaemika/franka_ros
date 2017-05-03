@@ -23,11 +23,10 @@ int main(int argc, char** argv) {
   nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
   franka_hw::FrankaHW franka_ros(joint_names, robot_ip,
                                  franka_states_publish_rate, nh);
-  ros::Duration period(0.001);
-  ros::Time cycle_start(ros::Time::now());
+  ros::Duration period(0.0);
 
   while (ros::ok()) {
-    cycle_start = ros::Time::now();
+    ros::Time cycle_start(ros::Time::now());
     if (!franka_ros.update(period)) {
       ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
       return -1;
