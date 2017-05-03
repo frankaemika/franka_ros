@@ -33,16 +33,8 @@ int main(int argc, char** argv) {
   nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
   franka_hw::FrankaHW franka_ros;
   franka_ros.initialize(joint_names, franka_states_publish_rate, nh);
-  ROS_INFO("Successfully initialized franka hw mock");
+  ROS_INFO("Initialized franka hw mock");
 
-  controller_manager::ControllerManager ctrl_manager(&franka_ros);
-  // std::string controller_name("test_joint_limit_interfaces_controller");
-  // if (!ctrl_manager.loadController(controller_name)){
-  //    ROS_ERROR_STREAM("Could not load controller " << controller_name.c_str());
-  //    return -1;
-  // }
-
-  // read joint limits from robot description
   std::vector<joint_limits_interface::JointLimits> joint_limits;
   std::vector<joint_limits_interface::SoftJointLimits> soft_limits;
   joint_limits.resize(7);
@@ -69,18 +61,20 @@ int main(int argc, char** argv) {
           return false;
       }
   }
-  ROS_INFO("Sleep to enable loading the controller");
-  sleep(3);
 
-  ros::Rate rate(1000);
-  ros::Time now(ros::Time::now());
-  ros::Time last(ros::Time::now());
-  ros::Duration period(0.001);
   std::array<double, 7> position_command;
   std::array<double, 7> velocity_command;
   std::array<double, 7> effort_command;
+  ros::Duration period(0.001);
+  ros::Rate rate(1000);
 
+  controller_manager::ControllerManager ctrl_manager(&franka_ros);
+  ROS_INFO("Sleep to enable loading the controller");
+  sleep(3);
   ROS_INFO("Starting control loop!");
+
+  ros::Time now(ros::Time::now());
+  ros::Time last(ros::Time::now());
   while (ros::ok()) {
     now = ros::Time::now();
     period = now - last;
@@ -91,29 +85,6 @@ int main(int argc, char** argv) {
     velocity_command = franka_ros.getJointVelocityCommand();
     effort_command = franka_ros.getJointEffortCommand();
 
-
-    for (size_t i=0; i < 7; ++i) {
-
-//        ROS_INFO_STREAM("joint[" << i << "] ");
-//        ROS_INFO_STREAM("pos_cmd: " << position_command[i] <<" limits: "
-//                                 << joint_limits[i].min_position << " to "
-//                                 << joint_limits[i].max_position);
-//        ROS_INFO_STREAM("vel_cmd: " << velocity_command[i] <<" limits: "
-//                                 << -joint_limits[i].max_velocity<< " to "
-//                                 << joint_limits[i].max_velocity);
-//        ROS_INFO_STREAM("eff_cmd: " << effort_command[i] <<" limits: "
-//                                 << -joint_limits[i].max_effort<< " to "
-//                                 << joint_limits[i].max_effort);
-       assert((position_command[i] <= joint_limits[i].max_position &&
-               position_command[i] >= joint_limits[i].min_position &&
-               "Position limits exceeded"));
-       assert((velocity_command[i] <= joint_limits[i].max_velocity &&
-               velocity_command[i] >= -joint_limits[i].max_velocity &&
-               "Velocity limits exceeded"));
-       assert((effort_command[i] <= joint_limits[i].max_effort &&
-               effort_command[i] >= -joint_limits[i].max_effort &&
-               "Effort limits exceeded"));
-    }
     ROS_INFO_STREAM("hw_node corrected commands pos vel eff = \n" <<
                     position_command[0] <<" "<< position_command[1] << " "<<
                     position_command[2] <<" "<< position_command[3] << " "<<
@@ -127,6 +98,17 @@ int main(int argc, char** argv) {
                     effort_command[2] << " "<< effort_command[3] << " "<<
                     effort_command[4] << " "<<  effort_command[5] << " "<<
                     effort_command[6]);
+    for (size_t i=0; i < 7; ++i) {
+       assert((position_command[i] <= joint_limits[i].max_position &&
+               position_command[i] >= joint_limits[i].min_position &&
+               "Position limits exceeded"));
+       assert((velocity_command[i] <= joint_limits[i].max_velocity &&
+               velocity_command[i] >= -joint_limits[i].max_velocity &&
+               "Velocity limits exceeded"));
+       assert((effort_command[i] <= joint_limits[i].max_effort &&
+               effort_command[i] >= -joint_limits[i].max_effort &&
+               "Effort limits exceeded"));
+    }
     rate.sleep();
   }
   spinner.stop();

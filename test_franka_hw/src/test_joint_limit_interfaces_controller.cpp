@@ -52,8 +52,6 @@ bool JointLimitTestController::init(hardware_interface::RobotHW* robot_hw, ros::
         return false;
     }
 
-
-
     position_joint_handles_.resize(7);
     velocity_joint_handles_.resize(7);
     effort_joint_handles_.resize(7);
@@ -62,7 +60,6 @@ bool JointLimitTestController::init(hardware_interface::RobotHW* robot_hw, ros::
       velocity_joint_handles_[i] = velocity_interface_->getHandle(joint_names_[i]);
       effort_joint_handles_[i] = effort_interface_->getHandle(joint_names_[i]);
     }
-
     return true;
 }
 
@@ -102,7 +99,6 @@ void JointLimitTestController::update(const ros::Time& time, const ros::Duration
                     effort_command[4] << " "<<  effort_command[5] << " "<<
                     effort_command[6]);
 }
-
 
 void JointLimitTestController::stopping(const ros::Time& time){
 }

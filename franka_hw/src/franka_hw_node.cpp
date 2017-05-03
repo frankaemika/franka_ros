@@ -26,13 +26,10 @@ int main(int argc, char** argv) {
   ros::Duration period(0.001);
   ros::Time cycle_start(ros::Time::now());
 
-  while (ros::ok()) {
+  return !franka_ros.update([cycle_start = ros::Time::now()](const franka::RobotState&) mutable {
+    ROS_INFO_THROTTLE(1, "cycle: %f s",
+                      (ros::Time::now() - cycle_start).toSec());
     cycle_start = ros::Time::now();
-    if (!franka_ros.update(period)) {
-      ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
-      return -1;
-    }
-    period = ros::Time::now() - cycle_start;
-  }
-  return 0;
+    return ros::ok();
+  });
 }

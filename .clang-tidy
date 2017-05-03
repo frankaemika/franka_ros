@@ -40,3 +40,7 @@ CheckOptions:
     value:  k
   - key:    readability-identifier-naming.ConstantCase
     value:  CamelCase
+  - key:    readability-identifier-naming.ConstantMemberPrefix
+    value:  ''
+  - key:    readability-identifier-naming.ConstantMemberCase
+    value:  lower_case
