@@ -9,13 +9,13 @@
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <urdf/model.h>
 #include <ros/spinner.h>
+#include <controller_manager/controller_manager.h>
+#include <ros/ros.h>
 
 #include <franka_hw/franka_hw.h>
 
 #include <franka/robot.h>
 
-#include <controller_manager/controller_manager.h>
-#include <ros/ros.h>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "mock_franka_hw");
