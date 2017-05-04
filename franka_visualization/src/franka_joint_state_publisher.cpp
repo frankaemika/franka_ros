@@ -38,24 +38,25 @@ int main(int argc, char** argv) {
   }
 
   try {
-    ROS_INFO("connecting to robot... ");
-    franka::Robot robot(robot_ip);
+      ROS_INFO("connecting to robot... ");
+      franka::Robot robot(robot_ip);
+      uint64_t sequence_number = 1;
 
-    robot.read([
-      sequence_number = 1ul, number_of_joints, &states, &rate, &joint_pub
-    ](const franka::RobotState& robot_state) mutable {
-      states.header.stamp = ros::Time::now();
-      states.header.seq = sequence_number++;
-      for (size_t i = 0; i < robot_state.q.size(); i++) {
-        states.position[i] = robot_state.q[i];
-        states.velocity[i] = robot_state.dq[i];
-        states.effort[i] = robot_state.tau_J[i];
+      while (ros::ok() && robot.update()) {
+        const franka::RobotState& robot_state = robot.robotState();
+        states.header.stamp = ros::Time::now();
+        states.header.seq = sequence_number;
+        for (int i = 0; i < joint_names.size(); ++i) {
+          states.name[i] = joint_names[i];
+          states.position[i] = robot_state.q[i];
+          states.velocity[i] = robot_state.dq[i];
+          states.effort[i] = robot_state.tau_J[i];
+        }
+        joint_pub.publish(states);
+        ros::spinOnce();
+        rate.sleep();
+        sequence_number++;
       }
-      joint_pub.publish(states);
-      ros::spinOnce();
-      rate.sleep();
-      return ros::ok();
-    });
 
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());

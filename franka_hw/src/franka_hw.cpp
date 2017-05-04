@@ -228,16 +228,19 @@ bool FrankaHW::update(const ros::Duration& period) {
   velocity_joint_limit_interface_.enforceLimits(period);
   effort_joint_limit_interface_.enforceLimits(period);
   try {
-    robot_->read([this, callback](const franka::RobotState& robot_state) {
-      robot_state_ = robot_state;
-      if (publish_rate_.triggers()) {
-        publishFrankaStates();
-        publishJointStates();
-        publishTransforms();
-        publishExternalWrench();
+      if (robot_->update()) {
+        robot_state_ = robot_->robotState();
+        if (publish_rate_.triggers()) {
+          publishFrankaStates();
+          publishJointStates();
+          publishTransforms();
+          publishExternalWrench();
+        }
+        return true;
       }
-      return callback(robot_state);
-    });
+      ROS_ERROR_THROTTLE(
+          1, "failed to read franka state as connection to robot was closed");
+      return false;
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;

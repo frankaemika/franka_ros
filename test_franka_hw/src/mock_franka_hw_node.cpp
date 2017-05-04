@@ -19,20 +19,24 @@
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "mock_franka_hw");
-  ros::NodeHandle nh("~");
+  ros::NodeHandle node_handle("~");
   ros::AsyncSpinner spinner(1);
   spinner.start();
 
   XmlRpc::XmlRpcValue params;
-  nh.getParam("joint_names", params);
+  node_handle.getParam("joint_names", params);
   std::vector<std::string> joint_names(params.size());
   for (int i = 0; i < params.size(); ++i) {
     joint_names[i] = static_cast<std::string>(params[i]);
   }
   double franka_states_publish_rate(30.0);
-  nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
-  franka_hw::FrankaHW franka_ros;
-  franka_ros.initialize(joint_names, franka_states_publish_rate, nh);
+  node_handle.getParam("franka_states_publish_rate", franka_states_publish_rate);
+
+  franka::Robot* empty_robot_pointer;
+  franka_hw::FrankaHW franka_ros(joint_names,
+          empty_robot_pointer,
+          franka_states_publish_rate,
+          node_handle);
   ROS_INFO("Initialized franka hw mock");
 
   std::vector<joint_limits_interface::JointLimits> joint_limits;
@@ -41,7 +45,7 @@ int main(int argc, char** argv) {
   soft_limits.resize(7);
 
   urdf::Model urdf_model;
-  if (!urdf_model.initParamWithNodeHandle("robot_description", nh)) {
+  if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
       ROS_ERROR("Could not initialize urdf_model parsing robot_description in MockHWnode");
   } else {
       ROS_INFO("Succesfully initialized urdf model in MockHWnode");
