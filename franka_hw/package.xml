@@ -18,7 +18,6 @@
   <build_depend>hardware_interface</build_depend>
   <build_depend>joint_limits_interface</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>pluginlib</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>message_generation</build_depend>
@@ -33,7 +32,6 @@
   <run_depend>hardware_interface</run_depend>
   <run_depend>joint_limits_interface</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>pluginlib</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
@@ -44,7 +42,4 @@
   <run_depend>urdf</run_depend>
   <run_depend>xmlrpcpp</run_depend>
 
-  <export>
-    <hardware_interface plugin="${prefix}/franka_hw_plugin.xml"/>
-  </export>
 </package>

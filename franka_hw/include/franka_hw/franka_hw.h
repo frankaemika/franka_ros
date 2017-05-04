@@ -1,6 +1,5 @@
 #pragma once
 
-#include <pluginlib/class_list_macros.h>
 #include <array>
 #include <memory>
 #include <string>
@@ -28,7 +27,7 @@ namespace franka_hw {
 
 class FrankaHW : public hardware_interface::RobotHW {
  public:
-  FrankaHW();
+  FrankaHW() = delete;
 
   /**
   * @param joint_names A vector of joint names for all franka joint
@@ -37,13 +36,10 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
-           const std::string& ip,
+           franka::Robot* const robot,
            double publish_rate,
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;
-  void initialize(const std::vector<std::string>& joint_names,
-                  double publish_rate,
-                  const ros::NodeHandle& node_handle);
   bool update(const ros::Duration& period);
   void publishFrankaStates();
   void publishJointStates();

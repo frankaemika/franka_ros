@@ -1,6 +1,5 @@
 #include <franka_hw/franka_hw.h>
 
-#include <pluginlib/class_list_macros.h>
 #include <array>
 #include <cinttypes>
 #include <mutex>
@@ -21,11 +20,8 @@
 
 namespace franka_hw {
 
-// A default constructor is required to export the plugin with pluginlib
-FrankaHW::FrankaHW() {}
-
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
-                   const std::string& ip,
+                   franka::Robot* const robot,
                    double publish_rate,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
@@ -40,19 +36,13 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
       publish_rate_(),
-      robot_(new franka::Robot(ip)),
+      robot_(robot),
       publisher_transforms_(node_handle, "/tf", 1),
       publisher_franka_states_(node_handle, "franka_states", 1),
       publisher_joint_states_(node_handle, "joint_states", 1),
       publisher_external_wrench_(node_handle, "F_ext", 1),
       joint_names_(),
       robot_state_() {
-  initialize(joint_names, publish_rate, node_handle);
-}
-
-void FrankaHW::initialize(const std::vector<std::string>& joint_names,
-                          double publish_rate,
-                          const ros::NodeHandle& node_handle) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
   publish_rate_.setRate(publish_rate);
@@ -344,4 +334,3 @@ void FrankaHW::publishExternalWrench() {
 
 }  // namespace franka_hw
 
-PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaHW, hardware_interface::RobotHW)
