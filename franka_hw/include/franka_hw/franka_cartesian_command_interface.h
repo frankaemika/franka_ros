@@ -24,7 +24,7 @@ class FrankaCartesianPoseHandle : public FrankaCartesianStateHandle {
   const std::array<double, 16>& getCommand() const { return command_; }
 
  private:
-  std::array<double, 16> command_ {};
+  std::array<double, 16> command_{};
 };
 
 /** \brief Hardware interface to support commanding an array of Franka joints.
@@ -53,7 +53,7 @@ class FrankaCartesianVelocityHandle : public FrankaCartesianStateHandle {
   const std::array<double, 6>& getCommand() const { return command_; }
 
  private:
-  std::array<double, 6> command_ {};
+  std::array<double, 6> command_{};
 };
 
 /** \brief Hardware interface to support commanding an array of Franka joints.

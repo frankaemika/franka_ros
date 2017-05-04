@@ -333,4 +333,3 @@ void FrankaHW::publishExternalWrench() {
 }
 
 }  // namespace franka_hw
-
