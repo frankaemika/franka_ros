@@ -36,7 +36,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
-           franka::Robot* const robot,
+           franka::Robot* robot,
            double publish_rate,
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;

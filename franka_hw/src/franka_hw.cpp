@@ -21,7 +21,7 @@
 namespace franka_hw {
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
-                   franka::Robot* const robot,
+                   franka::Robot* robot,
                    double publish_rate,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
