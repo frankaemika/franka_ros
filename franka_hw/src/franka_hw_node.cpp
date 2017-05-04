@@ -21,16 +21,17 @@ int main(int argc, char** argv) {
   nh.getParam("robot_ip", robot_ip);
   double franka_states_publish_rate = 30.0;
   nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
-  franka_hw::FrankaHW franka_ros(joint_names, robot_ip,
+  franka::Robot robot(robot_ip);
+  franka_hw::FrankaHW franka_ros(joint_names, &robot,
                                  franka_states_publish_rate, nh);
-  ros::Duration period(0.001);
-  ros::Time cycle_start(ros::Time::now());
-
-  return !franka_ros.update([cycle_start = ros::Time::now()](
-      const franka::RobotState&) mutable {
-    ROS_INFO_THROTTLE(1, "cycle: %f s",
-                      (ros::Time::now() - cycle_start).toSec());
-    cycle_start = ros::Time::now();
-    return ros::ok();
-  });
+  ros::Duration period(0.0);
+  while (ros::ok()) {
+    ros::Time cycle_start(ros::Time::now());
+    if (!franka_ros.update(period)) {
+      ROS_ERROR("failed to update franka_hw. Shutting down hardware node!");
+      return -1;
+    }
+    period = ros::Time::now() - cycle_start;
+  }
+  return 0;
 }
