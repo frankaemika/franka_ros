@@ -64,7 +64,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  std::unique_ptr<franka::Robot> robot_;
+  franka::Robot* robot_;
 
   franka_hw::TriggerRate publish_rate_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
