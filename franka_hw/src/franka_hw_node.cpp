@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   franka::Robot robot(robot_ip);
   franka_hw::FrankaHW franka_ros(joint_names, &robot,
                                  franka_states_publish_rate, nh);
-  ros::Duration period(0.0);
+
   return static_cast<int>(!franka_ros.update([cycle_start = ros::Time::now()](
       const franka::RobotState&) mutable {
     ROS_INFO_THROTTLE(1, "cycle: %f s",

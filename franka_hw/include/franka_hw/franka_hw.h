@@ -31,7 +31,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
   * @param joint_names A vector of joint names for all franka joint
-  * @param ip The ip address of the franka robot to connect to
+  * @param robot A pointer to an istance of franka::Robot
   * @param publish_rate Publish rate [Hz] for ROS topics
   * @param nh A nodehandle e.g to register publishers
   */
