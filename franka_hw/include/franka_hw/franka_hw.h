@@ -40,7 +40,7 @@ class FrankaHW : public hardware_interface::RobotHW {
            double publish_rate,
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;
-  bool update(const ros::Duration& period);
+  bool update(std::function<bool(const franka::RobotState&)> callback);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();

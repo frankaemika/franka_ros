@@ -206,29 +206,25 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 }
 
-bool FrankaHW::update(const ros::Duration& period) {
-  position_joint_limit_interface_.enforceLimits(period);
-  velocity_joint_limit_interface_.enforceLimits(period);
-  effort_joint_limit_interface_.enforceLimits(period);
 
+bool franka_hw::FrankaHW::update(
+    std::function<bool(const franka::RobotState&)> callback) {
   try {
-    if (robot_->update()) {
-      robot_state_ = robot_->robotState();
+    robot_.read([this, callback](const franka::RobotState& robot_state) {
+      robot_state_ = robot_state;
       if (publish_rate_.triggers()) {
         publishFrankaStates();
         publishJointStates();
         publishTransforms();
         publishExternalWrench();
       }
-      return true;
-    }
-    ROS_ERROR_THROTTLE(
-        1, "failed to read franka state as connection to robot was closed");
-    return false;
-  } catch (franka::NetworkException const& e) {
+      return callback(robot_state);
+    });
+  } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;
   }
+  return true;
 }
 
 void FrankaHW::publishFrankaStates() {
