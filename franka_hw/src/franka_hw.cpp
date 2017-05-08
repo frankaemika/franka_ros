@@ -206,11 +206,10 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 }
 
-
 bool franka_hw::FrankaHW::update(
     std::function<bool(const franka::RobotState&)> callback) {
   try {
-    robot_.read([this, callback](const franka::RobotState& robot_state) {
+    robot_->read([this, callback](const franka::RobotState& robot_state) {
       robot_state_ = robot_state;
       if (publish_rate_.triggers()) {
         publishFrankaStates();
