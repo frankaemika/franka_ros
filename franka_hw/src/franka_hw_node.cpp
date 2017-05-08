@@ -1,11 +1,12 @@
+
 #include <string>
 #include <vector>
 
-#include <franka_hw/franka_hw.h>
+#include <ros/ros.h>
 #include <xmlrpcpp/XmlRpc.h>
 
 #include <franka/robot.h>
-#include <ros/ros.h>
+#include <franka_hw/franka_hw.h>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");

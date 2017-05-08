@@ -8,7 +8,6 @@ class TriggerRate {
  public:
   explicit TriggerRate(double rate = 30.0);
   bool triggers();
-  void setRate(double rate);
 
  private:
   ros::Time time_stamp_;

@@ -27,7 +27,7 @@ class FrankaCartesianPoseHandle : public FrankaCartesianStateHandle {
   std::array<double, 16> command_{};
 };
 
-/** \brief Hardware interface to support commanding an array of Franka joints.
+/** \brief Hardware interface to support commanding Cartesian poses to a Franka.
  */
 class FrankaPoseCartesianInterface
     : public hardware_interface::HardwareResourceManager<

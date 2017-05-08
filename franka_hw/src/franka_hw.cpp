@@ -36,7 +36,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
-      publish_rate_(),
+      publish_rate_(publish_rate),
       robot_(robot),
       publisher_transforms_(node_handle, "/tf", 1),
       publisher_franka_states_(node_handle, "franka_states", 1),
@@ -46,7 +46,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       robot_state_() {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
-  publish_rate_.setRate(publish_rate);
   urdf::Model urdf_model;
   urdf_model.initParamWithNodeHandle("robot_description", node_handle);
   joint_limits_interface::SoftJointLimits soft_limits;
