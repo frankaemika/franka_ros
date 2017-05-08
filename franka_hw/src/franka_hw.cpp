@@ -214,18 +214,17 @@ bool franka_hw::FrankaHW::update(
       throw std::invalid_argument(
           "franka::Robot was not "
           "initialized. Got nullptr instead");
-    } else {
-      robot_->read([this, callback](const franka::RobotState& robot_state) {
-        robot_state_ = robot_state;
-        if (publish_rate_.triggers()) {
-          publishFrankaStates();
-          publishJointStates();
-          publishTransforms();
-          publishExternalWrench();
-        }
-        return callback(robot_state);
-      });
     }
+    robot_->read([this, callback](const franka::RobotState& robot_state) {
+      robot_state_ = robot_state;
+      if (publish_rate_.triggers()) {
+        publishFrankaStates();
+        publishJointStates();
+        publishTransforms();
+        publishExternalWrench();
+      }
+      return callback(robot_state);
+    });
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;
