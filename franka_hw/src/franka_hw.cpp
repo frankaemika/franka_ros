@@ -4,6 +4,7 @@
 #include <cinttypes>
 #include <mutex>
 #include <string>
+#include <stdexcept>
 
 #include <franka/robot.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -209,8 +210,12 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 bool franka_hw::FrankaHW::update(
     std::function<bool(const franka::RobotState&)> callback) {
   try {
-    robot_->read([this, callback](const franka::RobotState& robot_state) {
-      robot_state_ = robot_state;
+        if (!robot_){
+            throw std::invalid_argument("franka::Robot was not "
+                                        "initialized. Got nullptr instead");
+        } else {
+        robot_->read([this, callback](const franka::RobotState& robot_state) {
+          robot_state_ = robot_state;
       if (publish_rate_.triggers()) {
         publishFrankaStates();
         publishJointStates();
@@ -219,11 +224,13 @@ bool franka_hw::FrankaHW::update(
       }
       return callback(robot_state);
     });
+  }
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;
   }
   return true;
+
 }
 
 void FrankaHW::publishFrankaStates() {
