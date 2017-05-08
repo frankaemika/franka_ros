@@ -210,7 +210,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 bool franka_hw::FrankaHW::update(
     std::function<bool(const franka::RobotState&)> callback) {
   try {
-    if (!robot_) {
+    if (robot_ == nullptr) {
       throw std::invalid_argument(
           "franka::Robot was not "
           "initialized. Got nullptr instead");
