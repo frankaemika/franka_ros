@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   roscpp
-  pluginlib
   std_msgs
   sensor_msgs
   geometry_msgs
@@ -17,6 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   realtime_tools
   tf2_msgs
   tf
+  urdf
+  joint_limits_interface
+  xmlrpcpp
 )
 
 find_package(Franka REQUIRED)
@@ -76,10 +78,6 @@ target_link_libraries(franka_hw_node
 
 target_include_directories(franka_hw_node PUBLIC
   ${catkin_INCLUDE_DIRS}
-)
-
-install(FILES franka_hw_plugin.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 ## Tools

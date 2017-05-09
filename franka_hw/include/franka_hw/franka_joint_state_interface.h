@@ -1,7 +1,6 @@
 #pragma once
 
 #include <hardware_interface/internal/hardware_resource_manager.h>
-#include <cassert>
 #include <string>
 
 namespace franka_hw {
@@ -13,17 +12,17 @@ class FrankaJointStateHandle {
 
   /**
 * \param name The name of the joint
-* \param q A pointer to the storage for this joint's position
-* \param dq A pointer to the storage for this joint's velocity
-* \param tauJ A pointer to the storage for this joint's torque
-* \param q_d A pointer to the storage for this joint's desired position
-* \param dtau_J A pointer to the storage for this joint's torque's time
+* \param q A reference to the storage for this joint's position
+* \param dq A reference to the storage for this joint's velocity
+* \param tauJ A reference to the storage for this joint's torque
+* \param q_d A reference to the storage for this joint's desired position
+* \param dtau_J A reference to the storage for this joint's torque's time
 * derivative
-* \param tau_ext_hat_filtered A pointer to the storage for this joint's external
-* torque
-* \param joint_collision A pointer to the storage for this joint's collision
+* \param tau_ext_hat_filtered A reference to the storage for this joint's
+* external torque
+* \param joint_collision A reference to the storage for this joint's collision
 * state
-* \param joint_contact A pointer to the storage for this joint's contact state
+* \param joint_contact A reference to the storage for this joint's contact state
 */
   FrankaJointStateHandle(const std::string& name,
                          const double& q,

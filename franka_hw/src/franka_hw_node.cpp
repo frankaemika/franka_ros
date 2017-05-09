@@ -1,16 +1,17 @@
+
 #include <string>
 #include <vector>
 
-#include <franka_hw/franka_hw.h>
+#include <ros/ros.h>
+#include <xmlrpcpp/XmlRpc.h>
 
 #include <franka/robot.h>
-#include <ros/ros.h>
+#include <franka_hw/franka_hw.h>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
   ros::NodeHandle nh("~");
 
-  // parse robot_hw yaml with joint names and robot-IP:
   XmlRpc::XmlRpcValue params;
   nh.getParam("joint_names", params);
   std::vector<std::string> joint_names(params.size());
@@ -21,7 +22,8 @@ int main(int argc, char** argv) {
   nh.getParam("robot_ip", robot_ip);
   double franka_states_publish_rate = 30.0;
   nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
-  franka_hw::FrankaHW franka_ros(joint_names, robot_ip,
+  franka::Robot robot(robot_ip);
+  franka_hw::FrankaHW franka_ros(joint_names, &robot,
                                  franka_states_publish_rate, nh);
 
   return static_cast<int>(!franka_ros.update([cycle_start = ros::Time::now()](
