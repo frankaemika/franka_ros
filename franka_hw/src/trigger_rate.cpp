@@ -13,9 +13,4 @@ bool TriggerRate::triggers() {
   return false;
 }
 
-void TriggerRate::setRate(double rate) {
-  period_ = 1.0 / rate;
-  time_stamp_ = ros::Time::now();
-}
-
 }  // namespace franka_hw

@@ -3,6 +3,7 @@
 #include <array>
 #include <cinttypes>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 
 #include <franka/robot.h>
@@ -21,7 +22,7 @@
 namespace franka_hw {
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
-                   franka::Robot *robot,
+                   franka::Robot* robot,
                    double publish_rate,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
@@ -35,7 +36,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
-      publish_rate_(),
+      publish_rate_(publish_rate),
       robot_(robot),
       publisher_transforms_(node_handle, "/tf", 1),
       publisher_franka_states_(node_handle, "franka_states", 1),
@@ -45,7 +46,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       robot_state_() {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
-  publish_rate_.setRate(publish_rate);
   urdf::Model urdf_model;
   if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
     ROS_ERROR("Could not initialize urdf model from robot_description");
@@ -223,24 +223,24 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 }
 
-bool FrankaHW::update(const ros::Duration& period) {
-  position_joint_limit_interface_.enforceLimits(period);
-  velocity_joint_limit_interface_.enforceLimits(period);
-  effort_joint_limit_interface_.enforceLimits(period);
+bool franka_hw::FrankaHW::update(
+    std::function<bool(const franka::RobotState&)> callback) {
   try {
-    if (robot_->update()) {
-      robot_state_ = robot_->robotState();
+    if (robot_ == nullptr) {
+      throw std::invalid_argument(
+          "franka::Robot was not "
+          "initialized. Got nullptr instead");
+    }
+    robot_->read([this, callback](const franka::RobotState& robot_state) {
+      robot_state_ = robot_state;
       if (publish_rate_.triggers()) {
         publishFrankaStates();
         publishJointStates();
         publishTransforms();
         publishExternalWrench();
       }
-      return true;
-    }
-    ROS_ERROR_THROTTLE(
-        1, "failed to read franka state as connection to robot was closed");
-    return false;
+      return callback(robot_state);
+    });
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
     return false;

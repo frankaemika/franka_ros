@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -31,7 +30,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
   * @param joint_names A vector of joint names for all franka joint
-  * @param ip The ip address of the franka robot to connect to
+  * @param robot A pointer to an istance of franka::Robot
   * @param publish_rate Publish rate [Hz] for ROS topics
   * @param nh A nodehandle e.g to register publishers
   */
@@ -41,7 +40,7 @@ class FrankaHW : public hardware_interface::RobotHW {
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;
 
-  bool update(const ros::Duration& period);
+  bool update(std::function<bool(const franka::RobotState&)> callback);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
@@ -71,7 +70,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  std::unique_ptr<franka::Robot> robot_;
+  franka::Robot* robot_;
 
   franka_hw::TriggerRate publish_rate_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;

@@ -15,15 +15,14 @@ class FrankaJointHandle : public FrankaJointStateHandle {
    * \param joint_state_handle This joint's state handle
    * \param command A reference to the storage field for the joint command
    */
-  FrankaJointHandle(const FrankaJointStateHandle& joint_state_handle,
-                    double& command)
-      : FrankaJointStateHandle(joint_state_handle), command_(&command) {}
+  FrankaJointHandle(const FrankaJointStateHandle& joint_state_handle)
+      : FrankaJointStateHandle(joint_state_handle) {}
 
-  void setCommand(double command) { *command_ = command; }
-  const double& getCommand() const { return *command_; }
+  void setCommand(double command) { command_ = command; }
+  const double& getCommand() const { return command_; }
 
  private:
-  double* command_;
+  double command_;
 };
 
 /** \brief Hardware interface to support commanding an array of Franka joints.
