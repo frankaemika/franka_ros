@@ -2,7 +2,6 @@
 #include <vector>
 #include <array>
 #include <cassert>
-#include <unistd.h>
 
 #include <xmlrpcpp/XmlRpcValue.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -13,7 +12,6 @@
 #include <ros/ros.h>
 
 #include <franka_hw/franka_hw.h>
-
 #include <franka/robot.h>
 
 
@@ -40,9 +38,7 @@ int main(int argc, char** argv) {
   ROS_INFO("Initialized franka hw mock");
 
   std::vector<joint_limits_interface::JointLimits> joint_limits;
-  std::vector<joint_limits_interface::SoftJointLimits> soft_limits;
   joint_limits.resize(7);
-  soft_limits.resize(7);
 
   urdf::Model urdf_model;
   if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
@@ -57,10 +53,7 @@ int main(int argc, char** argv) {
                       << " upper=" << urdf_joint->limits->upper
                       << " lower=" << urdf_joint->limits->lower
                       << " velocity" << urdf_joint->limits->velocity);
-      if (!joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits[i])) {
-         ROS_ERROR_STREAM("Could not parse soft limits of joint " << joint_names[i]);
-         return false;
-      } else if (!joint_limits_interface::getJointLimits(urdf_joint, joint_limits[i])) {
+      if (!joint_limits_interface::getJointLimits(urdf_joint, joint_limits[i])) {
           ROS_ERROR_STREAM("Could not parse joint limits of joint "<<joint_names[i]);
           return false;
       }
@@ -71,12 +64,9 @@ int main(int argc, char** argv) {
   std::array<double, 7> effort_command;
   ros::Duration period(0.001);
   ros::Rate rate(1000);
-
   controller_manager::ControllerManager ctrl_manager(&franka_ros);
-  ROS_INFO("Sleep to enable loading the controller");
-  sleep(3);
-  ROS_INFO("Starting control loop!");
 
+  ROS_INFO("Starting control loop!");
   ros::Time now(ros::Time::now());
   ros::Time last(ros::Time::now());
   while (ros::ok()) {

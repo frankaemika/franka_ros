@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES test_joint_limit_interfaces_controller
+  LIBRARIES test_franka_hw
   CATKIN_DEPENDS franka_description franka_hw controller_manager roscpp controller_interface pluginlib urdf
 )
 
@@ -28,7 +28,11 @@ catkin_package(
 include_directories(include)
 include_directories(${catkin_INCLUDE_DIRS})
 
-add_library(test_franka_hw src/test_joint_limit_interfaces_controller.cpp)
+add_library(test_franka_hw
+   src/test_joint_position_limits_controller.cpp
+   src/test_joint_velocity_limits_controller.cpp
+   src/test_joint_torque_limits_controller.cpp)
+
 add_dependencies(test_franka_hw ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(test_franka_hw ${catkin_LIBRARIES})
 
