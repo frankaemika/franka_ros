@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     states.name[i] = joint_names[i];
   }
 
-try {
+  try {
     ROS_INFO("connecting to robot... ");
     franka::Robot robot(robot_ip);
 
