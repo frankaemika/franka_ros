@@ -367,5 +367,4 @@ std::array<double, 7> FrankaHW::getJointEffortCommand() const {
   return effort_joint_command_;
 }
 
-
 }  // namespace franka_hw
