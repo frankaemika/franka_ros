@@ -45,9 +45,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void publishJointStates();
   void publishTransforms();
   void publishExternalWrench();
-  void enforceLimits(const ros::Duration period);
-  bool checkForConflict(
-      const std::list<hardware_interface::ControllerInfo>& info) const;
+  void enforceLimits(const ros::Duration kPeriod);
   std::array<double, 7> getJointPositionCommand() const;
   std::array<double, 7> getJointVelocityCommand() const;
   std::array<double, 7> getJointEffortCommand() const;

@@ -349,10 +349,10 @@ void FrankaHW::publishExternalWrench() {
   }
 }
 
-void FrankaHW::enforceLimits(const ros::Duration period) {
-  position_joint_limit_interface_.enforceLimits(period);
-  velocity_joint_limit_interface_.enforceLimits(period);
-  effort_joint_limit_interface_.enforceLimits(period);
+void FrankaHW::enforceLimits(const ros::Duration kPeriod) {
+  position_joint_limit_interface_.enforceLimits(kPeriod);
+  velocity_joint_limit_interface_.enforceLimits(kPeriod);
+  effort_joint_limit_interface_.enforceLimits(kPeriod);
 }
 
 std::array<double, 7> FrankaHW::getJointPositionCommand() const {
@@ -367,9 +367,5 @@ std::array<double, 7> FrankaHW::getJointEffortCommand() const {
   return effort_joint_command_;
 }
 
-bool FrankaHW::checkForConflict(
-    const std::list<hardware_interface::ControllerInfo>& info) const {
-  return false;  // Will be replaced later by checks for compatible interfaces
-}
 
 }  // namespace franka_hw
