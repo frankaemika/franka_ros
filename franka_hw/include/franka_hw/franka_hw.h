@@ -32,14 +32,18 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param joint_names A vector of joint names for all franka joint
   * @param robot A pointer to an istance of franka::Robot
   * @param publish_rate Publish rate [Hz] for ROS topics
+  * @param arm_id Unique identifier for the Franka arm the class controls
   * @param nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
            double publish_rate,
+           const std::string& arm_id,
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;
   bool update(std::function<bool(const franka::RobotState&)> callback);
+  bool checkForConflict(
+      const std::list<hardware_interface::ControllerInfo>& info) const;
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
@@ -75,6 +79,7 @@ class FrankaHW : public hardware_interface::RobotHW {
       publisher_external_wrench_;
 
   std::vector<std::string> joint_names_;
+  std::string arm_id_;
   franka::RobotState robot_state_;
 
   std::array<double, 7> position_joint_command_;
@@ -85,5 +90,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
 };
+
+bool findArmIDinResourceID(const std::string& resource_id, std::string& arm_id);
 
 }  // namespace franka_hw

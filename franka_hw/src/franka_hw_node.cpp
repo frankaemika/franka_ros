@@ -10,21 +10,24 @@
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
-  ros::NodeHandle nh("~");
+  ros::NodeHandle node_handle("~");
 
   XmlRpc::XmlRpcValue params;
-  nh.getParam("joint_names", params);
+  node_handle.getParam("joint_names", params);
   std::vector<std::string> joint_names(params.size());
   for (int i = 0; i < params.size(); ++i) {
     joint_names[i] = static_cast<std::string>(params[i]);
   }
   std::string robot_ip;
-  nh.getParam("robot_ip", robot_ip);
+  node_handle.getParam("robot_ip", robot_ip);
+  std::string arm_id;
+  node_handle.getParam("arm_id", arm_id);
   double franka_states_publish_rate = 30.0;
-  nh.getParam("franka_states_publish_rate", franka_states_publish_rate);
+  node_handle.getParam("franka_states_publish_rate",
+                       franka_states_publish_rate);
   franka::Robot robot(robot_ip);
-  franka_hw::FrankaHW franka_ros(joint_names, &robot,
-                                 franka_states_publish_rate, nh);
+  franka_hw::FrankaHW franka_ros(
+      joint_names, &robot, franka_states_publish_rate, arm_id, node_handle);
 
   return static_cast<int>(!franka_ros.update([cycle_start = ros::Time::now()](
       const franka::RobotState&) mutable {

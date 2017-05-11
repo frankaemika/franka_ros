@@ -24,6 +24,7 @@ namespace franka_hw {
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    franka::Robot* robot,
                    double publish_rate,
+                   const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
       franka_joint_state_interface_(),
@@ -43,6 +44,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       publisher_joint_states_(node_handle, "joint_states", 1),
       publisher_external_wrench_(node_handle, "F_ext", 1),
       joint_names_(),
+      arm_id_(arm_id),
       robot_state_() {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
@@ -106,18 +108,20 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 
   FrankaCartesianStateHandle franka_cartesian_state_handle(
-      std::string("franka_cartesian_data"), robot_state_.cartesian_collision,
+      arm_id + std::string("_cartesian"), robot_state_.cartesian_collision,
       robot_state_.cartesian_contact, robot_state_.O_F_ext_hat_K,
       robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE);
   franka_cartesian_state_interface_.registerHandle(
       franka_cartesian_state_handle);
 
   franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
-      franka_cartesian_state_interface_.getHandle("franka_cartesian_data"));
+      franka_cartesian_state_interface_.getHandle(arm_id +
+                                                  std::string("_cartesian")));
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
   franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-      franka_cartesian_state_interface_.getHandle("franka_cartesian_data"));
+      franka_cartesian_state_interface_.getHandle(arm_id +
+                                                  std::string("_cartesian")));
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
 
@@ -330,6 +334,141 @@ void FrankaHW::publishExternalWrench() {
         robot_state_.K_F_ext_hat_K[5];
     publisher_external_wrench_.unlockAndPublish();
   }
+}
+
+bool FrankaHW::checkForConflict(
+    const std::list<hardware_interface::ControllerInfo>& info) const {
+  typedef std::map<std::string, std::vector<std::vector<std::string> > >
+      ResourceMap;
+  typedef std::list<hardware_interface::ControllerInfo>::const_iterator
+      CtrlInfoIt;
+  typedef std::vector<hardware_interface::InterfaceResources>::const_iterator
+      ClaimedResIt;
+  typedef std::set<std::string>::const_iterator ResourceIt;
+
+  // Populate a map of all controllers and claimed interfaces per resource
+  ResourceMap resource_map;
+  for (CtrlInfoIt info_it = info.begin(); info_it != info.end(); ++info_it) {
+    const std::vector<hardware_interface::InterfaceResources>& c_res =
+        info_it->claimed_resources;
+    for (ClaimedResIt c_res_it = c_res.begin(); c_res_it != c_res.end();
+         ++c_res_it) {
+      const std::set<std::string>& iface_resources = c_res_it->resources;
+      for (ResourceIt resource_it = iface_resources.begin();
+           resource_it != iface_resources.end(); ++resource_it) {
+        std::vector<std::string> claiming_controller(3);
+        claiming_controller[0] = info_it->name;
+        claiming_controller[1] = info_it->type;
+        claiming_controller[2] = c_res_it->hardware_interface;
+        resource_map[*resource_it].push_back(claiming_controller);
+      }
+    }
+  }
+
+  // check for conflicts in single resources: no triple claims,
+  // for 2 claims it must be one torque and one non torque claim
+  typedef std::map<std::string,
+                   std::vector<std::vector<std::string> > >::iterator it_type;
+  for (it_type map_it = resource_map.begin(); map_it != resource_map.end();
+       map_it++) {
+    if (map_it->second.size() > 2) {
+      ROS_ERROR_STREAM("Resource "
+                       << map_it->first
+                       << " claimed with more than two interfaces. Conflict!");
+      return true;
+    }
+    u_int8_t torque_claims = 0;
+    u_int8_t other_claims = 0;
+    if (map_it->second.size() == 2) {
+      for (std::vector<std::vector<std::string> >::iterator claimed_by_it =
+               map_it->second.begin();
+           claimed_by_it != map_it->second.end(); ++claimed_by_it) {
+        if ((*claimed_by_it)[2].compare("EffortJointInterface") ==
+            0) {  // TODO check name!
+          torque_claims++;
+        } else {
+          other_claims++;
+        }
+      }
+      if (torque_claims != 1) {
+        ROS_ERROR_STREAM(
+            "Resource "
+            << map_it->first
+            << " is claimed with two non-compatible interfaces. Conflict!");
+        return true;
+      }
+    }
+  }
+
+  typedef struct {
+    uint8_t joint_non_torque_claims = 0;
+    uint8_t cartesian_claims = 0;
+    uint8_t joint_torque_claims = 0;
+  } ResourceClaims;
+  typedef std::map<std::string, ResourceClaims> ArmClaimedMap;
+  ArmClaimedMap arm_claim_map;
+  std::string current_arm_id;
+
+  // check for conflicts between joint and cartesian level for each arm.
+  // Valid claims are torque claims on joint level in combination with either
+  // 7 non-torque claims on joint_level or one claim on cartesian level.
+  for (it_type map_it = resource_map.begin(); map_it != resource_map.end();
+       map_it++) {
+    if (!findArmIDinResourceID(map_it->first, current_arm_id)) {
+      ROS_ERROR_STREAM("Could not find arm_id in resource "
+                       << map_it->first
+                       << ".Conflict! Conflict!\n Name joints as "
+                          "'<robot_arm_id>_joint<jointnumber>'");
+      return true;
+    }
+    ResourceClaims new_claim;
+    for (std::vector<std::vector<std::string> >::iterator claimed_by_it =
+             map_it->second.begin();
+         claimed_by_it != map_it->second.end(); ++claimed_by_it) {
+      if ((*claimed_by_it)[2] == "EffortJointInterface") {
+        new_claim.joint_torque_claims++;
+      } else if ((*claimed_by_it)[2] == "PoseCartesianInterface" ||
+                 (*claimed_by_it)[2] == "VelocityCartesianInterface") {
+        new_claim.cartesian_claims++;
+      } else if ((*claimed_by_it)[2] == "PositionJointInterface" ||
+                 (*claimed_by_it)[2] == "VelocityJointInterface") {
+        new_claim.joint_non_torque_claims++;
+      } else {
+        ROS_ERROR_STREAM("Unknown interface claimed: " << (*claimed_by_it)[2]
+                                                       << ". Conflict!");
+        return true;
+      }
+    }
+    arm_claim_map[current_arm_id].joint_non_torque_claims +=
+        new_claim.joint_non_torque_claims;
+    arm_claim_map[current_arm_id].joint_torque_claims +=
+        new_claim.joint_torque_claims;
+    arm_claim_map[current_arm_id].cartesian_claims +=
+        new_claim.cartesian_claims;
+    if ((arm_claim_map[current_arm_id].cartesian_claims > 0 &&
+         arm_claim_map[current_arm_id].joint_non_torque_claims)) {
+      ROS_ERROR_STREAM("Invalid claims on joint AND cartesian level on arm "
+                       << map_it->first << ". Conflict!");
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool findArmIDinResourceID(const std::string& resource_id,
+                           std::string& arm_id) {
+  size_t position = resource_id.rfind("_joint");
+  if (position != std::string::npos && position > 0) {
+    arm_id = resource_id.substr(0, position);
+    return true;
+  }
+  position = resource_id.rfind("_cartesian");
+  if (position != std::string::npos && position > 0) {
+    arm_id = resource_id.substr(0, position);
+    return true;
+  }
+  return false;
 }
 
 }  // namespace franka_hw
