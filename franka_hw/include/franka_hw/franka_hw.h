@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -41,13 +42,14 @@ class FrankaHW : public hardware_interface::RobotHW {
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
   ~FrankaHW() override = default;
-  bool update(std::function<bool(const franka::RobotState&)> callback);
+  void run(std::function<void(void)> ros_callback);
   bool checkForConflict(
       const std::list<hardware_interface::ControllerInfo>& info) const;
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
   void publishExternalWrench();
+  void enforceLimits(const ros::Duration kPeriod);
 
   void runJointPosition(std::function<void(void)> ros_callback);
   void runJointVelocity(std::function<void(void)> ros_callback);
@@ -104,6 +106,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
   bool controller_running_flag_ = false;
+  std::function<void(std::function<void(void)>)> run_function_;
 };
 
 bool findArmIDinResourceID(const std::string& resource_id, std::string& arm_id);

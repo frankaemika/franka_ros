@@ -45,7 +45,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       publisher_external_wrench_(node_handle, "F_ext", 1),
       joint_names_(),
       arm_id_(arm_id),
-      robot_state_() {
+      robot_state_(),
+      run_function_(nullptr) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
   urdf::Model urdf_model;
@@ -210,29 +211,25 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 }
 
-bool franka_hw::FrankaHW::update(
-    std::function<bool(const franka::RobotState&)> callback) {
+void franka_hw::FrankaHW::run(std::function<void(void)> ros_callback) {
   try {
     if (robot_ == nullptr) {
       throw std::invalid_argument(
           "franka::Robot was not "
           "initialized. Got nullptr instead");
     }
-    robot_->read([this, callback](const franka::RobotState& robot_state) {
-      robot_state_ = robot_state;
-      if (publish_rate_.triggers()) {
-        publishFrankaStates();
-        publishJointStates();
-        publishTransforms();
-        publishExternalWrench();
-      }
-      return callback(robot_state);
-    });
+    if (run_function_ == nullptr) {
+      throw std::invalid_argument(
+          "run_function not set,"
+          "cannot run control loop");
+    }
+    if (controller_running_flag_) {
+      run_function_(ros_callback);
+    }
   } catch (const franka::Exception& e) {
     ROS_ERROR_STREAM("" << e.what());
-    return false;
+    return;
   }
-  return true;
 }
 
 void FrankaHW::publishFrankaStates() {
@@ -334,6 +331,12 @@ void FrankaHW::publishExternalWrench() {
         robot_state_.K_F_ext_hat_K[5];
     publisher_external_wrench_.unlockAndPublish();
   }
+}
+
+void FrankaHW::enforceLimits(const ros::Duration kPeriod) {
+  position_joint_limit_interface_.enforceLimits(kPeriod);
+  velocity_joint_limit_interface_.enforceLimits(kPeriod);
+  effort_joint_limit_interface_.enforceLimits(kPeriod);
 }
 
 bool FrankaHW::checkForConflict(

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include <controller_manager/controller_manager.h>
 #include <ros/ros.h>
 #include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
@@ -31,14 +32,26 @@ int main(int argc, char** argv) {
   franka::Robot robot(robot_ip);
   franka_hw::FrankaHW franka_ros(
       joint_names, &robot, franka_states_publish_rate, arm_id, node_handle);
+  controller_manager::ControllerManager control_manager(&franka_ros);
 
-  return static_cast<int>(!franka_ros.update([cycle_start = ros::Time::now()](
-      const franka::RobotState&) mutable {
-    ROS_INFO_THROTTLE(1, "cycle: %f s",
-                      (ros::Time::now() - cycle_start).toSec());
-    cycle_start = ros::Time::now();
-    return ros::ok();
-  }));
+  ros::Duration period(0.0);
+  ros::Time now(ros::Time::now());
+  ros::Time last(ros::Time::now());
+
+  while (ros::ok()) {
+    franka_ros.run([&]() {
+      now = ros::Time::now();
+      period = now - last;
+      last = now;
+      control_manager.update(now, period);
+      franka_ros.enforceLimits(period);
+      franka_ros.publishExternalWrench();
+      franka_ros.publishFrankaStates();
+      franka_ros.publishJointStates();
+      franka_ros.publishTransforms();
+    });
+  }
+
   spinner.stop();
   return 0;
 }
