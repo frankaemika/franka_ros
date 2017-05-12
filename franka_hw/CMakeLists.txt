@@ -45,6 +45,7 @@ add_library(franka_hw
   src/franka_hw.cpp
   src/trigger_rate.cpp
   src/control_callbacks.cpp
+  src/franka_hw_helper_functions.cpp
 )
 
 add_dependencies(franka_hw

@@ -77,7 +77,7 @@ void FrankaHW::runJointTorqueControl(std::function<void(void)> ros_callback) {
       });
 }
 
-void FrankaHW::runTorqueControlwithJointPositionMotionGenerator(
+void FrankaHW::runTorqueControlWithJointPositionMotionGenerator(
     std::function<void(void)> ros_callback) {
   // TODO: Unnecessary??
   robot_->control(
@@ -99,7 +99,7 @@ void FrankaHW::runTorqueControlwithJointPositionMotionGenerator(
       });
 }
 
-void FrankaHW::runTorqueControlwithJointVelocityMotionGenerator(
+void FrankaHW::runTorqueControlWithJointVelocityMotionGenerator(
     std::function<void(void)> ros_callback) {
   robot_->control(
       [&](const franka::RobotState& robot_state) -> franka::JointVelocities {
@@ -120,7 +120,7 @@ void FrankaHW::runTorqueControlwithJointVelocityMotionGenerator(
       });
 }
 
-void FrankaHW::runTorqueControlwithCartesianPoseMotionGenerator(
+void FrankaHW::runTorqueControlWithCartesianPoseMotionGenerator(
     std::function<void(void)> ros_callback) {
   robot_->control(
       [&](const franka::RobotState& robot_state) -> franka::CartesianPose {
@@ -144,7 +144,7 @@ void FrankaHW::runTorqueControlwithCartesianPoseMotionGenerator(
       });
 }
 
-void FrankaHW::runTorqueControlwithCartesianVelocityMotionGenerator(
+void FrankaHW::runTorqueControlWithCartesianVelocityMotionGenerator(
     std::function<void(void)> ros_callback) {
   robot_->control(
       [&](const franka::RobotState& robot_state)

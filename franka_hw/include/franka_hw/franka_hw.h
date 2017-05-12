@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <geometry_msgs/WrenchStamped.h>
+#include <hardware_interface/controller_info.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
@@ -19,6 +20,7 @@
 #include <franka_hw/FrankaState.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
+#include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_joint_command_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
 #include <franka_hw/trigger_rate.h>
@@ -45,6 +47,11 @@ class FrankaHW : public hardware_interface::RobotHW {
   void run(std::function<void(void)> ros_callback);
   bool checkForConflict(
       const std::list<hardware_interface::ControllerInfo>& info) const;
+  void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                const std::list<hardware_interface::ControllerInfo>& stop_list);
+  bool prepareSwitch(
+      const std::list<hardware_interface::ControllerInfo>& start_list,
+      const std::list<hardware_interface::ControllerInfo>& stop_list);
   void publishFrankaStates();
   void publishJointStates();
   void publishTransforms();
@@ -56,13 +63,13 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runCartesianPose(std::function<void(void)> ros_callback);
   void runCartesianVelocity(std::function<void(void)> ros_callback);
   void runJointTorqueControl(std::function<void(void)> ros_callback);
-  void runTorqueControlwithJointPositionMotionGenerator(
+  void runTorqueControlWithJointPositionMotionGenerator(
       std::function<void(void)> ros_callback);
-  void runTorqueControlwithJointVelocityMotionGenerator(
+  void runTorqueControlWithJointVelocityMotionGenerator(
       std::function<void(void)> ros_callback);
-  void runTorqueControlwithCartesianPoseMotionGenerator(
+  void runTorqueControlWithCartesianPoseMotionGenerator(
       std::function<void(void)> ros_callback);
-  void runTorqueControlwithCartesianVelocityMotionGenerator(
+  void runTorqueControlWithCartesianVelocityMotionGenerator(
       std::function<void(void)> ros_callback);
 
  private:
@@ -108,7 +115,5 @@ class FrankaHW : public hardware_interface::RobotHW {
   bool controller_running_flag_ = false;
   std::function<void(std::function<void(void)>)> run_function_;
 };
-
-bool findArmIDinResourceID(const std::string& resource_id, std::string& arm_id);
 
 }  // namespace franka_hw
