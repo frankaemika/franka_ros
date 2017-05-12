@@ -49,6 +49,20 @@ class FrankaHW : public hardware_interface::RobotHW {
   void publishTransforms();
   void publishExternalWrench();
 
+  void runJointPosition(std::function<void(void)> ros_callback);
+  void runJointVelocity(std::function<void(void)> ros_callback);
+  void runCartesianPose(std::function<void(void)> ros_callback);
+  void runCartesianVelocity(std::function<void(void)> ros_callback);
+  void runJointTorqueControl(std::function<void(void)> ros_callback);
+  void runTorqueControlwithJointPositionMotionGenerator(
+      std::function<void(void)> ros_callback);
+  void runTorqueControlwithJointVelocityMotionGenerator(
+      std::function<void(void)> ros_callback);
+  void runTorqueControlwithCartesianPoseMotionGenerator(
+      std::function<void(void)> ros_callback);
+  void runTorqueControlwithCartesianVelocityMotionGenerator(
+      std::function<void(void)> ros_callback);
+
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
   franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
@@ -89,6 +103,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<double, 6> velocity_cartesian_command_;
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
+  bool controller_running_flag_ = false;
 };
 
 bool findArmIDinResourceID(const std::string& resource_id, std::string& arm_id);

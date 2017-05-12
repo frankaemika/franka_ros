@@ -108,19 +108,19 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 
   FrankaCartesianStateHandle franka_cartesian_state_handle(
-      arm_id + std::string("_cartesian"), robot_state_.cartesian_collision,
+      arm_id_ + std::string("_cartesian"), robot_state_.cartesian_collision,
       robot_state_.cartesian_contact, robot_state_.O_F_ext_hat_K,
       robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE);
   franka_cartesian_state_interface_.registerHandle(
       franka_cartesian_state_handle);
 
   franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
-      franka_cartesian_state_interface_.getHandle(arm_id +
+      franka_cartesian_state_interface_.getHandle(arm_id_ +
                                                   std::string("_cartesian")));
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
   franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-      franka_cartesian_state_interface_.getHandle(arm_id +
+      franka_cartesian_state_interface_.getHandle(arm_id_ +
                                                   std::string("_cartesian")));
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
@@ -417,7 +417,7 @@ bool FrankaHW::checkForConflict(
     if (!findArmIDinResourceID(map_it->first, current_arm_id)) {
       ROS_ERROR_STREAM("Could not find arm_id in resource "
                        << map_it->first
-                       << ".Conflict! Conflict!\n Name joints as "
+                       << ".Conflict! \n Name joints as "
                           "'<robot_arm_id>_joint<jointnumber>'");
       return true;
     }
@@ -425,13 +425,17 @@ bool FrankaHW::checkForConflict(
     for (std::vector<std::vector<std::string> >::iterator claimed_by_it =
              map_it->second.begin();
          claimed_by_it != map_it->second.end(); ++claimed_by_it) {
-      if ((*claimed_by_it)[2] == "EffortJointInterface") {
+      if ((*claimed_by_it)[2] == "hardware_interface::EffortJointInterface") {
         new_claim.joint_torque_claims++;
-      } else if ((*claimed_by_it)[2] == "PoseCartesianInterface" ||
-                 (*claimed_by_it)[2] == "VelocityCartesianInterface") {
+      } else if ((*claimed_by_it)[2] ==
+                     "franka_hw::FrankaPoseCartesianInterface" ||
+                 (*claimed_by_it)[2] ==
+                     "franka_hw::FrankaVelocityCartesianInterface") {
         new_claim.cartesian_claims++;
-      } else if ((*claimed_by_it)[2] == "PositionJointInterface" ||
-                 (*claimed_by_it)[2] == "VelocityJointInterface") {
+      } else if ((*claimed_by_it)[2] ==
+                     "hardware_interface::PositionJointInterface" ||
+                 (*claimed_by_it)[2] ==
+                     "hardware_interface::VelocityJointInterface") {
         new_claim.joint_non_torque_claims++;
       } else {
         ROS_ERROR_STREAM("Unknown interface claimed: " << (*claimed_by_it)[2]

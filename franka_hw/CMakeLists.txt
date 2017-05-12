@@ -43,6 +43,7 @@ catkin_package(
 add_library(franka_hw
   src/franka_hw.cpp
   src/trigger_rate.cpp
+  src/control_callbacks.cpp
 )
 
 add_dependencies(franka_hw

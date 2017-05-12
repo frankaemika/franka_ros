@@ -3,6 +3,7 @@
 #include <vector>
 
 #include <ros/ros.h>
+#include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
 
 #include <franka/robot.h>
@@ -11,6 +12,8 @@
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
   ros::NodeHandle node_handle("~");
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
 
   XmlRpc::XmlRpcValue params;
   node_handle.getParam("joint_names", params);
@@ -36,4 +39,6 @@ int main(int argc, char** argv) {
     cycle_start = ros::Time::now();
     return ros::ok();
   }));
+  spinner.stop();
+  return 0;
 }
