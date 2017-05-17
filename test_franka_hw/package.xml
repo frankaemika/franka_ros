@@ -4,9 +4,10 @@
   <version>0.0.0</version>
   <description>The test_franka_hw package</description>
 
-  <maintainer email="jaeh_ch@todo.todo">jaeh_ch</maintainer>
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
-  <license>TODO</license>
+  <license>NONE</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>franka_description</build_depend>
