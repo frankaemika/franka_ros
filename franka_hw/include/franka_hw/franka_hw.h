@@ -89,8 +89,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<double, 7> effort_joint_command_ = {
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   std::array<double, 16> pose_cartesian_command_ = {
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-       0.0, 0.0}};
+      {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0}};
   std::array<double, 6> velocity_cartesian_command_ = {
       {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   uint64_t sequence_number_joint_states_ = 0;
