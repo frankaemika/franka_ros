@@ -1,0 +1,7 @@
+<library path="lib/libfranka_example_controllers">
+  <class name="franka_example_controllers/JointVelocityExampleController" type="franka_example_controllers::JointVelocityExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on joint velocities to demonstrate the according usage
+    </description>
+  </class>
+</library>

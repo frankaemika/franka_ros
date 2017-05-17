@@ -416,6 +416,7 @@ bool FrankaHW::checkForConflict(
 void FrankaHW::doSwitch(
     const std::list<hardware_interface::ControllerInfo>& start_list,
     const std::list<hardware_interface::ControllerInfo>& stop_list) {
+  position_joint_limit_interface_.reset();
   controller_running_flag_ = true;
 }
 
