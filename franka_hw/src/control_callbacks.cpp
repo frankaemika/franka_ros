@@ -74,7 +74,6 @@ void FrankaHW::runJointTorqueControl(std::function<void(void)> ros_callback) {
 
 void FrankaHW::runTorqueControlWithJointPositionMotionGenerator(
     std::function<void(void)> ros_callback) {
-  // TODO: Unnecessary??
   robot_->control(
       [&](const franka::RobotState& robot_state) -> franka::JointValues {
         if (controller_running_flag_) {
