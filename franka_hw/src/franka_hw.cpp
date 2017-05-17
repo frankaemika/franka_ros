@@ -221,7 +221,7 @@ void FrankaHW::run(std::function<void(void)> ros_callback) {
           "franka::Robot was not "
           "initialized. Got nullptr instead");
     }
-    if (controller_running_flag_ == true && run_function_ != nullptr) {
+    if (controller_running_flag_ && run_function_ != nullptr) {
       run_function_(ros_callback);
     }
   } catch (const franka::Exception& e) {
@@ -342,8 +342,8 @@ bool FrankaHW::checkForConflict(
   ResourceWithClaimsMap resource_map = getResourceMap(info);
   // check for conflicts in single resources: no triple claims,
   // for 2 claims it must be one torque and one non-torque claim
-  for (ResourceMapIterator map_it = resource_map.begin();
-       map_it != resource_map.end(); map_it++) {
+  for (auto map_it = resource_map.begin(); map_it != resource_map.end();
+       map_it++) {
     if (map_it->second.size() > 2) {
       ROS_ERROR_STREAM("Resource "
                        << map_it->first
@@ -353,11 +353,9 @@ bool FrankaHW::checkForConflict(
     u_int8_t torque_claims = 0;
     u_int8_t other_claims = 0;
     if (map_it->second.size() == 2) {
-      for (std::vector<std::vector<std::string> >::iterator claimed_by_it =
-               map_it->second.begin();
-           claimed_by_it != map_it->second.end(); ++claimed_by_it) {
-        if ((*claimed_by_it)[2].compare(
-                "hardware_interface::EffortJointInterface") == 0) {
+      for (auto& claimed_by : map_it->second) {
+        if (claimed_by[2].compare("hardware_interface::EffortJointInterface") ==
+            0) {
           torque_claims++;
         } else {
           other_claims++;
@@ -409,15 +407,15 @@ bool FrankaHW::checkForConflict(
 }
 
 void FrankaHW::doSwitch(
-    const std::list<hardware_interface::ControllerInfo>& start_list,
-    const std::list<hardware_interface::ControllerInfo>& stop_list) {
+    const std::list<hardware_interface::ControllerInfo>& start_list,   // NOLINT
+    const std::list<hardware_interface::ControllerInfo>& stop_list) {  // NOLINT
   position_joint_limit_interface_.reset();
   controller_running_flag_ = true;
 }
 
 bool FrankaHW::prepareSwitch(
     const std::list<hardware_interface::ControllerInfo>& start_list,
-    const std::list<hardware_interface::ControllerInfo>& stop_list) {
+    const std::list<hardware_interface::ControllerInfo>& stop_list) {  // NOLINT
   controller_running_flag_ = false;
 
   ResourceWithClaimsMap resource_map = getResourceMap(start_list);
