@@ -1,0 +1,2 @@
+joint_velocity_example_controller:
+    type: franka_example_controllers/JointVelocityExampleController

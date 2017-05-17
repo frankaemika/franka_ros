@@ -24,8 +24,6 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hw,
     XmlRpc::XmlRpcValue parameters;
     if (!node_handle.getParam("/franka_hw_node/joint_names", parameters)) {
         ROS_ERROR("Could not parse joint names in JointLimitTestController");
-    } else {
-        ROS_INFO("Found joint names in ros parameters");
     }
     if (parameters.size() != 7) {
         ROS_ERROR_STREAM("Wrong number of joint names, got "
@@ -57,10 +55,6 @@ void JointVelocityExampleController::update(const ros::Time& time, const ros::Du
                               time_max.toSec())) / time_max.toSec()));
           double omega = cycle * omega_max / 2.0 *
                          (1.0 - std::cos(2.0 * M_PI / time_max.toSec() * elapsed_time.toSec()));
-          if (elapsed_time.toSec() > 2 * time_max.toSec()) {
-            ROS_INFO_ONCE("Finished motion");
-            omega = 0.0;
-          }
     for (size_t i = 0; i < 3; ++i) {
         velocity_joint_handles_[i].setCommand(0.0);
     }

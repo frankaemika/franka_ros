@@ -32,43 +32,181 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW() = delete;
 
   /**
-  * @param joint_names A vector of joint names for all franka joint
-  * @param robot A pointer to an istance of franka::Robot
-  * @param publish_rate Publish rate [Hz] for ROS topics
-  * @param arm_id Unique identifier for the Franka arm the class controls
-  * @param nh A nodehandle e.g to register publishers
+  * Constructs an instance of FrankaHW
+  *
+  * @param[in] joint_names A vector of joint names for all franka joint
+  * @param[in] robot A pointer to an istance of franka::Robot
+  * @param[in] publish_rate Publish rate [Hz] for ROS topics
+  * @param[in] arm_id Unique identifier for the Franka arm the class controls
+  * @param[in] nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
            double publish_rate,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
+
   ~FrankaHW() override = default;
+
+  /**
+  * Runs the control in case a valid run_function_ was chosen based on
+  * the claimed resources
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void run(std::function<void(void)> ros_callback);
+
+  /**
+  * Checks whether a requested controller can be run, based on the resources
+  * and interfaces it claims
+  *
+  * @param[in] info A list of all controllers to be started, including the
+  * resources
+  * they claim
+  *
+  * @return Returns true in case of a conflict, false in case of valid
+  * controllers
+  */
   bool checkForConflict(
       const std::list<hardware_interface::ControllerInfo>& info) const;
+
+  /**
+  * Performs the switch between controllers and is real-time capable
+  *
+  * @param[in] start_list Information list about all controllers requested
+  * to be started
+  * @param[in] stop_list Information list about all controllers requested
+  * to be stopped
+  */
   void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                 const std::list<hardware_interface::ControllerInfo>& stop_list);
+
+  /**
+  * Prepares the switching between controllers. This function is not real-time
+  * capable.
+  *
+  * @param[in] start_list Information list about all controllers requested
+  * to be started
+  * @param[in] stop_list Information list about all controllers requested
+  * to be stopped
+  */
   bool prepareSwitch(
       const std::list<hardware_interface::ControllerInfo>& start_list,
       const std::list<hardware_interface::ControllerInfo>& stop_list);
+
+  /**
+  * Publishes all relevant data received from the Franka
+  */
   void publishFrankaStates();
+
+  /**
+  * Publishes the joint states of the Franka
+  */
   void publishJointStates();
+
+  /**
+  * Publishes the transforms for EE and K frame which define the end-effector
+  * (EE)
+  * and the Cartesian impedance reference frame (K)
+  */
   void publishTransforms();
+
+  /**
+  * Publishes the estimated external wrench felt by the Franka
+  */
   void publishExternalWrench();
+
+  /**
+  * Enforces joint limits on position velocity and torque level
+  *
+  * @param[in] kPeriod The duration of the current cycle
+  */
   void enforceLimits(const ros::Duration kPeriod);
 
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runJointPosition(std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runJointVelocity(std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runCartesianPose(std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runCartesianVelocity(std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runJointTorqueControl(std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runTorqueControlWithJointPositionMotionGenerator(
       std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runTorqueControlWithJointVelocityMotionGenerator(
       std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runTorqueControlWithCartesianPoseMotionGenerator(
       std::function<void(void)> ros_callback);
+
+  /**
+  * TODO
+  *
+  * @param[in] ros_callback A callback function that is executed at each time
+  * step
+  * and runs all ros-side functionality of the hardware
+  */
   void runTorqueControlWithCartesianVelocityMotionGenerator(
       std::function<void(void)> ros_callback);
 

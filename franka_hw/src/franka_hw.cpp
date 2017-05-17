@@ -63,7 +63,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         &robot_state_.tau_J[i]);
     joint_state_interface_.registerHandle(joint_handle);
 
-    franka_hw::FrankaJointStateHandle franka_joint_handle(
+    FrankaJointStateHandle franka_joint_handle(
         joint_names_[i], robot_state_.q[i], robot_state_.dq[i],
         robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
         robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
@@ -118,12 +118,12 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   franka_cartesian_state_interface_.registerHandle(
       franka_cartesian_state_handle);
 
-  franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ +
                                                   std::string("_cartesian")));
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
-  franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
+  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ +
                                                   std::string("_cartesian")));
   franka_velocity_cartesian_interface_.registerHandle(
@@ -139,8 +139,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&franka_velocity_cartesian_interface_);
 
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
-        lock(publisher_franka_states_);
+    std::lock_guard<realtime_tools::RealtimePublisher<FrankaState> > lock(
+        publisher_franka_states_);
     publisher_franka_states_.msg_.cartesian_collision.resize(
         robot_state_.cartesian_collision.size());
     publisher_franka_states_.msg_.cartesian_contact.resize(
@@ -214,19 +214,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 }
 
-void franka_hw::FrankaHW::run(std::function<void(void)> ros_callback) {
+void FrankaHW::run(std::function<void(void)> ros_callback) {
   try {
     if (robot_ == nullptr) {
       throw std::invalid_argument(
           "franka::Robot was not "
           "initialized. Got nullptr instead");
     }
-    if (run_function_ == nullptr) {
-      throw std::invalid_argument(
-          "run_function not set,"
-          "cannot run control loop");
-    }
-    if (controller_running_flag_) {
+    if (controller_running_flag_ == true && run_function_ != nullptr) {
       run_function_(ros_callback);
     }
   } catch (const franka::Exception& e) {
@@ -409,7 +404,7 @@ bool FrankaHW::checkForConflict(
       return true;
     }
   }
-
+  ROS_INFO_STREAM("No conflict found. I can load the controller");
   return false;
 }
 
@@ -537,9 +532,11 @@ bool FrankaHW::prepareSwitch(
       break;
     default:
       run_function_ = nullptr;
+      ROS_WARN("No valid Control Loop selected!");
       return false;
       break;
   }
+  ROS_INFO("Succesfully prepared controller switch");
   return true;
 }
 

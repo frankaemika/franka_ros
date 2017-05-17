@@ -1,4 +1,4 @@
-
+#include <unistd.h>
 #include <string>
 #include <vector>
 
@@ -38,20 +38,23 @@ int main(int argc, char** argv) {
   ros::Time now(ros::Time::now());
   ros::Time last(ros::Time::now());
 
-  while (ros::ok()) {
-    franka_ros.run([&]() {
-      now = ros::Time::now();
-      period = now - last;
-      last = now;
-      control_manager.update(now, period);
-      franka_ros.enforceLimits(period);
-      franka_ros.publishExternalWrench();
-      franka_ros.publishFrankaStates();
-      franka_ros.publishJointStates();
-      franka_ros.publishTransforms();
-    });
-  }
+  std::function<void(void)> ros_callback = [&]() {
+    now = ros::Time::now();
+    period = now - last;
+    last = now;
+    control_manager.update(now, period);
+    franka_ros.enforceLimits(period);
+    franka_ros.publishExternalWrench();
+    franka_ros.publishFrankaStates();
+    franka_ros.publishJointStates();
+    franka_ros.publishTransforms();
+  };
 
+  while (ros::ok()) {
+    franka_ros.run(ros_callback);
+    ros_callback();
+    usleep(5000);
+  }
   spinner.stop();
   return 0;
 }

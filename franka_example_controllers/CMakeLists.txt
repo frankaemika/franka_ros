@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   pluginlib
 )
 
-
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
