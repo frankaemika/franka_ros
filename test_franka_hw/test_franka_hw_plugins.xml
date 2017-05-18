@@ -1,0 +1,19 @@
+<library path="lib/libtest_franka_hw">
+
+  <class name="test_franka_hw/TestJointPositionLimitsController" type="test_franka_hw::TestJointPositionLimitsController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that intentionally exceeds joint position limits to see whether the joint limit interfaces work porperly
+    </description>
+  </class>
+  <class name="test_franka_hw/TestJointVelocityLimitsController" type="test_franka_hw::TestJointVelocityLimitsController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that intentionally exceeds joint velocity limits to see whether the joint limit interfaces work porperly
+    </description>
+  </class>
+  <class name="test_franka_hw/TestJointTorqueLimitsController" type="test_franka_hw::TestJointTorqueLimitsController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that intentionally exceeds joint torque limits to see whether the joint limit interfaces work porperly
+    </description>
+  </class>
+
+</library>
