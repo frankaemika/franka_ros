@@ -3,6 +3,7 @@
 #include <random>
 
 #include <controller_interface/controller_base.h>
+#include <hardware_interface/joint_command_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <xmlrpcpp/XmlRpcValue.h>
 
