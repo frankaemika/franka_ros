@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_example_controllers)
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -26,3 +28,16 @@ add_library(franka_example_controllers
 add_dependencies(franka_example_controllers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})
+
+## Tools
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
+include(ClangTools)
+add_format_target(franka_example_controllers FILES ${SOURCES} ${HEADERS})
+add_tidy_target(franka_example_controllers
+  FILES ${SOURCES}
+  DEPENDS franka_example_controllers
+)

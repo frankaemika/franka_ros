@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -13,16 +13,17 @@
 
 namespace test_franka_hw {
 
-class TestJointPositionLimitsController : public controller_interface::MultiInterfaceController<
-    hardware_interface::PositionJointInterface>
-{
-public:
+class TestJointPositionLimitsController
+    : public controller_interface::MultiInterfaceController<
+          hardware_interface::PositionJointInterface> {
+ public:
   TestJointPositionLimitsController();
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle &node_handle);
+  bool init(hardware_interface::RobotHW* robot_hw,
+            ros::NodeHandle& node_handle);
   void update(const ros::Time& time, const ros::Duration& period);
   void stopping(const ros::Time& time);
 
-private:
+ private:
   std::vector<joint_limits_interface::JointLimits> joint_limits_;
   std::vector<std::string> joint_names_;
   hardware_interface::PositionJointInterface* position_interface_;
