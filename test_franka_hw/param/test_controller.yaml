@@ -1,0 +1,8 @@
+test_joint_position_limits_controller:
+    type: test_franka_hw/TestJointPositionLimitsController
+
+test_joint_velocity_limits_controller:
+    type: test_franka_hw/TestJointVelocityLimitsController
+
+test_joint_torque_limits_controller:
+    type: test_franka_hw/TestJointTorqueLimitsController

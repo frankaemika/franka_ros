@@ -119,6 +119,27 @@ class FrankaHW : public hardware_interface::RobotHW {
   void publishExternalWrench();
 
   /**
+  * Getter for the current Joint Position Command
+  *
+  * @return The current Joint Position command
+  */
+  std::array<double, 7> getJointPositionCommand() const;
+
+  /**
+  * Getter for the current Joint Velocity Command
+  *
+  * @return The current Joint Velocity command
+  */
+  std::array<double, 7> getJointVelocityCommand() const;
+
+  /**
+  * Getter for the current Joint Torque Command
+  *
+  * @return The current Joint Torque command
+  */
+  std::array<double, 7> getJointEffortCommand() const;
+
+  /**
   * Enforces joint limits on position velocity and torque level
   *
   * @param[in] kPeriod The duration of the current cycle
@@ -126,7 +147,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
   /**
-  * TODO
+  * Callback function to send Joint Position commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -135,7 +156,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runJointPosition(std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Velocity commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -144,7 +165,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runJointVelocity(std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Cartesian Pose commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -153,7 +174,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runCartesianPose(std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Cartesian Velocity commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -162,7 +183,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runCartesianVelocity(std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Torque commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -171,7 +192,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   void runJointTorqueControl(std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Torque commands and use the Joint Position
+  * motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -181,7 +203,8 @@ class FrankaHW : public hardware_interface::RobotHW {
       std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Torque commands and use the Joint Velocity
+  * motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -191,7 +214,8 @@ class FrankaHW : public hardware_interface::RobotHW {
       std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Torque commands and use the Cartesian
+  * pose motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -201,7 +225,8 @@ class FrankaHW : public hardware_interface::RobotHW {
       std::function<void(void)> ros_callback);
 
   /**
-  * TODO
+  * Callback function to send Joint Torque commands and use the Cartesian
+  * velocity motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
   * step
@@ -243,11 +268,17 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::string arm_id_;
   franka::RobotState robot_state_;
 
-  std::array<double, 7> position_joint_command_;
-  std::array<double, 7> velocity_joint_command_;
-  std::array<double, 7> effort_joint_command_;
-  std::array<double, 16> pose_cartesian_command_;
-  std::array<double, 6> velocity_cartesian_command_;
+  std::array<double, 7> position_joint_command_ = {
+      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 7> velocity_joint_command_ = {
+      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 7> effort_joint_command_ = {
+      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 16> pose_cartesian_command_ = {
+      {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+       0.0, 1.0}};
+  std::array<double, 6> velocity_cartesian_command_ = {
+      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
   bool controller_running_flag_ = false;

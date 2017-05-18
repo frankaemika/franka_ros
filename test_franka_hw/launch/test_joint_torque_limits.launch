@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<launch>
+  <rosparam command="load" file="$(find test_franka_hw)/param/test_controller.yaml" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/franka.urdf.xacro" />
+  <node name="mock_franka_hw_node" pkg="test_franka_hw" type="mock_franka_hw_node" output="screen">
+    <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/franka.urdf.xacro" />
+  </node>
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="test_joint_torque_limits_controller --shutdown-timeout 2"/>
+</launch>
