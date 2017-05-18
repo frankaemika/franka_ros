@@ -239,6 +239,7 @@ void FrankaHW::run(std::function<void(void)> ros_callback) {
           "initialized. Got nullptr instead");
     }
     if (controller_running_flag_ && run_function_ != nullptr) {
+      robot_state_ = robot_->readOnce();
       run_function_(ros_callback);
     }
   } catch (const franka::Exception& e) {

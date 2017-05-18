@@ -55,10 +55,7 @@ void JointVelocityExampleController::update(const ros::Time& time, const ros::Du
                               time_max.toSec())) / time_max.toSec()));
           double omega = cycle * omega_max / 2.0 *
                          (1.0 - std::cos(2.0 * M_PI / time_max.toSec() * elapsed_time.toSec()));
-    for (size_t i = 0; i < 3; ++i) {
-        velocity_joint_handles_[i].setCommand(0.0);
-    }
-    for (size_t i = 3; i < 7; ++i) {
+    for (size_t i = 0; i < 7; ++i) {
         velocity_joint_handles_[i].setCommand(omega);
     }
 }
