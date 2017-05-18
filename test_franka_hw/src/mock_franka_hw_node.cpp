@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
   node_handle.getParam("franka_states_publish_rate",
                        franka_states_publish_rate);
 
-  franka::Robot* empty_robot_pointer;
+  franka::Robot* empty_robot_pointer = nullptr;
   std::string arm_id;
   node_handle.getParam("arm_id", arm_id);
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     if (!joint_limits_interface::getJointLimits(urdf_joint, joint_limits[i])) {
       ROS_ERROR_STREAM("Could not parse joint limits of joint "
                        << joint_names[i]);
-      return false;
+      return -1;
     }
   }
 

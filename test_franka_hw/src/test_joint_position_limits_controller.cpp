@@ -46,8 +46,8 @@ bool TestJointPositionLimitsController::init(
                     << " lower=" << urdf_joint->limits->lower << " velocity"
                     << urdf_joint->limits->velocity);
   }
-  position_interface_ =
-      robot_hw->get<hardware_interface::PositionJointInterface>();
+  position_interface_ =                                             // NOLINT
+      robot_hw->get<hardware_interface::PositionJointInterface>();  // NOLINT
   if (position_interface_ == nullptr) {
     ROS_ERROR("interfaces for controller not properly initialized ");
     return false;

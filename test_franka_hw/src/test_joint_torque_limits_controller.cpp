@@ -46,7 +46,8 @@ bool TestJointTorqueLimitsController::init(
                     << " lower=" << urdf_joint->limits->lower << " velocity"
                     << urdf_joint->limits->velocity);
   }
-  effort_interface_ = robot_hw->get<hardware_interface::EffortJointInterface>();
+  effort_interface_ =
+      robot_hw->get<hardware_interface::EffortJointInterface>();  // NOLINT
   if (effort_interface_ == nullptr) {
     ROS_ERROR("interfaces for controller not properly initialized ");
     return false;
@@ -58,8 +59,9 @@ bool TestJointTorqueLimitsController::init(
   return true;
 }
 
-void TestJointTorqueLimitsController::update(const ros::Time& time,
-                                             const ros::Duration& period) {
+void TestJointTorqueLimitsController::update(
+    const ros::Time& time,          // NOLINT
+    const ros::Duration& period) {  // NOLINT
   std::array<double, 7> effort_command;
 
   for (size_t i = 0; i < joint_names_.size(); ++i) {
@@ -79,8 +81,6 @@ void TestJointTorqueLimitsController::update(const ros::Time& time,
                   << effort_command[4] << " " << effort_command[5] << " "
                   << effort_command[6]);
 }
-
-void TestJointTorqueLimitsController::stopping(const ros::Time& time) {}
 
 }  // namespace test_franka_hw
 

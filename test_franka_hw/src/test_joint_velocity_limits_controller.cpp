@@ -47,7 +47,7 @@ bool TestJointVelocityLimitsController::init(
                     << urdf_joint->limits->velocity);
   }
   velocity_interface_ =
-      robot_hw->get<hardware_interface::VelocityJointInterface>();
+      robot_hw->get<hardware_interface::VelocityJointInterface>();  // NOLINT
   if (velocity_interface_ == nullptr) {
     ROS_ERROR("interfaces for controller not properly initialized ");
     return false;
@@ -60,8 +60,9 @@ bool TestJointVelocityLimitsController::init(
   return true;
 }
 
-void TestJointVelocityLimitsController::update(const ros::Time& time,
-                                               const ros::Duration& period) {
+void TestJointVelocityLimitsController::update(
+    const ros::Time& time,          // NOLINT
+    const ros::Duration& period) {  // NOLINT
   std::array<double, 7> velocity_command;
 
   for (size_t i = 0; i < joint_names_.size(); ++i) {
@@ -81,8 +82,6 @@ void TestJointVelocityLimitsController::update(const ros::Time& time,
                   << velocity_command[4] << " " << velocity_command[5] << " "
                   << velocity_command[6] << " ;\n ");
 }
-
-void TestJointVelocityLimitsController::stopping(const ros::Time& time) {}
 
 }  // namespace test_franka_hw
 
