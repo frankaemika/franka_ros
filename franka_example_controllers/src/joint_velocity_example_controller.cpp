@@ -1,5 +1,5 @@
 
-#include <franka_example_controllers/joint_velocity_controller_example.h>
+#include <franka_example_controllers/joint_velocity_example_controller.h>
 
 #include <cmath>
 
@@ -23,7 +23,7 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hw,
     }
     XmlRpc::XmlRpcValue parameters;
     if (!node_handle.getParam("/franka_hw_node/joint_names", parameters)) {
-        ROS_ERROR("Could not parse joint names in JointLimitTestController");
+        ROS_ERROR("Could not parse joint names in JointVelocityExampleController");
     }
     if (parameters.size() != 7) {
         ROS_ERROR_STREAM("Wrong number of joint names, got "

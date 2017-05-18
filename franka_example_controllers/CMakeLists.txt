@@ -19,7 +19,9 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_library(franka_example_controllers src/joint_velocity_controller_example.cpp)
+add_library(franka_example_controllers 
+  src/joint_velocity_example_controller.cpp
+  src/joint_position_example_controller.cpp)
 
 add_dependencies(franka_example_controllers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 

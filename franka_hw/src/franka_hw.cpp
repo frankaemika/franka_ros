@@ -229,6 +229,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     publisher_external_wrench_.msg_.wrench.torque.y = 0.0;
     publisher_external_wrench_.msg_.wrench.torque.z = 0.0;
   }
+  robot_state_ = robot_->readOnce();
 }
 
 void FrankaHW::run(std::function<void(void)> ros_callback) {

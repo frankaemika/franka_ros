@@ -4,4 +4,9 @@
       A controller that executes a short motion based on joint velocities to demonstrate the according usage
     </description>
   </class>
+  <class name="franka_example_controllers/JointPositionExampleController" type="franka_example_controllers::JointPositionExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on joint positions to demonstrate the according usage
+    </description>
+  </class>
 </library>
