@@ -21,7 +21,6 @@ class TestJointPositionLimitsController
   bool init(hardware_interface::RobotHW* robot_hw,
             ros::NodeHandle& node_handle);
   void update(const ros::Time& time, const ros::Duration& period);
-  void stopping(const ros::Time& time);
 
  private:
   std::vector<joint_limits_interface::JointLimits> joint_limits_;

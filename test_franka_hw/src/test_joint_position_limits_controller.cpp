@@ -61,8 +61,9 @@ bool TestJointPositionLimitsController::init(
   return true;
 }
 
-void TestJointPositionLimitsController::update(const ros::Time& time,
-                                               const ros::Duration& period) {
+void TestJointPositionLimitsController::update(
+    const ros::Time& time,          // NOLINT
+    const ros::Duration& period) {  // NOLINT
   std::array<double, 7> position_command;
   for (size_t i = 0; i < joint_names_.size(); ++i) {
     if (phase_) {
@@ -81,8 +82,6 @@ void TestJointPositionLimitsController::update(const ros::Time& time,
                   << position_command[4] << " " << position_command[5] << " "
                   << position_command[6] << " ;\n ");
 }
-
-void TestJointPositionLimitsController::stopping(const ros::Time& time) {}
 
 }  // namespace test_franka_hw
 
