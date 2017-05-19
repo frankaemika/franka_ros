@@ -35,29 +35,24 @@ void FrankaHW::runCartesianPose(std::function<void(void)> ros_callback) {
         if (controller_running_flag_) {
           robot_state_ = robot_state;
           ros_callback();
-          franka_hw::FrankaCartesianPoseHandle pose_handle(
-              franka_pose_cartesian_interface_.getHandle(
-                  arm_id_ + std::string("_cartesian")));
-          return franka::CartesianPose(pose_handle.getCommand());
+          auto cmd = pose_cartesian_command_;
+          return franka::CartesianPose(pose_cartesian_command_);
         }
         return franka::Stop;
       });
 }
 
 void FrankaHW::runCartesianVelocity(std::function<void(void)> ros_callback) {
-  robot_->control(
-      [&](const franka::RobotState& robot_state)
-          -> franka::CartesianVelocities {
-            if (controller_running_flag_) {
-              robot_state_ = robot_state;
-              ros_callback();
-              franka_hw::FrankaCartesianVelocityHandle velocity_handle(
-                  franka_velocity_cartesian_interface_.getHandle(
-                      arm_id_ + std::string("_cartesian")));
-              return franka::CartesianVelocities(velocity_handle.getCommand());
-            }
-            return franka::Stop;
-          });
+  robot_->control([&](const franka::RobotState& robot_state)
+                      -> franka::CartesianVelocities {
+                        if (controller_running_flag_) {
+                          robot_state_ = robot_state;
+                          ros_callback();
+                          return franka::CartesianVelocities(
+                              velocity_cartesian_command_);
+                        }
+                        return franka::Stop;
+                      });
 }
 
 void FrankaHW::runJointTorqueControl(std::function<void(void)> ros_callback) {
@@ -115,10 +110,7 @@ void FrankaHW::runTorqueControlWithCartesianPoseMotionGenerator(
   robot_->control(
       [&](const franka::RobotState& robot_state) -> franka::CartesianPose {
         if (controller_running_flag_) {
-          franka_hw::FrankaCartesianPoseHandle pose_handle(
-              franka_pose_cartesian_interface_.getHandle(
-                  arm_id_ + std::string("_cartesian")));
-          return franka::CartesianPose(pose_handle.getCommand());
+          return franka::CartesianPose(pose_cartesian_command_);
         }
         return franka::Stop;
       },
@@ -138,10 +130,7 @@ void FrankaHW::runTorqueControlWithCartesianVelocityMotionGenerator(
       [&](const franka::RobotState& robot_state)
           -> franka::CartesianVelocities {
             if (controller_running_flag_) {
-              franka_hw::FrankaCartesianVelocityHandle velocity_handle(
-                  franka_velocity_cartesian_interface_.getHandle(
-                      arm_id_ + std::string("_cartesian")));
-              return franka::CartesianVelocities(velocity_handle.getCommand());
+              return franka::CartesianVelocities(velocity_cartesian_command_);
             }
             return franka::Stop;
           },

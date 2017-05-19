@@ -137,12 +137,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 
   FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ +
-                                                  std::string("_cartesian")));
+                                                  std::string("_cartesian")),
+      pose_cartesian_command_);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
   FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ +
-                                                  std::string("_cartesian")));
+                                                  std::string("_cartesian")),
+      velocity_cartesian_command_);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
 

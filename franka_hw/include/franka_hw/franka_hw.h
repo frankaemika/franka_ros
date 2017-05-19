@@ -37,7 +37,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param[in] joint_names A vector of joint names for all franka joint
   * @param[in] robot A pointer to an istance of franka::Robot
   * @param[in] publish_rate Publish rate [Hz] for ROS topics
-  * @param[in] arm_id Unique identifier for the Franka arm the class controls
+  * @param[in] arm_id Unique identifier for the Franka arm that the class
+  * controls
   * @param[in] nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
