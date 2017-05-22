@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_example_controllers)
 
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -37,6 +35,8 @@ file(GLOB_RECURSE HEADERS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
 )
+
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 include(ClangTools)
 add_format_target(franka_example_controllers FILES ${SOURCES} ${HEADERS})
 add_tidy_target(franka_example_controllers

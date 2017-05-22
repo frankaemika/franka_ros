@@ -50,23 +50,20 @@ class FrankaHW : public hardware_interface::RobotHW {
   ~FrankaHW() override = default;
 
   /**
-  * Runs the control in case a valid run_function_ was chosen based on
-  * the claimed resources
+  * Runs the control in case a valid run_function_ was chosen based on the
+  * claimed resources
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void run(std::function<void(void)> ros_callback);
 
   /**
-  * Checks whether a requested controller can be run, based on the resources
-  * and interfaces it claims
+  * Checks whether a requested controller can be run, based on the resources and
+  * interfaces it claims
   *
   * @param[in] info A list of all controllers to be started, including the
-  * resources
-  * they claim
-  *
+  * resources they claim
   * @return Returns true in case of a conflict, false in case of valid
   * controllers
   */
@@ -76,10 +73,10 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
   * Performs the switch between controllers and is real-time capable
   *
-  * @param[in] start_list Information list about all controllers requested
-  * to be started
-  * @param[in] stop_list Information list about all controllers requested
-  * to be stopped
+  * @param[in] start_list Information list about all controllers requested to be
+  * started
+  * @param[in] stop_list Information list about all controllers requested to be
+  * stopped
   */
   void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                 const std::list<hardware_interface::ControllerInfo>& stop_list);
@@ -88,29 +85,28 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Prepares the switching between controllers. This function is not real-time
   * capable.
   *
-  * @param[in] start_list Information list about all controllers requested
-  * to be started
-  * @param[in] stop_list Information list about all controllers requested
-  * to be stopped
+  * @param[in] start_list Information list about all controllers requested to be
+  * started
+  * @param[in] stop_list Information list about all controllers requested to be
+  * stopped
   */
   bool prepareSwitch(
       const std::list<hardware_interface::ControllerInfo>& start_list,
       const std::list<hardware_interface::ControllerInfo>& stop_list);
 
   /**
-  * Publishes all relevant data received from the Franka
+  * Publishes all relevant data received from the Franka arm
   */
   void publishFrankaStates();
 
   /**
-  * Publishes the joint states of the Franka
+  * Publishes the joint states of the Franka arm
   */
   void publishJointStates();
 
   /**
   * Publishes the transforms for EE and K frame which define the end-effector
-  * (EE)
-  * and the Cartesian impedance reference frame (K)
+  * (EE) and the Cartesian impedance reference frame (K)
   */
   void publishTransforms();
 
@@ -151,8 +147,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Callback function to send Joint Position commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runJointPosition(std::function<void(void)> ros_callback);
 
@@ -160,8 +155,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Callback function to send Joint Velocity commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runJointVelocity(std::function<void(void)> ros_callback);
 
@@ -169,8 +163,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Callback function to send Cartesian Pose commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runCartesianPose(std::function<void(void)> ros_callback);
 
@@ -178,8 +171,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Callback function to send Cartesian Velocity commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runCartesianVelocity(std::function<void(void)> ros_callback);
 
@@ -187,8 +179,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Callback function to send Joint Torque commands
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runJointTorqueControl(std::function<void(void)> ros_callback);
 
@@ -197,8 +188,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runTorqueControlWithJointPositionMotionGenerator(
       std::function<void(void)> ros_callback);
@@ -208,19 +198,17 @@ class FrankaHW : public hardware_interface::RobotHW {
   * motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runTorqueControlWithJointVelocityMotionGenerator(
       std::function<void(void)> ros_callback);
 
   /**
-  * Callback function to send Joint Torque commands and use the Cartesian
-  * pose motion generator of the robot
+  * Callback function to send Joint Torque commands and use the Cartesian pose
+  * motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runTorqueControlWithCartesianPoseMotionGenerator(
       std::function<void(void)> ros_callback);
@@ -230,8 +218,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * velocity motion generator of the robot
   *
   * @param[in] ros_callback A callback function that is executed at each time
-  * step
-  * and runs all ros-side functionality of the hardware
+  * step and runs all ros-side functionality of the hardware
   */
   void runTorqueControlWithCartesianVelocityMotionGenerator(
       std::function<void(void)> ros_callback);

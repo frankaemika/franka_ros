@@ -6,15 +6,15 @@
 namespace franka_hw {
 
 bool findArmIDinResourceID(const std::string& resource_id,
-                           std::string& arm_id) {
+                           std::string* arm_id) {
   size_t position = resource_id.rfind("_joint");
   if (position != std::string::npos && position > 0) {
-    arm_id = resource_id.substr(0, position);
+    *arm_id = resource_id.substr(0, position);
     return true;
   }
   position = resource_id.rfind("_cartesian");
   if (position != std::string::npos && position > 0) {
-    arm_id = resource_id.substr(0, position);
+    *arm_id = resource_id.substr(0, position);
     return true;
   }
   return false;
@@ -49,7 +49,7 @@ bool getArmClaimedMap(ResourceWithClaimsMap& resource_map,
   // 7 non-torque claims on joint_level or one claim on cartesian level.
   for (auto map_it = resource_map.begin(); map_it != resource_map.end();
        map_it++) {
-    if (!findArmIDinResourceID(map_it->first, current_arm_id)) {
+    if (!findArmIDinResourceID(map_it->first, &current_arm_id)) {
       ROS_ERROR_STREAM("Could not find arm_id in resource "
                        << map_it->first
                        << ".Conflict! \n Name joints as "
