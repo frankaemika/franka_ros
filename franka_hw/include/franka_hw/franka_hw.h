@@ -144,84 +144,27 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
   /**
-  * Callback function to send Joint Position commands
+  * Template for a Callback function to a control loop with command type T,
+  * which can be joint positions, joint velocities,joint efforts , cartesian
+  * poses or cartesian velocities
   *
+  * @param[in] get_command A function that returns the desired command
   * @param[in] ros_callback A callback function that is executed at each time
   * step and runs all ros-side functionality of the hardware
   */
-  void runJointPosition(std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Velocity commands
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runJointVelocity(std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Cartesian Pose commands
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runCartesianPose(std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Cartesian Velocity commands
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runCartesianVelocity(std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Torque commands
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runJointTorqueControl(std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Torque commands and use the Joint Position
-  * motion generator of the robot
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runTorqueControlWithJointPositionMotionGenerator(
-      std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Torque commands and use the Joint Velocity
-  * motion generator of the robot
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runTorqueControlWithJointVelocityMotionGenerator(
-      std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Torque commands and use the Cartesian pose
-  * motion generator of the robot
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runTorqueControlWithCartesianPoseMotionGenerator(
-      std::function<void(void)> ros_callback);
-
-  /**
-  * Callback function to send Joint Torque commands and use the Cartesian
-  * velocity motion generator of the robot
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void runTorqueControlWithCartesianVelocityMotionGenerator(
-      std::function<void(void)> ros_callback);
+  template <typename T>
+  T controlCallback(std::function<T()> get_command,
+                    std::function<void()> ros_callback,
+                    const franka::RobotState& robot_state) {
+    if (controller_running_flag_) {
+      if (ros_callback) {
+        robot_state_ = robot_state;
+        ros_callback();
+      }
+      return get_command();
+    }
+    return franka::Stop;
+  }
 
  private:
   hardware_interface::JointStateInterface joint_state_interface_;
@@ -241,8 +184,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  franka::Robot* robot_;
-
   franka_hw::TriggerRate publish_rate_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
@@ -251,22 +192,17 @@ class FrankaHW : public hardware_interface::RobotHW {
       publisher_joint_states_;
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
       publisher_external_wrench_;
-
   std::vector<std::string> joint_names_;
   std::string arm_id_;
-  franka::RobotState robot_state_;
 
-  std::array<double, 7> position_joint_command_ = {
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 7> velocity_joint_command_ = {
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 7> effort_joint_command_ = {
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 16> pose_cartesian_command_ = {
-      {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-       0.0, 1.0}};
-  std::array<double, 6> velocity_cartesian_command_ = {
-      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  franka::Robot* robot_;
+  franka::RobotState robot_state_;
+  franka::JointValues position_joint_command_;
+  franka::JointVelocities velocity_joint_command_;
+  franka::Torques effort_joint_command_;
+  franka::CartesianPose pose_cartesian_command_;
+  franka::CartesianVelocities velocity_cartesian_command_;
+
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
   bool controller_running_flag_ = false;

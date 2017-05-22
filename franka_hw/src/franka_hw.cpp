@@ -41,14 +41,20 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
       publish_rate_(publish_rate),
-      robot_(robot),
       publisher_transforms_(node_handle, "/tf", 1),
       publisher_franka_states_(node_handle, "franka_states", 1),
       publisher_joint_states_(node_handle, "joint_states", 1),
       publisher_external_wrench_(node_handle, "F_ext", 1),
       joint_names_(),
       arm_id_(arm_id),
+      robot_(robot),
       robot_state_(),
+      position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      pose_cartesian_command_({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                               1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
+      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       run_function_(nullptr) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
@@ -74,17 +80,17 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 
     hardware_interface::JointHandle position_joint_handle(
         joint_state_interface_.getHandle(joint_names_[i]),
-        &position_joint_command_[i]);
+        &position_joint_command_.q[i]);
     position_joint_interface_.registerHandle(position_joint_handle);
 
     hardware_interface::JointHandle velocity_joint_handle(
         joint_state_interface_.getHandle(joint_names_[i]),
-        &velocity_joint_command_[i]);
+        &velocity_joint_command_.dq[i]);
     velocity_joint_interface_.registerHandle(velocity_joint_handle);
 
     hardware_interface::JointHandle effort_joint_handle(
         joint_state_interface_.getHandle(joint_names_[i]),
-        &effort_joint_command_[i]);
+        &effort_joint_command_.tau_J[i]);
     effort_joint_interface_.registerHandle(effort_joint_handle);
 
     boost::shared_ptr<const urdf::Joint> urdf_joint =
@@ -137,12 +143,12 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 
   FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
-      pose_cartesian_command_);
+      pose_cartesian_command_.O_T_EE);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
 
   FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
-      velocity_cartesian_command_);
+      velocity_cartesian_command_.O_dP_EE);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
 
@@ -239,7 +245,7 @@ void FrankaHW::run(std::function<void(void)> ros_callback) {
           "franka::Robot was not "
           "initialized. Got nullptr instead");
     }
-    if (controller_running_flag_ && run_function_ != nullptr) {
+    if (controller_running_flag_ && run_function_) {
       robot_state_ = robot_->readOnce();
       run_function_(ros_callback);
     }
@@ -503,45 +509,87 @@ bool FrankaHW::prepareSwitch(
 
   switch (request) {
     case JointPosition:
-      run_function_ =
-          std::bind(&FrankaHW::runJointPosition, this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::JointValues>, this,
+                      [=] { return position_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case JointVelocity:
-      run_function_ =
-          std::bind(&FrankaHW::runJointVelocity, this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+                      [=] { return velocity_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case JointTorque:
-      run_function_ = std::bind(&FrankaHW::runJointTorqueControl, this,
-                                std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(std::bind(&FrankaHW::controlCallback<franka::Torques>,
+                                  this, [=] { return effort_joint_command_; },
+                                  ros_callback, std::placeholders::_1));
+      };
       break;
     case CartesianPose:
-      run_function_ =
-          std::bind(&FrankaHW::runCartesianPose, this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+                      [=] { return pose_cartesian_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case CartesianVelocity:
-      run_function_ = std::bind(&FrankaHW::runCartesianVelocity, this,
-                                std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
+                      this, [=] { return velocity_cartesian_command_; },
+                      ros_callback, std::placeholders::_1));
+      };
       break;
     case TorqueAndJointPosition:
-      run_function_ =
-          std::bind(&FrankaHW::runTorqueControlWithJointPositionMotionGenerator,
-                    this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::JointValues>, this,
+                      [=] { return position_joint_command_; },
+                      std::function<void(void)>(), std::placeholders::_1),
+            std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                      [=] { return effort_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case TorqueAndJointVelocity:
-      run_function_ =
-          std::bind(&FrankaHW::runTorqueControlWithJointVelocityMotionGenerator,
-                    this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+                      [=] { return velocity_joint_command_; },
+                      std::function<void(void)>(), std::placeholders::_1),
+            std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                      [=] { return effort_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case TorqueAndCartesianPose:
-      run_function_ =
-          std::bind(&FrankaHW::runTorqueControlWithCartesianPoseMotionGenerator,
-                    this, std::placeholders::_1);
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+                      [=] { return pose_cartesian_command_; },
+                      std::function<void(void)>(), std::placeholders::_1),
+            std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                      [=] { return effort_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
       break;
     case TorqueAndCartesianVelocity:
-      run_function_ = std::bind(
-          &FrankaHW::runTorqueControlWithCartesianVelocityMotionGenerator, this,
-          std::placeholders::_1);
-      break;
+      run_function_ = [this](auto ros_callback) {
+        robot_->control(
+            std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
+                      this, [=] { return velocity_cartesian_command_; },
+                      std::function<void(void)>(), std::placeholders::_1),
+            std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                      [=] { return effort_joint_command_; }, ros_callback,
+                      std::placeholders::_1));
+      };
     case NonValidRequest:
       run_function_ = nullptr;
       ROS_WARN("No valid Control Loop selected!");
@@ -558,15 +606,15 @@ bool FrankaHW::prepareSwitch(
 }
 
 std::array<double, 7> FrankaHW::getJointPositionCommand() const {
-  return position_joint_command_;
+  return position_joint_command_.q;
 }
 
 std::array<double, 7> FrankaHW::getJointVelocityCommand() const {
-  return velocity_joint_command_;
+  return velocity_joint_command_.dq;
 }
 
 std::array<double, 7> FrankaHW::getJointEffortCommand() const {
-  return effort_joint_command_;
+  return effort_joint_command_.tau_J;
 }
 
 }  // namespace franka_hw
