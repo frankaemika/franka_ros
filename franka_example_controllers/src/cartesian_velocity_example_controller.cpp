@@ -42,9 +42,10 @@ bool CartesianVelocityExampleController::init(
   return true;
 }
 
-void CartesianVelocityExampleController::update(const ros::Time& time,
-                                                const ros::Duration& period) {
-  ros::Duration elapsed_time = ros::Time::now() - start_time_stamp_;
+void CartesianVelocityExampleController::update(
+    const ros::Time& time,
+    const ros::Duration& period) {  // NOLINT
+  ros::Duration elapsed_time = time - start_time_stamp_;
   double time_max = 4.0;
   double v_max = 0.1;
   double angle = M_PI / 4.0;
@@ -66,7 +67,8 @@ void CartesianVelocityExampleController::update(const ros::Time& time,
   }
 }
 
-void CartesianVelocityExampleController::stopping(const ros::Time& time) {
+void CartesianVelocityExampleController::stopping(
+    const ros::Time& time) {  // NOLINT
   try {
     franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
         velocity_cartesian_interface_->getHandle(arm_id_ +

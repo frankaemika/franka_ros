@@ -48,10 +48,11 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void JointVelocityExampleController::update(const ros::Time& time,
-                                            const ros::Duration& period) {
+void JointVelocityExampleController::update(
+    const ros::Time& time,
+    const ros::Duration& period) {  // NOLINT
   ros::Duration time_max(4.0);
-  ros::Duration elapsed_time = ros::Time::now() - start_time_stamp_;
+  ros::Duration elapsed_time = time - start_time_stamp_;
   double omega_max = 0.2;
   double cycle = std::floor(
       std::pow(-1.0, (elapsed_time.toSec() -
@@ -65,7 +66,8 @@ void JointVelocityExampleController::update(const ros::Time& time,
   }
 }
 
-void JointVelocityExampleController::stopping(const ros::Time& time) {
+void JointVelocityExampleController::stopping(
+    const ros::Time& time) {  // NOLINT
   for (size_t i = 0; i < velocity_joint_handles_.size(); ++i) {
     velocity_joint_handles_[i].setCommand(0.0);
   }

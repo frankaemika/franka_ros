@@ -49,9 +49,10 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void JointPositionExampleController::update(const ros::Time& time,
-                                            const ros::Duration& period) {
-  ros::Duration elapsed_time = ros::Time::now() - start_time_stamp_;
+void JointPositionExampleController::update(
+    const ros::Time& time,
+    const ros::Duration& period) {  // NOLINT
+  ros::Duration elapsed_time = time - start_time_stamp_;
   double delta_angle =
       M_PI / 8 * (1 - std::cos(M_PI / 5.0 * elapsed_time.toSec()));
   for (size_t i = 0; i < 7; ++i) {

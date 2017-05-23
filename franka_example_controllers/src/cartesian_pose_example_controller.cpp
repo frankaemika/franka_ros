@@ -45,8 +45,9 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void CartesianPoseExampleController::update(const ros::Time& time,
-                                            const ros::Duration& period) {
+void CartesianPoseExampleController::update(
+    const ros::Time& time,
+    const ros::Duration& period) {  // NOLINT
   ros::Duration elapsed_time = time - start_time_stamp_;
   double radius = 0.3;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time.toSec()));
