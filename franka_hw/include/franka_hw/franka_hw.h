@@ -143,6 +143,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   */
   void enforceLimits(const ros::Duration kPeriod);
 
+ private:
   /**
   * Template for a Callback function to a control loop with command type T,
   * which can be joint positions, joint velocities,joint efforts , cartesian
@@ -166,7 +167,6 @@ class FrankaHW : public hardware_interface::RobotHW {
     return franka::Stop;
   }
 
- private:
   hardware_interface::JointStateInterface joint_state_interface_;
   franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
   franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
