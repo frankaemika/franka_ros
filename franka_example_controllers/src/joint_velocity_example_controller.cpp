@@ -61,15 +61,16 @@ void JointVelocityExampleController::update(
   double omega =
       cycle * omega_max / 2.0 *
       (1.0 - std::cos(2.0 * M_PI / time_max.toSec() * elapsed_time.toSec()));
-  for (size_t i = 0; i < 7; ++i) {
-    velocity_joint_handles_[i].setCommand(omega);
+
+  for (auto joint_handle : velocity_joint_handles_) {
+    joint_handle.setCommand(omega);
   }
 }
 
 void JointVelocityExampleController::stopping(
     const ros::Time& time) {  // NOLINT
-  for (size_t i = 0; i < velocity_joint_handles_.size(); ++i) {
-    velocity_joint_handles_[i].setCommand(0.0);
+  for (auto joint_handle : velocity_joint_handles_) {
+    joint_handle.setCommand(0.0);
   }
 }
 
