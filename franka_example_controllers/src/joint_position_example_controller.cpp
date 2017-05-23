@@ -60,7 +60,7 @@ void JointPositionExampleController::update(
   }
 }
 
-}  // franka_example_controllers
+}  // namespace franka_example_controllers
 
 PLUGINLIB_EXPORT_CLASS(
     franka_example_controllers::JointPositionExampleController,

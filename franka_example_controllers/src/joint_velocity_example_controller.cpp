@@ -73,7 +73,7 @@ void JointVelocityExampleController::stopping(
   }
 }
 
-}  // franka_example_controllers
+}  // namespace franka_example_controllers
 
 PLUGINLIB_EXPORT_CLASS(
     franka_example_controllers::JointVelocityExampleController,
