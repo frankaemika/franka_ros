@@ -1,0 +1,22 @@
+<library path="lib/libfranka_example_controllers">
+  <class name="franka_example_controllers/JointVelocityExampleController" type="franka_example_controllers::JointVelocityExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on joint velocities to demonstrate correct usage
+    </description>
+  </class>
+  <class name="franka_example_controllers/JointPositionExampleController" type="franka_example_controllers::JointPositionExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on joint positions to demonstrate correct usage
+    </description>
+  </class>
+  <class name="franka_example_controllers/CartesianPoseExampleController" type="franka_example_controllers::CartesianPoseExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on cartesian poses to demonstrate correct usage
+    </description>
+  </class>
+  <class name="franka_example_controllers/CartesianVelocityExampleController" type="franka_example_controllers::CartesianVelocityExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on cartesian velocities to demonstrate correct usage
+    </description>
+  </class>
+</library>

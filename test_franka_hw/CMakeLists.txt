@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
-
 project(test_franka_hw)
+
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,3 +40,16 @@ target_link_libraries(test_franka_hw ${catkin_LIBRARIES})
 add_executable(mock_franka_hw_node src/mock_franka_hw_node.cpp)
 add_dependencies(mock_franka_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mock_franka_hw_node ${catkin_LIBRARIES})
+
+## Tools
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+)
+include(ClangTools)
+add_format_target(test_franka_hw FILES ${SOURCES} ${HEADERS})
+add_tidy_target(test_franka_hw
+  FILES ${SOURCES}
+  DEPENDS test_franka_hw mock_franka_hw_node
+)

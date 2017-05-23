@@ -17,14 +17,18 @@ class FrankaCartesianPoseHandle : public FrankaCartesianStateHandle {
    * passed a desired homogeneous transformation O_T_EE_d
    */
   FrankaCartesianPoseHandle(
-      const FrankaCartesianStateHandle& cartesian_state_handle)
-      : FrankaCartesianStateHandle(cartesian_state_handle) {}
+      const FrankaCartesianStateHandle& cartesian_state_handle,
+      std::array<double, 16>& command)
+      : FrankaCartesianStateHandle(cartesian_state_handle),
+        command_(&command) {}
 
-  void setCommand(std::array<double, 16>& command) { command_ = command; }
-  const std::array<double, 16>& getCommand() const { return command_; }
+  void setCommand(const std::array<double, 16>& command) {
+    *command_ = command;
+  }
+  const std::array<double, 16>& getCommand() const { return *command_; }
 
  private:
-  std::array<double, 16> command_{};
+  std::array<double, 16>* command_;
 };
 
 /** \brief Hardware interface to support commanding Cartesian poses to a Franka.
@@ -42,18 +46,20 @@ class FrankaCartesianVelocityHandle : public FrankaCartesianStateHandle {
 
   /**
    * \param cartesian_state_handle The cartesian state handle
-   * \param command A reference to the storage field for the cartesian pose
+   * \param command A reference to the storage field for the cartesian velocity
    * passed a desired homogeneous transformation O_T_EE_d
    */
   FrankaCartesianVelocityHandle(
-      const FrankaCartesianStateHandle& cartesian_state_handle)
-      : FrankaCartesianStateHandle(cartesian_state_handle) {}
+      const FrankaCartesianStateHandle& cartesian_state_handle,
+      std::array<double, 6>& command)
+      : FrankaCartesianStateHandle(cartesian_state_handle),
+        command_(&command) {}
 
-  void setCommand(std::array<double, 6>& command) { command_ = command; }
-  const std::array<double, 6>& getCommand() const { return command_; }
+  void setCommand(std::array<double, 6>& command) { *command_ = command; }
+  const std::array<double, 6>& getCommand() const { return *command_; }
 
  private:
-  std::array<double, 6> command_{};
+  std::array<double, 6>* command_;
 };
 
 /** \brief Hardware interface to support commanding an array of Franka joints.

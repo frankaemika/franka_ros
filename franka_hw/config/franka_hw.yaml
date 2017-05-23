@@ -1,12 +1,13 @@
 joint_names:
-  - joint1
-  - joint2
-  - joint3
-  - joint4
-  - joint5
-  - joint6
-  - joint7
+  - franka_emika_joint1
+  - franka_emika_joint2
+  - franka_emika_joint3
+  - franka_emika_joint4
+  - franka_emika_joint5
+  - franka_emika_joint6
+  - franka_emika_joint7
 
+arm_id: franka_emika
 robot_ip: 127.0.0.1
 franka_states_publish_rate: 30.0  # [Hz]
 
