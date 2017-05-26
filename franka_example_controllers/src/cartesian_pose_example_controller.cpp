@@ -16,8 +16,7 @@
 namespace franka_example_controllers {
 
 CartesianPoseExampleController::CartesianPoseExampleController()
-    : cartesian_pose_interface_(nullptr),
-      elapsed_time_(0.0){}
+    : cartesian_pose_interface_(nullptr), elapsed_time_(0.0) {}
 
 bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
@@ -46,9 +45,8 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void CartesianPoseExampleController::update(
-    const ros::Time& time,  // NOLINT
-    const ros::Duration& period) {
+void CartesianPoseExampleController::update(const ros::Time& time,  // NOLINT
+                                            const ros::Duration& period) {
   double radius = 0.3;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   double delta_x = radius * std::sin(angle);

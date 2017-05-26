@@ -13,8 +13,7 @@
 namespace franka_example_controllers {
 
 CartesianVelocityExampleController::CartesianVelocityExampleController()
-    : velocity_cartesian_interface_(nullptr),
-      elapsed_time_(0.0) {}
+    : velocity_cartesian_interface_(nullptr), elapsed_time_(0.0) {}
 
 bool CartesianVelocityExampleController::init(
     hardware_interface::RobotHW* robot_hw,
@@ -44,14 +43,15 @@ bool CartesianVelocityExampleController::init(
 }
 
 void CartesianVelocityExampleController::update(
-    const ros::Time& time,   // NOLINT
+    const ros::Time& time,  // NOLINT
     const ros::Duration& period) {
   double time_max = 4.0;
   double v_max = 0.1;
   double angle = M_PI / 4.0;
-  double cycle = std::floor(pow(
-      -1.0, (elapsed_time_.toSec() - std::fmod(elapsed_time_.toSec(), time_max)) /
-                time_max));
+  double cycle =
+      std::floor(pow(-1.0, (elapsed_time_.toSec() -
+                            std::fmod(elapsed_time_.toSec(), time_max)) /
+                               time_max));
   double v = cycle * v_max / 2.0 *
              (1.0 - std::cos(2.0 * M_PI / time_max * elapsed_time_.toSec()));
   double v_x = std::cos(angle) * v;
