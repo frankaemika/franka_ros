@@ -58,9 +58,7 @@ TEST(FrankaHWTests, checkForConflictAndPrepareSwitchOk) {
   resources_set_cart.insert(arm_id + "_cartesian");
   resource_set_cart_other_arm.insert("franka2_cartesian");
 
-  // Test single claims on single arm
-  // /////////////////////////////////////////////////////////////////////////////////
-
+  // Test single claims on single arm //////////////////////////////////////
   // Case  no arm ID set -> should report conflict
   std::set<std::string> no_id_set;
   no_id_set.insert("joint1");
@@ -124,9 +122,7 @@ TEST(FrankaHWTests, checkForConflictAndPrepareSwitchOk) {
   ASSERT_FALSE(robot.checkForConflict(info_list));
   ASSERT_TRUE(robot.prepareSwitch(info_list, empty_stop_list));
 
-  // Test dual claims on single arm
-  // ////////////////////////////////////////////////////////////////////////////////////
-
+  // Test dual claims on single arm////////////////////////////////////////
   // Case joint torque and joint torque -> should report conflict
   resource1.hardware_interface = "hardware_interface::EffortJointInterface";
   resource1.resources = resources_set;
@@ -251,9 +247,7 @@ TEST(FrankaHWTests, checkForConflictAndPrepareSwitchOk) {
       newInfo("controller1", "dummyControllerClass", resource1, resource2));
   ASSERT_TRUE(robot.checkForConflict(info_list));
 
-  // Test triple claim on single arm
-  // ////////////////////////////////////////////////////////
-
+  // Test triple claim on single arm ////////////////////////////////////////
   //  Case 3 command interfaces -> should report conflict
   resource1.hardware_interface = "franka_hw::FrankaVelocityCartesianInterface";
   resource1.resources = resources_set_cart;
@@ -264,8 +258,7 @@ TEST(FrankaHWTests, checkForConflictAndPrepareSwitchOk) {
   info_list.push_back(info);
   ASSERT_TRUE(robot.checkForConflict(info_list));
 
-  // Test claims on two arms
-  // ////////////////////////////////////////////////////////////////////
+  // Test claims on two arms ///////////////////////////////////////////////
   // Case 2 arms cartesian pose -> should not report conflict
   resource1.hardware_interface = "franka_hw::FrankaPoseCartesianInterface";
   resource1.resources = resources_set_cart;
@@ -313,7 +306,7 @@ TEST(FrankaHWTests, interfacesOk) {
   ASSERT_TRUE(fjs_interface != NULL);
   ASSERT_TRUE(fcs_interface != NULL);
 
-  // Test handle of franka_hw cartesian interfaces
+  // Test handles of franka_hw cartesian interfaces
   franka_hw::FrankaCartesianPoseHandle fpc_handle =
       fpc_interface->getHandle(arm_id + "_cartesian");
   std::array<double, 16> pose_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -353,8 +346,6 @@ TEST(FrankaHWTests, jointLimitInterfacesOk) {
   ASSERT_TRUE(pj_interface != NULL);
   ASSERT_TRUE(vj_interface != NULL);
   ASSERT_TRUE(ej_interface != NULL);
-
-  // parse joint limits from robot description
 
   urdf::Model urdf_model;
   ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", nh));
