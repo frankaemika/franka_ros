@@ -13,7 +13,8 @@
 namespace franka_example_controllers {
 
 JointPositionExampleController::JointPositionExampleController()
-    : position_joint_interface_(nullptr) {}
+    : position_joint_interface_(nullptr),
+      elapsed_time_(0.0){}
 
 bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
@@ -45,19 +46,19 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
       return false;
     }
   }
-  start_time_stamp_ = ros::Time::now();
+  elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
 void JointPositionExampleController::update(
-    const ros::Time& time,
-    const ros::Duration& period) {  // NOLINT
-  ros::Duration elapsed_time = time - start_time_stamp_;
+    const ros::Time& time,    // NOLINT
+    const ros::Duration& period) {
   double delta_angle =
-      M_PI / 8 * (1 - std::cos(M_PI / 5.0 * elapsed_time.toSec()));
+      M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   for (size_t i = 0; i < 7; ++i) {
     position_joint_handles_[i].setCommand(initial_pose_[i] + delta_angle);
   }
+  elapsed_time_ += period;
 }
 
 }  // namespace franka_example_controllers

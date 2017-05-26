@@ -41,6 +41,12 @@ add_executable(mock_franka_hw_node src/mock_franka_hw_node.cpp)
 add_dependencies(mock_franka_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mock_franka_hw_node ${catkin_LIBRARIES})
 
+catkin_add_gtest(franka_hw_test src/franka_hw_test.cpp)
+add_dependencies(franka_hw_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(franka_hw_test ${catkin_LIBRARIES})
+
+
+
 ## Tools
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE HEADERS
@@ -51,5 +57,5 @@ include(ClangTools)
 add_format_target(test_franka_hw FILES ${SOURCES} ${HEADERS})
 add_tidy_target(test_franka_hw
   FILES ${SOURCES}
-  DEPENDS test_franka_hw mock_franka_hw_node
+  DEPENDS test_franka_hw mock_franka_hw_node franka_hw_test
 )

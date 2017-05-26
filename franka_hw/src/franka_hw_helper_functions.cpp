@@ -52,9 +52,9 @@ bool getArmClaimedMap(ResourceWithClaimsMap& resource_map,
     if (!findArmIDinResourceID(map_it->first, &current_arm_id)) {
       ROS_ERROR_STREAM("Could not find arm_id in resource "
                        << map_it->first
-                       << ".Conflict! \n Name joints as "
+                       << ". Conflict! Name joints as "
                           "'<robot_arm_id>_joint<jointnumber>'");
-      return true;
+      return false;
     }
     ResourceClaims new_claim;
     for (auto claimed_by : map_it->second) {

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <random>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/joint_command_interface.h>

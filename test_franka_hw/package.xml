@@ -30,6 +30,8 @@
   <run_depend>joint_limits_interface</run_depend>
   <run_depend>xmlrpcpp</run_depend>
 
+  <test_depend>gtest</test_depend>
+
   <export>
     <controller_interface plugin="${prefix}/test_franka_hw_plugins.xml"/>
   </export>

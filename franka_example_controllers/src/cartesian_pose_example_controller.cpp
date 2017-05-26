@@ -16,7 +16,8 @@
 namespace franka_example_controllers {
 
 CartesianPoseExampleController::CartesianPoseExampleController()
-    : cartesian_pose_interface_(nullptr) {}
+    : cartesian_pose_interface_(nullptr),
+      elapsed_time_(0.0){}
 
 bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
@@ -41,16 +42,15 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
     ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
     return false;
   }
-  start_time_stamp_ = ros::Time::now();
+  elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
 void CartesianPoseExampleController::update(
-    const ros::Time& time,
-    const ros::Duration& period) {  // NOLINT
-  ros::Duration elapsed_time = time - start_time_stamp_;
+    const ros::Time& time,  // NOLINT
+    const ros::Duration& period) {
   double radius = 0.3;
-  double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time.toSec()));
+  double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   double delta_x = radius * std::sin(angle);
   double delta_z = radius * (std::cos(angle) - 1);
   std::array<double, 16> new_pose = initial_pose_;
@@ -65,6 +65,7 @@ void CartesianPoseExampleController::update(
     ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
     return;
   }
+  elapsed_time_ += period;
 }
 
 }  // namespace franka_example_controllers
