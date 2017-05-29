@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   joint_limits_interface
   xmlrpcpp
   controller_manager
+  franka_description
 )
 
 find_package(Franka REQUIRED)
@@ -80,6 +81,28 @@ target_link_libraries(franka_hw_node
 
 target_include_directories(franka_hw_node PUBLIC
   ${catkin_INCLUDE_DIRS}
+)
+
+catkin_add_gtest(franka_hw_test
+  tests/franka_hw_test.cpp
+)
+
+add_dependencies(franka_hw_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  franka_hw
+)
+
+target_link_libraries(franka_hw_test
+  ${catkin_LIBRARIES}
+  Franka::franka
+  franka_hw
+  gtest
+)
+
+target_include_directories(franka_hw_test PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Tools

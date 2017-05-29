@@ -24,8 +24,8 @@
 
 namespace franka_hw {
 
-constexpr double FrankaHW::kMaximum_joint_acceleration;
-constexpr double FrankaHW::kMaximum_joint_jerk;
+constexpr double FrankaHW::kMaximumJointAcceleration;
+constexpr double FrankaHW::kMaximumJointJerk;
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    franka::Robot* robot,
@@ -97,7 +97,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       ROS_ERROR("Could not initialize urdf model from robot_description");
     } else {
       joint_limits_interface::SoftJointLimits soft_limits;
-      joint_limits_interface::JointLimits limits;
+      joint_limits_interface::JointLimits joint_limits;
 
       for (size_t i = 0; i < joint_names_.size(); ++i) {
         boost::shared_ptr<const urdf::Joint> urdf_joint =
@@ -115,29 +115,30 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 
         if (joint_limits_interface::getSoftJointLimits(urdf_joint,
                                                        soft_limits)) {
-          if (joint_limits_interface::getJointLimits(urdf_joint, limits)) {
-            limits.max_acceleration = kMaximum_joint_acceleration;
-            limits.has_acceleration_limits = true;
-            limits.max_jerk = kMaximum_joint_jerk;
-            limits.has_jerk_limits = true;
+          if (joint_limits_interface::getJointLimits(urdf_joint,
+                                                     joint_limits)) {
+            joint_limits.max_acceleration = kMaximumJointAcceleration;
+            joint_limits.has_acceleration_limits = true;
+            joint_limits.max_jerk = kMaximumJointJerk;
+            joint_limits.has_jerk_limits = true;
             joint_limits_interface::PositionJointSoftLimitsHandle
                 position_limit_handle(
                     position_joint_interface_.getHandle(joint_names_[i]),
-                    limits, soft_limits);
+                    joint_limits, soft_limits);
             position_joint_limit_interface_.registerHandle(
                 position_limit_handle);
 
             joint_limits_interface::VelocityJointSoftLimitsHandle
                 velocity_limit_handle(
                     velocity_joint_interface_.getHandle(joint_names_[i]),
-                    limits, soft_limits);
+                    joint_limits, soft_limits);
             velocity_joint_limit_interface_.registerHandle(
                 velocity_limit_handle);
 
             joint_limits_interface::EffortJointSoftLimitsHandle
                 effort_limit_handle(
-                    effort_joint_interface_.getHandle(joint_names_[i]), limits,
-                    soft_limits);
+                    effort_joint_interface_.getHandle(joint_names_[i]),
+                    joint_limits, soft_limits);
             effort_joint_limit_interface_.registerHandle(effort_limit_handle);
           } else {
             ROS_ERROR_STREAM("Could not parse joint limit for joint "

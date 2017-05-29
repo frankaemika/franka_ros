@@ -44,4 +44,6 @@
   <run_depend>xmlrpcpp</run_depend>
   <run_depend>controller_manager</run_depend>
 
+  <test_depend>gtest</test_depend>
+
 </package>

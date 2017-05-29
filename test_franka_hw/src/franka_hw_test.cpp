@@ -18,6 +18,8 @@
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_hw.h>
 
+namespace franka_hw {
+
 hardware_interface::ControllerInfo newInfo(
     std::string name,
     std::string type,
@@ -39,6 +41,27 @@ hardware_interface::ControllerInfo newInfo(
   info.claimed_resources.push_back(resource2);
   return info;
 }
+
+FrankaHW* createRobot() {
+  ros::NodeHandle nh;
+  std::string arm_id("franka_emika");
+  std::vector<std::string> joint_names(7);
+  for (size_t i = 0; i < 7; ++i) {
+    joint_names[i] = arm_id + "_joint" + std::to_string(i + 1);
+  }
+  return new FrankaHW(joint_names, nullptr, 30.0, arm_id, nh);
+}
+
+template <class T>
+class StartControllerTest : public testing::Test {
+ public:
+  StartControllerTest() : robot_(createRobot()), arm_id_("franka_emika") {}
+  std::list<hardware_interface::ControllerInfo> getControlerInfoList();
+
+ private:
+  std::unique_ptr<FrankaHW> robot_;
+  std::string arm_id_;
+};
 
 TEST(FrankaHWTests, checkForConflictAndPrepareSwitchOk) {
   ros::NodeHandle nh;
@@ -424,3 +447,5 @@ int main(int argc, char** argv) {
   ros::shutdown();
   return ret;
 }
+
+}  // namespace franka_hw

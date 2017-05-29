@@ -41,9 +41,9 @@ add_executable(mock_franka_hw_node src/mock_franka_hw_node.cpp)
 add_dependencies(mock_franka_hw_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(mock_franka_hw_node ${catkin_LIBRARIES})
 
-catkin_add_gtest(franka_hw_test src/franka_hw_test.cpp)
-add_dependencies(franka_hw_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(franka_hw_test ${catkin_LIBRARIES})
+#catkin_add_gtest(franka_hw_test src/franka_hw_test.cpp)
+#add_dependencies(franka_hw_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(franka_hw_test ${catkin_LIBRARIES})
 
 
 
