@@ -67,10 +67,10 @@ FrankaHW* createMockRobot() {
     return new FrankaHW(joint_names, nullptr, 30.0, arm_id, nh);
 }
 
-class findConflictsTestFixture :
+class ControllerConflict :
         public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- findConflictsTestFixture() : robot_(franka_hw::createMockRobot()) {}
+ ControllerConflict() : robot_(franka_hw::createMockRobot()) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -81,10 +81,10 @@ public:
  std::unique_ptr<franka_hw::FrankaHW>  robot_;
 };
 
-class findAdmissibleAndPrepareSwitchTestFixture : public
+class NoControllerConflict : public
         ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- findAdmissibleAndPrepareSwitchTestFixture() : robot_(franka_hw::createMockRobot()) {}
+ NoControllerConflict() : robot_(franka_hw::createMockRobot()) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -159,7 +159,7 @@ ControllerInfo jt_cv_info = newInfo(name_str, type_str, jt_res, cv_res);
 ControllerInfo jt_cp_info = newInfo(name_str, type_str, jt_res, cp_res);
 
 INSTANTIATE_TEST_CASE_P(nonAdmissibleRequests,
-                        findConflictsTestFixture,
+                        ControllerConflict,
                         ::testing::Values(std::list<ControllerInfo>{no_id_info},
                                           std::list<ControllerInfo>{unknown_iface_info},
                                           std::list<ControllerInfo>{jt_jt_info},
@@ -176,7 +176,7 @@ INSTANTIATE_TEST_CASE_P(nonAdmissibleRequests,
                                           std::list<ControllerInfo>{jp_jp_jp_info}));
 
 INSTANTIATE_TEST_CASE_P(admissibleRequests,
-                        findAdmissibleAndPrepareSwitchTestFixture,
+                        NoControllerConflict,
                         ::testing::Values(std::list<ControllerInfo>{jp_info},
                                           std::list<ControllerInfo>{jv_info},
                                           std::list<ControllerInfo>{jt_info},
@@ -188,143 +188,16 @@ INSTANTIATE_TEST_CASE_P(admissibleRequests,
                                           std::list<ControllerInfo>{jt_cp_info},
                                           std::list<ControllerInfo>{cp_info, cp_arm2_info}));
 
-TEST_P(findConflictsTestFixture, findConflictsOk) {
+TEST_P(ControllerConflict, ConflictsForIncompatibleControllers) {
   EXPECT_TRUE(callCheckForConflict(GetParam()));
 }
 
-TEST_P(findAdmissibleAndPrepareSwitchTestFixture, findAdmissibleOk) {
+TEST_P(NoControllerConflict, DoesNotConflictForCompatibleControllers) {
   EXPECT_FALSE(callCheckForConflict(GetParam()));
 }
 
-TEST_P(findAdmissibleAndPrepareSwitchTestFixture, prepareSwitchOk) {
+TEST_P(NoControllerConflict, CanPrepareSwitchForCompatibleControllers) {
     EXPECT_TRUE(callPrepareSwitch(GetParam()));
-}
-
-TEST(FrankaHWTests, interfacesOk) {
-  std::unique_ptr<franka_hw::FrankaHW> robotptr(createMockRobot());
-  hardware_interface::JointStateInterface* js_interface =
-      robotptr->get<hardware_interface::JointStateInterface>();
-  hardware_interface::PositionJointInterface* pj_interface =
-      robotptr->get<hardware_interface::PositionJointInterface>();
-  hardware_interface::VelocityJointInterface* vj_interface =
-      robotptr->get<hardware_interface::VelocityJointInterface>();
-  hardware_interface::EffortJointInterface* ej_interface =
-      robotptr->get<hardware_interface::EffortJointInterface>();
-  franka_hw::FrankaPoseCartesianInterface* fpc_interface =
-      robotptr->get<franka_hw::FrankaPoseCartesianInterface>();
-  franka_hw::FrankaVelocityCartesianInterface* fvc_interface =
-      robotptr->get<franka_hw::FrankaVelocityCartesianInterface>();
-  franka_hw::FrankaJointStateInterface* fjs_interface =
-      robotptr->get<franka_hw::FrankaJointStateInterface>();
-  franka_hw::FrankaCartesianStateInterface* fcs_interface =
-      robotptr->get<franka_hw::FrankaCartesianStateInterface>();
-
-  ASSERT_TRUE(js_interface != NULL);
-  ASSERT_TRUE(pj_interface != NULL);
-  ASSERT_TRUE(vj_interface != NULL);
-  ASSERT_TRUE(ej_interface != NULL);
-  ASSERT_TRUE(fpc_interface != NULL);
-  ASSERT_TRUE(fvc_interface != NULL);
-  ASSERT_TRUE(fjs_interface != NULL);
-  ASSERT_TRUE(fcs_interface != NULL);
-
-  franka_hw::FrankaCartesianPoseHandle fpc_handle =
-      fpc_interface->getHandle(arm_id + "_cartesian");
-  std::array<double, 16> pose_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-                                         1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-                                         1.0, 1.0, 1.0, 1.0};
-  fpc_handle.setCommand(pose_command);
-  EXPECT_TRUE(pose_command == fpc_handle.getCommand());
-
-  franka_hw::FrankaCartesianVelocityHandle fvc_handle =
-      fvc_interface->getHandle(arm_id + "_cartesian");
-  std::array<double, 6> vel_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-  fvc_handle.setCommand(vel_command);
-  EXPECT_TRUE(vel_command == fvc_handle.getCommand());
-
-  EXPECT_NO_THROW(fcs_interface->getHandle(arm_id + "_cartesian"));
-
-  for (size_t i = 0; i < 7; ++i) {
-    EXPECT_NO_THROW(fjs_interface->getHandle(joint_names[i]));
-  }
-}
-
-TEST(FrankaHWTests, jointLimitInterfacesOk) {
-  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(createMockRobot());
-
-  hardware_interface::PositionJointInterface* pj_interface =
-      robot_ptr->get<hardware_interface::PositionJointInterface>();
-  hardware_interface::VelocityJointInterface* vj_interface =
-      robot_ptr->get<hardware_interface::VelocityJointInterface>();
-  hardware_interface::EffortJointInterface* ej_interface =
-      robot_ptr->get<hardware_interface::EffortJointInterface>();
-  ASSERT_TRUE(pj_interface != NULL);
-  ASSERT_TRUE(vj_interface != NULL);
-  ASSERT_TRUE(ej_interface != NULL);
-
-  urdf::Model urdf_model;
-  ros::NodeHandle nh;
-  ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", nh));
-  std::vector<joint_limits_interface::JointLimits> joint_limits(7);
-  std::vector<hardware_interface::JointHandle> position_handles(7);
-  std::vector<hardware_interface::JointHandle> velocity_handles(7);
-  std::vector<hardware_interface::JointHandle> effort_handles(7);
-
-  for (size_t i = 0; i < joint_names.size(); ++i) {
-    boost::shared_ptr<const urdf::Joint> urdf_joint =
-        urdf_model.getJoint(joint_names[i]);
-    ASSERT_TRUE(
-        joint_limits_interface::getJointLimits(urdf_joint, joint_limits[i]));
-    ASSERT_NO_THROW(position_handles[i] =
-                        pj_interface->getHandle(joint_names[i]));
-    ASSERT_NO_THROW(velocity_handles[i] =
-                        vj_interface->getHandle(joint_names[i]));
-    ASSERT_NO_THROW(effort_handles[i] =
-                        ej_interface->getHandle(joint_names[i]));
-  }
-
-  std::uniform_real_distribution<double> uniform_distribution(0.0, 3.0);
-  std::default_random_engine random_engine;
-
-  for (size_t i = 0; i < joint_names.size(); ++i) {
-    position_handles[i].setCommand(joint_limits[i].max_position +
-                                   uniform_distribution(random_engine));
-    velocity_handles[i].setCommand(joint_limits[i].max_velocity +
-                                   uniform_distribution(random_engine));
-    effort_handles[i].setCommand(joint_limits[i].max_effort +
-                                 uniform_distribution(random_engine));
-  }
-  robot_ptr->enforceLimits(ros::Duration(0.001));
-  for (size_t i = 0; i < joint_names.size(); ++i) {
-    EXPECT_TRUE(
-        position_handles[i].getCommand() <= joint_limits[i].max_position &&
-        position_handles[i].getCommand() >= joint_limits[i].min_position);
-    EXPECT_TRUE(
-        velocity_handles[i].getCommand() <= joint_limits[i].max_velocity &&
-        velocity_handles[i].getCommand() >= -joint_limits[i].max_velocity);
-    EXPECT_TRUE(effort_handles[i].getCommand() <= joint_limits[i].max_effort &&
-                effort_handles[i].getCommand() >= -joint_limits[i].max_effort);
-  }
-
-  for (size_t i = 0; i < joint_names.size(); ++i) {
-    position_handles[i].setCommand(joint_limits[i].min_position -
-                                   uniform_distribution(random_engine));
-    velocity_handles[i].setCommand(-joint_limits[i].max_velocity -
-                                   uniform_distribution(random_engine));
-    effort_handles[i].setCommand(-joint_limits[i].max_effort -
-                                 uniform_distribution(random_engine));
-  }
-  robot_ptr->enforceLimits(ros::Duration(0.001));
-  for (size_t i = 0; i < joint_names.size(); ++i) {
-    EXPECT_TRUE(
-        position_handles[i].getCommand() <= joint_limits[i].max_position &&
-        position_handles[i].getCommand() >= joint_limits[i].min_position);
-    EXPECT_TRUE(
-        velocity_handles[i].getCommand() <= joint_limits[i].max_velocity &&
-        velocity_handles[i].getCommand() >= -joint_limits[i].max_velocity);
-    EXPECT_TRUE(effort_handles[i].getCommand() <= joint_limits[i].max_effort &&
-                effort_handles[i].getCommand() >= -joint_limits[i].max_effort);
-  }
 }
 
 }  // namespace franka_hw

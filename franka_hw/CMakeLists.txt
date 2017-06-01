@@ -97,5 +97,5 @@ include(ClangTools)
 add_format_target(franka_hw FILES ${SOURCES} ${HEADERS})
 add_tidy_target(franka_hw
   FILES ${SOURCES}
-  DEPENDS franka_hw franka_hw_node franka_hw_test
+  DEPENDS franka_hw franka_hw_node
 )
