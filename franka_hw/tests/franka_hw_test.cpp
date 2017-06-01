@@ -333,10 +333,10 @@ TEST(FrankaHWTests, jointLimitInterfacesOk) {
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "FrankaHWTestNode");
+  ros::init(argc, argv, "franka_hw_test_node");
   ros::NodeHandle nh;
-  std::string path = ros::package::getPath("test_franka_hw");
-  std::ifstream t(path + "/urdf/franka.urdf");
+  std::string path = ros::package::getPath("franka_hw");
+  std::ifstream t(path + "/tests/urdf/franka.urdf");
   std::string urdf_string((std::istreambuf_iterator<char>(t)),
                           std::istreambuf_iterator<char>());
   nh.setParam("robot_description", urdf_string);

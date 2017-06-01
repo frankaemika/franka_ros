@@ -83,27 +83,36 @@ target_include_directories(franka_hw_node PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
 
-catkin_add_gtest(franka_hw_test
-  tests/franka_hw_test.cpp
-)
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  #find_package(gtest) ???
 
-add_dependencies(franka_hw_test
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-  franka_hw
-)
+  add_rostest_gtest(franka_hw_test tests/launch/franka_hw_test.test
+    tests/franka_hw_test.cpp
+  )
 
-target_link_libraries(franka_hw_test
-  ${catkin_LIBRARIES}
-  Franka::franka
-  franka_hw
-  gtest
-)
+  #catkin_add_gtest(franka_hw_test
+  #  tests/franka_hw_test.cpp
+  #)
 
-target_include_directories(franka_hw_test PUBLIC
-  ${catkin_INCLUDE_DIRS}
-  include
-)
+  add_dependencies(franka_hw_test
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+    franka_hw
+  )
+
+  target_link_libraries(franka_hw_test
+    ${catkin_LIBRARIES}
+    Franka::franka
+    franka_hw
+    gtest
+  )
+
+  target_include_directories(franka_hw_test PUBLIC
+    ${catkin_INCLUDE_DIRS}
+    include
+  )
+endif()
 
 ## Tools
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)

@@ -1,0 +1,4 @@
+<launch>
+ <env name="ROSCONSOLE_CONFIG_FILE" value="$(find franka_hw)/tests/config/ros_console_settings_for_tests.conf"/>
+ <test test-name="franka_hw_test" pkg="franka_hw" type="franka_hw_test" />
+</launch>
