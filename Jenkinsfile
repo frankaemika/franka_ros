@@ -33,6 +33,10 @@ node {
         sh 'src/scripts/ci/debug-build.sh'
       }
     }
+
+    stage('Archive results') {
+      junit 'build/test_results/**/*.xml'
+    }
     currentBuild.result = 'SUCCESS'
   } catch (e) {
     currentBuild.result = 'FAILED'
