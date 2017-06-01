@@ -84,29 +84,7 @@ target_include_directories(franka_hw_node PUBLIC
 )
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-
-  add_rostest_gtest(franka_hw_test tests/launch/franka_hw_test.test
-    tests/franka_hw_test.cpp
-  )
-
-  add_dependencies(franka_hw_test
-    ${${PROJECT_NAME}_EXPORTED_TARGETS}
-    ${catkin_EXPORTED_TARGETS}
-    franka_hw
-  )
-
-  target_link_libraries(franka_hw_test
-    ${catkin_LIBRARIES}
-    Franka::franka
-    franka_hw
-    gtest
-  )
-
-  target_include_directories(franka_hw_test PUBLIC
-    ${catkin_INCLUDE_DIRS}
-    include
-  )
+  add_subdirectory(test)
 endif()
 
 ## Tools

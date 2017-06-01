@@ -1,10 +1,8 @@
 #include <gtest/gtest.h>
 #include <array>
-#include <fstream>
 #include <list>
 #include <random>
 #include <set>
-#include <streambuf>
 #include <string>
 
 #include <hardware_interface/controller_info.h>
@@ -317,7 +315,7 @@ TEST(FrankaHWTests, jointLimitInterfacesOk) {
                                  uniform_distribution(random_engine));
   }
   robot_ptr->enforceLimits(ros::Duration(0.001));
-  for (size_t i = 0; i < joint_names.size(); ++i) {
+for (size_t i = 0; i < joint_names.size(); ++i) {
     EXPECT_TRUE(
         position_handles[i].getCommand() <= joint_limits[i].max_position &&
         position_handles[i].getCommand() >= joint_limits[i].min_position);
@@ -334,12 +332,5 @@ TEST(FrankaHWTests, jointLimitInterfacesOk) {
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "franka_hw_test_node");
-  ros::NodeHandle nh;
-  std::string path = ros::package::getPath("franka_hw");
-  std::ifstream t(path + "/tests/urdf/franka.urdf");
-  std::string urdf_string((std::istreambuf_iterator<char>(t)),
-                          std::istreambuf_iterator<char>());
-  nh.setParam("robot_description", urdf_string);
-  int ret = RUN_ALL_TESTS();
-  return ret;
+  return RUN_ALL_TESTS();
 }
