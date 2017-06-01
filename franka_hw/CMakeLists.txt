@@ -85,15 +85,10 @@ target_include_directories(franka_hw_node PUBLIC
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  #find_package(gtest) ???
 
   add_rostest_gtest(franka_hw_test tests/launch/franka_hw_test.test
     tests/franka_hw_test.cpp
   )
-
-  #catkin_add_gtest(franka_hw_test
-  #  tests/franka_hw_test.cpp
-  #)
 
   add_dependencies(franka_hw_test
     ${${PROJECT_NAME}_EXPORTED_TARGETS}
