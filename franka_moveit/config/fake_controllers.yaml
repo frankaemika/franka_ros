@@ -1,0 +1,10 @@
+controller_list:
+  - name: fake_franka_controller
+    joints:
+      - franka_emika_joint1
+      - franka_emika_joint2
+      - franka_emika_joint3
+      - franka_emika_joint4
+      - franka_emika_joint5
+      - franka_emika_joint6
+      - franka_emika_joint7
