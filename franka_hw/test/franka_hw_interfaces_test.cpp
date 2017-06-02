@@ -36,14 +36,14 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   franka_hw::FrankaCartesianStateInterface* fcs_interface =
       robotptr->get<franka_hw::FrankaCartesianStateInterface>();
 
-  ASSERT_NE(js_interface, nullptr);
-  ASSERT_NE(pj_interface, nullptr);
-  ASSERT_NE(vj_interface, nullptr);
-  ASSERT_NE(ej_interface, nullptr);
-  ASSERT_NE(fpc_interface, nullptr);
-  ASSERT_NE(fvc_interface, nullptr);
-  ASSERT_NE(fjs_interface, nullptr);
-  ASSERT_NE(fcs_interface, nullptr);
+  ASSERT_NE(nullptr, js_interface ;
+  ASSERT_NE(nullptr, pj_interface);
+  ASSERT_NE(nullptr, vj_interface);
+  ASSERT_NE(nullptr, ej_interface);
+  ASSERT_NE(nullptr, fpc_interface);
+  ASSERT_NE(nullptr, fvc_interface);
+  ASSERT_NE(nullptr, fjs_interface);
+  ASSERT_NE(nullptr, fcs_interface);
 
   franka_hw::FrankaCartesianPoseHandle fpc_handle =
       fpc_interface->getHandle(arm_id + "_cartesian");
@@ -74,9 +74,9 @@ TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
       robot_ptr->get<hardware_interface::VelocityJointInterface>();
   hardware_interface::EffortJointInterface* ej_interface =
       robot_ptr->get<hardware_interface::EffortJointInterface>();
-  ASSERT_NE(pj_interface, nullptr);
-  ASSERT_NE(vj_interface, nullptr);
-  ASSERT_NE(ej_interface, nullptr);
+  ASSERT_NE(nullptr, pj_interface);
+  ASSERT_NE(nullptr, vj_interface);
+  ASSERT_NE(nullptr, ej_interface);
 
   urdf::Model urdf_model;
   ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", ros::NodeHandle()));
