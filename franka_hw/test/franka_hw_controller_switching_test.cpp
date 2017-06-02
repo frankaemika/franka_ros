@@ -9,7 +9,6 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
-#include <ros/package.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
 
@@ -21,6 +20,14 @@ using std::set;
 using hardware_interface::InterfaceResources;
 using hardware_interface::ControllerInfo;
 
+std::string arm_id("franka_emika");
+std::vector<std::string> joint_names  = {arm_id + "_joint1",
+        arm_id + "_joint2",
+        arm_id + "_joint3",
+        arm_id + "_joint4",
+        arm_id + "_joint5",
+        arm_id + "_joint6",
+        arm_id + "_joint7"};
 
 namespace franka_hw {
 
@@ -57,20 +64,10 @@ hardware_interface::ControllerInfo newInfo(
   return info;
 }
 
-FrankaHW* createMockRobot() {
-    ros::NodeHandle nh;
-    std::string arm_id("franka_emika");
-    std::vector<std::string> joint_names(7);
-    for (size_t i = 0; i < 7; ++i) {
-      joint_names[i] = arm_id + "_joint" + std::to_string(i + 1);
-    }
-    return new FrankaHW(joint_names, nullptr, 30.0, arm_id, nh);
-}
-
 class ControllerConflict :
         public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- ControllerConflict() : robot_(franka_hw::createMockRobot()) {}
+ ControllerConflict() : robot_(new FrankaHW(joint_names, nullptr, 30.0, arm_id, ros::NodeHandle())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -84,7 +81,7 @@ public:
 class NoControllerConflict : public
         ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- NoControllerConflict() : robot_(franka_hw::createMockRobot()) {}
+ NoControllerConflict() : robot_(new FrankaHW(joint_names, nullptr, 30.0, arm_id, ros::NodeHandle())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -95,15 +92,7 @@ public:
  std::unique_ptr<franka_hw::FrankaHW>  robot_;
 };
 
-string arm_id("franka_emika");
 string arm_id2("franka_emika2");
-std::vector<std::string> joint_names  = {arm_id + "_joint1",
-        arm_id + "_joint2",
-        arm_id + "_joint3",
-        arm_id + "_joint4",
-        arm_id + "_joint5",
-        arm_id + "_joint6",
-        arm_id + "_joint7"};
 string jp_iface_str("hardware_interface::PositionJointInterface");
 string jv_iface_str("hardware_interface::VelocityJointInterface");
 string jt_iface_str("hardware_interface::EffortJointInterface");
@@ -112,7 +101,6 @@ string cp_iface_str("franka_hw::FrankaPoseCartesianInterface");
 string unknown_iface_str("hardware_interface::UnknownInterface");
 string name_str("some_controller");
 string type_str("SomeControllerClass");
-
 set<string> joints_set = {joint_names[0],
                           joint_names[1],
                           joint_names[2],
@@ -123,7 +111,6 @@ set<string> joints_set = {joint_names[0],
 set<string> cartesian_set = {arm_id + "_cartesian"};
 set<string> cartesian_arm2_set = {arm_id2 + "_cartesian"};
 set<string> no_id_set = {"joint1"};
-
 InterfaceResources no_id_res(jp_iface_str, no_id_set);
 InterfaceResources unknown_iface_res(unknown_iface_str, joints_set);
 InterfaceResources jp_res(jp_iface_str, joints_set);
@@ -132,7 +119,6 @@ InterfaceResources jt_res(jt_iface_str, joints_set);
 InterfaceResources cv_res(cv_iface_str, cartesian_set);
 InterfaceResources cp_res(cp_iface_str, cartesian_set);
 InterfaceResources cp_arm2_res(cp_iface_str, cartesian_arm2_set);
-
 ControllerInfo cp_arm2_info = newInfo(name_str, type_str, cp_arm2_res);
 ControllerInfo no_id_info = newInfo(name_str, type_str, no_id_res);
 ControllerInfo unknown_iface_info = newInfo(name_str, type_str, unknown_iface_res);
@@ -201,9 +187,3 @@ TEST_P(NoControllerConflict, CanPrepareSwitchForCompatibleControllers) {
 }
 
 }  // namespace franka_hw
-
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "franka_hw_test_node");
-  return RUN_ALL_TESTS();
-}

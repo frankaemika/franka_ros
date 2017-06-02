@@ -6,37 +6,19 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
-#include <ros/package.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
 
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_hw.h>
 
-
-std::string arm_id("franka_emika");
-std::vector<std::string> joint_names  = {arm_id + "_joint1",
-        arm_id + "_joint2",
-        arm_id + "_joint3",
-        arm_id + "_joint4",
-        arm_id + "_joint5",
-        arm_id + "_joint6",
-        arm_id + "_joint7"};
+extern std::string arm_id;
+extern std::vector<std::string> joint_names;
 
 namespace franka_hw {
 
-FrankaHW* createMockRobot() {
-    ros::NodeHandle nh;
-    std::string arm_id("franka_emika");
-    std::vector<std::string> joint_names(7);
-    for (size_t i = 0; i < 7; ++i) {
-      joint_names[i] = arm_id + "_joint" + std::to_string(i + 1);
-    }
-    return new FrankaHW(joint_names, nullptr, 30.0, arm_id, nh);
-}
-
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
-  std::unique_ptr<franka_hw::FrankaHW> robotptr(createMockRobot());
+  std::unique_ptr<franka_hw::FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, 30.0, arm_id, ros::NodeHandle()));
   hardware_interface::JointStateInterface* js_interface =
       robotptr->get<hardware_interface::JointStateInterface>();
   hardware_interface::PositionJointInterface* pj_interface =
@@ -84,7 +66,7 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
-  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(createMockRobot());
+  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, 30.0, arm_id, ros::NodeHandle()));
 
   hardware_interface::PositionJointInterface* pj_interface =
       robot_ptr->get<hardware_interface::PositionJointInterface>();
@@ -97,8 +79,7 @@ TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
   ASSERT_NE(ej_interface, nullptr);
 
   urdf::Model urdf_model;
-  ros::NodeHandle nh;
-  ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", nh));
+  ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", ros::NodeHandle()));
   std::vector<joint_limits_interface::JointLimits> joint_limits(7);
   std::vector<hardware_interface::JointHandle> position_handles(7);
   std::vector<hardware_interface::JointHandle> velocity_handles(7);
@@ -158,8 +139,3 @@ TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
 
 }  // namespace franka_hw
 
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "franka_hw_test_node");
-  return RUN_ALL_TESTS();
-}
