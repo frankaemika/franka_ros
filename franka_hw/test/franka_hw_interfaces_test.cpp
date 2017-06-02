@@ -36,7 +36,7 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   franka_hw::FrankaCartesianStateInterface* fcs_interface =
       robotptr->get<franka_hw::FrankaCartesianStateInterface>();
 
-  ASSERT_NE(nullptr, js_interface ;
+  ASSERT_NE(nullptr, js_interface);
   ASSERT_NE(nullptr, pj_interface);
   ASSERT_NE(nullptr, vj_interface);
   ASSERT_NE(nullptr, ej_interface);
