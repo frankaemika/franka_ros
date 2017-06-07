@@ -29,6 +29,9 @@ namespace franka_hw {
 
 class FrankaHW : public hardware_interface::RobotHW {
  public:
+  static constexpr double kMaximumJointAcceleration{1.0};
+  static constexpr double kMaximumJointJerk{4000.0};
+
   FrankaHW() = delete;
 
   /**

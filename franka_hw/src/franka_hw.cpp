@@ -24,6 +24,9 @@
 
 namespace franka_hw {
 
+constexpr double FrankaHW::kMaximumJointAcceleration;
+constexpr double FrankaHW::kMaximumJointJerk;
+
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    franka::Robot* robot,
                    double publish_rate,
@@ -58,12 +61,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       run_function_(nullptr) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
-  urdf::Model urdf_model;
-  if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
-    ROS_ERROR("Could not initialize urdf model from robot_description");
-  }
-  joint_limits_interface::SoftJointLimits soft_limits;
-  joint_limits_interface::JointLimits limits;
 
   for (size_t i = 0; i < joint_names_.size(); ++i) {
     hardware_interface::JointStateHandle joint_handle(
@@ -92,66 +89,85 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         joint_state_interface_.getHandle(joint_names_[i]),
         &effort_joint_command_.tau_J[i]);
     effort_joint_interface_.registerHandle(effort_joint_handle);
-
-    boost::shared_ptr<const urdf::Joint> urdf_joint =
-        urdf_model.getJoint(joint_names_[i]);
-    if (!urdf_joint) {
-      ROS_ERROR_STREAM("Could not get joint " << joint_names_[i]
-                                              << " from urdf");
-    }
-    if (!urdf_joint->safety) {
-      ROS_ERROR_STREAM("Joint " << joint_names_[i] << " has no safety");
-    }
-    if (!urdf_joint->limits) {
-      ROS_ERROR_STREAM("Joint " << joint_names_[i] << " has no limits");
-    }
-
-    if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
-      if (joint_limits_interface::getJointLimits(urdf_joint, limits)) {
-        joint_limits_interface::PositionJointSoftLimitsHandle
-            position_limit_handle(
-                position_joint_interface_.getHandle(joint_names_[i]), limits,
-                soft_limits);
-        position_joint_limit_interface_.registerHandle(position_limit_handle);
-
-        joint_limits_interface::VelocityJointSoftLimitsHandle
-            velocity_limit_handle(
-                velocity_joint_interface_.getHandle(joint_names_[i]), limits,
-                soft_limits);
-        velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
-
-        joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
-            effort_joint_interface_.getHandle(joint_names_[i]), limits,
-            soft_limits);
-        effort_joint_limit_interface_.registerHandle(effort_limit_handle);
-      } else {
-        ROS_ERROR_STREAM("Could not parse joint limit for joint "
-                         << joint_names_[i] << " for joint limit interfaces");
-      }
-    } else {
-      ROS_ERROR_STREAM("Could not parse soft joint limit for joint "
-                       << joint_names_[i] << " for joint limit interfaces");
-    }
   }
 
+  if (node_handle.hasParam("robot_description")) {
+    urdf::Model urdf_model;
+    if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
+      ROS_ERROR("Could not initialize urdf model from robot_description");
+    } else {
+      joint_limits_interface::SoftJointLimits soft_limits;
+      joint_limits_interface::JointLimits joint_limits;
+
+      for (auto joint_name : joint_names_) {
+        boost::shared_ptr<const urdf::Joint> urdf_joint =
+            urdf_model.getJoint(joint_name);
+        if (!urdf_joint) {
+          ROS_ERROR_STREAM("Could not get joint " << joint_name
+                                                  << " from urdf");
+        }
+        if (!urdf_joint->safety) {
+          ROS_ERROR_STREAM("Joint " << joint_name << " has no safety");
+        }
+        if (!urdf_joint->limits) {
+          ROS_ERROR_STREAM("Joint " << joint_name << " has no limits");
+        }
+
+        if (joint_limits_interface::getSoftJointLimits(urdf_joint,
+                                                       soft_limits)) {
+          if (joint_limits_interface::getJointLimits(urdf_joint,
+                                                     joint_limits)) {
+            joint_limits.max_acceleration = kMaximumJointAcceleration;
+            joint_limits.has_acceleration_limits = true;
+            joint_limits.max_jerk = kMaximumJointJerk;
+            joint_limits.has_jerk_limits = true;
+            joint_limits_interface::PositionJointSoftLimitsHandle
+                position_limit_handle(
+                    position_joint_interface_.getHandle(joint_name),
+                    joint_limits, soft_limits);
+            position_joint_limit_interface_.registerHandle(
+                position_limit_handle);
+
+            joint_limits_interface::VelocityJointSoftLimitsHandle
+                velocity_limit_handle(
+                    velocity_joint_interface_.getHandle(joint_name),
+                    joint_limits, soft_limits);
+            velocity_joint_limit_interface_.registerHandle(
+                velocity_limit_handle);
+
+            joint_limits_interface::EffortJointSoftLimitsHandle
+                effort_limit_handle(
+                    effort_joint_interface_.getHandle(joint_name), joint_limits,
+                    soft_limits);
+            effort_joint_limit_interface_.registerHandle(effort_limit_handle);
+          } else {
+            ROS_ERROR_STREAM("Could not parse joint limit for joint "
+                             << joint_name << " for joint limit interfaces");
+          }
+        } else {
+          ROS_ERROR_STREAM("Could not parse soft joint limit for joint "
+                           << joint_name << " for joint limit interfaces");
+        }
+      }
+    }
+  } else {
+    ROS_WARN("No parameter robot_description found to set joint limits!");
+  }
   FrankaCartesianStateHandle franka_cartesian_state_handle(
       arm_id_ + "_cartesian", robot_state_.cartesian_collision,
       robot_state_.cartesian_contact, robot_state_.O_F_ext_hat_K,
       robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE);
   franka_cartesian_state_interface_.registerHandle(
       franka_cartesian_state_handle);
-
   FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
       pose_cartesian_command_.O_T_EE);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
-
   FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
       franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
       velocity_cartesian_command_.O_dP_EE);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
-
   registerInterface(&joint_state_interface_);
   registerInterface(&franka_joint_state_interface_);
   registerInterface(&franka_cartesian_state_interface_);
@@ -160,7 +176,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&effort_joint_interface_);
   registerInterface(&franka_pose_cartesian_interface_);
   registerInterface(&franka_velocity_cartesian_interface_);
-
   {
     std::lock_guard<realtime_tools::RealtimePublisher<FrankaState> > lock(
         publisher_franka_states_);
@@ -235,7 +250,9 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     publisher_external_wrench_.msg_.wrench.torque.y = 0.0;
     publisher_external_wrench_.msg_.wrench.torque.z = 0.0;
   }
-  robot_state_ = robot_->readOnce();
+  if (robot_ != nullptr) {
+    robot_state_ = robot_->readOnce();
+  }
 }
 
 void FrankaHW::run(std::function<void(void)> ros_callback) {
@@ -412,7 +429,7 @@ bool FrankaHW::checkForConflict(
          arm_claim_map[arm_id_].joint_position_claims +
                  arm_claim_map[arm_id_].joint_velocity_claims >
              0)) {
-      ROS_ERROR_STREAM("Invalid claims on joint AND cartesian level on arm"
+      ROS_ERROR_STREAM("Invalid claims on joint AND cartesian level on arm "
                        << arm_id_ << ". Conflict!");
       return true;
     }

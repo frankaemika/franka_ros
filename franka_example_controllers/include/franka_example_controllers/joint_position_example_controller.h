@@ -23,7 +23,7 @@ class JointPositionExampleController
   hardware_interface::PositionJointInterface* position_joint_interface_;
   std::vector<hardware_interface::JointHandle> position_joint_handles_;
   std::array<double, 7> initial_pose_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  ros::Time start_time_stamp_;
+  ros::Duration elapsed_time_;
 };
 
 }  // namespace franka_example_controllers

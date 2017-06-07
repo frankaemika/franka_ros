@@ -13,7 +13,7 @@
 namespace franka_example_controllers {
 
 CartesianVelocityExampleController::CartesianVelocityExampleController()
-    : velocity_cartesian_interface_(nullptr) {}
+    : velocity_cartesian_interface_(nullptr), elapsed_time_(0.0) {}
 
 bool CartesianVelocityExampleController::init(
     hardware_interface::RobotHW* robot_hw,
@@ -38,22 +38,22 @@ bool CartesianVelocityExampleController::init(
     ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
     return false;
   }
-  start_time_stamp_ = ros::Time::now();
+  elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
 void CartesianVelocityExampleController::update(
-    const ros::Time& time,
-    const ros::Duration& period) {  // NOLINT
-  ros::Duration elapsed_time = time - start_time_stamp_;
+    const ros::Time& time,  // NOLINT
+    const ros::Duration& period) {
   double time_max = 4.0;
   double v_max = 0.1;
   double angle = M_PI / 4.0;
-  double cycle = std::floor(pow(
-      -1.0, (elapsed_time.toSec() - std::fmod(elapsed_time.toSec(), time_max)) /
-                time_max));
+  double cycle =
+      std::floor(pow(-1.0, (elapsed_time_.toSec() -
+                            std::fmod(elapsed_time_.toSec(), time_max)) /
+                               time_max));
   double v = cycle * v_max / 2.0 *
-             (1.0 - std::cos(2.0 * M_PI / time_max * elapsed_time.toSec()));
+             (1.0 - std::cos(2.0 * M_PI / time_max * elapsed_time_.toSec()));
   double v_x = std::cos(angle) * v;
   double v_z = -std::sin(angle) * v;
   std::array<double, 6> command = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
@@ -65,6 +65,7 @@ void CartesianVelocityExampleController::update(
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
   }
+  elapsed_time_ += period;
 }
 
 void CartesianVelocityExampleController::stopping(

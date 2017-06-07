@@ -25,7 +25,7 @@ class CartesianPoseExampleController
   std::array<double, 16> initial_pose_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                            0.0, 0.0}};
-  ros::Time start_time_stamp_;
+  ros::Duration elapsed_time_;
 };
 
 }  // namespace franka_example_controllers
