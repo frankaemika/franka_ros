@@ -43,7 +43,9 @@ class FrankaCartesianStateHandle {
   const std::array<double, 6>& getFExtO() const { return *O_F_ext_hat_K_; }
   const std::array<double, 6>& getFExtK() const { return *K_F_ext_hat_K_; }
   const std::array<double, 16>& getTransform() const { return *O_T_EE_; }
-  const std::array<double, 16>& getDesiredTransform() const { return *O_T_EE_d_; }
+  const std::array<double, 16>& getDesiredTransform() const {
+    return *O_T_EE_d_;
+  }
 
  private:
   std::string name_;
