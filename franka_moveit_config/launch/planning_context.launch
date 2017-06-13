@@ -9,16 +9,16 @@
   <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/franka.urdf.xacro'"/>
 
   <!-- The semantic description that corresponds to the URDF -->
-  <param name="$(arg robot_description)_semantic" textfile="$(find franka_moveit)/config/franka_emika.srdf" />
-  
+  <param name="$(arg robot_description)_semantic" textfile="$(find franka_moveit_config)/config/franka_emika.srdf" />
+
   <!-- Load updated joint limits (override information from URDF) -->
   <group ns="$(arg robot_description)_planning">
-    <rosparam command="load" file="$(find franka_moveit)/config/joint_limits.yaml"/>
+    <rosparam command="load" file="$(find franka_moveit_config)/config/joint_limits.yaml"/>
   </group>
 
   <!-- Load default settings for kinematics; these settings are overridden by settings in a node's namespace -->
   <group ns="$(arg robot_description)_kinematics">
-    <rosparam command="load" file="$(find franka_moveit)/config/kinematics.yaml"/>
+    <rosparam command="load" file="$(find franka_moveit_config)/config/kinematics.yaml"/>
   </group>
-  
+
 </launch>

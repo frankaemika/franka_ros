@@ -1,8 +1,5 @@
-controller_list:
-  - name: franka_position_joint_trajectory_controller
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
-    default: true
+joint_trajectory_controller:
+    type: "position_controllers/JointTrajectoryController"
     joints:
       - franka_emika_joint1
       - franka_emika_joint2

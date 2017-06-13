@@ -1,18 +1,18 @@
+<?xml version="1.0"?>
 <package>
-
-  <name>franka_moveit</name>
-  <version>0.3.0</version>
+  <name>franka_moveit_config</name>
+  <version>0.0.0</version>
   <description>
-     An automatically generated package with all the configuration and launch files for using the franka_emika with the MoveIt! Motion Planning Framework
+     An automatically generated package with all the configuration and launch files for using FRANKA EMIKA with the MoveIt! Motion Planning Framework
   </description>
-  <author email="info@franka.de">Franka Emika GmbH</author>
-  <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
+
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
   <license>NONE</license>
 
-  <url type="website">http://moveit.ros.org/</url>
-  <url type="bugtracker">https://github.com/ros-planning/moveit/issues</url>
-  <url type="repository">https://github.com/ros-planning/moveit</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -27,6 +27,4 @@
   <!-- <run_depend>warehouse_ros_mongo</run_depend> -->
   <build_depend>franka_description</build_depend>
   <run_depend>franka_description</run_depend>
-
-
 </package>

@@ -9,15 +9,3 @@ cartesian_pose_example_controller:
 
 cartesian_velocity_example_controller:
     type: franka_example_controllers/CartesianVelocityExampleController
-    
-franka_position_joint_trajectory_controller:
-    type: "position_controllers/JointTrajectoryController"
-    joints:
-      - franka_emika_joint1
-      - franka_emika_joint2
-      - franka_emika_joint3
-      - franka_emika_joint4
-      - franka_emika_joint5
-      - franka_emika_joint6
-      - franka_emika_joint7
-
