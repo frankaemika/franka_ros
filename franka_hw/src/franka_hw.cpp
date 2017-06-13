@@ -156,7 +156,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   FrankaCartesianStateHandle franka_cartesian_state_handle(
       arm_id_ + "_cartesian", robot_state_.cartesian_collision,
       robot_state_.cartesian_contact, robot_state_.O_F_ext_hat_K,
-      robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE);
+      robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE, robot_state_.O_T_EE_d);
   franka_cartesian_state_interface_.registerHandle(
       franka_cartesian_state_handle);
   FrankaCartesianPoseHandle franka_cartesian_pose_handle(
@@ -188,6 +188,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     publisher_franka_states_.msg_.K_F_ext_hat_K.resize(
         robot_state_.K_F_ext_hat_K.size());
     publisher_franka_states_.msg_.elbow.resize(robot_state_.elbow.size());
+    publisher_franka_states_.msg_.elbow_d.resize(robot_state_.elbow_d.size());
     publisher_franka_states_.msg_.joint_collision.resize(
         robot_state_.joint_collision.size());
     publisher_franka_states_.msg_.joint_contact.resize(
@@ -212,6 +213,19 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     publisher_franka_states_.msg_.O_T_EE.layout.dim[1].stride = 4;
     publisher_franka_states_.msg_.O_T_EE.layout.dim[1].label = "column";
     publisher_franka_states_.msg_.O_T_EE.data.resize(16);
+    publisher_franka_states_.msg_.O_T_EE_d.layout.data_offset = 0;
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim.clear();
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim.push_back(
+        std_msgs::MultiArrayDimension());
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[0].size = 4;
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[0].stride = 4 * 4;
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[0].label = "row";
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim.push_back(
+        std_msgs::MultiArrayDimension());
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[1].size = 4;
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[1].stride = 4;
+    publisher_franka_states_.msg_.O_T_EE_d.layout.dim[1].label = "column";
+    publisher_franka_states_.msg_.O_T_EE_d.data.resize(16);
   }
   {
     std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> >
@@ -303,10 +317,21 @@ void FrankaHW::publishFrankaStates() {
       publisher_franka_states_.msg_.elbow[i] = robot_state_.elbow[i];
     }
 
+    for (size_t i = 0; i < robot_state_.elbow_d.size(); ++i) {
+      publisher_franka_states_.msg_.elbow_d[i] = robot_state_.elbow_d[i];
+    }
+
     for (size_t row = 0; row < 4; ++row) {
       for (size_t col = 0; col < 4; ++col) {
         publisher_franka_states_.msg_.O_T_EE.data[4 * row + col] =
             robot_state_.O_T_EE[4 * col + row];
+      }
+    }
+
+    for (size_t row = 0; row < 4; ++row) {
+      for (size_t col = 0; col < 4; ++col) {
+        publisher_franka_states_.msg_.O_T_EE_d.data[4 * row + col] =
+            robot_state_.O_T_EE_d[4 * col + row];
       }
     }
 
@@ -528,7 +553,7 @@ bool FrankaHW::prepareSwitch(
     case JointPosition:
       run_function_ = [this](auto ros_callback) {
         robot_->control(
-            std::bind(&FrankaHW::controlCallback<franka::JointValues>, this,
+            std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                       [=] { return position_joint_command_; }, ros_callback,
                       std::placeholders::_1));
       };
@@ -567,7 +592,7 @@ bool FrankaHW::prepareSwitch(
     case TorqueAndJointPosition:
       run_function_ = [this](auto ros_callback) {
         robot_->control(
-            std::bind(&FrankaHW::controlCallback<franka::JointValues>, this,
+            std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                       [=] { return position_joint_command_; },
                       std::function<void(void)>(), std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,

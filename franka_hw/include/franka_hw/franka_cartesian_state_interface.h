@@ -27,13 +27,15 @@ class FrankaCartesianStateHandle {
                              const std::array<double, 6>& contact,
                              const std::array<double, 6>& O_F_ext_hat_K,
                              const std::array<double, 6>& K_F_ext_hat_K,
-                             const std::array<double, 16>& O_T_EE)
+                             const std::array<double, 16>& O_T_EE,
+                             const std::array<double, 16>& O_T_EE_d)
       : name_(name),
         collision_(&collision),
         contact_(&contact),
         O_F_ext_hat_K_(&O_F_ext_hat_K),
         K_F_ext_hat_K_(&K_F_ext_hat_K),
-        O_T_EE_(&O_T_EE) {}
+        O_T_EE_(&O_T_EE),
+        O_T_EE_d_(&O_T_EE_d) {}
 
   const std::string& getName() const { return name_; }
   const std::array<double, 6>& getCollision() const { return *collision_; }
@@ -41,6 +43,7 @@ class FrankaCartesianStateHandle {
   const std::array<double, 6>& getFExtO() const { return *O_F_ext_hat_K_; }
   const std::array<double, 6>& getFExtK() const { return *K_F_ext_hat_K_; }
   const std::array<double, 16>& getTransform() const { return *O_T_EE_; }
+  const std::array<double, 16>& getDesiredTransform() const { return *O_T_EE_d_; }
 
  private:
   std::string name_;
@@ -49,6 +52,7 @@ class FrankaCartesianStateHandle {
   const std::array<double, 6>* O_F_ext_hat_K_;
   const std::array<double, 6>* K_F_ext_hat_K_;
   const std::array<double, 16>* O_T_EE_;
+  const std::array<double, 16>* O_T_EE_d_;
 };
 
 /** \brief Hardware interface to support reading the cartesian state of a franka
