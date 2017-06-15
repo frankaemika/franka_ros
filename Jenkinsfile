@@ -27,10 +27,14 @@ node {
       }
     }
 
-    stage('Build in debug mode') {
-      dir('catkin_ws') {
+    dir('catkin_ws') {
+      stage('Build in debug mode') {
         env.FRANKA_DIR = "${pwd()}/../libfranka/build"
         sh 'src/scripts/ci/debug-build.sh'
+      }
+
+      stage('Archive results') {
+        junit 'build/test_results/**/*.xml'
       }
     }
     currentBuild.result = 'SUCCESS'

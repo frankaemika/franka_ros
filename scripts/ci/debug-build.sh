@@ -9,4 +9,4 @@ catkin_make --cmake-args -DFranka_DIR:PATH=$FRANKA_DIR -DCMAKE_EXPORT_COMPILE_CO
 . devel/setup.sh
 catkin_make -j1 check-format
 catkin_make -j1 check-tidy
-catkin_make test
+catkin_make run_tests

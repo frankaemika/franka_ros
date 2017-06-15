@@ -7,9 +7,11 @@ float64[] tau_J
 float64[] dtau_J
 float64[] K_F_ext_hat_K
 float64[] elbow
+float64[] elbow_d
 float64[] joint_collision
 float64[] joint_contact
 float64[] O_F_ext_hat_K
 float64[] q_d
 float64[] tau_ext_hat_filtered
 std_msgs/Float64MultiArray O_T_EE
+std_msgs/Float64MultiArray O_T_EE_d

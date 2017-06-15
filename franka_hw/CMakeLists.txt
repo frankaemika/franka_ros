@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   joint_limits_interface
   xmlrpcpp
   controller_manager
+  franka_description
 )
 
 find_package(Franka REQUIRED)
@@ -81,6 +82,10 @@ target_link_libraries(franka_hw_node
 target_include_directories(franka_hw_node PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
 
 ## Tools
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
