@@ -3,7 +3,7 @@
   <arg name="robot_ip" default="robot.franka.de" />
   <arg name="arm_id" default="franka_emika" />
 
-  <node name="$(arg arm_id)" pkg="franka_hw" type="franka_hw_node" output="screen">
+  <node name="$(arg arm_id)" pkg="franka_hw" type="franka_hw_node" output="screen" required="true">
     <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
     <param name="arm_id" value="$(arg arm_id)" />

@@ -1,11 +1,10 @@
+#include "franka_hw_helper_functions.h"
 
-#include <ros/ros.h>
-
-#include <franka_hw/franka_hw_helper_functions.h>
+#include <ros/console.h>
 
 namespace franka_hw {
 
-bool findArmIDinResourceID(const std::string& resource_id,
+bool findArmIdInResourceId(const std::string& resource_id,
                            std::string* arm_id) {
   size_t position = resource_id.rfind("_joint");
   if (position != std::string::npos && position > 0) {
@@ -49,7 +48,7 @@ bool getArmClaimedMap(ResourceWithClaimsMap& resource_map,
   // 7 non-torque claims on joint_level or one claim on cartesian level.
   for (auto map_it = resource_map.begin(); map_it != resource_map.end();
        map_it++) {
-    if (!findArmIDinResourceID(map_it->first, &current_arm_id)) {
+    if (!findArmIdInResourceId(map_it->first, &current_arm_id)) {
       ROS_ERROR_STREAM("Could not find arm_id in resource "
                        << map_it->first
                        << ". Conflict! Name joints as "
@@ -87,6 +86,67 @@ bool getArmClaimedMap(ResourceWithClaimsMap& resource_map,
         new_claim.cartesian_pose_claims;
   }
   return true;
+}
+
+ControlMode getControlMode(const std::string& arm_id,
+                           ArmClaimedMap& arm_claim_map) {
+  ControlMode control_mode = ControlMode::None;
+  if (arm_claim_map[arm_id].joint_position_claims > 0 &&
+      arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+      arm_claim_map[arm_id].joint_torque_claims == 0 &&
+      arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+      arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointPosition;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims > 0 &&
+             arm_claim_map[arm_id].joint_torque_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointVelocity;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointTorque;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::CartesianPose;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims > 0) {
+    control_mode = ControlMode::CartesianVelocity;
+  } else if (arm_claim_map[arm_id].joint_position_claims > 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointTorque | ControlMode::JointPosition;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims > 0 &&
+             arm_claim_map[arm_id].joint_torque_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointTorque | ControlMode::JointVelocity;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims == 0) {
+    control_mode = ControlMode::JointTorque | ControlMode::CartesianPose;
+  } else if (arm_claim_map[arm_id].joint_position_claims == 0 &&
+             arm_claim_map[arm_id].joint_velocity_claims == 0 &&
+             arm_claim_map[arm_id].joint_torque_claims > 0 &&
+             arm_claim_map[arm_id].cartesian_pose_claims == 0 &&
+             arm_claim_map[arm_id].cartesian_velocity_claims > 0) {
+    control_mode = ControlMode::JointTorque | ControlMode::CartesianVelocity;
+  }
+  return control_mode;
 }
 
 }  // namespace franka_hw
