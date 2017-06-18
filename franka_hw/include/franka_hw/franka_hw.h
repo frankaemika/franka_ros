@@ -24,7 +24,6 @@
 #include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_joint_command_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
-#include <franka_hw/trigger_rate.h>
 
 namespace franka_hw {
 
@@ -40,14 +39,12 @@ class FrankaHW : public hardware_interface::RobotHW {
   *
   * @param[in] joint_names A vector of joint names for all franka joint
   * @param[in] robot A pointer to an istance of franka::Robot
-  * @param[in] publish_rate Publish rate [Hz] for ROS topics
   * @param[in] arm_id Unique identifier for the Franka arm that the class
   * controls
   * @param[in] nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
-           double publish_rate,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
@@ -187,7 +184,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  const franka_hw::TriggerRate publish_rate_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;

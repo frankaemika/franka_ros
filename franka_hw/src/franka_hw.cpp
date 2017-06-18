@@ -20,7 +20,6 @@ constexpr double FrankaHW::kMaximumJointJerk;
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    franka::Robot* robot,
-                   double publish_rate,
                    const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
@@ -34,7 +33,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
-      publish_rate_(publish_rate),
       publisher_transforms_(node_handle, "/tf", 1),
       publisher_franka_states_(node_handle, "franka_states", 1),
       publisher_joint_states_(node_handle, "joint_states", 1),
