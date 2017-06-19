@@ -8,3 +8,5 @@ joint_trajectory_controller:
     - franka_emika_joint5
     - franka_emika_joint6
     - franka_emika_joint7
+  constraints:
+    goal_time: 0.01

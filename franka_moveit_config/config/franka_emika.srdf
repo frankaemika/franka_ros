@@ -39,7 +39,7 @@
         <joint name="franka_emika_joint6" value="0" />
         <joint name="franka_emika_joint7" value="0" />
     </group_state>
-    <group_state name="work" group="franka">
+    <group_state name="ready" group="franka">
         <joint name="franka_emika_joint1" value="0" />
         <joint name="franka_emika_joint2" value="-0.2128" />
         <joint name="franka_emika_joint3" value="0" />
