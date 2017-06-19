@@ -260,7 +260,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 }
 
 void FrankaHW::run(std::function<bool()> ros_callback) {
-  if (!robot_) {
+  if (robot_ == nullptr) {
     throw std::invalid_argument("franka::Robot was not initialized.");
   }
 
