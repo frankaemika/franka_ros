@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="robot_ip" default="robot.franka.de" />
+  <arg name="arm_id" default="franka_emika" />
+
+  <include file="$(find franka_hw)/launch/franka_hw.launch">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+    <arg name="arm_id" value="$(arg arm_id)" />
+  </include>
+  <include file="$(find franka_moveit_config)/launch/franka_moveit.launch">
+    <arg name="arm_id" value="$(arg arm_id)" />
+  </include>
+  <group ns="$(arg arm_id)">
+    <node name="move_to_start" pkg="franka_moveit_config" type="move_to_start.py" output="screen" required="true" />
+  </group>
+</launch>
