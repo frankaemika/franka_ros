@@ -4,36 +4,36 @@
 joint_limits:
   franka_emika_joint1:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint2:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint3:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint4:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint5:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint6:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
   franka_emika_joint7:
     has_velocity_limits: true
-    max_velocity: 2.5
-    has_acceleration_limits: false
-    max_acceleration: 0
+    max_velocity: 0.5
+    has_acceleration_limits: true
+    max_acceleration: 0.5
