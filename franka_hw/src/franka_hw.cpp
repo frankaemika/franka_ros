@@ -264,8 +264,17 @@ void FrankaHW::run(std::function<bool()> ros_callback) {
     throw std::invalid_argument("franka::Robot was not initialized.");
   }
 
+  robot_state_ = robot_->readOnce();
+  uint32_t last_sequence_number = robot_state_.sequence_number;
+
   do {
-    run_function_(ros_callback);
+    run_function_([this, ros_callback, &last_sequence_number]() {
+      if (last_sequence_number != robot_state_.sequence_number) {
+        last_sequence_number = robot_state_.sequence_number;
+        return ros_callback();
+      }
+      return true;
+    });
   } while (ros_callback());
   // TODO(FWA): how to handle e.g. collisions in ros_control?
   // Currently just propagates exceptions.
@@ -333,7 +342,7 @@ void FrankaHW::publishJointStates() {
   if (publisher_joint_states_.trylock()) {
     for (size_t i = 0; i < joint_names_.size(); ++i) {
       publisher_joint_states_.msg_.name[i] = joint_names_[i];
-      publisher_joint_states_.msg_.position[i] = robot_state_.q[i];
+      publisher_joint_states_.msg_.position[i] = robot_state_.q_d[i];
       publisher_joint_states_.msg_.velocity[i] = robot_state_.dq[i];
       publisher_joint_states_.msg_.effort[i] = robot_state_.tau_J[i];
     }
@@ -535,7 +544,7 @@ bool FrankaHW::prepareSwitch(
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                       [=] { return position_joint_command_; },
-                      std::function<bool()>(), std::placeholders::_1),
+                      ros_callback, std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                       [=] { return effort_joint_command_; }, ros_callback,
                       std::placeholders::_1));
@@ -546,7 +555,7 @@ bool FrankaHW::prepareSwitch(
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                       [=] { return velocity_joint_command_; },
-                      std::function<bool()>(), std::placeholders::_1),
+                      ros_callback, std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                       [=] { return effort_joint_command_; }, ros_callback,
                       std::placeholders::_1));
@@ -557,7 +566,7 @@ bool FrankaHW::prepareSwitch(
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                       [=] { return pose_cartesian_command_; },
-                      std::function<bool()>(), std::placeholders::_1),
+                      ros_callback, std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                       [=] { return effort_joint_command_; }, ros_callback,
                       std::placeholders::_1));
@@ -568,7 +577,7 @@ bool FrankaHW::prepareSwitch(
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
                       this, [=] { return velocity_cartesian_command_; },
-                      std::function<bool()>(), std::placeholders::_1),
+                      ros_callback, std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                       [=] { return effort_joint_command_; }, ros_callback,
                       std::placeholders::_1));
