@@ -145,21 +145,12 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
  private:
-  /**
-  * Template for a Callback function to a control loop with command type T,
-  * which can be joint positions, joint velocities,joint efforts , cartesian
-  * poses or cartesian velocities
-  *
-  * @param[in] get_command A function that returns the desired command
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
   template <typename T>
-  T controlCallback(std::function<T()> get_command,
+  T controlCallback(const T& command,
                     std::function<bool()> ros_callback,
                     const franka::RobotState& robot_state) {
     if (readCallback(ros_callback, robot_state)) {
-      return get_command();
+      return command;
     }
     return franka::Stop;
   }
