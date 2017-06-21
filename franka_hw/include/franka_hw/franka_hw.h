@@ -51,12 +51,16 @@ class FrankaHW : public hardware_interface::RobotHW {
   ~FrankaHW() override = default;
 
   /**
-  * Runs the control in case a valid run_function_ was chosen based on the
-  * claimed resources
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
+   * Runs the currently active controller in a realtime loop.
+   *
+   * If no controller is active, a default loop is run that reads the robot
+   * state, but does not perform control. The function only exits if
+   * ros_callback returns false.
+   *
+   * @param[in] ros_callback A callback function that is executed at each time
+   * step and runs all ros-side functionality of the hardware. Execution is
+   * stopped if it returns false.
+   */
   void run(std::function<bool()> ros_callback);
 
   /**
