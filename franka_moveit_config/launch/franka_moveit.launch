@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="arm_id" default="franka_emika" />
+
+  <group ns="$(arg arm_id)">
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+
+    <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="joint_trajectory_controller --shutdown-timeout 2"/>
+
+    <include file="$(find franka_moveit_config)/launch/move_group.launch" />
+  </group>
+</launch>

@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: franka_description
+    relative_path: robots/franka.urdf.xacro
+  SRDF:
+    relative_path: config/franka_emika.srdf
+  CONFIG:
+    author_name: Franka Emika GmbH
+    author_email: info@franka.de
+    generated_timestamp: 1496132153

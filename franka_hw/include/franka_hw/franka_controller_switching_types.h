@@ -1,51 +1,66 @@
 #pragma once
 
-#include <list>
 #include <map>
-#include <set>
+#include <ostream>
 #include <string>
 #include <vector>
 
-#include <hardware_interface/controller_info.h>
-#include <hardware_interface/interface_resources.h>
-
 namespace franka_hw {
 
-typedef std::map<std::string, std::vector<std::vector<std::string> > >
-    ResourceWithClaimsMap;
+using ResourceWithClaimsMap =
+    std::map<std::string, std::vector<std::vector<std::string>>>;
 
-typedef std::list<hardware_interface::ControllerInfo>::const_iterator
-    ControlInfoIterator;
-
-typedef std::vector<hardware_interface::InterfaceResources>::const_iterator
-    ClaimedResourceIterator;
-
-typedef std::set<std::string>::const_iterator ResourceIterator;
-
-typedef std::map<std::string, std::vector<std::vector<std::string> > >::iterator
-    ResourceMapIterator;
-
-typedef struct {
+struct ResourceClaims {
   uint8_t joint_position_claims = 0;
   uint8_t joint_velocity_claims = 0;
   uint8_t joint_torque_claims = 0;
   uint8_t cartesian_velocity_claims = 0;
   uint8_t cartesian_pose_claims = 0;
-} ResourceClaims;
+};
 
-typedef std::map<std::string, ResourceClaims> ArmClaimedMap;
+using ArmClaimedMap = std::map<std::string, ResourceClaims>;
 
-typedef enum {
-  NonValidRequest = 0,
-  JointTorque = 1,
-  JointPosition = 2,
-  JointVelocity = 3,
-  CartesianVelocity = 4,
-  CartesianPose = 5,
-  TorqueAndJointPosition = 6,
-  TorqueAndJointVelocity = 7,
-  TorqueAndCartesianPose = 8,
-  TorqueAndCartesianVelocity = 9
-} RequestedControl;
+enum class ControlMode {
+  None = 0,
+  JointTorque = (1 << 0),
+  JointPosition = (1 << 1),
+  JointVelocity = (1 << 2),
+  CartesianVelocity = (1 << 3),
+  CartesianPose = (1 << 4),
+};
+
+std::ostream& operator<<(std::ostream& ostream, ControlMode mode);
+
+// Implement operators for BitmaskType concept
+constexpr ControlMode operator&(ControlMode left, ControlMode right) {
+  return static_cast<ControlMode>(
+      static_cast<std::underlying_type_t<ControlMode>>(left) &
+      static_cast<std::underlying_type_t<ControlMode>>(right));
+}
+
+constexpr ControlMode operator|(ControlMode left, ControlMode right) {
+  return static_cast<ControlMode>(
+      static_cast<std::underlying_type_t<ControlMode>>(left) |
+      static_cast<std::underlying_type_t<ControlMode>>(right));
+}
+
+constexpr ControlMode operator^(ControlMode left, ControlMode right) {
+  return static_cast<ControlMode>(
+      static_cast<std::underlying_type_t<ControlMode>>(left) ^
+      static_cast<std::underlying_type_t<ControlMode>>(right));
+}
+
+constexpr ControlMode operator~(ControlMode mode) {
+  return static_cast<ControlMode>(
+      ~static_cast<std::underlying_type_t<ControlMode>>(mode));
+}
+
+constexpr ControlMode& operator&=(ControlMode& left, ControlMode right) {
+  return left = left & right;
+}
+
+constexpr ControlMode& operator|=(ControlMode& left, ControlMode right) {
+  return left = left | right;
+}
 
 }  // namespace franka_hw

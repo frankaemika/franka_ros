@@ -9,12 +9,11 @@
 
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/trigger_rate.h>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
   ros::NodeHandle node_handle("~");
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
 
   XmlRpc::XmlRpcValue params;
   node_handle.getParam("joint_names", params);
@@ -26,35 +25,31 @@ int main(int argc, char** argv) {
   node_handle.getParam("robot_ip", robot_ip);
   std::string arm_id;
   node_handle.getParam("arm_id", arm_id);
-  double franka_states_publish_rate = 30.0;
-  node_handle.getParam("franka_states_publish_rate",
-                       franka_states_publish_rate);
+  double publish_rate = 30.0;
+  node_handle.getParam("publish_rate", publish_rate);
   franka::Robot robot(robot_ip);
-  franka_hw::FrankaHW franka_ros(
-      joint_names, &robot, franka_states_publish_rate, arm_id, node_handle);
-  controller_manager::ControllerManager control_manager(&franka_ros);
+  franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
+  controller_manager::ControllerManager control_manager(&franka_ros,
+                                                        node_handle);
 
-  ros::Duration period(0.0);
-  ros::Time now(ros::Time::now());
-  ros::Time last(ros::Time::now());
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
 
-  std::function<void(void)> ros_callback = [&]() {
-    now = ros::Time::now();
-    period = now - last;
-    last = now;
-    control_manager.update(now, period);
-    franka_ros.enforceLimits(period);
-    franka_ros.publishExternalWrench();
-    franka_ros.publishFrankaStates();
-    franka_ros.publishJointStates();
-    franka_ros.publishTransforms();
-  };
+  const ros::Duration kPeriod(0.001);
+  franka_hw::TriggerRate trigger_publish(publish_rate);
+  franka_ros.run([&]() {
+    control_manager.update(ros::Time::now(), kPeriod);
+    franka_ros.enforceLimits(kPeriod);
+    // TODO(FWA): should only update trigger timestamp if
+    // actually published.
+    if (trigger_publish()) {
+      franka_ros.publishExternalWrench();
+      franka_ros.publishFrankaStates();
+      franka_ros.publishJointStates();
+      franka_ros.publishTransforms();
+    }
+    return ros::ok();
+  });
 
-  while (ros::ok()) {
-    franka_ros.run(ros_callback);
-    ros_callback();
-    usleep(5000);
-  }
-  spinner.stop();
   return 0;
 }

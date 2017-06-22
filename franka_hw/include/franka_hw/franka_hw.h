@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cinttypes>
 #include <functional>
 #include <string>
 #include <vector>
@@ -23,7 +24,6 @@
 #include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_joint_command_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
-#include <franka_hw/trigger_rate.h>
 
 namespace franka_hw {
 
@@ -39,27 +39,29 @@ class FrankaHW : public hardware_interface::RobotHW {
   *
   * @param[in] joint_names A vector of joint names for all franka joint
   * @param[in] robot A pointer to an istance of franka::Robot
-  * @param[in] publish_rate Publish rate [Hz] for ROS topics
   * @param[in] arm_id Unique identifier for the Franka arm that the class
   * controls
   * @param[in] nh A nodehandle e.g to register publishers
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
-           double publish_rate,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
   ~FrankaHW() override = default;
 
   /**
-  * Runs the control in case a valid run_function_ was chosen based on the
-  * claimed resources
-  *
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
-  void run(std::function<void(void)> ros_callback);
+   * Runs the currently active controller in a realtime loop.
+   *
+   * If no controller is active, a default loop is run that reads the robot
+   * state, but does not perform control. The function only exits if
+   * ros_callback returns false.
+   *
+   * @param[in] ros_callback A callback function that is executed at each time
+   * step and runs all ros-side functionality of the hardware. Execution is
+   * stopped if it returns false.
+   */
+  void run(std::function<bool()> ros_callback);
 
   /**
   * Checks whether a requested controller can be run, based on the resources and
@@ -147,28 +149,18 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
  private:
-  /**
-  * Template for a Callback function to a control loop with command type T,
-  * which can be joint positions, joint velocities,joint efforts , cartesian
-  * poses or cartesian velocities
-  *
-  * @param[in] get_command A function that returns the desired command
-  * @param[in] ros_callback A callback function that is executed at each time
-  * step and runs all ros-side functionality of the hardware
-  */
   template <typename T>
-  T controlCallback(std::function<T()> get_command,
-                    std::function<void()> ros_callback,
+  T controlCallback(const T& command,
+                    std::function<bool()> ros_callback,
                     const franka::RobotState& robot_state) {
-    if (controller_running_flag_) {
-      if (ros_callback) {
-        robot_state_ = robot_state;
-        ros_callback();
-      }
-      return get_command();
+    if (readCallback(ros_callback, robot_state)) {
+      return command;
     }
     return franka::Stop;
   }
+
+  bool readCallback(std::function<bool()> ros_callback,
+                    const franka::RobotState& robot_state);
 
   hardware_interface::JointStateInterface joint_state_interface_;
   franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
@@ -187,7 +179,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  franka_hw::TriggerRate publish_rate_;
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>
       publisher_franka_states_;
@@ -196,9 +187,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
       publisher_external_wrench_;
   std::vector<std::string> joint_names_;
-  std::string arm_id_;
+  const std::string arm_id_;
 
-  franka::Robot* robot_;
+  franka::Robot* const robot_;
   franka::RobotState robot_state_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
@@ -208,8 +199,10 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
-  bool controller_running_flag_ = false;
-  std::function<void(std::function<void(void)>)> run_function_;
+  bool controller_running_ = true;
+  ControlMode current_control_mode_ = ControlMode::None;
+  const std::function<void(std::function<bool()>)> default_run_function_;
+  std::function<void(std::function<bool()>)> run_function_;
 };
 
 }  // namespace franka_hw

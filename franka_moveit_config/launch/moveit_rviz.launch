@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb --ex run --args" />
+
+  <arg name="config" default="true" />
+  <arg unless="$(arg config)" name="command_args" value="" />
+  <arg     if="$(arg config)" name="command_args" value="-d $(find franka_moveit_config)/launch/moveit.rviz" />
+
+  <arg name="arm_id" default="franka_emika" />
+
+  <group ns="$(arg arm_id)">
+    <node name="$(anon rviz)" launch-prefix="$(arg launch_prefix)" pkg="rviz" type="rviz" respawn="false"
+        args="$(arg command_args)" output="screen">
+      <rosparam command="load" file="$(find franka_moveit_config)/config/kinematics.yaml"/>
+    </node>
+  </group>
+
+</launch>
