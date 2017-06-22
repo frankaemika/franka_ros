@@ -264,10 +264,10 @@ void FrankaHW::run(std::function<bool()> ros_callback) {
     throw std::invalid_argument("franka::Robot was not initialized.");
   }
 
-  robot_state_ = robot_->readOnce();
-  uint32_t last_sequence_number = robot_state_.sequence_number;
-
   do {
+    robot_state_ = robot_->readOnce();
+    uint32_t last_sequence_number = robot_state_.sequence_number;
+
     run_function_([this, ros_callback, &last_sequence_number]() {
       if (last_sequence_number != robot_state_.sequence_number) {
         last_sequence_number = robot_state_.sequence_number;

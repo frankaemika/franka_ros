@@ -199,7 +199,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;
-  bool controller_running_ = false;
+  bool controller_running_ = true;
   ControlMode current_control_mode_ = ControlMode::None;
   const std::function<void(std::function<bool()>)> default_run_function_;
   std::function<void(std::function<bool()>)> run_function_;
