@@ -150,11 +150,11 @@ class FrankaHW : public hardware_interface::RobotHW {
 
  private:
   template <typename T>
-  T controlCallback(const T& command,
+  T controlCallback(const T* command,
                     std::function<bool()> ros_callback,
                     const franka::RobotState& robot_state) {
     if (readCallback(ros_callback, robot_state)) {
-      return command;
+      return *command;
     }
     return franka::Stop;
   }

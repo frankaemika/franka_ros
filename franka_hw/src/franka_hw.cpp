@@ -503,7 +503,7 @@ bool FrankaHW::prepareSwitch(
     case ControlMode::JointTorque:
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(std::bind(&FrankaHW::controlCallback<franka::Torques>,
-                                  this, effort_joint_command_, ros_callback,
+                                  this, &effort_joint_command_, ros_callback,
                                   std::placeholders::_1));
       };
       break;
@@ -511,38 +511,38 @@ bool FrankaHW::prepareSwitch(
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(std::bind(
             &FrankaHW::controlCallback<franka::JointPositions>, this,
-            position_joint_command_, ros_callback, std::placeholders::_1));
+            &position_joint_command_, ros_callback, std::placeholders::_1));
       };
       break;
     case ControlMode::JointVelocity:
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(std::bind(
             &FrankaHW::controlCallback<franka::JointVelocities>, this,
-            velocity_joint_command_, ros_callback, std::placeholders::_1));
+            &velocity_joint_command_, ros_callback, std::placeholders::_1));
       };
       break;
     case ControlMode::CartesianPose:
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(std::bind(
             &FrankaHW::controlCallback<franka::CartesianPose>, this,
-            pose_cartesian_command_, ros_callback, std::placeholders::_1));
+            &pose_cartesian_command_, ros_callback, std::placeholders::_1));
       };
       break;
     case ControlMode::CartesianVelocity:
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(std::bind(
             &FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-            velocity_cartesian_command_, ros_callback, std::placeholders::_1));
+            &velocity_cartesian_command_, ros_callback, std::placeholders::_1));
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointPosition):
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                      position_joint_command_, ros_callback,
+                      &position_joint_command_, ros_callback,
                       std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                      effort_joint_command_, ros_callback,
+                      &effort_joint_command_, ros_callback,
                       std::placeholders::_1));
       };
       break;
@@ -550,10 +550,10 @@ bool FrankaHW::prepareSwitch(
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                      velocity_joint_command_, ros_callback,
+                      &velocity_joint_command_, ros_callback,
                       std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                      effort_joint_command_, ros_callback,
+                      &effort_joint_command_, ros_callback,
                       std::placeholders::_1));
       };
       break;
@@ -561,10 +561,10 @@ bool FrankaHW::prepareSwitch(
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                      pose_cartesian_command_, ros_callback,
+                      &pose_cartesian_command_, ros_callback,
                       std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                      effort_joint_command_, ros_callback,
+                      &effort_joint_command_, ros_callback,
                       std::placeholders::_1));
       };
       break;
@@ -572,10 +572,10 @@ bool FrankaHW::prepareSwitch(
       run_function_ = [this](std::function<bool()> ros_callback) {
         robot_->control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
-                      this, velocity_cartesian_command_, ros_callback,
+                      this, &velocity_cartesian_command_, ros_callback,
                       std::placeholders::_1),
             std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                      effort_joint_command_, ros_callback,
+                      &effort_joint_command_, ros_callback,
                       std::placeholders::_1));
       };
       break;
