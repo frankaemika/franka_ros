@@ -19,6 +19,15 @@
 #include <franka/robot.h>
 
 #include <franka_hw/FrankaState.h>
+#include <franka_hw/SetCartesianStiffness.h>
+#include <franka_hw/SetEEFrame.h>
+#include <franka_hw/SetForceTorqueCollisionBehavior.h>
+#include <franka_hw/SetFullCollisionBehavior.h>
+#include <franka_hw/SetJointStiffness.h>
+#include <franka_hw/SetKFrame.h>
+#include <franka_hw/SetLoad.h>
+#include <franka_hw/SetTimeScalingFactor.h>
+
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
@@ -149,6 +158,32 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
  private:
+  bool setJointStiffness(franka_hw::SetJointStiffness::Request& req,
+                         franka_hw::SetJointStiffness::Response& res);
+
+  bool setCartesianStiffness(franka_hw::SetCartesianStiffness::Request& req,
+                             franka_hw::SetCartesianStiffness::Response& res);
+
+  bool setEEFrame(franka_hw::SetEEFrame::Request& req,
+                  franka_hw::SetEEFrame::Response& res);
+
+  bool setKFrame(franka_hw::SetKFrame::Request& req,
+                 franka_hw::SetKFrame::Response& res);
+
+  bool setForceTorqueCollisionBehavior(
+      franka_hw::SetForceTorqueCollisionBehavior::Request& req,
+      franka_hw::SetForceTorqueCollisionBehavior::Response& res);
+
+  bool setFullCollisionBehavior(
+      franka_hw::SetFullCollisionBehavior::Request& req,
+      franka_hw::SetFullCollisionBehavior::Response& res);
+
+  bool setLoad(franka_hw::SetLoad::Request& req,
+               franka_hw::SetLoad::Response& res);
+
+  bool setTimeScalingFactor(franka_hw::SetTimeScalingFactor::Request& req,
+                            franka_hw::SetTimeScalingFactor::Response& res);
+
   template <typename T>
   T controlCallback(const T& command,
                     std::function<bool()> ros_callback,
@@ -196,6 +231,15 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::Torques effort_joint_command_;
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
+
+  ros::ServiceServer joint_stiffness_server_;
+  ros::ServiceServer cartesian_stiffness_server_;
+  ros::ServiceServer EE_frame_server_;
+  ros::ServiceServer K_frame_server_;
+  ros::ServiceServer force_torque_collision_server_;
+  ros::ServiceServer full_collision_server_;
+  ros::ServiceServer load_server_;
+  ros::ServiceServer time_scaling_server_;
 
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;

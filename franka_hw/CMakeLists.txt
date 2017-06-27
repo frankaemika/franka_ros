@@ -30,6 +30,17 @@ add_message_files(
   FrankaState.msg
 )
 
+add_service_files(FILES
+   SetJointStiffness.srv
+   SetCartesianStiffness.srv
+   SetFullCollisionBehavior.srv
+   SetForceTorqueCollisionBehavior.srv
+   SetEEFrame.srv
+   SetKFrame.srv
+   SetLoad.srv
+   SetTimeScalingFactor.srv
+)
+
 generate_messages(
   DEPENDENCIES
   std_msgs
@@ -52,7 +63,7 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  franka_hw_generate_messages_cpp
+  ${PROJECT_NAME}_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw
@@ -72,7 +83,7 @@ add_executable(franka_hw_node
 add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  franka_hw_generate_messages_cpp
+  ${PROJECT_NAME}_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw_node

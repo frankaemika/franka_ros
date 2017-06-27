@@ -28,7 +28,8 @@
   <build_depend>urdf</build_depend>
   <build_depend>xmlrpcpp</build_depend>
   <build_depend>controller_manager</build_depend>
-  
+  <build_depend>message_generation</build_depend>
+
   <run_depend>Franka</run_depend>
   <run_depend>hardware_interface</run_depend>
   <run_depend>joint_limits_interface</run_depend>
@@ -43,6 +44,7 @@
   <run_depend>urdf</run_depend>
   <run_depend>xmlrpcpp</run_depend>
   <run_depend>controller_manager</run_depend>
+  <run_depend>message_runtime</run_depend>
 
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
