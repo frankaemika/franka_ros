@@ -92,7 +92,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         robot_->read(std::bind(&FrankaHW::readCallback, this, ros_callback,
                                std::placeholders::_1));
       }),
-      run_function_(default_run_function_) {
+      run_function_(default_run_function_),
+      error_recovery_server_(node_handle, "error_recovery", robot) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
 

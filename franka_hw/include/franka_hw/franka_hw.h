@@ -28,6 +28,7 @@
 #include <franka_hw/SetLoad.h>
 #include <franka_hw/SetTimeScalingFactor.h>
 
+#include <franka_hw/error_recovery_server.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_cartesian_state_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
@@ -240,6 +241,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   ros::ServiceServer full_collision_server_;
   ros::ServiceServer load_server_;
   ros::ServiceServer time_scaling_server_;
+  ErrorRecoveryServer error_recovery_server_;
 
   uint64_t sequence_number_joint_states_ = 0;
   uint64_t sequence_number_franka_states_ = 0;

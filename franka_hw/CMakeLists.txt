@@ -89,11 +89,13 @@ add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
+  error_recovery_server
 )
 
 target_link_libraries(franka_hw
   ${catkin_LIBRARIES}
   Franka::franka
+  error_recovery_server
 )
 
 target_include_directories(franka_hw PUBLIC
