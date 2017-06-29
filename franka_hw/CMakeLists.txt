@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   xmlrpcpp
   controller_manager
   franka_description
+  actionlib_msgs
 )
 
 find_package(Franka REQUIRED)
@@ -28,6 +29,11 @@ find_package(Franka REQUIRED)
 add_message_files(
   FILES
   FrankaState.msg
+)
+
+add_action_files(
+  DIRECTORY action
+  FILES ErrorRecovery.action
 )
 
 add_service_files(FILES
@@ -44,13 +50,32 @@ add_service_files(FILES
 generate_messages(
   DEPENDENCIES
   std_msgs
+  actionlib_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw
-  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
+  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools actionlib_msgs
   DEPENDS Franka
+)
+
+add_library(error_recovery_server src/error_recovery_server.cpp)
+
+add_dependencies(error_recovery_server
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_generate_messages_cpp
+)
+
+target_link_libraries(error_recovery_server
+   ${catkin_LIBRARIES}
+   Franka::franka
+)
+
+target_include_directories(error_recovery_server PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
 )
 
 add_library(franka_hw
