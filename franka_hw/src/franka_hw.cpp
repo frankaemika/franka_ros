@@ -13,14 +13,6 @@
 #include <tf/transform_datatypes.h>
 #include <urdf/model.h>
 
-#include <franka_hw/SetCartesianStiffness.h>
-#include <franka_hw/SetEEFrame.h>
-#include <franka_hw/SetForceTorqueCollisionBehavior.h>
-#include <franka_hw/SetFullCollisionBehavior.h>
-#include <franka_hw/SetJointStiffness.h>
-#include <franka_hw/SetKFrame.h>
-#include <franka_hw/SetLoad.h>
-#include <franka_hw/SetTimeScalingFactor.h>
 #include "franka_hw_helper_functions.h"
 
 namespace franka_hw {
@@ -57,43 +49,11 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       pose_cartesian_command_({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
                                1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-      joint_stiffness_server_(
-          ros::NodeHandle().advertiseService(arm_id + "/set_joint_stiffness",
-                                             &FrankaHW::setJointStiffness,
-                                             this)),
-      cartesian_stiffness_server_(ros::NodeHandle().advertiseService(
-          arm_id + "/set_cartesian_stiffness",
-          &FrankaHW::setCartesianStiffness,
-          this)),
-      EE_frame_server_(
-          ros::NodeHandle().advertiseService(arm_id + "/set_EE_frame",
-                                             &FrankaHW::setEEFrame,
-                                             this)),
-      K_frame_server_(
-          ros::NodeHandle().advertiseService(arm_id + "/set_K_frame",
-                                             &FrankaHW::setKFrame,
-                                             this)),
-      force_torque_collision_server_(ros::NodeHandle().advertiseService(
-          arm_id + "/set_force_torque_collision_behavior",
-          &FrankaHW::setForceTorqueCollisionBehavior,
-          this)),
-      full_collision_server_(ros::NodeHandle().advertiseService(
-          arm_id + "/set_full_collision_behavior",
-          &FrankaHW::setFullCollisionBehavior,
-          this)),
-      load_server_(ros::NodeHandle().advertiseService(arm_id + "/set_load",
-                                                      &FrankaHW::setLoad,
-                                                      this)),
-      time_scaling_server_(ros::NodeHandle().advertiseService(
-          arm_id + "/set_time_scaling_factor",
-          &FrankaHW::setTimeScalingFactor,
-          this)),
       default_run_function_([this](std::function<bool()> ros_callback) {
         robot_->read(std::bind(&FrankaHW::readCallback, this, ros_callback,
                                std::placeholders::_1));
       }),
-      run_function_(default_run_function_),
-      error_recovery_server_(node_handle, "error_recovery", robot) {
+      run_function_(default_run_function_) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
 
@@ -658,133 +618,6 @@ std::array<double, 7> FrankaHW::getJointVelocityCommand() const {
 
 std::array<double, 7> FrankaHW::getJointEffortCommand() const {
   return effort_joint_command_.tau_J;
-}
-
-bool FrankaHW::setJointStiffness(franka_hw::SetJointStiffness::Request& req,
-                                 franka_hw::SetJointStiffness::Response& res) {
-  std::array<double, 7> joint_stiffness;
-  std::copy(req.joint_stiffness.cbegin(), req.joint_stiffness.cend(),
-            joint_stiffness.begin());
-  robot_->setJointImpedance(joint_stiffness);
-  return true;
-}
-
-bool FrankaHW::setCartesianStiffness(
-    franka_hw::SetCartesianStiffness::Request& req,
-    franka_hw::SetCartesianStiffness::Response& res) {
-  std::array<double, 6> cartesian_stiffness;
-  std::copy(req.cartesian_stiffness.cbegin(), req.cartesian_stiffness.cend(),
-            cartesian_stiffness.begin());
-  robot_->setCartesianImpedance(cartesian_stiffness);
-  return true;
-}
-
-bool FrankaHW::setEEFrame(franka_hw::SetEEFrame::Request& req,
-                          franka_hw::SetEEFrame::Response& res) {
-  std::array<double, 16> F_T_EE;
-  std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
-  robot_->setEE(F_T_EE);
-  return true;
-}
-
-bool FrankaHW::setKFrame(franka_hw::SetKFrame::Request& req,
-                         franka_hw::SetKFrame::Response& res) {
-  std::array<double, 16> EE_T_K;
-  std::copy(req.EE_T_K.cbegin(), req.EE_T_K.cend(), EE_T_K.begin());
-  robot_->setK(EE_T_K);
-  return true;
-}
-
-bool FrankaHW::setForceTorqueCollisionBehavior(
-    franka_hw::SetForceTorqueCollisionBehavior::Request& req,
-    franka_hw::SetForceTorqueCollisionBehavior::Response& res) {
-  std::array<double, 7> lower_torque_thresholds_nominal;
-  std::copy(req.lower_torque_thresholds_nominal.cbegin(),
-            req.lower_torque_thresholds_nominal.cend(),
-            lower_torque_thresholds_nominal.begin());
-  std::array<double, 7> upper_torque_thresholds_nominal;
-  std::copy(req.upper_torque_thresholds_nominal.cbegin(),
-            req.upper_torque_thresholds_nominal.cend(),
-            upper_torque_thresholds_nominal.begin());
-  std::array<double, 6> lower_force_thresholds_nominal;
-  std::copy(req.lower_force_thresholds_nominal.cbegin(),
-            req.lower_force_thresholds_nominal.cend(),
-            lower_force_thresholds_nominal.begin());
-  std::array<double, 6> upper_force_thresholds_nominal;
-  std::copy(req.upper_force_thresholds_nominal.cbegin(),
-            req.upper_force_thresholds_nominal.cend(),
-            upper_force_thresholds_nominal.begin());
-
-  robot_->setCollisionBehavior(
-      lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
-      lower_force_thresholds_nominal, upper_force_thresholds_nominal);
-  return true;
-}
-
-bool FrankaHW::setFullCollisionBehavior(
-    franka_hw::SetFullCollisionBehavior::Request& req,
-    franka_hw::SetFullCollisionBehavior::Response& res) {
-  std::array<double, 7> lower_torque_thresholds_acceleration;
-  std::copy(req.lower_torque_thresholds_acceleration.cbegin(),
-            req.lower_torque_thresholds_acceleration.cend(),
-            lower_torque_thresholds_acceleration.begin());
-  std::array<double, 7> upper_torque_thresholds_acceleration;
-  std::copy(req.upper_torque_thresholds_acceleration.cbegin(),
-            req.upper_torque_thresholds_acceleration.cend(),
-            upper_torque_thresholds_acceleration.begin());
-  std::array<double, 7> lower_torque_thresholds_nominal;
-  std::copy(req.lower_torque_thresholds_nominal.cbegin(),
-            req.lower_torque_thresholds_nominal.cend(),
-            lower_torque_thresholds_nominal.begin());
-  std::array<double, 7> upper_torque_thresholds_nominal;
-  std::copy(req.upper_torque_thresholds_nominal.cbegin(),
-            req.upper_torque_thresholds_nominal.cend(),
-            upper_torque_thresholds_nominal.begin());
-  std::array<double, 6> lower_force_thresholds_acceleration;
-  std::copy(req.lower_force_thresholds_acceleration.cbegin(),
-            req.lower_force_thresholds_acceleration.cend(),
-            lower_force_thresholds_acceleration.begin());
-  std::array<double, 6> upper_force_thresholds_acceleration;
-  std::copy(req.upper_force_thresholds_acceleration.cbegin(),
-            req.upper_force_thresholds_acceleration.cend(),
-            upper_force_thresholds_acceleration.begin());
-  std::array<double, 6> lower_force_thresholds_nominal;
-  std::copy(req.lower_force_thresholds_nominal.cbegin(),
-            req.lower_force_thresholds_nominal.cend(),
-            lower_force_thresholds_nominal.begin());
-  std::array<double, 6> upper_force_thresholds_nominal;
-  std::copy(req.upper_force_thresholds_nominal.cbegin(),
-            req.upper_force_thresholds_nominal.cend(),
-            upper_force_thresholds_nominal.begin());
-
-  robot_->setCollisionBehavior(
-      lower_torque_thresholds_acceleration,
-      upper_torque_thresholds_acceleration, lower_torque_thresholds_nominal,
-      upper_torque_thresholds_nominal, lower_force_thresholds_acceleration,
-      upper_force_thresholds_acceleration, lower_force_thresholds_nominal,
-      upper_force_thresholds_nominal);
-  return true;
-}
-
-bool FrankaHW::setLoad(franka_hw::SetLoad::Request& req,
-                       franka_hw::SetLoad::Response& res) {
-  double mass(req.mass);
-  std::array<double, 3> F_x_center_load;
-  std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(),
-            F_x_center_load.begin());
-  std::array<double, 9> load_inertia;
-  std::copy(req.load_inertia.cbegin(), req.load_inertia.cend(),
-            load_inertia.begin());
-
-  robot_->setLoad(mass, F_x_center_load, load_inertia);
-  return true;
-}
-
-bool FrankaHW::setTimeScalingFactor(
-    franka_hw::SetTimeScalingFactor::Request& req,
-    franka_hw::SetTimeScalingFactor::Response& res) {
-  robot_->setTimeScalingFactor(req.time_scaling_factor);
-  return true;
 }
 
 }  // namespace franka_hw

@@ -21,7 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
   xmlrpcpp
   controller_manager
   franka_description
-  actionlib_msgs
 )
 
 find_package(Franka REQUIRED)
@@ -31,20 +30,16 @@ add_message_files(
   FrankaState.msg
 )
 
-add_action_files(
-  DIRECTORY action
-  FILES ErrorRecovery.action
-)
-
 add_service_files(FILES
-   SetJointStiffness.srv
-   SetCartesianStiffness.srv
+   SetJointImpedance.srv
+   SetCartesianImpedance.srv
    SetFullCollisionBehavior.srv
    SetForceTorqueCollisionBehavior.srv
    SetEEFrame.srv
    SetKFrame.srv
    SetLoad.srv
    SetTimeScalingFactor.srv
+   ErrorRecovery.srv
 )
 
 generate_messages(
@@ -56,24 +51,24 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw
-  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools actionlib_msgs
+  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
   DEPENDS Franka
 )
 
-add_library(error_recovery_server src/error_recovery_server.cpp)
+add_library(service_server src/service_server.cpp)
 
-add_dependencies(error_recovery_server
+add_dependencies(service_server
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
 )
 
-target_link_libraries(error_recovery_server
+target_link_libraries(service_server
    ${catkin_LIBRARIES}
    Franka::franka
 )
 
-target_include_directories(error_recovery_server PUBLIC
+target_include_directories(service_server PUBLIC
   ${catkin_INCLUDE_DIRS}
   include
 )
@@ -89,13 +84,11 @@ add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
-  error_recovery_server
 )
 
 target_link_libraries(franka_hw
   ${catkin_LIBRARIES}
   Franka::franka
-  error_recovery_server
 )
 
 target_include_directories(franka_hw PUBLIC
@@ -111,11 +104,13 @@ add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
+  service_server
 )
 
 target_link_libraries(franka_hw_node
   ${catkin_LIBRARIES}
   franka_hw
+  service_server
 )
 
 target_include_directories(franka_hw_node PUBLIC

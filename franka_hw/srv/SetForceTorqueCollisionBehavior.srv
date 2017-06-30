@@ -3,5 +3,6 @@ float64[7] upper_torque_thresholds_nominal
 float64[6] lower_force_thresholds_nominal
 float64[6] upper_force_thresholds_nominal
 --------------------------
-
+bool success
+string error
 
