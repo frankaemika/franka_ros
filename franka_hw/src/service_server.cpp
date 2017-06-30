@@ -20,16 +20,14 @@ namespace franka_hw {
 
 ServiceServer::ServiceServer(franka::Robot* robot, ros::NodeHandle& node_handle)
     : robot_(robot),
-      joint_impedance_server_(
-          node_handle.advertiseService<SetJointImpedance::Request,
-                                       SetJointImpedance::Response>(
-              "set_joint_impedance",
-              createErrorFunction<SetJointImpedance::Request,
-                                  SetJointImpedance::Response>(
-                  std::bind(&ServiceServer::setJointImpedance,
-                            this,
-                            std::placeholders::_1,
-                            std::placeholders::_2)))),
+      joint_impedance_server_(node_handle.advertiseService(
+          "set_joint_impedance",
+          createErrorFunction<SetJointImpedance::Request,
+                              SetJointImpedance::Response>(
+              std::bind(&ServiceServer::setJointImpedance,
+                        this,
+                        std::placeholders::_1,
+                        std::placeholders::_2)))),
 
       cartesian_impedance_server_(node_handle.advertiseService(
           "set_cartesian_impedance",
