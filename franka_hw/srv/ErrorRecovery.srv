@@ -1,4 +1,3 @@
-float64 time_scaling_factor
 --------------------------
 bool success
 string error
