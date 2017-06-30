@@ -18,21 +18,7 @@
 
 namespace franka_hw {
 
-template <typename T1, typename T2>
-const boost::function<bool(T1&, T2&)> createErrorFunction(
-    std::function<bool(T1&, T2&)> handler) {
-  return [handler](T1& request, T2& response) -> bool {
-    try {
-      handler(request, response);
-      response.success = true;
-    } catch (const franka::Exception& ex) {
-      ROS_ERROR_STREAM("" << ex.what());
-      response.success = false;
-      response.error = ex.what();
-    }
-    return true;
-  };
-}
+
 
 class ServiceServer {
  public:
