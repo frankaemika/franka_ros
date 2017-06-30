@@ -6,8 +6,7 @@
 #include <array>
 #include <functional>
 
-namespace franka_hw {
-
+namespace {
 template <typename T1, typename T2>
 const boost::function<bool(T1&, T2&)> createErrorFunction(
     std::function<void(T1&, T2&)> handler) {
@@ -23,6 +22,10 @@ const boost::function<bool(T1&, T2&)> createErrorFunction(
     return true;
   };
 }
+
+}  // anonymous namespace
+
+namespace franka_hw {
 
 ServiceServer::ServiceServer(franka::Robot* robot, ros::NodeHandle& node_handle)
     : robot_(robot),

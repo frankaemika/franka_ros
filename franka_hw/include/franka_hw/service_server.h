@@ -18,8 +18,6 @@
 
 namespace franka_hw {
 
-
-
 class ServiceServer {
  public:
   ServiceServer() = delete;
