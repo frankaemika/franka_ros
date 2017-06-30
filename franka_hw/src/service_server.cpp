@@ -6,16 +6,6 @@
 #include <array>
 #include <functional>
 
-#include <franka_hw/ErrorRecovery.h>
-#include <franka_hw/SetCartesianImpedance.h>
-#include <franka_hw/SetEEFrame.h>
-#include <franka_hw/SetForceTorqueCollisionBehavior.h>
-#include <franka_hw/SetFullCollisionBehavior.h>
-#include <franka_hw/SetJointImpedance.h>
-#include <franka_hw/SetKFrame.h>
-#include <franka_hw/SetLoad.h>
-#include <franka_hw/SetTimeScalingFactor.h>
-
 namespace franka_hw {
 
 template <typename T1, typename T2>
