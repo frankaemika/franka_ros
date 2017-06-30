@@ -45,7 +45,6 @@ add_service_files(FILES
 generate_messages(
   DEPENDENCIES
   std_msgs
-  actionlib_msgs
 )
 
 catkin_package(
@@ -104,7 +103,6 @@ add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
-  service_server
 )
 
 target_link_libraries(franka_hw_node

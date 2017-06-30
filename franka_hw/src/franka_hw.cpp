@@ -6,7 +6,6 @@
 #include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <ros/service_server.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/MultiArrayDimension.h>
 #include <tf/tf.h>

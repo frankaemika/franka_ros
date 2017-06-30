@@ -10,7 +10,6 @@
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/service_server.h>
-#include <franka_hw/service_server.h>
 #include <franka_hw/trigger_rate.h>
 
 int main(int argc, char** argv) {
