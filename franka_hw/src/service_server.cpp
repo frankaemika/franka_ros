@@ -122,7 +122,7 @@ bool ServiceServer::setJointImpedance(
 bool ServiceServer::setEEFrame(
     SetEEFrame::Request& req,
     SetEEFrame::Response& res) {  // NOLINT [misc-unused-parameters]
-  std::array<double, 16> F_T_EE;
+  std::array<double, 16> F_T_EE;  // NOLINT [readability-identifier-naming]
   std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
   robot_->setEE(F_T_EE);
   return true;
@@ -130,8 +130,8 @@ bool ServiceServer::setEEFrame(
 
 bool ServiceServer::setKFrame(
     SetKFrame::Request& req,
-    SetKFrame::Response& res) {  // NOLINT [misc-unused-parameters]
-  std::array<double, 16> EE_T_K;
+    SetKFrame::Response& res) {   // NOLINT [misc-unused-parameters]
+  std::array<double, 16> EE_T_K;  // NOLINT [readability-identifier-naming]
   std::copy(req.EE_T_K.cbegin(), req.EE_T_K.cend(), EE_T_K.begin());
   robot_->setK(EE_T_K);
   return true;
@@ -213,7 +213,8 @@ bool ServiceServer::setLoad(
     SetLoad::Request& req,
     SetLoad::Response& res) {  // NOLINT [misc-unused-parameters]
   double mass(req.mass);
-  std::array<double, 3> F_x_center_load;
+  std::array<double, 3>
+      F_x_center_load;  // NOLINT [readability-identifier-naming]
   std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(),
             F_x_center_load.begin());
   std::array<double, 9> load_inertia;
