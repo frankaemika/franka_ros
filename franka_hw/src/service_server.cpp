@@ -101,7 +101,7 @@ ServiceServer::ServiceServer(franka::Robot* robot, ros::NodeHandle& node_handle)
 
 bool ServiceServer::setCartesianImpedance(
     SetCartesianImpedance::Request& req,
-    SetCartesianImpedance::Response& res) {
+    SetCartesianImpedance::Response& res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 6> cartesian_stiffness;
   std::copy(req.cartesian_stiffness.cbegin(), req.cartesian_stiffness.cend(),
             cartesian_stiffness.begin());
@@ -109,8 +109,9 @@ bool ServiceServer::setCartesianImpedance(
   return true;
 }
 
-bool ServiceServer::setJointImpedance(SetJointImpedance::Request& req,
-                                      SetJointImpedance::Response& res) {
+bool ServiceServer::setJointImpedance(
+    SetJointImpedance::Request& req,
+    SetJointImpedance::Response& res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 7> joint_stiffness;
   std::copy(req.joint_stiffness.cbegin(), req.joint_stiffness.cend(),
             joint_stiffness.begin());
@@ -118,16 +119,18 @@ bool ServiceServer::setJointImpedance(SetJointImpedance::Request& req,
   return true;
 }
 
-bool ServiceServer::setEEFrame(SetEEFrame::Request& req,
-                               SetEEFrame::Response& res) {
+bool ServiceServer::setEEFrame(
+    SetEEFrame::Request& req,
+    SetEEFrame::Response& res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 16> F_T_EE;
   std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
   robot_->setEE(F_T_EE);
   return true;
 }
 
-bool ServiceServer::setKFrame(SetKFrame::Request& req,
-                              SetKFrame::Response& res) {
+bool ServiceServer::setKFrame(
+    SetKFrame::Request& req,
+    SetKFrame::Response& res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 16> EE_T_K;
   std::copy(req.EE_T_K.cbegin(), req.EE_T_K.cend(), EE_T_K.begin());
   robot_->setK(EE_T_K);
@@ -136,7 +139,8 @@ bool ServiceServer::setKFrame(SetKFrame::Request& req,
 
 bool ServiceServer::setForceTorqueCollisionBehavior(
     SetForceTorqueCollisionBehavior::Request& req,
-    SetForceTorqueCollisionBehavior::Response& res) {
+    SetForceTorqueCollisionBehavior::Response&
+        res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
             req.lower_torque_thresholds_nominal.cend(),
@@ -162,7 +166,8 @@ bool ServiceServer::setForceTorqueCollisionBehavior(
 
 bool ServiceServer::setFullCollisionBehavior(
     SetFullCollisionBehavior::Request& req,
-    SetFullCollisionBehavior::Response& res) {
+    SetFullCollisionBehavior::Response&
+        res) {  // NOLINT [misc-unused-parameters]
   std::array<double, 7> lower_torque_thresholds_acceleration;
   std::copy(req.lower_torque_thresholds_acceleration.cbegin(),
             req.lower_torque_thresholds_acceleration.cend(),
@@ -204,7 +209,9 @@ bool ServiceServer::setFullCollisionBehavior(
   return true;
 }
 
-bool ServiceServer::setLoad(SetLoad::Request& req, SetLoad::Response& res) {
+bool ServiceServer::setLoad(
+    SetLoad::Request& req,
+    SetLoad::Response& res) {  // NOLINT [misc-unused-parameters]
   double mass(req.mass);
   std::array<double, 3> F_x_center_load;
   std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(),
@@ -217,14 +224,16 @@ bool ServiceServer::setLoad(SetLoad::Request& req, SetLoad::Response& res) {
   return true;
 }
 
-bool ServiceServer::setTimeScalingFactor(SetTimeScalingFactor::Request& req,
-                                         SetTimeScalingFactor::Response& res) {
+bool ServiceServer::setTimeScalingFactor(
+    SetTimeScalingFactor::Request& req,
+    SetTimeScalingFactor::Response& res) {  // NOLINT [misc-unused-parameters]
   robot_->setTimeScalingFactor(req.time_scaling_factor);
   return true;
 }
 
-bool ServiceServer::errorRecovery(ErrorRecovery::Request& req,
-                                  ErrorRecovery::Response& res) {
+bool ServiceServer::errorRecovery(
+    ErrorRecovery::Request& req,
+    ErrorRecovery::Response& res) {  // NOLINT [misc-unused-parameters]
   robot_->automaticErrorRecovery();
   return true;
 }
