@@ -233,7 +233,7 @@ bool ServiceServer::setTimeScalingFactor(
 }
 
 bool ServiceServer::errorRecovery(
-    ErrorRecovery::Request& req,
+    ErrorRecovery::Request& req,     // NOLINT [misc-unused-parameters]
     ErrorRecovery::Response& res) {  // NOLINT [misc-unused-parameters]
   robot_->automaticErrorRecovery();
   return true;
