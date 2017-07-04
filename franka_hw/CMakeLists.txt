@@ -25,6 +25,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Franka REQUIRED)
 
+find_package(Boost REQUIRED)
+
 add_message_files(
   FILES
   FrankaState.msg
@@ -82,7 +84,6 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw
@@ -102,7 +103,7 @@ add_executable(franka_hw_node
 add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_generate_messages_cpp
+  service_server
 )
 
 target_link_libraries(franka_hw_node

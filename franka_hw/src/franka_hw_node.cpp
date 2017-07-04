@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
   double publish_rate = 30.0;
   node_handle.getParam("publish_rate", publish_rate);
   franka::Robot robot(robot_ip);
-  franka_hw::ServiceServer service_server(&robot, node_handle);
+  franka_hw::ServiceServer service_server(robot, node_handle);
   franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
                                                         node_handle);

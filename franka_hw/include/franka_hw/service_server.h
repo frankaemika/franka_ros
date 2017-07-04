@@ -1,9 +1,5 @@
 #pragma once
 
-#include <functional>
-
-#include <franka/exception.h>
-#include <franka/robot.h>
 #include <ros/ros.h>
 
 #include <franka_hw/ErrorRecovery.h>
@@ -16,38 +12,37 @@
 #include <franka_hw/SetLoad.h>
 #include <franka_hw/SetTimeScalingFactor.h>
 
+namespace franka {
+class Robot;
+}
+
 namespace franka_hw {
 
 class ServiceServer {
  public:
   ServiceServer() = delete;
-  ServiceServer(franka::Robot* robot, ros::NodeHandle& node_handle);
+  ServiceServer(franka::Robot& robot, ros::NodeHandle& node_handle);
   ~ServiceServer() {}
 
  private:
-  bool setCartesianImpedance(SetCartesianImpedance::Request& req,
-                             SetCartesianImpedance::Response& res);
+  bool setCartesianImpedance(const SetCartesianImpedance::Request& req);
 
-  bool setJointImpedance(SetJointImpedance::Request& req,
-                         SetJointImpedance::Response& res);
+  bool setJointImpedance(const SetJointImpedance::Request& req);
 
-  bool setEEFrame(SetEEFrame::Request& req, SetEEFrame::Response& res);
+  bool setEEFrame(const SetEEFrame::Request& req);
 
-  bool setKFrame(SetKFrame::Request& req, SetKFrame::Response& res);
+  bool setKFrame(const SetKFrame::Request& req);
 
   bool setForceTorqueCollisionBehavior(
-      SetForceTorqueCollisionBehavior::Request& req,
-      SetForceTorqueCollisionBehavior::Response& res);
+      const SetForceTorqueCollisionBehavior::Request& req);
 
-  bool setFullCollisionBehavior(SetFullCollisionBehavior::Request& req,
-                                SetFullCollisionBehavior::Response& res);
+  bool setFullCollisionBehavior(const SetFullCollisionBehavior::Request& req);
 
-  bool setLoad(SetLoad::Request& req, SetLoad::Response& res);
+  bool setLoad(const SetLoad::Request& req);
 
-  bool setTimeScalingFactor(SetTimeScalingFactor::Request& req,
-                            SetTimeScalingFactor::Response& res);
+  bool setTimeScalingFactor(const SetTimeScalingFactor::Request& req);
 
-  bool errorRecovery(ErrorRecovery::Request& req, ErrorRecovery::Response& res);
+  bool errorRecovery();
 
   franka::Robot* robot_;
   ros::ServiceServer joint_impedance_server_;
