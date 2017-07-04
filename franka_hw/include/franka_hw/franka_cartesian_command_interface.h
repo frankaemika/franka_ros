@@ -1,13 +1,13 @@
 #pragma once
 
-#include <franka_hw/franka_cartesian_state_interface.h>
+#include <franka_hw/franka_state_interface.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <string>
 
 namespace franka_hw {
 
 /** \brief A handle used to read and command a Cartesian Pose to a Franka. */
-class FrankaCartesianPoseHandle : public FrankaCartesianStateHandle {
+class FrankaCartesianPoseHandle : public FrankaStateHandle {
  public:
   FrankaCartesianPoseHandle() = delete;
 
@@ -17,9 +17,9 @@ class FrankaCartesianPoseHandle : public FrankaCartesianStateHandle {
    * passed a desired homogeneous transformation O_T_EE_d
    */
   FrankaCartesianPoseHandle(
-      const FrankaCartesianStateHandle& cartesian_state_handle,
+      const FrankaStateHandle& franka_state_handle,
       std::array<double, 16>& command)
-      : FrankaCartesianStateHandle(cartesian_state_handle),
+      : FrankaStateHandle(franka_state_handle),
         command_(&command) {}
 
   void setCommand(const std::array<double, 16>& command) {
@@ -40,7 +40,7 @@ class FrankaPoseCartesianInterface
 
 /** \brief A handle used to read and command a Cartesian Velocity to a Franka.
  */
-class FrankaCartesianVelocityHandle : public FrankaCartesianStateHandle {
+class FrankaCartesianVelocityHandle : public FrankaStateHandle {
  public:
   FrankaCartesianVelocityHandle() = delete;
 
@@ -50,9 +50,9 @@ class FrankaCartesianVelocityHandle : public FrankaCartesianStateHandle {
    * passed a desired homogeneous transformation O_T_EE_d
    */
   FrankaCartesianVelocityHandle(
-      const FrankaCartesianStateHandle& cartesian_state_handle,
+      const FrankaStateHandle& franka_state_handle,
       std::array<double, 6>& command)
-      : FrankaCartesianStateHandle(cartesian_state_handle),
+      : FrankaStateHandle(franka_state_handle),
         command_(&command) {}
 
   void setCommand(std::array<double, 6>& command) { *command_ = command; }

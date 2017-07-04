@@ -24,8 +24,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
-      franka_joint_state_interface_(),
-      franka_cartesian_state_interface_(),
+      franka_state_interface_(),
       position_joint_interface_(),
       velocity_joint_interface_(),
       effort_joint_interface_(),
@@ -61,13 +60,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq[i],
         &robot_state_.tau_J[i]);
     joint_state_interface_.registerHandle(joint_handle);
-
-    FrankaJointStateHandle franka_joint_handle(
-        joint_names_[i], robot_state_.q[i], robot_state_.dq[i],
-        robot_state_.tau_J[i], robot_state_.q_d[i], robot_state_.dtau_J[i],
-        robot_state_.tau_ext_hat_filtered[i], robot_state_.joint_collision[i],
-        robot_state_.joint_contact[i]);
-    franka_joint_state_interface_.registerHandle(franka_joint_handle);
 
     hardware_interface::JointHandle position_joint_handle(
         joint_state_interface_.getHandle(joint_names_[i]),
@@ -147,24 +139,18 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   } else {
     ROS_WARN("No parameter robot_description found to set joint limits!");
   }
-  FrankaCartesianStateHandle franka_cartesian_state_handle(
-      arm_id_ + "_cartesian", robot_state_.cartesian_collision,
-      robot_state_.cartesian_contact, robot_state_.O_F_ext_hat_K,
-      robot_state_.K_F_ext_hat_K, robot_state_.O_T_EE, robot_state_.O_T_EE_d);
-  franka_cartesian_state_interface_.registerHandle(
-      franka_cartesian_state_handle);
-  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
-      franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
+
+  FrankaStateHandle franka_state_handle(arm_id_ + "_state", robot_state_);
+  FrankaCartesianPoseHandle franka_cartesian_pose_handle(franka_state_handle,
       pose_cartesian_command_.O_T_EE);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
-  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-      franka_cartesian_state_interface_.getHandle(arm_id_ + "_cartesian"),
+  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(franka_state_handle,
       velocity_cartesian_command_.O_dP_EE);
-  franka_velocity_cartesian_interface_.registerHandle(
-      franka_cartesian_velocity_handle);
+  franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
+  franka_state_interface_.registerHandle(franka_state_handle);
+
+  registerInterface(&franka_state_interface_);
   registerInterface(&joint_state_interface_);
-  registerInterface(&franka_joint_state_interface_);
-  registerInterface(&franka_cartesian_state_interface_);
   registerInterface(&position_joint_interface_);
   registerInterface(&velocity_joint_interface_);
   registerInterface(&effort_joint_interface_);

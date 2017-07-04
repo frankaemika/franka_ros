@@ -20,10 +20,8 @@
 
 #include <franka_hw/FrankaState.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
-#include <franka_hw/franka_cartesian_state_interface.h>
+#include <franka_hw/franka_state_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
-#include <franka_hw/franka_joint_command_interface.h>
-#include <franka_hw/franka_joint_state_interface.h>
 
 namespace franka_hw {
 
@@ -163,8 +161,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                     const franka::RobotState& robot_state);
 
   hardware_interface::JointStateInterface joint_state_interface_;
-  franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
-  franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
+  franka_hw::FrankaStateInterface franka_state_interface_;
   hardware_interface::PositionJointInterface position_joint_interface_;
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;

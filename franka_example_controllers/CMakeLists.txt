@@ -6,6 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
+  roscpp
+  sensor_msgs
+  geometry_msgs
+  realtime_tools
+  tf2_msgs
+  tf
   franka_description
   franka_hw
   pluginlib
@@ -23,7 +29,8 @@ add_library(franka_example_controllers
   src/joint_velocity_example_controller.cpp
   src/joint_position_example_controller.cpp
   src/cartesian_pose_example_controller.cpp
-  src/cartesian_velocity_example_controller.cpp)
+  src/cartesian_velocity_example_controller.cpp
+  src/franka_state_controller.cpp)
 
 add_dependencies(franka_example_controllers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
