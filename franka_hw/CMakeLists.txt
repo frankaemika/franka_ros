@@ -25,9 +25,23 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Franka REQUIRED)
 
+find_package(Boost REQUIRED)
+
 add_message_files(
   FILES
   FrankaState.msg
+)
+
+add_service_files(FILES
+   SetJointImpedance.srv
+   SetCartesianImpedance.srv
+   SetFullCollisionBehavior.srv
+   SetForceTorqueCollisionBehavior.srv
+   SetEEFrame.srv
+   SetKFrame.srv
+   SetLoad.srv
+   SetTimeScalingFactor.srv
+   ErrorRecovery.srv
 )
 
 generate_messages(
@@ -42,6 +56,24 @@ catkin_package(
   DEPENDS Franka
 )
 
+add_library(service_server src/service_server.cpp)
+
+add_dependencies(service_server
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_generate_messages_cpp
+)
+
+target_link_libraries(service_server
+   ${catkin_LIBRARIES}
+   Franka::franka
+)
+
+target_include_directories(service_server PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
+)
+
 add_library(franka_hw
   src/franka_hw.cpp
   src/trigger_rate.cpp
@@ -52,7 +84,6 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  franka_hw_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw
@@ -72,12 +103,13 @@ add_executable(franka_hw_node
 add_dependencies(franka_hw_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  franka_hw_generate_messages_cpp
+  service_server
 )
 
 target_link_libraries(franka_hw_node
   ${catkin_LIBRARIES}
   franka_hw
+  service_server
 )
 
 target_include_directories(franka_hw_node PUBLIC
