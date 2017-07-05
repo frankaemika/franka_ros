@@ -1,17 +1,16 @@
 #pragma once
 
+#include <franka/robot_state.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <array>
 #include <cassert>
 #include <string>
-#include <franka/robot_state.h>
 
 namespace franka_hw {
 
 /** A handle used to read the cartesian state of an end-effector. */
 class FrankaStateHandle {
  public:
-
   FrankaStateHandle() = delete;
   /**
  * \param name The name of the state handle
@@ -28,7 +27,8 @@ class FrankaStateHandle {
   const franka::RobotState* robot_state_;
 };
 
-/** \brief Hardware interface to support reading the complete robot state of a franka
+/** \brief Hardware interface to support reading the complete robot state of a
+ * franka
  *  robot
  *
  * This \ref HardwareInterface supports reading the state of a franka robot
@@ -38,7 +38,6 @@ class FrankaStateHandle {
  * End-effector frame to base_link frame as well joint_specific states
  */
 class FrankaStateInterface
-    : public hardware_interface::HardwareResourceManager<
-          FrankaStateHandle> {};
+    : public hardware_interface::HardwareResourceManager<FrankaStateHandle> {};
 
 }  // namespace franka_hw

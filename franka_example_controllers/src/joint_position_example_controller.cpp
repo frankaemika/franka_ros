@@ -15,21 +15,25 @@ namespace franka_example_controllers {
 JointPositionExampleController::JointPositionExampleController()
     : position_joint_interface_(nullptr), elapsed_time_(0.0) {}
 
-bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                          ros::NodeHandle& node_handle) {
+bool JointPositionExampleController::init(
+    hardware_interface::RobotHW* robot_hw,
+    ros::NodeHandle& node_handle) {  // NOLINT
   position_joint_interface_ =
       robot_hw->get<hardware_interface::PositionJointInterface>();
   if (position_joint_interface_ == nullptr) {
-    ROS_ERROR("Error getting position joint interface from harware!");
+    ROS_ERROR(
+        "JointPositionExamleController: Error getting position joint interface "
+        "from harware!");
     return false;
   }
   XmlRpc::XmlRpcValue parameters;
-  if (!node_handle.getParam("/franka_hw_node/joint_names", parameters)) {
-    ROS_ERROR("Could not parse joint names in JointPositionExampleController");
+  if (!ros::NodeHandle("~").getParam("joint_names", parameters)) {
+    ROS_ERROR("JointPositionExamleController: Could not parse joint names");
   }
   if (parameters.size() != 7) {
-    ROS_ERROR_STREAM("Wrong number of joint names, got "
-                     << int(parameters.size()) << " instead of 7 names!");
+    ROS_ERROR_STREAM(
+        "JointPositionExamleController: Wrong number of joint names, got "
+        << int(parameters.size()) << " instead of 7 names!");
     return false;
   }
   position_joint_handles_.resize(7);
@@ -41,7 +45,9 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
           position_joint_interface_->getHandle(joint_names_[i]);
       initial_pose_[i] = position_joint_handles_[i].getPosition();
     } catch (const hardware_interface::HardwareInterfaceException& e) {
-      ROS_ERROR_STREAM("Exception getting joint handles: " << e.what());
+      ROS_ERROR_STREAM(
+          "JointPositionExamleController: Exception getting joint handles: "
+          << e.what());
       return false;
     }
   }

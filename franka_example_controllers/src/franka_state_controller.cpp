@@ -1,17 +1,17 @@
 #include <franka_example_controllers/franka_state_controller.h>
 
 #include <cmath>
+#include <mutex>
 #include <stdexcept>
 #include <string>
-#include <mutex>
 
 #include <controller_interface/controller_base.h>
 #include <hardware_interface/hardware_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
-#include <xmlrpcpp/XmlRpcValue.h>
 #include <tf/tf.h>
 #include <tf/transform_datatypes.h>
+#include <xmlrpcpp/XmlRpcValue.h>
 
 #include <franka_hw/franka_cartesian_command_interface.h>
 
@@ -27,9 +27,8 @@ FrankaStateController::FrankaStateController()
       trigger_publish_(30.0) {}
 
 bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
-                                          ros::NodeHandle& node_handle) {
-  franka_state_interface_ =
-      robot_hw->get<franka_hw::FrankaStateInterface>();
+                                 ros::NodeHandle& node_handle) {
+  franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
     ROS_ERROR("Could not get Franka state interface from hardware");
     return false;
@@ -43,7 +42,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
   double publish_rate(30.0);
   if (node_handle.getParam("publish_rate", publish_rate)) {
     trigger_publish_ = franka_hw::TriggerRate(publish_rate);
-    ROS_INFO_STREAM("Found publish rate on parameter server: " << publish_rate << " Hz");
+    ROS_INFO_STREAM("Found publish rate on parameter server: " << publish_rate
+                                                               << " Hz");
     return false;
   }
 
@@ -70,8 +70,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
   }
 
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> > lock(
-        publisher_franka_states_);
+    std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >
+        lock(publisher_franka_states_);
     publisher_franka_states_.msg_.cartesian_collision.resize(
         robot_state_.cartesian_collision.size());
     publisher_franka_states_.msg_.cartesian_contact.resize(
@@ -161,7 +161,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
 }
 
 void FrankaStateController::update(const ros::Time& time,  // NOLINT
-                                            const ros::Duration& period) {
+                                   const ros::Duration& period) {
   if (trigger_publish_()) {
     robot_state_ = franka_state_handle_->getRobotState();
     publishFrankaStates();
@@ -171,7 +171,6 @@ void FrankaStateController::update(const ros::Time& time,  // NOLINT
     sequence_number_++;
   }
 }
-
 
 void FrankaStateController::publishFrankaStates() {
   if (publisher_franka_states_.trylock()) {
@@ -280,6 +279,5 @@ void FrankaStateController::publishExternalWrench() {
 
 }  // namespace franka_example_controllers
 
-PLUGINLIB_EXPORT_CLASS(
-    franka_example_controllers::FrankaStateController,
-    controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::FrankaStateController,
+                       controller_interface::ControllerBase)

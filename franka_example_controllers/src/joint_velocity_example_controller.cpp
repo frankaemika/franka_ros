@@ -15,21 +15,27 @@ namespace franka_example_controllers {
 JointVelocityExampleController::JointVelocityExampleController()
     : velocity_joint_interface_(nullptr) {}
 
-bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                          ros::NodeHandle& node_handle) {
+bool JointVelocityExampleController::init(
+    hardware_interface::RobotHW* robot_hw,
+    ros::NodeHandle& node_handle) {  // NOLINT
   velocity_joint_interface_ =
       robot_hw->get<hardware_interface::VelocityJointInterface>();
   if (velocity_joint_interface_ == nullptr) {
-    ROS_ERROR("Error getting velocity joint interface from harware!");
+    ROS_ERROR(
+        "JointVelocityExampleController: Error getting velocity joint "
+        "interface from harware!");
     return false;
   }
   XmlRpc::XmlRpcValue parameters;
-  if (!node_handle.getParam("/franka_hw_node/joint_names", parameters)) {
-    ROS_ERROR("Could not parse joint names in JointVelocityExampleController");
+  if (!ros::NodeHandle("~").getParam("joint_names", parameters)) {
+    ROS_ERROR(
+        "JointVelocityExampleController: Could not parse joint names in "
+        "JointVelocityExampleController");
   }
   if (parameters.size() != 7) {
-    ROS_ERROR_STREAM("Wrong number of joint names, got "
-                     << int(parameters.size()) << " instead of 7 names!");
+    ROS_ERROR_STREAM(
+        "JointVelocityExampleController: Wrong number of joint names, got "
+        << int(parameters.size()) << " instead of 7 names!");
     return false;
   }
   velocity_joint_handles_.resize(7);
@@ -40,7 +46,9 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hw,
       velocity_joint_handles_[i] =
           velocity_joint_interface_->getHandle(joint_names_[i]);
     } catch (const hardware_interface::HardwareInterfaceException& e) {
-      ROS_ERROR_STREAM("Exception getting joint handles: " << e.what());
+      ROS_ERROR_STREAM(
+          "JointVelocityExampleController: Exception getting joint handles: "
+          << e.what());
       return false;
     }
   }

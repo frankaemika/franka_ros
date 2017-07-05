@@ -13,30 +13,43 @@
 namespace franka_example_controllers {
 
 CartesianVelocityExampleController::CartesianVelocityExampleController()
-    : velocity_cartesian_interface_(nullptr), elapsed_time_(0.0) {}
+    : velocity_cartesian_interface_(nullptr),
+      velocity_cartesian_handle_(nullptr),
+      elapsed_time_(0.0) {}
 
 bool CartesianVelocityExampleController::init(
     hardware_interface::RobotHW* robot_hw,
-    ros::NodeHandle& node_handle) {
+    ros::NodeHandle& node_handle) {  // NOLINT
+
+  if (!ros::NodeHandle("~").getParam("arm_id", arm_id_)) {
+    ROS_ERROR(
+        "CartesianVelocityExampleController: Could not get parameter arm_id");
+    return false;
+  }
+
   velocity_cartesian_interface_ =
       robot_hw->get<franka_hw::FrankaVelocityCartesianInterface>();
   if (velocity_cartesian_interface_ == nullptr) {
-    ROS_ERROR("Could not get Cartesian Pose interface from hardware");
+    ROS_ERROR(
+        "CartesianVelocityExampleController: Could not get Cartesian Pose "
+        "interface from hardware");
     return false;
   }
-
-  if (!node_handle.getParam("/franka_hw_node/arm_id", arm_id_)) {
-    ROS_ERROR("Could not get parameter arm_id");
-    return false;
-  }
-
   try {
-    franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
+    velocity_cartesian_handle_ = new franka_hw::FrankaCartesianVelocityHandle(
         velocity_cartesian_interface_->getHandle(arm_id_ +
-                                                 std::string("_cartesian")));
+                                                 std::string("_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM(
+        "CartesianVelocityExampleController: Exception getting cartesian "
+        "handle: "
+        << e.what());
     return false;
+  }
+  if (velocity_cartesian_handle_ == nullptr) {
+    ROS_ERROR(
+        "CartesianVelocityExampleController: Could not get Cartesian velociyt "
+        "handle");
   }
   elapsed_time_ = ros::Duration(0.0);
   return true;
@@ -57,15 +70,9 @@ void CartesianVelocityExampleController::update(
   double v_x = std::cos(angle) * v;
   double v_z = -std::sin(angle) * v;
   std::array<double, 6> command = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
-  try {
-    franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
-        velocity_cartesian_interface_->getHandle(arm_id_ +
-                                                 std::string("_cartesian")));
-    cartesian_velocity_handle.setCommand(command);
-  } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
-  }
+  velocity_cartesian_handle_->setCommand(command);
   elapsed_time_ += period;
+  return;
 }
 
 void CartesianVelocityExampleController::stopping(
@@ -77,7 +84,10 @@ void CartesianVelocityExampleController::stopping(
     std::array<double, 6> command = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     cartesian_velocity_handle.setCommand(command);
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM(
+        "CartesianVelocityExampleController: Exception getting cartesian "
+        "handle: "
+        << e.what());
   }
 }
 

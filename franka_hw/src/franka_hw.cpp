@@ -140,13 +140,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     ROS_WARN("No parameter robot_description found to set joint limits!");
   }
 
-  FrankaStateHandle franka_state_handle(arm_id_ + "_state", robot_state_);
-  FrankaCartesianPoseHandle franka_cartesian_pose_handle(franka_state_handle,
-      pose_cartesian_command_.O_T_EE);
+  FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
+  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+      franka_state_handle, pose_cartesian_command_.O_T_EE);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
-  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(franka_state_handle,
-      velocity_cartesian_command_.O_dP_EE);
-  franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
+  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
+      franka_state_handle, velocity_cartesian_command_.O_dP_EE);
+  franka_velocity_cartesian_interface_.registerHandle(
+      franka_cartesian_velocity_handle);
   franka_state_interface_.registerHandle(franka_state_handle);
 
   registerInterface(&franka_state_interface_);

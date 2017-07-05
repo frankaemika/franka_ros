@@ -16,11 +16,9 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
    * \param command A reference to the storage field for the cartesian pose
    * passed a desired homogeneous transformation O_T_EE_d
    */
-  FrankaCartesianPoseHandle(
-      const FrankaStateHandle& franka_state_handle,
-      std::array<double, 16>& command)
-      : FrankaStateHandle(franka_state_handle),
-        command_(&command) {}
+  FrankaCartesianPoseHandle(const FrankaStateHandle& franka_state_handle,
+                            std::array<double, 16>& command)
+      : FrankaStateHandle(franka_state_handle), command_(&command) {}
 
   void setCommand(const std::array<double, 16>& command) {
     *command_ = command;
@@ -49,11 +47,9 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
    * \param command A reference to the storage field for the cartesian velocity
    * passed a desired homogeneous transformation O_T_EE_d
    */
-  FrankaCartesianVelocityHandle(
-      const FrankaStateHandle& franka_state_handle,
-      std::array<double, 6>& command)
-      : FrankaStateHandle(franka_state_handle),
-        command_(&command) {}
+  FrankaCartesianVelocityHandle(const FrankaStateHandle& franka_state_handle,
+                                std::array<double, 6>& command)
+      : FrankaStateHandle(franka_state_handle), command_(&command) {}
 
   void setCommand(std::array<double, 6>& command) { *command_ = command; }
   const std::array<double, 6>& getCommand() const { return *command_; }
