@@ -1,7 +1,7 @@
 moveit_setup_assistant_config:
   URDF:
     package: franka_description
-    relative_path: robots/franka.urdf.xacro
+    relative_path: robots/franka_emika_01_01.urdf.xacro
   SRDF:
     relative_path: config/franka_emika.srdf
   CONFIG:
