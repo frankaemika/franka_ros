@@ -1,0 +1,5 @@
+float64[7] joint_stiffness
+---
+bool success
+string error
+

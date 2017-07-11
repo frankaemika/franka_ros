@@ -1,0 +1,5 @@
+float64[6] cartesian_stiffness
+---
+bool success
+string error
+
