@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
   xmlrpcpp
   controller_manager
   franka_description
+  pluginlib
+  controller_interface
 )
 
 find_package(Franka REQUIRED)
@@ -51,8 +53,8 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES franka_hw
-  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
+  LIBRARIES franka_hw franka_state_controller
+  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools controller_interface pluginlib
   DEPENDS Franka
 )
 
@@ -84,6 +86,7 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw
@@ -92,6 +95,26 @@ target_link_libraries(franka_hw
 )
 
 target_include_directories(franka_hw PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
+)
+
+add_library(franka_state_controller
+  src/franka_state_controller.cpp
+)
+
+add_dependencies(franka_state_controller
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_generate_messages_cpp
+)
+
+target_link_libraries(franka_state_controller
+  ${catkin_LIBRARIES}
+  Franka::franka
+)
+
+target_include_directories(franka_state_controller PUBLIC
   ${catkin_INCLUDE_DIRS}
   include
 )

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <controller_interface/multi_interface_controller.h>
+#include <controller_interface/controller.h>
 #include <franka_hw/FrankaState.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
@@ -14,10 +14,10 @@
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/trigger_rate.h>
 
-namespace franka_example_controllers {
+namespace franka_hw {
 
 class FrankaStateController
-    : public controller_interface::MultiInterfaceController<
+    : public controller_interface::Controller<
           franka_hw::FrankaStateInterface> {
  public:
   FrankaStateController();
@@ -65,4 +65,4 @@ class FrankaStateController
   std::vector<std::string> joint_names_;
 };
 
-}  // namespace franka_example_controllers
+}  // namespace franka_hw

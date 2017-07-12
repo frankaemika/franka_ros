@@ -22,7 +22,7 @@ class CartesianVelocityExampleController
  private:
   std::string arm_id_;
   franka_hw::FrankaVelocityCartesianInterface* velocity_cartesian_interface_;
-  franka_hw::FrankaCartesianVelocityHandle* velocity_cartesian_handle_;
+  std::unique_ptr<franka_hw::FrankaCartesianVelocityHandle> velocity_cartesian_handle_;
   ros::Duration elapsed_time_;
 };
 

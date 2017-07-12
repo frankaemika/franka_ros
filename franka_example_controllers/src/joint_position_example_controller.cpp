@@ -60,7 +60,11 @@ void JointPositionExampleController::update(const ros::Time& time,  // NOLINT
   double delta_angle =
       M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   for (size_t i = 0; i < 7; ++i) {
+      if(i==4) {
+         position_joint_handles_[i].setCommand(initial_pose_[i] - delta_angle);
+      } else {
     position_joint_handles_[i].setCommand(initial_pose_[i] + delta_angle);
+      }
   }
   elapsed_time_ += period;
 }

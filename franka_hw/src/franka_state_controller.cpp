@@ -1,4 +1,4 @@
-#include <franka_example_controllers/franka_state_controller.h>
+#include <franka_hw/franka_state_controller.h>
 
 #include <cmath>
 #include <mutex>
@@ -15,7 +15,7 @@
 
 #include <franka_hw/franka_cartesian_command_interface.h>
 
-namespace franka_example_controllers {
+namespace franka_hw {
 
 FrankaStateController::FrankaStateController()
     : franka_state_interface_(nullptr),
@@ -24,18 +24,21 @@ FrankaStateController::FrankaStateController()
       publisher_franka_states_(ros::NodeHandle("~"), "franka_states", 1),
       publisher_joint_states_(ros::NodeHandle("~"), "joint_states", 1),
       publisher_external_wrench_(ros::NodeHandle("~"), "F_ext", 1),
-      trigger_publish_(30.0) {}
+      trigger_publish_(30.0) {
+    ROS_INFO("Franka_State_Controller: Created");
+}
 
 bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
                                  ros::NodeHandle& node_handle) {
+  ROS_INFO("Franka_State_Controller: Starting init");
   franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
-    ROS_ERROR("Could not get Franka state interface from hardware");
+    ROS_ERROR("FrankaStateController:Could not get Franka state interface from hardware");
     return false;
   }
 
   if (!node_handle.getParam("arm_id", arm_id_)) {
-    ROS_ERROR("Could not get parameter arm_id");
+    ROS_ERROR("FrankaStateController:Could not get parameter arm_id");
     return false;
   }
 
@@ -62,11 +65,11 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hw,
     franka_state_handle_ = new franka_hw::FrankaStateHandle(
         franka_state_interface_->getHandle(arm_id_ + "_state"));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM("FrankaStateController:Exception getting cartesian handle: " << e.what());
     return false;
   }
   if (franka_state_handle_ == nullptr) {
-    ROS_ERROR("Could not get state handle from Franka state interface");
+    ROS_ERROR("FrankaStateController:Could not get state handle from Franka state interface");
   }
 
   {
@@ -277,7 +280,7 @@ void FrankaStateController::publishExternalWrench() {
   }
 }
 
-}  // namespace franka_example_controllers
+}  // namespace franka_hw
 
-PLUGINLIB_EXPORT_CLASS(franka_example_controllers::FrankaStateController,
+PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaStateController,
                        controller_interface::ControllerBase)

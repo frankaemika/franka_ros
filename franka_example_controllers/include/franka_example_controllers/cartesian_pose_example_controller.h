@@ -26,7 +26,7 @@ class CartesianPoseExampleController
                                            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                                            0.0, 0.0}};
   ros::Duration elapsed_time_;
-  franka_hw::FrankaCartesianPoseHandle* cartesian_pose_handle_;
+  std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
 };
 
 }  // namespace franka_example_controllers

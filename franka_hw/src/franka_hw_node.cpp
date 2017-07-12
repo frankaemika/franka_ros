@@ -26,9 +26,7 @@ int main(int argc, char** argv) {
   node_handle.getParam("robot_ip", robot_ip);
   std::string arm_id;
   node_handle.getParam("arm_id", arm_id);
-  double publish_rate = 30.0;
-  node_handle.getParam("publish_rate", publish_rate);
-  franka::Robot robot(robot_ip);
+  franka::Robot robot(robot_ip, franka::RealtimeConfig::kIgnore);
   franka_hw::ServiceServer service_server(robot, node_handle);
   franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
@@ -37,18 +35,9 @@ int main(int argc, char** argv) {
   spinner.start();
 
   const ros::Duration kPeriod(0.001);
-  franka_hw::TriggerRate trigger_publish(publish_rate);
   franka_ros.run([&]() {
     control_manager.update(ros::Time::now(), kPeriod);
     franka_ros.enforceLimits(kPeriod);
-    // TODO(FWA): should only update trigger timestamp if
-    // actually published.
-    if (trigger_publish()) {
-      franka_ros.publishExternalWrench();
-      franka_ros.publishFrankaStates();
-      franka_ros.publishJointStates();
-      franka_ros.publishTransforms();
-    }
     return ros::ok();
   });
   return 0;

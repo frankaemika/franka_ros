@@ -16,6 +16,7 @@
   
   <build_depend>Franka</build_depend>
   <build_depend>hardware_interface</build_depend>
+  <build_depend>controller_interface</build_depend>
   <build_depend>joint_limits_interface</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -28,9 +29,11 @@
   <build_depend>urdf</build_depend>
   <build_depend>xmlrpcpp</build_depend>
   <build_depend>controller_manager</build_depend>
+  <build_depend>pluginlib</build_depend>
 
   <run_depend>Franka</run_depend>
   <run_depend>hardware_interface</run_depend>
+  <run_depend>controller_interface</run_depend>
   <run_depend>joint_limits_interface</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
@@ -43,9 +46,13 @@
   <run_depend>urdf</run_depend>
   <run_depend>xmlrpcpp</run_depend>
   <run_depend>controller_manager</run_depend>
+  <run_depend>pluginlib</run_depend>
 
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
 
+  <export>
+    <controller_interface plugin="${prefix}/franka_hw_controller_plugin.xml"/>
+  </export>
 
 </package>
