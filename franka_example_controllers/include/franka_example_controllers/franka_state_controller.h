@@ -23,7 +23,7 @@ class FrankaStateController
   FrankaStateController();
   bool init(hardware_interface::RobotHW* robot_hw,
             ros::NodeHandle& node_handle);
-  void update(const ros::Time& time, const ros::Duration& period);
+  void update(const ros::Time& time, const ros::Duration&);
 
  private:
   /**
