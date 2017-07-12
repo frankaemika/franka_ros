@@ -51,6 +51,5 @@ int main(int argc, char** argv) {
     }
     return ros::ok();
   });
-  spinner.stop();
   return 0;
 }

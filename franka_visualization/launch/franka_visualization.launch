@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <launch>
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/franka_visualization/launch/franka_visualization.launch.urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/franka_emika_01_01.urdf.xacro" />
   <node name="franka_joint_state_publisher" pkg="franka_visualization" type="franka_joint_state_publisher" output="screen">
     <rosparam command="load" file="$(find franka_visualization)/param/robot_read_settings.yaml" />
   </node>

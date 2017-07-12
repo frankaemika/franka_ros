@@ -8,14 +8,14 @@
 
 namespace franka_hw {
 
-/** A handle used to read the cartesian state of an end-effector. */
+/** A handle used to read the complete state of a franka robot. */
 class FrankaStateHandle {
  public:
   FrankaStateHandle() = delete;
   /**
- * \param name The name of the state handle
- * \param robot_state A reference to the robot_state
- */
+   * @param[in] name The name of the state handle
+   * @param[in] robot_state A reference to the robot_state
+   */
   FrankaStateHandle(const std::string& name, franka::RobotState& robot_state)
       : name_(name), robot_state_(&robot_state) {}
 
@@ -28,13 +28,12 @@ class FrankaStateHandle {
 };
 
 /** \brief Hardware interface to support reading the complete robot state of a
- * franka
- *  robot
+ * franka robot
  *
- * This \ref HardwareInterface supports reading the state of a franka robot
+ * This HardwareInterface supports reading the state of a franka robot
  * This inludes a collision state, a contact state, estimated external
- * wrench exerted to the robot w.r.t. the end-
- * effector frame and the robot base_link and the homogenous transformation from
+ * wrench exerted to the robot w.r.t. the end-effector frame and the
+ * robot base_link and the homogenous transformation from
  * End-effector frame to base_link frame as well joint_specific states
  */
 class FrankaStateInterface
