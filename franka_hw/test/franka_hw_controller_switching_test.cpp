@@ -108,8 +108,8 @@ set<string> joints_set = {joint_names[0],
                           joint_names[4],
                           joint_names[5],
                           joint_names[6]};
-set<string> cartesian_set = {arm_id + "_cartesian"};
-set<string> cartesian_arm2_set = {arm_id2 + "_cartesian"};
+set<string> cartesian_set = {arm_id + "_robot"};
+set<string> cartesian_arm2_set = {arm_id2 + "_robot"};
 set<string> no_id_set = {"joint1"};
 InterfaceResources no_id_res(jp_iface_str, no_id_set);
 InterfaceResources unknown_iface_res(unknown_iface_str, joints_set);

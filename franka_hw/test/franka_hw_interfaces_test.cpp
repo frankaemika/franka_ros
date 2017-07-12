@@ -31,10 +31,8 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
       robotptr->get<franka_hw::FrankaPoseCartesianInterface>();
   franka_hw::FrankaVelocityCartesianInterface* fvc_interface =
       robotptr->get<franka_hw::FrankaVelocityCartesianInterface>();
-  franka_hw::FrankaJointStateInterface* fjs_interface =
-      robotptr->get<franka_hw::FrankaJointStateInterface>();
-  franka_hw::FrankaCartesianStateInterface* fcs_interface =
-      robotptr->get<franka_hw::FrankaCartesianStateInterface>();
+  franka_hw::FrankaStateInterface* fs_interface =
+      robotptr->get<franka_hw::FrankaStateInterface>();
 
   ASSERT_NE(nullptr, js_interface);
   ASSERT_NE(nullptr, pj_interface);
@@ -42,27 +40,27 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   ASSERT_NE(nullptr, ej_interface);
   ASSERT_NE(nullptr, fpc_interface);
   ASSERT_NE(nullptr, fvc_interface);
-  ASSERT_NE(nullptr, fjs_interface);
-  ASSERT_NE(nullptr, fcs_interface);
+  ASSERT_NE(nullptr, fs_interface);
 
+  EXPECT_NO_THROW(franka_hw::FrankaCartesianPoseHandle fpc_handle =
+      fpc_interface->getHandle(arm_id + "_robot"));
   franka_hw::FrankaCartesianPoseHandle fpc_handle =
-      fpc_interface->getHandle(arm_id + "_cartesian");
+        fpc_interface->getHandle(arm_id + "_robot");
   std::array<double, 16> pose_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                          1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                          1.0, 1.0, 1.0, 1.0};
   fpc_handle.setCommand(pose_command);
   EXPECT_EQ(pose_command, fpc_handle.getCommand());
 
+  EXPECT_NO_THROW(franka_hw::FrankaCartesianVelocityHandle fvc_handle =
+      fvc_interface->getHandle(arm_id + "_robot"));
   franka_hw::FrankaCartesianVelocityHandle fvc_handle =
-      fvc_interface->getHandle(arm_id + "_cartesian");
+        fvc_interface->getHandle(arm_id + "_robot");
   std::array<double, 6> vel_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   fvc_handle.setCommand(vel_command);
   EXPECT_EQ(vel_command, fvc_handle.getCommand());
 
-  EXPECT_NO_THROW(fcs_interface->getHandle(arm_id + "_cartesian"));
-  for (size_t i = 0; i < 7; ++i) {
-    EXPECT_NO_THROW(fjs_interface->getHandle(joint_names[i]));
-  }
+  EXPECT_NO_THROW(fs_interface->getHandle(arm_id + "_robot"));
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
