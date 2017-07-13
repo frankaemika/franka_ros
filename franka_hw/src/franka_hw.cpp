@@ -255,15 +255,15 @@ bool FrankaHW::checkForConflict(
 }
 
 void FrankaHW::doSwitch(
-    const std::list<hardware_interface::ControllerInfo>& start_list,   // NOLINT
-    const std::list<hardware_interface::ControllerInfo>& stop_list) {  // NOLINT
+    const std::list<hardware_interface::ControllerInfo>& /*start_list*/,
+    const std::list<hardware_interface::ControllerInfo>& /*stop_list*/) {
   position_joint_limit_interface_.reset();
   controller_running_ = true;
 }
 
 bool FrankaHW::prepareSwitch(
     const std::list<hardware_interface::ControllerInfo>& start_list,
-    const std::list<hardware_interface::ControllerInfo>& stop_list) {  // NOLINT
+    const std::list<hardware_interface::ControllerInfo>& stop_list) {
   ResourceWithClaimsMap start_resource_map = getResourceMap(start_list);
   ArmClaimedMap start_arm_claim_map;
   if (!getArmClaimedMap(start_resource_map, start_arm_claim_map)) {
