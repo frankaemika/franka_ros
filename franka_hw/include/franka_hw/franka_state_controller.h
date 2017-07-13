@@ -30,7 +30,7 @@ class FrankaStateController
   * @param[in] controller_node_handle Nodehandle in the controller namespace
   * passed from HW node
   */
-  bool init(hardware_interface::RobotHW* hardware,
+  bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
             ros::NodeHandle& controller_node_handle);
 

@@ -65,9 +65,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   }
 
   try {
-    franka_state_handle_ = std::unique_ptr<franka_hw::FrankaStateHandle>(
-        new franka_hw::FrankaStateHandle(
-            franka_state_interface_->getHandle(arm_id_ + "_robot")));
+    franka_state_handle_.reset(new franka_hw::FrankaStateHandle(
+        franka_state_interface_->getHandle(arm_id_ + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "FrankaStateController: Exception getting cartesian handle: "
