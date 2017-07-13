@@ -73,7 +73,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Performs the switch between controllers and is real-time capable
   *
   */
-  void doSwitch(const std::list<hardware_interface::ControllerInfo>&, const std::list<hardware_interface::ControllerInfo>&);
+  void doSwitch(const std::list<hardware_interface::ControllerInfo>&,
+                const std::list<hardware_interface::ControllerInfo>&);
 
   /**
   * Prepares the switching between controllers. This function is not real-time
@@ -82,8 +83,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param[in] start_list Information list about all controllers requested to be
   * started
   */
-  bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
-      const std::list<hardware_interface::ControllerInfo>&stop_list);
+  bool prepareSwitch(
+      const std::list<hardware_interface::ControllerInfo>& start_list,
+      const std::list<hardware_interface::ControllerInfo>& stop_list);
 
   /**
   * Getter for the current Joint Position Command
