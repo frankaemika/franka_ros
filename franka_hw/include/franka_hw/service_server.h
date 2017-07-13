@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <unordered_map>
+
 #include <ros/ros.h>
 
 #include <franka_hw/ErrorRecovery.h>
@@ -21,28 +24,22 @@ namespace franka_hw {
 class ServiceServer {
  public:
   ServiceServer() = delete;
-  ServiceServer(franka::Robot& robot, ros::NodeHandle& node_handle);
-  ~ServiceServer() {}
+  ServiceServer(franka::Robot& robot,
+                ros::NodeHandle& node_handle,
+                const std::unordered_map<std::string, std::function<void()>>&
+                    success_callbacks = {});
 
  private:
-  bool setCartesianImpedance(const SetCartesianImpedance::Request& req);
-
-  bool setJointImpedance(const SetJointImpedance::Request& req);
-
-  bool setEEFrame(const SetEEFrame::Request& req);
-
-  bool setKFrame(const SetKFrame::Request& req);
-
-  bool setForceTorqueCollisionBehavior(
+  void setCartesianImpedance(const SetCartesianImpedance::Request& req);
+  void setJointImpedance(const SetJointImpedance::Request& req);
+  void setEEFrame(const SetEEFrame::Request& req);
+  void setKFrame(const SetKFrame::Request& req);
+  void setForceTorqueCollisionBehavior(
       const SetForceTorqueCollisionBehavior::Request& req);
-
-  bool setFullCollisionBehavior(const SetFullCollisionBehavior::Request& req);
-
-  bool setLoad(const SetLoad::Request& req);
-
-  bool setTimeScalingFactor(const SetTimeScalingFactor::Request& req);
-
-  bool errorRecovery();
+  void setFullCollisionBehavior(const SetFullCollisionBehavior::Request& req);
+  void setLoad(const SetLoad::Request& req);
+  void setTimeScalingFactor(const SetTimeScalingFactor::Request& req);
+  void errorRecovery();
 
   franka::Robot* robot_;
   ros::ServiceServer joint_impedance_server_;
