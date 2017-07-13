@@ -11,8 +11,7 @@
   </node>
   <group ns="$(arg arm_id)">
     <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="franka_state_controller --shutdown-timeout 2"/>
+    <node name="state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="franka_state_controller --shutdown-timeout 2"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
-    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_description)/rviz/franka_description.rviz"/>
   </group>
 </launch>

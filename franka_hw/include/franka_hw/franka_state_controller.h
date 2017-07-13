@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <controller_interface/controller.h>
+#include <controller_interface/multi_interface_controller.h>
 #include <franka_hw/FrankaState.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/WrenchStamped.h>
@@ -17,40 +17,62 @@
 namespace franka_hw {
 
 class FrankaStateController
-    : public controller_interface::Controller<
+    : public controller_interface::MultiInterfaceController<
           franka_hw::FrankaStateInterface> {
  public:
   FrankaStateController();
-  bool init(hardware_interface::RobotHW* robot_hw,
+
+
+  /**
+  * Initializes the controller with interfaces and publishers
+  *
+  * @param[in] hardware Pointer to the robot hardware
+  * @param[in] node_handle Nodehandle passed from HW node
+  */
+  bool init(hardware_interface::RobotHW* hardware,
             ros::NodeHandle& node_handle);
+
+  /**
+  * Reads a new franka robot state and publishes it
+  *
+  * @param[in] time Current ros time
+  */
   void update(const ros::Time& time, const ros::Duration&);
 
  private:
   /**
   * Publishes all relevant data received from the Franka arm
+  *
+  * @param[in] time Current ros time
   */
-  void publishFrankaStates();
+  void publishFrankaStates(const ros::Time& time);
 
   /**
   * Publishes the joint states of the Franka arm
+  *
+  * @param[in] time Current ros time
   */
-  void publishJointStates();
+  void publishJointStates(const ros::Time &time);
 
   /**
   * Publishes the transforms for EE and K frame which define the end-effector
   * (EE) and the Cartesian impedance reference frame (K)
+  *
+  * @param[in] time Current ros time
   */
-  void publishTransforms();
+  void publishTransforms(const ros::Time &time);
 
   /**
   * Publishes the estimated external wrench felt by the Franka
+  *
+  * @param[in] time Current ros time
   */
-  void publishExternalWrench();
+  void publishExternalWrench(const ros::Time &time);
 
   std::string arm_id_;
 
   franka_hw::FrankaStateInterface* franka_state_interface_;
-  franka_hw::FrankaStateHandle* franka_state_handle_;
+  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
 
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_hw::FrankaState>

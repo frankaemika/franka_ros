@@ -76,7 +76,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   if (node_handle.hasParam("robot_description")) {
     urdf::Model urdf_model;
     if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
-      ROS_ERROR("Could not initialize urdf model from robot_description");
+      ROS_ERROR("FrankaHW: Could not initialize urdf model from robot_description");
     } else {
       joint_limits_interface::SoftJointLimits soft_limits;
       joint_limits_interface::JointLimits joint_limits;
@@ -85,14 +85,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
         boost::shared_ptr<const urdf::Joint> urdf_joint =
             urdf_model.getJoint(joint_name);
         if (!urdf_joint) {
-          ROS_ERROR_STREAM("Could not get joint " << joint_name
+          ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name
                                                   << " from urdf");
         }
         if (!urdf_joint->safety) {
-          ROS_ERROR_STREAM("Joint " << joint_name << " has no safety");
+          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
         }
         if (!urdf_joint->limits) {
-          ROS_ERROR_STREAM("Joint " << joint_name << " has no limits");
+          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
         }
 
         if (joint_limits_interface::getSoftJointLimits(urdf_joint,
@@ -123,17 +123,17 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                     soft_limits);
             effort_joint_limit_interface_.registerHandle(effort_limit_handle);
           } else {
-            ROS_ERROR_STREAM("Could not parse joint limit for joint "
+            ROS_ERROR_STREAM("FrankaHW: Could not parse joint limit for joint "
                              << joint_name << " for joint limit interfaces");
           }
         } else {
-          ROS_ERROR_STREAM("Could not parse soft joint limit for joint "
+          ROS_ERROR_STREAM("FrankaHW: Could not parse soft joint limit for joint "
                            << joint_name << " for joint limit interfaces");
         }
       }
     }
   } else {
-    ROS_WARN("No parameter robot_description found to set joint limits!");
+    ROS_WARN("FrankaHW: No parameter robot_description found to set joint limits!");
   }
 
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
@@ -158,12 +158,11 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
 
 void FrankaHW::run(std::function<bool()> ros_callback) {
   if (robot_ == nullptr) {
-    throw std::invalid_argument("franka::Robot was not initialized.");
+    throw std::invalid_argument("FrankaHW: franka robot was not initialized.");
   }
 
   uint32_t last_sequence_number = 0;
   do {
-    ROS_INFO("franka_hw::execute run_function_");
     run_function_([this, ros_callback, &last_sequence_number]() {
       if (last_sequence_number != robot_state_.sequence_number) {
         last_sequence_number = robot_state_.sequence_number;
@@ -190,7 +189,7 @@ bool FrankaHW::checkForConflict(
   for (auto map_it = resource_map.begin(); map_it != resource_map.end();
        map_it++) {
     if (map_it->second.size() > 2) {
-      ROS_ERROR_STREAM("Resource "
+      ROS_ERROR_STREAM("FrankaHW: Resource "
                        << map_it->first
                        << " claimed with more than two interfaces. Conflict!");
       return true;
@@ -208,7 +207,7 @@ bool FrankaHW::checkForConflict(
       }
       if (torque_claims != 1) {
         ROS_ERROR_STREAM(
-            "Resource "
+            "FrankaHW: Resource "
             << map_it->first
             << " is claimed with two non-compatible interfaces. Conflict!");
         return true;
@@ -218,7 +217,7 @@ bool FrankaHW::checkForConflict(
 
   ArmClaimedMap arm_claim_map;
   if (!getArmClaimedMap(resource_map, arm_claim_map)) {
-    ROS_ERROR_STREAM("Unknown interface claimed. Conflict!");
+    ROS_ERROR_STREAM("FrankaHW: Unknown interface claimed. Conflict!");
     return true;
   }
 
@@ -232,7 +231,7 @@ bool FrankaHW::checkForConflict(
          arm_claim_map[arm_id_].joint_position_claims +
                  arm_claim_map[arm_id_].joint_velocity_claims >
              0)) {
-      ROS_ERROR_STREAM("Invalid claims on joint AND cartesian level on arm "
+      ROS_ERROR_STREAM("FrankaHW: Invalid claims on joint AND cartesian level on arm "
                        << arm_id_ << ". Conflict!");
       return true;
     }
@@ -242,7 +241,7 @@ bool FrankaHW::checkForConflict(
          arm_claim_map[arm_id_].joint_velocity_claims != 7) ||
         (arm_claim_map[arm_id_].joint_torque_claims > 0 &&
          arm_claim_map[arm_id_].joint_torque_claims != 7)) {
-      ROS_ERROR_STREAM("Non-consistent claims on the joints of "
+      ROS_ERROR_STREAM("FrankaHW: Non-consistent claims on the joints of "
                        << arm_id_ << ". Not supported. Conflict!");
       return true;
     }
@@ -263,7 +262,7 @@ bool FrankaHW::prepareSwitch(
   ResourceWithClaimsMap start_resource_map = getResourceMap(start_list);
   ArmClaimedMap start_arm_claim_map;
   if (!getArmClaimedMap(start_resource_map, start_arm_claim_map)) {
-    ROS_ERROR("Unknown interface claimed for starting!");
+    ROS_ERROR("FrankaHW: Unknown interface claimed for starting!");
     return false;
   }
   ControlMode start_control_mode = getControlMode(arm_id_, start_arm_claim_map);
@@ -271,7 +270,7 @@ bool FrankaHW::prepareSwitch(
   ResourceWithClaimsMap stop_resource_map = getResourceMap(stop_list);
   ArmClaimedMap stop_arm_claim_map;
   if (!getArmClaimedMap(stop_resource_map, stop_arm_claim_map)) {
-    ROS_ERROR("Unknown interface claimed for stopping!");
+    ROS_ERROR("FrankaHW: Unknown interface claimed for stopping!");
     return false;
   }
   ControlMode stop_control_mode = getControlMode(arm_id_, stop_arm_claim_map);
@@ -368,11 +367,11 @@ bool FrankaHW::prepareSwitch(
       };
       break;
     default:
-      ROS_WARN("No valid control mode selected; cannot switch controllers.");
+      ROS_WARN("FrankaHW: No valid control mode selected; cannot switch controllers.");
       return false;
   }
 
-  ROS_INFO_STREAM("Prepared switching controllers to "
+  ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
                   << requested_control_mode);
   current_control_mode_ = requested_control_mode;
   controller_running_ = false;
