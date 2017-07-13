@@ -16,10 +16,11 @@ JointVelocityExampleController::JointVelocityExampleController()
     : velocity_joint_interface_(nullptr) {}
 
 bool JointVelocityExampleController::init(
-    hardware_interface::RobotHW* robot_hw,
-    ros::NodeHandle& node_handle) {  // NOLINT
+    hardware_interface::RobotHW* robot_hardware,
+    ros::NodeHandle& root_node_handle,
+    ros::NodeHandle& /*controller_node_handle*/) {
   velocity_joint_interface_ =
-      robot_hw->get<hardware_interface::VelocityJointInterface>();
+      robot_hardware->get<hardware_interface::VelocityJointInterface>();
   if (velocity_joint_interface_ == nullptr) {
     ROS_ERROR(
         "JointVelocityExampleController: Error getting velocity joint "
@@ -27,7 +28,7 @@ bool JointVelocityExampleController::init(
     return false;
   }
   XmlRpc::XmlRpcValue parameters;
-  if (!ros::NodeHandle("~").getParam("joint_names", parameters)) {
+  if (!root_node_handle.getParam("joint_names", parameters)) {
     ROS_ERROR(
         "JointVelocityExampleController: Could not parse joint names in "
         "JointVelocityExampleController");
@@ -56,9 +57,8 @@ bool JointVelocityExampleController::init(
   return true;
 }
 
-void JointVelocityExampleController::update(
-    const ros::Time& time,
-    const ros::Duration& period) {  // NOLINT
+void JointVelocityExampleController::update(const ros::Time& time,
+                                            const ros::Duration& /*period*/) {
   ros::Duration time_max(4.0);
   ros::Duration elapsed_time = time - start_time_stamp_;
   double omega_max = 0.2;
@@ -75,8 +75,7 @@ void JointVelocityExampleController::update(
   }
 }
 
-void JointVelocityExampleController::stopping(
-    const ros::Time& time) {  // NOLINT
+void JointVelocityExampleController::stopping(const ros::Time& /*time*/) {
   for (auto joint_handle : velocity_joint_handles_) {
     joint_handle.setCommand(0.0);
   }

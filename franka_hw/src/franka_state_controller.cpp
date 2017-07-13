@@ -20,35 +20,39 @@ namespace franka_hw {
 FrankaStateController::FrankaStateController()
     : franka_state_interface_(nullptr),
       franka_state_handle_(nullptr),
-      publisher_transforms_(ros::NodeHandle("~"), "/tf", 1),
-      publisher_franka_states_(ros::NodeHandle("~"), "franka_states", 1),
-      publisher_joint_states_(ros::NodeHandle("~"), "joint_states", 1),
-      publisher_external_wrench_(ros::NodeHandle("~"), "F_ext", 1),
-      trigger_publish_(30.0) {
-}
+      publisher_transforms_(),
+      publisher_franka_states_(),
+      publisher_joint_states_(),
+      publisher_external_wrench_(),
+      trigger_publish_(30.0) {}
 
-bool FrankaStateController::init(hardware_interface::RobotHW* hardware,
-                                 ros::NodeHandle& node_handle) { // NOLINT
-  franka_state_interface_ = hardware->get<franka_hw::FrankaStateInterface>();
+bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
+                                 ros::NodeHandle& root_node_handle,
+                                 ros::NodeHandle& controller_node_handle) {
+  franka_state_interface_ =
+      robot_hardware->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
-    ROS_ERROR("FrankaStateController: Could not get Franka state interface from hardware");
+    ROS_ERROR(
+        "FrankaStateController: Could not get Franka state interface from "
+        "hardware");
     return false;
   }
-  if (!ros::NodeHandle("~").getParam("arm_id", arm_id_)) {
+  if (!root_node_handle.getParam("arm_id", arm_id_)) {
     ROS_ERROR("FrankaStateController: Could not get parameter arm_id");
     return false;
   }
   double publish_rate(30.0);
-  if (ros::NodeHandle("~").getParam("publish_rate", publish_rate)) {
+  if (controller_node_handle.getParam("publish_rate", publish_rate)) {
     trigger_publish_ = franka_hw::TriggerRate(publish_rate);
-    ROS_INFO_STREAM("FrankaStateController: Found publish rate on parameter server: " << publish_rate << " Hz");
-    return false;
+    ROS_INFO_STREAM(
+        "FrankaStateController: Found publish rate on parameter server: "
+        << publish_rate << " Hz");
   }
   XmlRpc::XmlRpcValue params;
 
-  if(!ros::NodeHandle("~").getParam("joint_names", params)) {
-      ROS_ERROR("FrankaStateController: Could not get parameter joint_names");
-      return false;
+  if (!root_node_handle.getParam("joint_names", params)) {
+    ROS_ERROR("FrankaStateController: Could not get parameter joint_names");
+    return false;
   }
 
   if (params.size() != 7) {
@@ -61,14 +65,25 @@ bool FrankaStateController::init(hardware_interface::RobotHW* hardware,
   }
 
   try {
-    franka_state_handle_ = std::unique_ptr<franka_hw::FrankaStateHandle>(new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id_ + "_robot")));
+    franka_state_handle_ = std::unique_ptr<franka_hw::FrankaStateHandle>(
+        new franka_hw::FrankaStateHandle(
+            franka_state_interface_->getHandle(arm_id_ + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("FrankaStateController: Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM(
+        "FrankaStateController: Exception getting cartesian handle: "
+        << e.what());
     return false;
   }
   if (franka_state_handle_ == nullptr) {
-    ROS_ERROR("FrankaStateController: Could not get state handle from Franka state interface");
+    ROS_ERROR(
+        "FrankaStateController: Could not get state handle from Franka state "
+        "interface");
   }
+
+  publisher_transforms_.init(root_node_handle, "/tf", 1);
+  publisher_franka_states_.init(root_node_handle, "franka_states", 1);
+  publisher_joint_states_.init(root_node_handle, "joint_states", 1);
+  publisher_external_wrench_.init(root_node_handle, "F_ext", 1);
 
   {
     std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >

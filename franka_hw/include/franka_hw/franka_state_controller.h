@@ -22,15 +22,17 @@ class FrankaStateController
  public:
   FrankaStateController();
 
-
   /**
   * Initializes the controller with interfaces and publishers
   *
   * @param[in] hardware Pointer to the robot hardware
-  * @param[in] node_handle Nodehandle passed from HW node
+  * @param[in] root_node_handle Nodehandle on root level passed from HW node
+  * @param[in] controller_node_handle Nodehandle in the controller namespace
+  * passed from HW node
   */
   bool init(hardware_interface::RobotHW* hardware,
-            ros::NodeHandle& node_handle);
+            ros::NodeHandle& root_node_handle,
+            ros::NodeHandle& controller_node_handle);
 
   /**
   * Reads a new franka robot state and publishes it
@@ -52,7 +54,7 @@ class FrankaStateController
   *
   * @param[in] time Current ros time
   */
-  void publishJointStates(const ros::Time &time);
+  void publishJointStates(const ros::Time& time);
 
   /**
   * Publishes the transforms for EE and K frame which define the end-effector
@@ -60,14 +62,14 @@ class FrankaStateController
   *
   * @param[in] time Current ros time
   */
-  void publishTransforms(const ros::Time &time);
+  void publishTransforms(const ros::Time& time);
 
   /**
   * Publishes the estimated external wrench felt by the Franka
   *
   * @param[in] time Current ros time
   */
-  void publishExternalWrench(const ros::Time &time);
+  void publishExternalWrench(const ros::Time& time);
 
   std::string arm_id_;
 

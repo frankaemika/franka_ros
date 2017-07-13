@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 #include <controller_interface/multi_interface_controller.h>
@@ -15,9 +16,11 @@ class CartesianPoseExampleController
           franka_hw::FrankaPoseCartesianInterface> {
  public:
   CartesianPoseExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& node_handle);
-  void update(const ros::Time& time, const ros::Duration& period);
+  bool init(hardware_interface::RobotHW* robot_hardware,
+            ros::NodeHandle& root_node_handle,
+            ros::NodeHandle&);
+
+  void update(const ros::Time&, const ros::Duration& period);
 
  private:
   std::string arm_id_;

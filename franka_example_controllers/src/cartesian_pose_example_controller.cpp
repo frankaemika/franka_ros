@@ -21,10 +21,11 @@ CartesianPoseExampleController::CartesianPoseExampleController()
       cartesian_pose_handle_(nullptr) {}
 
 bool CartesianPoseExampleController::init(
-    hardware_interface::RobotHW* robot_hw,
-    ros::NodeHandle& node_handle) {  // NOLINT
+    hardware_interface::RobotHW* robot_hardware,
+    ros::NodeHandle& root_node_handle,
+    ros::NodeHandle& /*controller_node_handle*/) {
   cartesian_pose_interface_ =
-      robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
+      robot_hardware->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface_ == nullptr) {
     ROS_ERROR(
         "CartesianPoseExampleController: Could not get Cartesian Pose "
@@ -32,13 +33,14 @@ bool CartesianPoseExampleController::init(
     return false;
   }
 
-  if (!ros::NodeHandle("~").getParam("arm_id", arm_id_)) {
+  if (!root_node_handle.getParam("arm_id", arm_id_)) {
     ROS_ERROR("CartesianPoseExampleController: Could not get parameter arm_id");
     return false;
   }
 
   try {
-    cartesian_pose_handle_ = std::unique_ptr<franka_hw::FrankaCartesianPoseHandle>(new franka_hw::FrankaCartesianPoseHandle(cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
+    cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
+        cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
     initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
@@ -46,16 +48,11 @@ bool CartesianPoseExampleController::init(
         << e.what());
     return false;
   }
-  if (cartesian_pose_handle_ == nullptr) {
-    ROS_ERROR(
-        "CartesianPoseExampleController: Could not get Cartesian Pose handle");
-    return false;
-  }
   elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
-void CartesianPoseExampleController::update(const ros::Time& time,  // NOLINT
+void CartesianPoseExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   double radius = 0.3;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));

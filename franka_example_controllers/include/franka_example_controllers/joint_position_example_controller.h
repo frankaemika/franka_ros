@@ -14,9 +14,10 @@ class JointPositionExampleController
           hardware_interface::PositionJointInterface> {
  public:
   JointPositionExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& node_handle);
-  void update(const ros::Time& time, const ros::Duration& period);
+  bool init(hardware_interface::RobotHW* robot_hardware,
+            ros::NodeHandle& root_node_handle,
+            ros::NodeHandle& /*controller_node_handle*/);
+  void update(const ros::Time&, const ros::Duration& period);
 
  private:
   std::vector<std::string> joint_names_;

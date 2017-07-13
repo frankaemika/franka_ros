@@ -18,17 +18,17 @@ CartesianVelocityExampleController::CartesianVelocityExampleController()
       elapsed_time_(0.0) {}
 
 bool CartesianVelocityExampleController::init(
-    hardware_interface::RobotHW* robot_hw,
-    ros::NodeHandle& node_handle) {  // NOLINT
-
-  if (!ros::NodeHandle("~").getParam("arm_id", arm_id_)) {
+    hardware_interface::RobotHW* robot_hardware,
+    ros::NodeHandle& root_node_handle,
+    ros::NodeHandle& /*controller_node_handle*/) {
+  if (!root_node_handle.getParam("arm_id", arm_id_)) {
     ROS_ERROR(
         "CartesianVelocityExampleController: Could not get parameter arm_id");
     return false;
   }
 
   velocity_cartesian_interface_ =
-      robot_hw->get<franka_hw::FrankaVelocityCartesianInterface>();
+      robot_hardware->get<franka_hw::FrankaVelocityCartesianInterface>();
   if (velocity_cartesian_interface_ == nullptr) {
     ROS_ERROR(
         "CartesianVelocityExampleController: Could not get Cartesian Pose "
@@ -36,7 +36,9 @@ bool CartesianVelocityExampleController::init(
     return false;
   }
   try {
-    velocity_cartesian_handle_ = std::unique_ptr<franka_hw::FrankaCartesianVelocityHandle>(new franka_hw::FrankaCartesianVelocityHandle(velocity_cartesian_interface_->getHandle(arm_id_ + "_robot")));
+    velocity_cartesian_handle_.reset(
+        new franka_hw::FrankaCartesianVelocityHandle(
+            velocity_cartesian_interface_->getHandle(arm_id_ + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "CartesianVelocityExampleController: Exception getting cartesian "
@@ -49,9 +51,8 @@ bool CartesianVelocityExampleController::init(
   return true;
 }
 
-void CartesianVelocityExampleController::update(
-    const ros::Time& time,  // NOLINT
-    const ros::Duration& period) {
+void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
+                                                const ros::Duration& period) {
   double time_max = 4.0;
   double v_max = 0.1;
   double angle = M_PI / 4.0;
@@ -69,8 +70,7 @@ void CartesianVelocityExampleController::update(
   return;
 }
 
-void CartesianVelocityExampleController::stopping(
-    const ros::Time& time) {  // NOLINT
+void CartesianVelocityExampleController::stopping(const ros::Time& /*time*/) {
   try {
     franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
         velocity_cartesian_interface_->getHandle(arm_id_ +

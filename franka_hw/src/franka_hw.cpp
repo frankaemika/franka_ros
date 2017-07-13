@@ -76,7 +76,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   if (node_handle.hasParam("robot_description")) {
     urdf::Model urdf_model;
     if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
-      ROS_ERROR("FrankaHW: Could not initialize urdf model from robot_description");
+      ROS_ERROR(
+          "FrankaHW: Could not initialize urdf model from robot_description");
     } else {
       joint_limits_interface::SoftJointLimits soft_limits;
       joint_limits_interface::JointLimits joint_limits;
@@ -86,13 +87,15 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
             urdf_model.getJoint(joint_name);
         if (!urdf_joint) {
           ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name
-                                                  << " from urdf");
+                                                            << " from urdf");
         }
         if (!urdf_joint->safety) {
-          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
+          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name
+                                              << " has no safety");
         }
         if (!urdf_joint->limits) {
-          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
+          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name
+                                              << " has no limits");
         }
 
         if (joint_limits_interface::getSoftJointLimits(urdf_joint,
@@ -127,13 +130,15 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                              << joint_name << " for joint limit interfaces");
           }
         } else {
-          ROS_ERROR_STREAM("FrankaHW: Could not parse soft joint limit for joint "
-                           << joint_name << " for joint limit interfaces");
+          ROS_ERROR_STREAM(
+              "FrankaHW: Could not parse soft joint limit for joint "
+              << joint_name << " for joint limit interfaces");
         }
       }
     }
   } else {
-    ROS_WARN("FrankaHW: No parameter robot_description found to set joint limits!");
+    ROS_WARN(
+        "FrankaHW: No parameter robot_description found to set joint limits!");
   }
 
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
@@ -153,7 +158,6 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&effort_joint_interface_);
   registerInterface(&franka_pose_cartesian_interface_);
   registerInterface(&franka_velocity_cartesian_interface_);
-
 }
 
 void FrankaHW::run(std::function<bool()> ros_callback) {
@@ -231,8 +235,9 @@ bool FrankaHW::checkForConflict(
          arm_claim_map[arm_id_].joint_position_claims +
                  arm_claim_map[arm_id_].joint_velocity_claims >
              0)) {
-      ROS_ERROR_STREAM("FrankaHW: Invalid claims on joint AND cartesian level on arm "
-                       << arm_id_ << ". Conflict!");
+      ROS_ERROR_STREAM(
+          "FrankaHW: Invalid claims on joint AND cartesian level on arm "
+          << arm_id_ << ". Conflict!");
       return true;
     }
     if ((arm_claim_map[arm_id_].joint_position_claims > 0 &&
@@ -367,7 +372,9 @@ bool FrankaHW::prepareSwitch(
       };
       break;
     default:
-      ROS_WARN("FrankaHW: No valid control mode selected; cannot switch controllers.");
+      ROS_WARN(
+          "FrankaHW: No valid control mode selected; cannot switch "
+          "controllers.");
       return false;
   }
 
