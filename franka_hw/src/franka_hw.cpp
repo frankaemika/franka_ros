@@ -21,6 +21,7 @@ constexpr double FrankaHW::kMaximumJointJerk;
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
                    franka::Robot* robot,
+                   franka::Model* model,
                    const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
     : joint_state_interface_(),
@@ -31,6 +32,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       effort_joint_interface_(),
       franka_pose_cartesian_interface_(),
       franka_velocity_cartesian_interface_(),
+      franka_model_interface_(),
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
@@ -41,6 +43,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       joint_names_(),
       arm_id_(arm_id),
       robot_(robot),
+      model_(model),
       robot_state_(),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -162,6 +165,15 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       velocity_cartesian_command_.O_dP_EE);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
+
+  if (model_ != nullptr) {
+    franka_hw::FrankaModelHandle model_handle("model", model_, robot_state_);
+    franka_model_interface_.registerHandle(model_handle);
+    registerInterface(&franka_model_interface_);
+  } else {
+    ROS_ERROR("FrankaHW: Model was not set! Cannot offer FrankaModelInterface");
+  }
+
   registerInterface(&joint_state_interface_);
   registerInterface(&franka_joint_state_interface_);
   registerInterface(&franka_cartesian_state_interface_);
@@ -170,6 +182,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&effort_joint_interface_);
   registerInterface(&franka_pose_cartesian_interface_);
   registerInterface(&franka_velocity_cartesian_interface_);
+
   {
     std::lock_guard<realtime_tools::RealtimePublisher<FrankaState> > lock(
         publisher_franka_states_);

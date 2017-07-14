@@ -7,6 +7,7 @@
 #include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
 
+#include <franka/model.h>
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/service_server.h>
@@ -30,7 +31,9 @@ int main(int argc, char** argv) {
   node_handle.getParam("publish_rate", publish_rate);
   franka::Robot robot(robot_ip);
   franka_hw::ServiceServer service_server(robot, node_handle);
-  franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
+  franka::Model model(robot);
+  franka_hw::FrankaHW franka_ros(joint_names, &robot, &model, arm_id,
+                                 node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
                                                         node_handle);
   ros::AsyncSpinner spinner(1);

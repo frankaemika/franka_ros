@@ -16,6 +16,7 @@
 #include <sensor_msgs/JointState.h>
 #include <tf2_msgs/TFMessage.h>
 
+#include <franka/model.h>
 #include <franka/robot.h>
 
 #include <franka_hw/FrankaState.h>
@@ -25,6 +26,7 @@
 #include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_joint_command_interface.h>
 #include <franka_hw/franka_joint_state_interface.h>
+#include <franka_hw/franka_model_interface.h>
 
 namespace franka_hw {
 
@@ -46,6 +48,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
+           franka::Model* model,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
@@ -172,6 +175,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
   franka_hw::FrankaVelocityCartesianInterface
       franka_velocity_cartesian_interface_;
+  franka_hw::FrankaModelInterface franka_model_interface_;
 
   joint_limits_interface::PositionJointSoftLimitsInterface
       position_joint_limit_interface_;
@@ -191,6 +195,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   const std::string arm_id_;
 
   franka::Robot* const robot_;
+  franka::Model* model_;
   franka::RobotState robot_state_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;

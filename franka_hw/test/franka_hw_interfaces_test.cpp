@@ -18,7 +18,7 @@ extern std::vector<std::string> joint_names;
 namespace franka_hw {
 
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
-  std::unique_ptr<franka_hw::FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<franka_hw::FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, nullptr, arm_id, ros::NodeHandle()));
   hardware_interface::JointStateInterface* js_interface =
       robotptr->get<hardware_interface::JointStateInterface>();
   hardware_interface::PositionJointInterface* pj_interface =
@@ -66,7 +66,7 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
-  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, nullptr, arm_id, ros::NodeHandle()));
 
   hardware_interface::PositionJointInterface* pj_interface =
       robot_ptr->get<hardware_interface::PositionJointInterface>();
