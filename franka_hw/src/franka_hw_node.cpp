@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   node_handle.getParam("publish_rate", publish_rate);
   franka::Robot robot(robot_ip);
   franka_hw::ServiceServer service_server(robot, node_handle);
-  franka::Model model(robot);
+  franka::Model model = robot.loadModel();
   franka_hw::FrankaHW franka_ros(joint_names, &robot, &model, arm_id,
                                  node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
