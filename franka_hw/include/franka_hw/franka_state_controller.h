@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 #include <controller_interface/multi_interface_controller.h>

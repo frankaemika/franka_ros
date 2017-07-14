@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <mutex>
-#include <stdexcept>
 #include <string>
 
 #include <controller_interface/controller_base.h>
@@ -72,11 +71,6 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
         "FrankaStateController: Exception getting cartesian handle: "
         << e.what());
     return false;
-  }
-  if (franka_state_handle_ == nullptr) {
-    ROS_ERROR(
-        "FrankaStateController: Could not get state handle from Franka state "
-        "interface");
   }
 
   publisher_transforms_.init(root_node_handle, "/tf", 1);
