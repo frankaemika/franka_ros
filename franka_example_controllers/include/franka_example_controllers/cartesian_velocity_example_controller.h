@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
