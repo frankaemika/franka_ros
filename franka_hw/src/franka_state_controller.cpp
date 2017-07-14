@@ -43,9 +43,10 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   double publish_rate(30.0);
   if (controller_node_handle.getParam("publish_rate", publish_rate)) {
     trigger_publish_ = franka_hw::TriggerRate(publish_rate);
+  } else {
     ROS_INFO_STREAM(
-        "FrankaStateController: Found publish rate on parameter server: "
-        << publish_rate << " Hz");
+        "FrankaStateController: Did not find publish_rate. Using default "
+        << publish_rate << " [Hz].");
   }
   XmlRpc::XmlRpcValue params;
 

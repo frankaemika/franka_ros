@@ -86,7 +86,6 @@ add_library(franka_hw
 add_dependencies(franka_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  ${PROJECT_NAME}_generate_messages_cpp
 )
 
 target_link_libraries(franka_hw

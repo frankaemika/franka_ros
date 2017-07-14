@@ -1,10 +1,12 @@
 #pragma once
 
+#include <array>
 #include <memory>
-#include <vector>
+#include <string>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/robot_hw.h>
+#include <ros/node_handle.h>
 #include <ros/time.h>
 
 #include <franka_hw/franka_cartesian_command_interface.h>
