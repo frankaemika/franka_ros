@@ -1,12 +1,12 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <ros/time.h>
+#include <ros/node_handle.h>
 
 namespace franka_example_controllers {
 

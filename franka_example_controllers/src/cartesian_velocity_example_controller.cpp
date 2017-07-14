@@ -2,6 +2,8 @@
 #include <franka_example_controllers/cartesian_velocity_example_controller.h>
 
 #include <cmath>
+#include <string>
+#include <array>
 
 #include <controller_interface/controller_base.h>
 #include <hardware_interface/hardware_interface.h>
