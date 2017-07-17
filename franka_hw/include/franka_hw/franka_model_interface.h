@@ -42,7 +42,8 @@ class FrankaModelHandle {
   */
   std::array<double, 49> getMass(const std::array<double, 9>& load_inertia,
                                  double load_mass,
-                                 const std::array<double, 3>& F_x_Cload) const {
+                                 const std::array<double, 3>& F_x_Cload)
+      const {  // NOLINT (readability-identifier-naming)
     return model_->mass(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -59,7 +60,8 @@ class FrankaModelHandle {
   std::array<double, 49> getMass(const franka::RobotState& robot_state,
                                  const std::array<double, 9>& load_inertia,
                                  double load_mass,
-                                 const std::array<double, 3>& F_x_Cload) const {
+                                 const std::array<double, 3>& F_x_Cload)
+      const {  // NOLINT (readability-identifier-naming)
     return model_->mass(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -72,10 +74,10 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 7> getCoriolis(
-      const std::array<double, 9>& load_inertia,
-      double load_mass,
-      const std::array<double, 3>& F_x_Cload) const {
+  std::array<double, 7> getCoriolis(const std::array<double, 9>& load_inertia,
+                                    double load_mass,
+                                    const std::array<double, 3>& F_x_Cload)
+      const {  // NOLINT (readability-identifier-naming)
     return model_->coriolis(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -89,11 +91,11 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 7> getCoriolis(
-      const franka::RobotState& robot_state,
-      const std::array<double, 9>& load_inertia,
-      double load_mass,
-      const std::array<double, 3>& F_x_Cload) const {
+  std::array<double, 7> getCoriolis(const franka::RobotState& robot_state,
+                                    const std::array<double, 9>& load_inertia,
+                                    double load_mass,
+                                    const std::array<double, 3>& F_x_Cload)
+      const {  // NOLINT (readability-identifier-naming)
     return model_->coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 

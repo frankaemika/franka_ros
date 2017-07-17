@@ -23,7 +23,6 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 }  // anonymous namespace
 
-
 namespace franka_example_controllers {
 
 ModelExampleController::ModelExampleController()
