@@ -58,7 +58,8 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
   std::array<double, 6>* command_;
 };
 
-/** \brief Hardware interface to support commanding an array of Franka joints.
+/** \brief Hardware interface to support commanding Cartesian velocities to a
+ * Franka
  */
 class FrankaVelocityCartesianInterface
     : public hardware_interface::HardwareResourceManager<
