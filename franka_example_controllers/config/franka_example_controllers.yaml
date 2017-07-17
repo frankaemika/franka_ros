@@ -9,3 +9,6 @@ cartesian_pose_example_controller:
 
 cartesian_velocity_example_controller:
     type: franka_example_controllers/CartesianVelocityExampleController
+
+model_example_controller:
+    type: franka_example_controllers/ModelExampleController
