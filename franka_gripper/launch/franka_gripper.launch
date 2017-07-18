@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<launch>
+   <arg name="robot_ip" default="robot.franka.de" />
+
+   <node name="franka_gripper_node" pkg="franka_gripper" type="franka_gripper_node" output="screen">
+      <param name="robot_ip" value="$(arg robot_ip)"/>
+   </node>
+</launch>
