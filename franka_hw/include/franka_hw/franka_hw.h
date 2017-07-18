@@ -3,6 +3,7 @@
 #include <array>
 #include <cinttypes>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -48,7 +49,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
-           franka::Model* model,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
@@ -195,7 +195,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   const std::string arm_id_;
 
   franka::Robot* const robot_;
-  franka::Model* model_;
+  std::unique_ptr<franka::Model> model_;
   franka::RobotState robot_state_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;

@@ -31,18 +31,7 @@ int main(int argc, char** argv) {
   node_handle.getParam("publish_rate", publish_rate);
   franka::Robot robot(robot_ip);
   franka_hw::ServiceServer service_server(robot, node_handle);
-
-  boost::shared_ptr<franka::Model> model = nullptr;
-  try {
-    model =
-        boost::shared_ptr<franka::Model>(new franka::Model(robot.loadModel()));
-  } catch (franka::ModelException& e) {
-    ROS_ERROR_STREAM(
-        "franka_hw_node: Exception loading model library: " << e.what());
-  }
-
-  franka_hw::FrankaHW franka_ros(joint_names, &robot, model.get(), arm_id,
-                                 node_handle);
+  franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
                                                         node_handle);
   ros::AsyncSpinner spinner(1);
