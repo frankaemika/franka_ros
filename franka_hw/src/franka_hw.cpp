@@ -167,7 +167,8 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       franka_cartesian_velocity_handle);
 
   if (model_ != nullptr) {
-    franka_hw::FrankaModelHandle model_handle("model", model_, robot_state_);
+    franka_hw::FrankaModelHandle model_handle(arm_id_ + "model", model_,
+                                              robot_state_);
     franka_model_interface_.registerHandle(model_handle);
     registerInterface(&franka_model_interface_);
   } else {

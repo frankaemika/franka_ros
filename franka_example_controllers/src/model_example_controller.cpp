@@ -29,7 +29,11 @@ ModelExampleController::ModelExampleController()
     : model_interface_(nullptr), model_handle_(nullptr), rate_trigger_(1.0) {}
 
 bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                  ros::NodeHandle& /*node_handle*/) {
+                                  ros::NodeHandle& node_handle) {
+  if (!node_handle.getParam("arm_id", arm_id_)) {
+    ROS_ERROR("ModelExampleController: Could not read parameter arm_id");
+    return false;
+  }
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
     ROS_ERROR_STREAM(
@@ -38,8 +42,8 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
 
   try {
-    model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface_->getHandle("model")));
+    model_handle_.reset(new franka_hw::FrankaModelHandle(
+        model_interface_->getHandle(arm_id_ + "model")));
   } catch (hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting model handle from "

@@ -12,3 +12,4 @@ cartesian_velocity_example_controller:
 
 model_example_controller:
     type: franka_example_controllers/ModelExampleController
+    arm_id: franka_emika

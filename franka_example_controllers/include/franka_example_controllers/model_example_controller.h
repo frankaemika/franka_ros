@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/robot_hw.h>
@@ -17,13 +18,15 @@ class ModelExampleController
           franka_hw::FrankaModelInterface> {
  public:
   ModelExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle&);
+  bool init(hardware_interface::RobotHW* robot_hw,
+            ros::NodeHandle& node_handle);
   void update(const ros::Time&, const ros::Duration&);
 
  private:
   franka_hw::FrankaModelInterface* model_interface_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   franka_hw::TriggerRate rate_trigger_;
+  std::string arm_id_;
 };
 
 }  // namespace franka_example_controllers
