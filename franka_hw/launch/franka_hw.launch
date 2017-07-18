@@ -7,7 +7,7 @@
     <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
     <param name="arm_id" value="$(arg arm_id)" />
-    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/franka_emika_01_01.urdf.xacro'" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01.urdf.xacro'" />
   </node>
   <group ns="$(arg arm_id)">
     <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />

@@ -1,5 +1,5 @@
 <launch>
  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find franka_hw)/test/config/ros_console_settings_for_tests.conf"/>
- <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/franka_emika_01_01.urdf.xacro" />
+ <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/FEA_01_01.urdf.xacro" />
  <test test-name="franka_hw_test" pkg="franka_hw" type="franka_hw_test" />
 </launch>
