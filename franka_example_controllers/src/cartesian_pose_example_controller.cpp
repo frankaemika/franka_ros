@@ -16,36 +16,43 @@
 namespace franka_example_controllers {
 
 CartesianPoseExampleController::CartesianPoseExampleController()
-    : cartesian_pose_interface_(nullptr), elapsed_time_(0.0) {}
+    : cartesian_pose_interface_(nullptr),
+      elapsed_time_(0.0),
+      cartesian_pose_handle_(nullptr) {}
 
-bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                          ros::NodeHandle& node_handle) {
+bool CartesianPoseExampleController::init(
+    hardware_interface::RobotHW* robot_hardware,
+    ros::NodeHandle& root_node_handle,
+    ros::NodeHandle& /*controller_node_handle*/) {
   cartesian_pose_interface_ =
-      robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
+      robot_hardware->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface_ == nullptr) {
-    ROS_ERROR("Could not get Cartesian Pose interface from hardware");
+    ROS_ERROR(
+        "CartesianPoseExampleController: Could not get Cartesian Pose "
+        "interface from hardware");
     return false;
   }
 
-  if (!node_handle.getParam("/franka_hw_node/arm_id", arm_id_)) {
-    ROS_ERROR("Could not get parameter arm_id");
+  if (!root_node_handle.getParam("arm_id", arm_id_)) {
+    ROS_ERROR("CartesianPoseExampleController: Could not get parameter arm_id");
     return false;
   }
 
   try {
-    franka_hw::FrankaCartesianPoseHandle cartesian_pose_handle(
-        cartesian_pose_interface_->getHandle(arm_id_ +
-                                             std::string("_cartesian")));
-    initial_pose_ = cartesian_pose_handle.getTransform();
+    cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
+        cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
+    initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM(
+        "CartesianPoseExampleController: Exception getting cartesian handle: "
+        << e.what());
     return false;
   }
   elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
-void CartesianPoseExampleController::update(const ros::Time& time,  // NOLINT
+void CartesianPoseExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   double radius = 0.3;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
@@ -54,16 +61,9 @@ void CartesianPoseExampleController::update(const ros::Time& time,  // NOLINT
   std::array<double, 16> new_pose = initial_pose_;
   new_pose[12] += delta_x;
   new_pose[14] += delta_z;
-  try {
-    franka_hw::FrankaCartesianPoseHandle cartesian_pose_handle(
-        cartesian_pose_interface_->getHandle(arm_id_ +
-                                             std::string("_cartesian")));
-    cartesian_pose_handle.setCommand(new_pose);
-  } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("Exception getting cartesian handle: " << e.what());
-    return;
-  }
+  cartesian_pose_handle_->setCommand(new_pose);
   elapsed_time_ += period;
+  return;
 }
 
 }  // namespace franka_example_controllers

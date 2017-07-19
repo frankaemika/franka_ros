@@ -11,6 +11,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 
+#include <franka_hw/franka_model_interface.h>
+
 namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {

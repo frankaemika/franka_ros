@@ -15,21 +15,27 @@ namespace franka_example_controllers {
 JointPositionExampleController::JointPositionExampleController()
     : position_joint_interface_(nullptr), elapsed_time_(0.0) {}
 
-bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                          ros::NodeHandle& node_handle) {
+bool JointPositionExampleController::init(
+    hardware_interface::RobotHW* robot_hardware,
+    ros::NodeHandle& root_node_handle,
+    ros::NodeHandle& /*controller_node_handle*/) {
   position_joint_interface_ =
-      robot_hw->get<hardware_interface::PositionJointInterface>();
+      robot_hardware->get<hardware_interface::PositionJointInterface>();
   if (position_joint_interface_ == nullptr) {
-    ROS_ERROR("Error getting position joint interface from harware!");
+    ROS_ERROR(
+        "JointPositionExampleController: Error getting position joint "
+        "interface "
+        "from harware!");
     return false;
   }
   XmlRpc::XmlRpcValue parameters;
-  if (!node_handle.getParam("/franka_hw_node/joint_names", parameters)) {
-    ROS_ERROR("Could not parse joint names in JointPositionExampleController");
+  if (!root_node_handle.getParam("joint_names", parameters)) {
+    ROS_ERROR("JointPositionExampleController: Could not parse joint names");
   }
   if (parameters.size() != 7) {
-    ROS_ERROR_STREAM("Wrong number of joint names, got "
-                     << int(parameters.size()) << " instead of 7 names!");
+    ROS_ERROR_STREAM(
+        "JointPositionExampleController: Wrong number of joint names, got "
+        << int(parameters.size()) << " instead of 7 names!");
     return false;
   }
   position_joint_handles_.resize(7);
@@ -41,7 +47,9 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
           position_joint_interface_->getHandle(joint_names_[i]);
       initial_pose_[i] = position_joint_handles_[i].getPosition();
     } catch (const hardware_interface::HardwareInterfaceException& e) {
-      ROS_ERROR_STREAM("Exception getting joint handles: " << e.what());
+      ROS_ERROR_STREAM(
+          "JointPositionExampleController: Exception getting joint handles: "
+          << e.what());
       return false;
     }
   }
@@ -49,12 +57,16 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void JointPositionExampleController::update(const ros::Time& time,  // NOLINT
+void JointPositionExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
   double delta_angle =
       M_PI / 16 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   for (size_t i = 0; i < 7; ++i) {
-    position_joint_handles_[i].setCommand(initial_pose_[i] + delta_angle);
+    if (i == 4) {
+      position_joint_handles_[i].setCommand(initial_pose_[i] - delta_angle);
+    } else {
+      position_joint_handles_[i].setCommand(initial_pose_[i] + delta_angle);
+    }
   }
   elapsed_time_ += period;
 }

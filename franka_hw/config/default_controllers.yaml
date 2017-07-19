@@ -10,3 +10,8 @@ joint_trajectory_controller:
     - franka_emika_joint7
   constraints:
     goal_time: 0.01
+
+franka_state_controller:
+  type: franka_hw/FrankaStateController
+  publish_rate: 30  # [Hz]
+
