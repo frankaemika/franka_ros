@@ -27,34 +27,31 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Franka REQUIRED)
 
-find_package(Boost REQUIRED)
-
-add_message_files(
-  FILES
+add_message_files(FILES
   FrankaState.msg
 )
 
 add_service_files(FILES
-   SetJointImpedance.srv
-   SetCartesianImpedance.srv
-   SetFullCollisionBehavior.srv
-   SetForceTorqueCollisionBehavior.srv
-   SetEEFrame.srv
-   SetKFrame.srv
-   SetLoad.srv
-   SetTimeScalingFactor.srv
-   ErrorRecovery.srv
+  SetJointImpedance.srv
+  SetCartesianImpedance.srv
+  SetFullCollisionBehavior.srv
+  SetForceTorqueCollisionBehavior.srv
+  SetEEFrame.srv
+  SetKFrame.srv
+  SetLoad.srv
+  SetTimeScalingFactor.srv
+  ErrorRecovery.srv
 )
 
-generate_messages(
-  DEPENDENCIES
+generate_messages(DEPENDENCIES
   std_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw franka_state_controller
-  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools controller_interface pluginlib
+  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
+                 controller_interface pluginlib
   DEPENDS Franka
 )
 

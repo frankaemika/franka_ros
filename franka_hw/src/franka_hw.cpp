@@ -72,8 +72,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       joint_limits_interface::JointLimits joint_limits;
 
       for (auto joint_name : joint_names_) {
-        boost::shared_ptr<const urdf::Joint> urdf_joint =
-            urdf_model.getJoint(joint_name);
+        auto urdf_joint = urdf_model.getJoint(joint_name);
         if (!urdf_joint) {
           ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name
                                                             << " from urdf");
