@@ -172,12 +172,7 @@ void FrankaHW::run(std::function<bool()> ros_callback) {
   }
 
   if (model_ == nullptr) {
-    try {
-      model_.reset(new franka::Model(robot_->loadModel()));
-    } catch (franka::ModelException& e) {
-      ROS_ERROR_STREAM(
-          "FrankaHW: Exception loading model from robot: " << e.what());
-    }
+    model_.reset(new franka::Model(robot_->loadModel()));
   }
 
   uint32_t last_sequence_number = 0;
