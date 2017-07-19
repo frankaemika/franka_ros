@@ -117,6 +117,7 @@ void GripperServer::executeGripperCommand(
         action_server_.setSucceeded(command_result);
         return;
       } else {
+        gripper_.stop();
         ROS_WARN("GripperServer: Grasp failed");
       }
     }
