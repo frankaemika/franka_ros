@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   message_generation
+  control_msgs
+  actionlib
 )
 
 find_package(Franka REQUIRED)
@@ -28,7 +30,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_gripper
-  CATKIN_DEPENDS roscpp message_runtime
+  CATKIN_DEPENDS roscpp message_runtime control_msgs actionlib
   DEPENDS Franka
 )
 

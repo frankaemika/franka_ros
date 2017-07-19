@@ -1,17 +1,20 @@
 
 #include <franka_gripper/franka_gripper.h>
 
-#include <string>
+#include <math.h>
 #include <boost/function.hpp>
 #include <functional>
+#include <string>
 
+#include <control_msgs/GripperCommandAction.h>
 #include <ros/node_handle.h>
 
+#include <franka/exception.h>
+#include <franka/gripper_state.h>
 #include <franka_gripper/Grasp.h>
 #include <franka_gripper/Homing.h>
-#include <franka_gripper/Stop.h>
 #include <franka_gripper/Move.h>
-#include <franka/exception.h>
+#include <franka_gripper/Stop.h>
 
 namespace {
 template <typename T1, typename T2>
@@ -32,38 +35,114 @@ const boost::function<bool(T1&, T2&)> createServiceCallback(
 
 }  // anonymous namespace
 
-
 namespace franka_gripper {
 
 using std::placeholders::_1;
 
-GripperServer::GripperServer(const std::string& robot_ip, ros::NodeHandle& node_handle) :
-    gripper_(robot_ip),
-    move_server_(node_handle.advertiseService("move",
-                                              createServiceCallback<Move::Request, Move::Response>(std::bind(&GripperServer::move, this, _1)))),
-    homing_server_(node_handle.advertiseService("homing",
-                                                createServiceCallback<Homing::Request, Homing::Response>(std::bind(&GripperServer::homing, this)))),
-    grasp_server_(node_handle.advertiseService("grasp",
-                                              createServiceCallback<Grasp::Request, Grasp::Response>(std::bind(&GripperServer::grasp, this, _1)))),
-    stop_server_(node_handle.advertiseService("stop",
-                                              createServiceCallback<Stop::Request, Stop::Response>(std::bind(&GripperServer::stop, this)))) {
+constexpr double GripperServer::kCommandVelocity;
+constexpr double GripperServer::kNewtonToMilliAmperFactor;
+constexpr double GripperServer::kWidthTolerance;
+
+GripperServer::GripperServer(const std::string& robot_ip,
+                             ros::NodeHandle& node_handle,
+                             std::string action_name)
+    : gripper_(robot_ip),
+      action_server_(node_handle,
+                     action_name,
+                     std::bind(&GripperServer::executeGripperCommand, this, _1),
+                     false),
+      move_server_(node_handle.advertiseService(
+          "move",
+          createServiceCallback<Move::Request, Move::Response>(
+              std::bind(&GripperServer::move, this, _1)))),
+      homing_server_(node_handle.advertiseService(
+          "homing",
+          createServiceCallback<Homing::Request, Homing::Response>(
+              std::bind(&GripperServer::homing, this)))),
+      grasp_server_(node_handle.advertiseService(
+          "grasp",
+          createServiceCallback<Grasp::Request, Grasp::Response>(
+              std::bind(&GripperServer::grasp, this, _1)))),
+      stop_server_(node_handle.advertiseService(
+          "stop",
+          createServiceCallback<Stop::Request, Stop::Response>(
+              std::bind(&GripperServer::stop, this)))) {
+  action_server_.start();
 }
 
 void GripperServer::move(const Move::Request& request) {
-        gripper_.move(request.width, request.speed);
+  gripper_.move(request.width, request.speed);
 }
 
 void GripperServer::homing() {
-        gripper_.homing();
+  gripper_.homing();
 }
 
 void GripperServer::stop() {
-    gripper_.stop();
+  gripper_.stop();
 }
 
 void GripperServer::grasp(const Grasp::Request& request) {
-    gripper_.grasp(request.width, request.speed, request.max_current);
+  gripper_.grasp(request.width, request.speed, request.max_current);
+}
+
+void GripperServer::executeGripperCommand(
+    const control_msgs::GripperCommandGoalConstPtr& goal) {
+  bool success = false;
+  try {
+    franka::GripperState state = gripper_.readOnce();
+    command_feedback_.effort = 0.0;
+    command_feedback_.position = state.width;
+    command_feedback_.reached_goal = state.is_grasped;
+    command_feedback_.stalled = false;
+    action_server_.publishFeedback(command_feedback_);
+
+    if (goal->command.position >= state.max_width ||
+        goal->command.position < 0.0) {
+      ROS_ERROR("GripperServer: Commanding out of range width!");
+      action_server_.setAborted();
+      return;
+    }
+    if (goal->command.position >= state.width) {
+      gripper_.move(goal->command.position, kCommandVelocity);
+      state = gripper_.readOnce();
+      if (pow((state.width - goal->command.position), 2) < kWidthTolerance) {
+        command_result_.effort = 0.0;
+        command_result_.position = state.width;
+        command_result_.reached_goal = state.is_grasped;
+        command_result_.stalled = false;
+        success = true;
+        action_server_.setSucceeded(command_result_);
+      } else {
+        ROS_WARN("GripperServer: Move failed");
+      }
+    } else {
+      gripper_.grasp(goal->command.position, kCommandVelocity,
+                     goal->command.max_effort * kNewtonToMilliAmperFactor);
+      state = gripper_.readOnce();
+      if (state.is_grasped) {
+        command_result_.effort = 0.0;
+        command_result_.position = state.width;
+        command_result_.reached_goal = state.is_grasped;
+        command_result_.stalled = false;
+        success = true;
+        action_server_.setSucceeded(command_result_);
+      } else {
+        ROS_WARN("GripperServer: Grasp failed");
+      }
+    }
+  } catch (const franka::CommandException& ex) {
+    ROS_ERROR_STREAM(
+        "GripperServer: Exception performing grasp: " << ex.what());
+  } catch (const franka::NetworkException& ex) {
+    ROS_ERROR_STREAM("GripperServer: Exception reading state: " << ex.what());
+  } catch (const franka::ProtocolException& ex) {
+    ROS_ERROR_STREAM("GripperServer: Exception reading state: " << ex.what());
+  }
+
+  if (!success) {
+    action_server_.setAborted();
+  }
 }
 
 }  // namespace franka_gripper
-
