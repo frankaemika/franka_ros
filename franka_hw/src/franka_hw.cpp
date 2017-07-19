@@ -152,7 +152,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       franka_state_handle, velocity_cartesian_command_.O_dP_EE);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
-  franka_hw::FrankaModelHandle model_handle(arm_id_ + "model", &model_,
+  franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", &model_,
                                             robot_state_);
   franka_model_interface_.registerHandle(model_handle);
 

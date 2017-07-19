@@ -45,7 +45,7 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
 
   try {
     model_handle_.reset(new franka_hw::FrankaModelHandle(
-        model_interface_->getHandle(arm_id_ + "model")));
+        model_interface_->getHandle(arm_id_ + "_model")));
   } catch (hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting model handle from "
