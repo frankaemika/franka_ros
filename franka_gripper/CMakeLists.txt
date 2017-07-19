@@ -22,9 +22,7 @@ add_service_files(FILES
    Homing.srv
 )
 
-generate_messages(
-  DEPENDENCIES
-)
+generate_messages()
 
 catkin_package(
   INCLUDE_DIRS include

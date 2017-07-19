@@ -17,8 +17,7 @@ namespace franka_gripper {
 
 class GripperServer {
  public:
-  static constexpr double kCommandVelocity{
-      0.05};  // TODO CJ: Get reasonable value
+  static constexpr double kCommandVelocity{0.1};
   static constexpr double kNewtonToMilliAmpereFactor{
       41.0 / 200.0};  // TODO CJ: Get precise value
   static constexpr double kWidthTolerance{0.005};
