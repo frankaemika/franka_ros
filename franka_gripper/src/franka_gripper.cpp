@@ -1,20 +1,11 @@
-
 #include <franka_gripper/franka_gripper.h>
 
-#include <math.h>
 #include <boost/function.hpp>
+#include <cmath>
 #include <functional>
-#include <string>
-
-#include <control_msgs/GripperCommandAction.h>
-#include <ros/node_handle.h>
 
 #include <franka/exception.h>
 #include <franka/gripper_state.h>
-#include <franka_gripper/Grasp.h>
-#include <franka_gripper/Homing.h>
-#include <franka_gripper/Move.h>
-#include <franka_gripper/Stop.h>
 
 namespace {
 template <typename T1, typename T2>
@@ -40,7 +31,7 @@ namespace franka_gripper {
 using std::placeholders::_1;
 
 constexpr double GripperServer::kCommandVelocity;
-constexpr double GripperServer::kNewtonToMilliAmperFactor;
+constexpr double GripperServer::kNewtonToMilliAmpereFactor;
 constexpr double GripperServer::kWidthTolerance;
 
 GripperServer::GripperServer(const std::string& robot_ip,
@@ -87,18 +78,10 @@ void GripperServer::grasp(const Grasp::Request& request) {
 
 void GripperServer::executeGripperCommand(
     const control_msgs::GripperCommandGoalConstPtr& goal) {
-  bool success = false;
+  control_msgs::GripperCommandResult command_result;
   try {
     franka::GripperState state = gripper_.readOnce();
-    command_feedback_.effort = 0.0;
-    command_feedback_.position = state.width;
-    command_feedback_.reached_goal =
-        false;  // NOLINT [readability-implicit-bool-cast]
-    command_feedback_.stalled =
-        false;  // NOLINT [readability-implicit-bool-cast]
-    action_server_.publishFeedback(command_feedback_);
-
-    if (goal->command.position >= state.max_width ||
+    if (goal->command.position > state.max_width ||
         goal->command.position < 0.0) {
       ROS_ERROR("GripperServer: Commanding out of range width!");
       action_server_.setAborted();
@@ -107,31 +90,32 @@ void GripperServer::executeGripperCommand(
     if (goal->command.position >= state.width) {
       gripper_.move(goal->command.position, kCommandVelocity);
       state = gripper_.readOnce();
-      if (pow((state.width - goal->command.position), 2) < kWidthTolerance) {
-        command_result_.effort = 0.0;
-        command_result_.position = state.width;
-        command_result_.reached_goal =
+      if (std::pow((state.width - goal->command.position), 2) <
+          kWidthTolerance) {
+        command_result.effort = 0.0;
+        command_result.position = state.width;
+        command_result.reached_goal =
             true;  // NOLINT [readability-implicit-bool-cast]
-        command_result_.stalled =
+        command_result.stalled =
             false;  // NOLINT [readability-implicit-bool-cast]
-        success = true;
-        action_server_.setSucceeded(command_result_);
+        action_server_.setSucceeded(command_result);
+        return;
       } else {
         ROS_WARN("GripperServer: Move failed");
       }
     } else {
       gripper_.grasp(goal->command.position, kCommandVelocity,
-                     goal->command.max_effort * kNewtonToMilliAmperFactor);
+                     goal->command.max_effort * kNewtonToMilliAmpereFactor);
       state = gripper_.readOnce();
       if (state.is_grasped) {
-        command_result_.effort = 0.0;
-        command_result_.position = state.width;
-        command_result_.reached_goal =
+        command_result.effort = 0.0;
+        command_result.position = state.width;
+        command_result.reached_goal =
             true;  // NOLINT [readability-implicit-bool-cast]
-        command_result_.stalled =
+        command_result.stalled =
             false;  // NOLINT [readability-implicit-bool-cast]
-        success = true;
-        action_server_.setSucceeded(command_result_);
+        action_server_.setSucceeded(command_result);
+        return;
       } else {
         ROS_WARN("GripperServer: Grasp failed");
       }
@@ -145,9 +129,7 @@ void GripperServer::executeGripperCommand(
     ROS_ERROR_STREAM("GripperServer: Exception reading state: " << ex.what());
   }
 
-  if (!success) {
-    action_server_.setAborted();
-  }
+  action_server_.setAborted();
 }
 
 }  // namespace franka_gripper

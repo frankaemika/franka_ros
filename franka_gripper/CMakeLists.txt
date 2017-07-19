@@ -15,8 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Franka REQUIRED)
 
-add_service_files(
-   FILES
+add_service_files(FILES
    Stop.srv
    Move.srv
    Grasp.srv
@@ -34,7 +33,9 @@ catkin_package(
   DEPENDS Franka
 )
 
-add_library(franka_gripper src/franka_gripper.cpp )
+add_library(franka_gripper
+src/franka_gripper.cpp
+)
 
 add_dependencies(franka_gripper
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -52,7 +53,9 @@ target_include_directories(franka_gripper PUBLIC
   include
 )
 
-add_executable(franka_gripper_node src/franka_gripper_node.cpp )
+add_executable(franka_gripper_node
+  src/franka_gripper_node.cpp
+)
 
 add_dependencies(franka_gripper_node
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
@@ -62,7 +65,6 @@ add_dependencies(franka_gripper_node
 
 target_link_libraries(franka_gripper_node
    ${catkin_LIBRARIES}
-   Franka::franka
    franka_gripper
 )
 

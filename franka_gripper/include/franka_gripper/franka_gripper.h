@@ -18,7 +18,7 @@ namespace franka_gripper {
 class GripperServer {
  public:
   static constexpr double kCommandVelocity{0.05};
-  static constexpr double kNewtonToMilliAmperFactor{1.0};
+  static constexpr double kNewtonToMilliAmpereFactor{1.0};
   static constexpr double kWidthTolerance{0.005};
 
   GripperServer() = delete;
@@ -39,8 +39,6 @@ class GripperServer {
   ros::ServiceServer stop_server_;
   actionlib::SimpleActionServer<control_msgs::GripperCommandAction>
       action_server_;
-  control_msgs::GripperCommandFeedback command_feedback_;
-  control_msgs::GripperCommandResult command_result_;
 };
 
 }  // namespace franka_gripper
