@@ -259,8 +259,9 @@ bool FrankaHW::checkForConflict(
 }
 
 // doSwitch runs on the main realtime thread
-void FrankaHW::doSwitch(const std::list<hardware_interface::ControllerInfo>&,
-                        const std::list<hardware_interface::ControllerInfo>&) {
+void FrankaHW::doSwitch(
+    const std::list<hardware_interface::ControllerInfo>& /* start_list */,
+    const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
   reset();
   if (current_control_mode_ != ControlMode::None) {
     controller_active_ = true;
