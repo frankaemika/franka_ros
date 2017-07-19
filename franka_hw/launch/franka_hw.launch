@@ -7,6 +7,11 @@
     <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
     <param name="arm_id" value="$(arg arm_id)" />
-    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/franka.urdf.xacro'" />
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01.urdf.xacro'" />
   </node>
+  <group ns="$(arg arm_id)">
+    <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />
+    <node name="state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="franka_state_controller --shutdown-timeout 2"/>
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+  </group>
 </launch>

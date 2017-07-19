@@ -11,7 +11,7 @@ bool findArmIdInResourceId(const std::string& resource_id,
     *arm_id = resource_id.substr(0, position);
     return true;
   }
-  position = resource_id.rfind("_cartesian");
+  position = resource_id.rfind("_robot");
   if (position != std::string::npos && position > 0) {
     *arm_id = resource_id.substr(0, position);
     return true;
