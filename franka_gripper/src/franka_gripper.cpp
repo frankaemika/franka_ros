@@ -92,8 +92,10 @@ void GripperServer::executeGripperCommand(
     franka::GripperState state = gripper_.readOnce();
     command_feedback_.effort = 0.0;
     command_feedback_.position = state.width;
-    command_feedback_.reached_goal = false;
-    command_feedback_.stalled = false;
+    command_feedback_.reached_goal =
+        false;  // NOLINT [readability-implicit-bool-cast]
+    command_feedback_.stalled =
+        false;  // NOLINT [readability-implicit-bool-cast]
     action_server_.publishFeedback(command_feedback_);
 
     if (goal->command.position >= state.max_width ||
@@ -108,8 +110,10 @@ void GripperServer::executeGripperCommand(
       if (pow((state.width - goal->command.position), 2) < kWidthTolerance) {
         command_result_.effort = 0.0;
         command_result_.position = state.width;
-        command_result_.reached_goal = true;
-        command_result_.stalled = false;
+        command_result_.reached_goal =
+            true;  // NOLINT [readability-implicit-bool-cast]
+        command_result_.stalled =
+            false;  // NOLINT [readability-implicit-bool-cast]
         success = true;
         action_server_.setSucceeded(command_result_);
       } else {
@@ -122,8 +126,10 @@ void GripperServer::executeGripperCommand(
       if (state.is_grasped) {
         command_result_.effort = 0.0;
         command_result_.position = state.width;
-        command_result_.reached_goal = true;
-        command_result_.stalled = false;
+        command_result_.reached_goal =
+            true;  // NOLINT [readability-implicit-bool-cast]
+        command_result_.stalled =
+            false;  // NOLINT [readability-implicit-bool-cast]
         success = true;
         action_server_.setSucceeded(command_result_);
       } else {
