@@ -22,9 +22,7 @@ class GripperServer {
   static constexpr double kWidthTolerance{0.005};
 
   GripperServer() = delete;
-  GripperServer(const std::string& robot_ip,
-                ros::NodeHandle& node_handle,
-                std::string action_name);
+  GripperServer(const std::string& robot_ip, ros::NodeHandle& node_handle);
 
  private:
   void move(const Move::Request& request);

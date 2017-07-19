@@ -44,11 +44,10 @@ constexpr double GripperServer::kNewtonToMilliAmperFactor;
 constexpr double GripperServer::kWidthTolerance;
 
 GripperServer::GripperServer(const std::string& robot_ip,
-                             ros::NodeHandle& node_handle,
-                             std::string action_name)
+                             ros::NodeHandle& node_handle)
     : gripper_(robot_ip),
       action_server_(node_handle,
-                     action_name,
+                     "gripper_action",
                      std::bind(&GripperServer::executeGripperCommand, this, _1),
                      false),
       move_server_(node_handle.advertiseService(
@@ -93,7 +92,7 @@ void GripperServer::executeGripperCommand(
     franka::GripperState state = gripper_.readOnce();
     command_feedback_.effort = 0.0;
     command_feedback_.position = state.width;
-    command_feedback_.reached_goal = state.is_grasped;
+    command_feedback_.reached_goal = false;
     command_feedback_.stalled = false;
     action_server_.publishFeedback(command_feedback_);
 
@@ -109,7 +108,7 @@ void GripperServer::executeGripperCommand(
       if (pow((state.width - goal->command.position), 2) < kWidthTolerance) {
         command_result_.effort = 0.0;
         command_result_.position = state.width;
-        command_result_.reached_goal = state.is_grasped;
+        command_result_.reached_goal = true;
         command_result_.stalled = false;
         success = true;
         action_server_.setSucceeded(command_result_);
@@ -123,7 +122,7 @@ void GripperServer::executeGripperCommand(
       if (state.is_grasped) {
         command_result_.effort = 0.0;
         command_result_.position = state.width;
-        command_result_.reached_goal = state.is_grasped;
+        command_result_.reached_goal = true;
         command_result_.stalled = false;
         success = true;
         action_server_.setSucceeded(command_result_);

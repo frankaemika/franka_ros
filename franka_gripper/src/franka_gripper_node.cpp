@@ -18,8 +18,7 @@ int main(int argc, char** argv) {
   }
 
   try {
-    franka_gripper::GripperServer gripper_server(robot_ip, node_handle,
-                                                 "gripper_action");
+    franka_gripper::GripperServer gripper_server(robot_ip, node_handle);
     ros::spin();
   } catch (franka::NetworkException& ex) {
     ROS_ERROR_STREAM(

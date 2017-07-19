@@ -11,3 +11,11 @@ controller_list:
       - franka_emika_joint5
       - franka_emika_joint6
       - franka_emika_joint7
+      
+  - name: franka_gripper_node
+    action_ns: gripper_action
+    type: GripperCommand
+    default: true
+    joints:
+      - franka_emika_finger_joint1
+      - franka_emika_finger_joint2
