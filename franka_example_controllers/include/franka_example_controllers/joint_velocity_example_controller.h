@@ -1,10 +1,12 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <ros/node_handle.h>
 #include <ros/time.h>
 
 namespace franka_example_controllers {
@@ -14,10 +16,11 @@ class JointVelocityExampleController
           hardware_interface::VelocityJointInterface> {
  public:
   JointVelocityExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& node_handle);
-  void update(const ros::Time& time, const ros::Duration& period);
-  void stopping(const ros::Time& time);
+  bool init(hardware_interface::RobotHW* robot_hardware,
+            ros::NodeHandle& root_node_handle,
+            ros::NodeHandle&);
+  void update(const ros::Time& time, const ros::Duration&);
+  void stopping(const ros::Time&);
 
  private:
   std::vector<std::string> joint_names_;

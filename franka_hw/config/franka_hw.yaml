@@ -9,4 +9,3 @@ joint_names:
 
 arm_id: franka_emika
 robot_ip: 127.0.0.1
-publish_rate: 30.0  # [Hz]

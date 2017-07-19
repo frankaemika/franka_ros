@@ -12,19 +12,12 @@
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <joint_limits_interface/joint_limits_interface.h>
-#include <realtime_tools/realtime_publisher.h>
-#include <sensor_msgs/JointState.h>
-#include <tf2_msgs/TFMessage.h>
 
 #include <franka/robot.h>
 
-#include <franka_hw/FrankaState.h>
-
 #include <franka_hw/franka_cartesian_command_interface.h>
-#include <franka_hw/franka_cartesian_state_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
-#include <franka_hw/franka_joint_command_interface.h>
-#include <franka_hw/franka_joint_state_interface.h>
+#include <franka_hw/franka_state_interface.h>
 
 namespace franka_hw {
 
@@ -42,7 +35,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param[in] robot A pointer to an istance of franka::Robot
   * @param[in] arm_id Unique identifier for the Franka arm that the class
   * controls
-  * @param[in] nh A nodehandle e.g to register publishers
+  * @param[in] nh A nodehandle e.g to get parameters
   */
   FrankaHW(const std::vector<std::string>& joint_names,
            franka::Robot* robot,
@@ -79,13 +72,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
   * Performs the switch between controllers and is real-time capable
   *
-  * @param[in] start_list Information list about all controllers requested to be
-  * started
-  * @param[in] stop_list Information list about all controllers requested to be
-  * stopped
   */
-  void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
-                const std::list<hardware_interface::ControllerInfo>& stop_list);
+  void doSwitch(const std::list<hardware_interface::ControllerInfo>&,
+                const std::list<hardware_interface::ControllerInfo>&);
 
   /**
   * Prepares the switching between controllers. This function is not real-time
@@ -93,33 +82,10 @@ class FrankaHW : public hardware_interface::RobotHW {
   *
   * @param[in] start_list Information list about all controllers requested to be
   * started
-  * @param[in] stop_list Information list about all controllers requested to be
-  * stopped
   */
   bool prepareSwitch(
       const std::list<hardware_interface::ControllerInfo>& start_list,
       const std::list<hardware_interface::ControllerInfo>& stop_list);
-
-  /**
-  * Publishes all relevant data received from the Franka arm
-  */
-  void publishFrankaStates();
-
-  /**
-  * Publishes the joint states of the Franka arm
-  */
-  void publishJointStates();
-
-  /**
-  * Publishes the transforms for EE and K frame which define the end-effector
-  * (EE) and the Cartesian impedance reference frame (K)
-  */
-  void publishTransforms();
-
-  /**
-  * Publishes the estimated external wrench felt by the Franka
-  */
-  void publishExternalWrench();
 
   /**
   * Getter for the current Joint Position Command
@@ -164,8 +130,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                     const franka::RobotState& robot_state);
 
   hardware_interface::JointStateInterface joint_state_interface_;
-  franka_hw::FrankaJointStateInterface franka_joint_state_interface_;
-  franka_hw::FrankaCartesianStateInterface franka_cartesian_state_interface_;
+  franka_hw::FrankaStateInterface franka_state_interface_;
   hardware_interface::PositionJointInterface position_joint_interface_;
   hardware_interface::VelocityJointInterface velocity_joint_interface_;
   hardware_interface::EffortJointInterface effort_joint_interface_;
@@ -180,13 +145,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface
       effort_joint_limit_interface_;
 
-  realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
-  realtime_tools::RealtimePublisher<franka_hw::FrankaState>
-      publisher_franka_states_;
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState>
-      publisher_joint_states_;
-  realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
-      publisher_external_wrench_;
   std::vector<std::string> joint_names_;
   const std::string arm_id_;
 
@@ -198,8 +156,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
 
-  uint64_t sequence_number_joint_states_ = 0;
-  uint64_t sequence_number_franka_states_ = 0;
   bool controller_running_ = true;
   ControlMode current_control_mode_ = ControlMode::None;
   const std::function<void(std::function<bool()>)> default_run_function_;
