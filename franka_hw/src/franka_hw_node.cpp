@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
   node_handle.getParam("robot_ip", robot_ip);
   std::string arm_id;
   node_handle.getParam("arm_id", arm_id);
-  franka::Robot robot(robot_ip, franka::kIgnore);
+  franka::Robot robot(robot_ip);
   franka_hw::ServiceServer service_server(robot, node_handle);
   franka_hw::FrankaHW franka_ros(joint_names, &robot, arm_id, node_handle);
   controller_manager::ControllerManager control_manager(&franka_ros,
