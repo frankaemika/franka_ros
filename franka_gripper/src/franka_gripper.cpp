@@ -100,9 +100,9 @@ void GripperServer::executeGripperCommand(
             false;  // NOLINT [readability-implicit-bool-cast]
         action_server_.setSucceeded(command_result);
         return;
-      } else {
-        ROS_WARN("GripperServer: Move failed");
       }
+      ROS_WARN("GripperServer: Move failed");
+
     } else {
       gripper_.grasp(goal->command.position, kCommandVelocity,
                      goal->command.max_effort * kNewtonToMilliAmpereFactor);
@@ -116,10 +116,9 @@ void GripperServer::executeGripperCommand(
             false;  // NOLINT [readability-implicit-bool-cast]
         action_server_.setSucceeded(command_result);
         return;
-      } else {
-        gripper_.stop();
-        ROS_WARN("GripperServer: Grasp failed");
       }
+      gripper_.stop();
+      ROS_WARN("GripperServer: Grasp failed");
     }
   } catch (const franka::CommandException& ex) {
     ROS_ERROR_STREAM(
