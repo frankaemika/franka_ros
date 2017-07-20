@@ -83,7 +83,9 @@ void GripperServer::executeGripperCommand(
     franka::GripperState state = gripper_.readOnce();
     if (goal->command.position > state.max_width ||
         goal->command.position < 0.0) {
-      ROS_ERROR("GripperServer: Commanding out of range width!");
+      ROS_ERROR_STREAM(
+          "GripperServer: Commanding out of range width! max_width = "
+          << state.max_width << " command = " << goal->command.position);
       action_server_.setAborted();
       return;
     }
@@ -104,8 +106,10 @@ void GripperServer::executeGripperCommand(
       ROS_WARN("GripperServer: Move failed");
 
     } else {
+      ROS_INFO("Action: Grasping");
       gripper_.grasp(goal->command.position, kCommandVelocity,
                      goal->command.max_effort * kNewtonToMilliAmpereFactor);
+      ROS_INFO("Action: Grasping finished");
       state = gripper_.readOnce();
       if (state.is_grasped) {
         command_result.effort = 0.0;
@@ -114,6 +118,7 @@ void GripperServer::executeGripperCommand(
             true;  // NOLINT [readability-implicit-bool-cast]
         command_result.stalled =
             false;  // NOLINT [readability-implicit-bool-cast]
+        ROS_INFO("Action: Set succeeded");
         action_server_.setSucceeded(command_result);
         return;
       }
