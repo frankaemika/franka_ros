@@ -8,6 +8,7 @@
 #include <ros/service_server.h>
 
 #include <franka/gripper.h>
+#include <franka/gripper_state.h>
 #include <franka_gripper/Grasp.h>
 #include <franka_gripper/Homing.h>
 #include <franka_gripper/Move.h>
@@ -17,13 +18,14 @@ namespace franka_gripper {
 
 class GripperServer {
  public:
-  static constexpr double kCommandVelocity{0.1};  // TODO CJ: Get precise value
+  static constexpr double kCommandVelocity{0.1};
   static constexpr double kNewtonToMilliAmpereFactor{
       1.0};  // TODO CJ: Get precise value
   static constexpr double kWidthTolerance{0.005};
 
   GripperServer() = delete;
   GripperServer(const std::string& robot_ip, ros::NodeHandle& node_handle);
+  bool getGripperState(franka::GripperState* state);
 
  private:
   void move(const Move::Request& request);

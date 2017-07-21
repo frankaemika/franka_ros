@@ -1,0 +1,4 @@
+publish_rate: 30  # [Hz]
+joint_names:
+  - franka_emika_leftfinger_joint
+  - franka_emika_rightfinger_joint

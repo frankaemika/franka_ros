@@ -1,10 +1,11 @@
 <?xml version="1.0" ?>
 <launch>
-  <arg name="robot_ip" default="robot.franka.de" />
+  <arg name="robot_ip" default="franka_softies" />
   <arg name="arm_id" default="franka_emika" />
   <group ns="$(arg arm_id)">
     <node name="franka_gripper_node" pkg="franka_gripper" type="franka_gripper_node" output="screen">
       <param name="robot_ip" value="$(arg robot_ip)"/>
+      <rosparam command="load" file="$(find franka_gripper)/config/gripper_node_config.yaml" />
     </node>
   </group>
 </launch>

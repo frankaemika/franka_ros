@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   control_msgs
   actionlib
+  sensor_msgs
+  xmlrpcpp
 )
 
 find_package(Franka REQUIRED)
@@ -27,7 +29,7 @@ generate_messages()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_gripper
-  CATKIN_DEPENDS roscpp message_runtime control_msgs actionlib
+  CATKIN_DEPENDS roscpp message_runtime control_msgs actionlib sensor_msgs xmlrpcpp
   DEPENDS Franka
 )
 
