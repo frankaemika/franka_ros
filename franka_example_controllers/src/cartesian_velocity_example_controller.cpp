@@ -55,6 +55,8 @@ bool CartesianVelocityExampleController::init(
 
 void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
                                                 const ros::Duration& period) {
+  elapsed_time_ += period;
+
   double time_max = 4.0;
   double v_max = 0.1;
   double angle = M_PI / 4.0;
@@ -68,8 +70,6 @@ void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
   double v_z = -std::sin(angle) * v;
   std::array<double, 6> command = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
   velocity_cartesian_handle_->setCommand(command);
-  elapsed_time_ += period;
-  return;
 }
 
 void CartesianVelocityExampleController::stopping(const ros::Time& /*time*/) {
