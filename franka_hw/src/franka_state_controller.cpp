@@ -75,9 +75,9 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   }
 
   publisher_transforms_.init(root_node_handle, "/tf", 1);
-  publisher_franka_states_.init(root_node_handle, "franka_states", 1);
-  publisher_joint_states_.init(root_node_handle, "joint_states", 1);
-  publisher_external_wrench_.init(root_node_handle, "F_ext", 1);
+  publisher_franka_states_.init(controller_node_handle, "franka_states", 1);
+  publisher_joint_states_.init(controller_node_handle, "joint_states", 1);
+  publisher_external_wrench_.init(controller_node_handle, "F_ext", 1);
 
   {
     std::lock_guard<realtime_tools::RealtimePublisher<franka_hw::FrankaState> >

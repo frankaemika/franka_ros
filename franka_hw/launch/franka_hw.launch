@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <launch>
-  <arg name="robot_ip" default="robot.franka.de" />
+  <arg name="robot_ip" default="localhost" />
   <arg name="arm_id" default="franka_emika" />
 
   <node name="$(arg arm_id)" pkg="franka_hw" type="franka_hw_node" output="screen" required="true">
