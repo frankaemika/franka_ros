@@ -1,15 +1,8 @@
 #include <franka_hw/franka_hw.h>
 
-#include <functional>
-#include <mutex>
+#include <cstdint>
 
-#include <joint_limits_interface/joint_limits.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
-#include <realtime_tools/realtime_publisher.h>
-#include <sensor_msgs/JointState.h>
-#include <std_msgs/MultiArrayDimension.h>
-#include <tf/tf.h>
-#include <tf/transform_datatypes.h>
 #include <urdf/model.h>
 
 #include "franka_hw_helper_functions.h"
@@ -42,12 +35,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       pose_cartesian_command_({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
                                1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
-      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-      default_run_function_([this](std::function<bool()> ros_callback) {
-        robot_->read(std::bind(&FrankaHW::readCallback, this, ros_callback,
-                               std::placeholders::_1));
-      }),
-      run_function_(default_run_function_) {
+      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
   joint_names_.resize(joint_names.size());
   joint_names_ = joint_names;
 
@@ -83,8 +71,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       joint_limits_interface::JointLimits joint_limits;
 
       for (auto joint_name : joint_names_) {
-        boost::shared_ptr<const urdf::Joint> urdf_joint =
-            urdf_model.getJoint(joint_name);
+        auto urdf_joint = urdf_model.getJoint(joint_name);
         if (!urdf_joint) {
           ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name
                                                             << " from urdf");
@@ -160,23 +147,40 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&franka_velocity_cartesian_interface_);
 }
 
-void FrankaHW::run(std::function<bool()> ros_callback) {
+void FrankaHW::readOnce() {
+  robot_state_ = robot_->readOnce();
+}
+
+bool FrankaHW::controllerActive() const noexcept {
+  return controller_active_;
+}
+
+void FrankaHW::reset() {
+  position_joint_limit_interface_.reset();
+}
+
+void FrankaHW::control(
+    std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback) {
   if (robot_ == nullptr) {
     throw std::invalid_argument("FrankaHW: franka robot was not initialized.");
   }
 
-  uint32_t last_sequence_number = 0;
-  do {
-    run_function_([this, ros_callback, &last_sequence_number]() {
-      if (last_sequence_number != robot_state_.sequence_number) {
-        last_sequence_number = robot_state_.sequence_number;
-        return ros_callback();
-      }
-      return true;
-    });
-  } while (ros_callback());
-  // TODO(FWA): how to handle e.g. collisions in ros_control?
-  // Currently just propagates exceptions.
+  if (!controller_active_) {
+    return;
+  }
+
+  constexpr double kPeriod = 0.001;
+  uint32_t last_sequence_number = robot_state_.sequence_number;
+  run_function_([this, ros_callback, &last_sequence_number]() {
+    if (last_sequence_number != robot_state_.sequence_number) {
+      // TODO (fwalch): Handle overflows.
+      int ticks = robot_state_.sequence_number - last_sequence_number;
+      last_sequence_number = robot_state_.sequence_number;
+      ros::Duration period(ticks * kPeriod);
+      return ros_callback(ros::Time::now(), period);
+    }
+    return true;
+  });
 }
 
 void FrankaHW::enforceLimits(const ros::Duration kPeriod) {
@@ -254,13 +258,17 @@ bool FrankaHW::checkForConflict(
   return false;
 }
 
+// doSwitch runs on the main realtime thread
 void FrankaHW::doSwitch(
-    const std::list<hardware_interface::ControllerInfo>& /*start_list*/,
-    const std::list<hardware_interface::ControllerInfo>& /*stop_list*/) {
-  position_joint_limit_interface_.reset();
-  controller_running_ = true;
+    const std::list<hardware_interface::ControllerInfo>& /* start_list */,
+    const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
+  reset();
+  if (current_control_mode_ != ControlMode::None) {
+    controller_active_ = true;
+  }
 }
 
+// prepareSwitch runs on the background message handling thread
 bool FrankaHW::prepareSwitch(
     const std::list<hardware_interface::ControllerInfo>& start_list,
     const std::list<hardware_interface::ControllerInfo>& stop_list) {
@@ -286,7 +294,6 @@ bool FrankaHW::prepareSwitch(
 
   switch (requested_control_mode) {
     case ControlMode::None:
-      run_function_ = default_run_function_;
       break;
     case ControlMode::JointTorque:
       run_function_ = [this](std::function<bool()> ros_callback) {
@@ -381,20 +388,9 @@ bool FrankaHW::prepareSwitch(
   ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
                   << requested_control_mode);
   current_control_mode_ = requested_control_mode;
-  controller_running_ = false;
-  return true;
-}
 
-bool FrankaHW::readCallback(std::function<bool()> ros_callback,
-                            const franka::RobotState& robot_state) {
-  robot_state_ = robot_state;
-  if (!controller_running_) {
-    // A new controller has been prepared; stop this one.
-    return false;
-  }
-  if (ros_callback && !ros_callback()) {
-    return false;
-  }
+  controller_active_ = false;
+
   return true;
 }
 
