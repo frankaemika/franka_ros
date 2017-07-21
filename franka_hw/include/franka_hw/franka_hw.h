@@ -1,17 +1,17 @@
 #pragma once
 
 #include <array>
-#include <cinttypes>
+#include <atomic>
 #include <functional>
 #include <string>
 #include <vector>
 
-#include <geometry_msgs/WrenchStamped.h>
-#include <hardware_interface/controller_info.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <joint_limits_interface/joint_limits_interface.h>
+#include <ros/node_handle.h>
+#include <ros/time.h>
 
 #include <franka/robot.h>
 
@@ -47,15 +47,41 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Runs the currently active controller in a realtime loop.
    *
-   * If no controller is active, a default loop is run that reads the robot
-   * state, but does not perform control. The function only exits if
-   * ros_callback returns false.
+   * If no controller is active, the function immediately exits.
+   * When running a controller, the function only exits when ros_callback
+   * returns false.
    *
    * @param[in] ros_callback A callback function that is executed at each time
-   * step and runs all ros-side functionality of the hardware. Execution is
+   * step and runs all ROS-side functionality of the hardware. Execution is
    * stopped if it returns false.
+   *
+   * @throw franka::ControlException if an error related to control occurred.
+   * @throw franka::NetworkException if the connection is lost, e.g. after a
+   * timeout.
+   * @throw franka::RealtimeException if realtime priority can not be set for
+   * the current thread.
    */
-  void run(std::function<bool()> ros_callback);
+  void control(
+      std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
+
+  /**
+   * Reads the current robot state and updates the controller interfaces.
+   *
+   * @throw franka::NetworkException if the connection is lost.
+   */
+  void readOnce();
+
+  /**
+   * Indicates whether there is an active controller.
+   *
+   * @return True if a controller is currently active, false otherwise.
+   */
+  bool controllerActive() const noexcept;
+
+  /**
+   * Resets controller interfaces.
+   */
+  void reset();
 
   /**
   * Checks whether a requested controller can be run, based on the resources and
@@ -67,14 +93,14 @@ class FrankaHW : public hardware_interface::RobotHW {
   * controllers
   */
   bool checkForConflict(
-      const std::list<hardware_interface::ControllerInfo>& info) const;
+      const std::list<hardware_interface::ControllerInfo>& info) const override;
 
   /**
   * Performs the switch between controllers and is real-time capable
   *
   */
   void doSwitch(const std::list<hardware_interface::ControllerInfo>&,
-                const std::list<hardware_interface::ControllerInfo>&);
+                const std::list<hardware_interface::ControllerInfo>&) override;
 
   /**
   * Prepares the switching between controllers. This function is not real-time
@@ -85,7 +111,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   */
   bool prepareSwitch(
       const std::list<hardware_interface::ControllerInfo>& start_list,
-      const std::list<hardware_interface::ControllerInfo>& stop_list);
+      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
   * Getter for the current Joint Position Command
@@ -120,14 +146,15 @@ class FrankaHW : public hardware_interface::RobotHW {
   T controlCallback(const T& command,
                     std::function<bool()> ros_callback,
                     const franka::RobotState& robot_state) {
-    if (readCallback(ros_callback, robot_state)) {
-      return command;
+    robot_state_ = robot_state;
+    if (!controller_active_) {
+      return franka::Stop;
     }
-    return franka::Stop;
+    if (ros_callback && !ros_callback()) {
+      return franka::Stop;
+    }
+    return command;
   }
-
-  bool readCallback(std::function<bool()> ros_callback,
-                    const franka::RobotState& robot_state);
 
   hardware_interface::JointStateInterface joint_state_interface_;
   franka_hw::FrankaStateInterface franka_state_interface_;
@@ -156,10 +183,10 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
 
-  bool controller_running_ = true;
-  ControlMode current_control_mode_ = ControlMode::None;
-  const std::function<void(std::function<bool()>)> default_run_function_;
   std::function<void(std::function<bool()>)> run_function_;
+
+  std::atomic_bool controller_active_{false};
+  ControlMode current_control_mode_ = ControlMode::None;
 };
 
 }  // namespace franka_hw

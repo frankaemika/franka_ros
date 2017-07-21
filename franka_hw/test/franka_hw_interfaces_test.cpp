@@ -84,8 +84,7 @@ TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
   std::vector<hardware_interface::JointHandle> effort_handles(7);
 
   for (size_t i = 0; i < joint_names.size(); ++i) {
-    boost::shared_ptr<const urdf::Joint> urdf_joint =
-        urdf_model.getJoint(joint_names[i]);
+    auto urdf_joint = urdf_model.getJoint(joint_names[i]);
     ASSERT_TRUE(
         joint_limits_interface::getJointLimits(urdf_joint, joint_limits[i]));
     ASSERT_NO_THROW(position_handles[i] =
