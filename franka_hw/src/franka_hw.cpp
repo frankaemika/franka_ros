@@ -13,32 +13,16 @@ constexpr double FrankaHW::kMaximumJointAcceleration;
 constexpr double FrankaHW::kMaximumJointJerk;
 
 FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
-                   franka::Robot* robot,
                    const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
-    : joint_state_interface_(),
-      franka_state_interface_(),
-      position_joint_interface_(),
-      velocity_joint_interface_(),
-      effort_joint_interface_(),
-      franka_pose_cartesian_interface_(),
-      franka_velocity_cartesian_interface_(),
-      position_joint_limit_interface_(),
-      velocity_joint_limit_interface_(),
-      effort_joint_limit_interface_(),
-      joint_names_(),
+    : joint_names_(joint_names),
       arm_id_(arm_id),
-      robot_(robot),
-      robot_state_(),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       pose_cartesian_command_({1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
                                1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
-  joint_names_.resize(joint_names.size());
-  joint_names_ = joint_names;
-
   for (size_t i = 0; i < joint_names_.size(); ++i) {
     hardware_interface::JointStateHandle joint_handle(
         joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq[i],
@@ -147,31 +131,27 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   registerInterface(&franka_velocity_cartesian_interface_);
 }
 
-void FrankaHW::readOnce() {
-  robot_state_ = robot_->readOnce();
+void FrankaHW::update(const franka::RobotState& robot_state, bool reset) {
+  robot_state_ = robot_state;
+  if (reset) {
+    position_joint_limit_interface_.reset();
+  }
 }
 
 bool FrankaHW::controllerActive() const noexcept {
   return controller_active_;
 }
 
-void FrankaHW::reset() {
-  position_joint_limit_interface_.reset();
-}
-
 void FrankaHW::control(
+    franka::Robot& robot,
     std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback) {
-  if (robot_ == nullptr) {
-    throw std::invalid_argument("FrankaHW: franka robot was not initialized.");
-  }
-
   if (!controller_active_) {
     return;
   }
 
   constexpr double kPeriod = 0.001;
   uint32_t last_sequence_number = robot_state_.sequence_number;
-  run_function_([this, ros_callback, &last_sequence_number]() {
+  run_function_(robot, [this, ros_callback, &last_sequence_number]() {
     if (last_sequence_number != robot_state_.sequence_number) {
       last_sequence_number = robot_state_.sequence_number;
       ros::Duration period(robot_state_.timeStep());
@@ -260,7 +240,7 @@ bool FrankaHW::checkForConflict(
 void FrankaHW::doSwitch(
     const std::list<hardware_interface::ControllerInfo>& /* start_list */,
     const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
-  reset();
+  position_joint_limit_interface_.reset();
   if (current_control_mode_ != ControlMode::None) {
     controller_active_ = true;
   }
@@ -294,47 +274,53 @@ bool FrankaHW::prepareSwitch(
     case ControlMode::None:
       break;
     case ControlMode::JointTorque:
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(std::bind(&FrankaHW::controlCallback<franka::Torques>,
-                                  this, std::cref(effort_joint_command_),
-                                  ros_callback, std::placeholders::_1));
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>,
+                                this, std::cref(effort_joint_command_),
+                                ros_callback, std::placeholders::_1));
       };
       break;
     case ControlMode::JointPosition:
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                       std::cref(position_joint_command_), ros_callback,
                       std::placeholders::_1));
       };
       break;
     case ControlMode::JointVelocity:
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                       std::cref(velocity_joint_command_), ros_callback,
                       std::placeholders::_1));
       };
       break;
     case ControlMode::CartesianPose:
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                       std::cref(pose_cartesian_command_), ros_callback,
                       std::placeholders::_1));
       };
       break;
     case ControlMode::CartesianVelocity:
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
                       this, std::cref(velocity_cartesian_command_),
                       ros_callback, std::placeholders::_1));
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointPosition):
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                       std::cref(position_joint_command_), ros_callback,
                       std::placeholders::_1),
@@ -344,8 +330,9 @@ bool FrankaHW::prepareSwitch(
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointVelocity):
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                       std::cref(velocity_joint_command_), ros_callback,
                       std::placeholders::_1),
@@ -355,8 +342,9 @@ bool FrankaHW::prepareSwitch(
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianPose):
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                       std::cref(pose_cartesian_command_), ros_callback,
                       std::placeholders::_1),
@@ -366,8 +354,9 @@ bool FrankaHW::prepareSwitch(
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
-      run_function_ = [this](std::function<bool()> ros_callback) {
-        robot_->control(
+      run_function_ = [this](franka::Robot& robot,
+                             std::function<bool()> ros_callback) {
+        robot.control(
             std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>,
                       this, std::cref(velocity_cartesian_command_),
                       ros_callback, std::placeholders::_1),

@@ -32,13 +32,11 @@ class FrankaHW : public hardware_interface::RobotHW {
   * Constructs an instance of FrankaHW
   *
   * @param[in] joint_names A vector of joint names for all franka joint
-  * @param[in] robot A pointer to an istance of franka::Robot
   * @param[in] arm_id Unique identifier for the Franka arm that the class
   * controls
   * @param[in] nh A nodehandle e.g to get parameters
   */
   FrankaHW(const std::vector<std::string>& joint_names,
-           franka::Robot* robot,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
@@ -51,6 +49,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * When running a controller, the function only exits when ros_callback
    * returns false.
    *
+   * @param[in] robot Robot instance.
    * @param[in] ros_callback A callback function that is executed at each time
    * step and runs all ROS-side functionality of the hardware. Execution is
    * stopped if it returns false.
@@ -62,14 +61,18 @@ class FrankaHW : public hardware_interface::RobotHW {
    * the current thread.
    */
   void control(
+      franka::Robot& robot,
       std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
 
   /**
-   * Reads the current robot state and updates the controller interfaces.
+   * Updates the controller interfaces from the given robot state.
+   *
+   * @param[in] robot_state Current robot state.
+   * @param[in] reset If true, resets the controller interfaces.
    *
    * @throw franka::NetworkException if the connection is lost.
    */
-  void readOnce();
+  void update(const franka::RobotState& robot_state, bool reset = false);
 
   /**
    * Indicates whether there is an active controller.
@@ -77,11 +80,6 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @return True if a controller is currently active, false otherwise.
    */
   bool controllerActive() const noexcept;
-
-  /**
-   * Resets controller interfaces.
-   */
-  void reset();
 
   /**
   * Checks whether a requested controller can be run, based on the resources and
@@ -156,34 +154,34 @@ class FrankaHW : public hardware_interface::RobotHW {
     return command;
   }
 
-  hardware_interface::JointStateInterface joint_state_interface_;
-  franka_hw::FrankaStateInterface franka_state_interface_;
-  hardware_interface::PositionJointInterface position_joint_interface_;
-  hardware_interface::VelocityJointInterface velocity_joint_interface_;
-  hardware_interface::EffortJointInterface effort_joint_interface_;
-  franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
+  hardware_interface::JointStateInterface joint_state_interface_{};
+  franka_hw::FrankaStateInterface franka_state_interface_{};
+  hardware_interface::PositionJointInterface position_joint_interface_{};
+  hardware_interface::VelocityJointInterface velocity_joint_interface_{};
+  hardware_interface::EffortJointInterface effort_joint_interface_{};
+  franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_{};
   franka_hw::FrankaVelocityCartesianInterface
-      franka_velocity_cartesian_interface_;
+      franka_velocity_cartesian_interface_{};
 
   joint_limits_interface::PositionJointSoftLimitsInterface
-      position_joint_limit_interface_;
+      position_joint_limit_interface_{};
   joint_limits_interface::VelocityJointSoftLimitsInterface
-      velocity_joint_limit_interface_;
+      velocity_joint_limit_interface_{};
   joint_limits_interface::EffortJointSoftLimitsInterface
-      effort_joint_limit_interface_;
+      effort_joint_limit_interface_{};
+
+  franka::RobotState robot_state_{};
 
   std::vector<std::string> joint_names_;
   const std::string arm_id_;
 
-  franka::Robot* const robot_;
-  franka::RobotState robot_state_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
   franka::Torques effort_joint_command_;
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
 
-  std::function<void(std::function<bool()>)> run_function_;
+  std::function<void(franka::Robot&, std::function<bool()>)> run_function_;
 
   std::atomic_bool controller_active_{false};
   ControlMode current_control_mode_ = ControlMode::None;

@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
             has_error = false;
           });
 
-  franka_hw::FrankaHW franka_control(joint_names, &robot, arm_id, node_handle);
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle);
   controller_manager::ControllerManager control_manager(&franka_control,
                                                         node_handle);
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
-      franka_control.readOnce();
+      franka_control.update(robot.readOnce());
 
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);
@@ -122,12 +122,12 @@ int main(int argc, char** argv) {
     // Reset controllers before starting a motion
     ros::Time now = ros::Time::now();
     control_manager.update(now, now - last_time, true);
-    franka_control.reset();
+    franka_control.update(robot.readOnce(), true);
 
     try {
       // Run control loop. Will exit if the controller is switched.
       franka_control.control(
-          [&](const ros::Time& now, const ros::Duration& period) {
+          robot, [&](const ros::Time& now, const ros::Duration& period) {
             control_manager.update(now, period);
             franka_control.enforceLimits(period);
             return ros::ok();
