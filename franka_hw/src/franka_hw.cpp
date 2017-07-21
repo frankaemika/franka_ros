@@ -173,10 +173,8 @@ void FrankaHW::control(
   uint32_t last_sequence_number = robot_state_.sequence_number;
   run_function_([this, ros_callback, &last_sequence_number]() {
     if (last_sequence_number != robot_state_.sequence_number) {
-      // TODO (fwalch): Handle overflows.
-      int ticks = robot_state_.sequence_number - last_sequence_number;
       last_sequence_number = robot_state_.sequence_number;
-      ros::Duration period(ticks * kPeriod);
+      ros::Duration period(robot_state_.timeStep());
       return ros_callback(ros::Time::now(), period);
     }
     return true;
