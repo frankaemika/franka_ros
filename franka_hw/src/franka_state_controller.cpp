@@ -145,13 +145,15 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
-    tf::StampedTransform trafo(transform, ros::Time::now(), "link8", "EE");
+    tf::StampedTransform trafo(transform, ros::Time::now(), arm_id_ + "_link8",
+                               arm_id_ + "_EE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
     translation = tf::Vector3(0.0, 0.0, 0.0);
     transform = tf::Transform(quaternion, translation);
-    trafo = tf::StampedTransform(transform, ros::Time::now(), "EE", "K");
+    trafo = tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_EE",
+                                 arm_id_ + "_K");
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
   }
@@ -159,7 +161,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     std::lock_guard<
         realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> >
         lock(publisher_external_wrench_);
-    publisher_external_wrench_.msg_.header.frame_id = "K";
+    publisher_external_wrench_.msg_.header.frame_id = arm_id_ + "_K";
     publisher_external_wrench_.msg_.wrench.force.x = 0.0;
     publisher_external_wrench_.msg_.wrench.force.y = 0.0;
     publisher_external_wrench_.msg_.wrench.force.z = 0.0;
@@ -255,13 +257,15 @@ void FrankaStateController::publishTransforms(const ros::Time& time) {
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
-    tf::StampedTransform trafo(transform, time, "link8", "EE");
+    tf::StampedTransform trafo(transform, time, arm_id_ + "_link8",
+                               arm_id_ + "_EE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
     translation = tf::Vector3(0.0, 0.0, 0.0);
     transform = tf::Transform(quaternion, translation);
-    trafo = tf::StampedTransform(transform, time, "EE", "K");
+    trafo =
+        tf::StampedTransform(transform, time, arm_id_ + "_EE", arm_id_ + "_K");
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
     publisher_transforms_.unlockAndPublish();
@@ -270,7 +274,7 @@ void FrankaStateController::publishTransforms(const ros::Time& time) {
 
 void FrankaStateController::publishExternalWrench(const ros::Time& time) {
   if (publisher_external_wrench_.trylock()) {
-    publisher_external_wrench_.msg_.header.frame_id = "K";
+    publisher_external_wrench_.msg_.header.frame_id = arm_id_ + "_K";
     publisher_external_wrench_.msg_.header.stamp = time;
     publisher_external_wrench_.msg_.wrench.force.x =
         robot_state_.K_F_ext_hat_K[0];
