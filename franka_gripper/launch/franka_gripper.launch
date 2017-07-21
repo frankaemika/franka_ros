@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <launch>
-  <arg name="robot_ip" default="franka_softies" />
+  <arg name="robot_ip" default="robot.franka.de" />
   <arg name="arm_id" default="franka_emika" />
   <group ns="$(arg arm_id)">
     <node name="franka_gripper_node" pkg="franka_gripper" type="franka_gripper_node" output="screen">
