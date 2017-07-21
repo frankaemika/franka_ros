@@ -2,6 +2,7 @@
 <launch>
   <arg name="robot_ip" default="localhost" />
   <arg name="arm_id" default="franka_emika" />
+  <arg name="load_gripper" default="false" />
 
   <node name="$(arg arm_id)" pkg="franka_hw" type="franka_hw_node" output="screen" required="true">
     <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
@@ -13,5 +14,18 @@
     <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />
     <node name="state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="franka_state_controller --shutdown-timeout 2"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+    
+    <group if="$(arg load_gripper)">
+      <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
+        <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01_Gripper.urdf.xacro'" />
+        <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper_node/joint_states]</rosparam>
+      </node>   
+    </group>
+    <group unless="$(arg load_gripper)">
+      <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
+          <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01.urdf.xacro'" />
+          <rosparam param="source_list">[franka_state_controller/joint_states]</rosparam>
+      </node>
+    </group>
   </group>
 </launch>
