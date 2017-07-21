@@ -53,26 +53,26 @@ bool JointVelocityExampleController::init(
       return false;
     }
   }
-  start_time_stamp_ = ros::Time::now();
+  elapsed_time_ = ros::Duration(0.0);
   return true;
 }
 
-void JointVelocityExampleController::update(const ros::Time& time,
-                                            const ros::Duration& /*period*/) {
+void JointVelocityExampleController::update(const ros::Time& /*time*/,
+                                            const ros::Duration& period) {
   ros::Duration time_max(4.0);
-  ros::Duration elapsed_time = time - start_time_stamp_;
   double omega_max = 0.2;
   double cycle = std::floor(
-      std::pow(-1.0, (elapsed_time.toSec() -
-                      std::fmod(elapsed_time.toSec(), time_max.toSec())) /
+      std::pow(-1.0, (elapsed_time_.toSec() -
+                      std::fmod(elapsed_time_.toSec(), time_max.toSec())) /
                          time_max.toSec()));
   double omega =
       cycle * omega_max / 2.0 *
-      (1.0 - std::cos(2.0 * M_PI / time_max.toSec() * elapsed_time.toSec()));
+      (1.0 - std::cos(2.0 * M_PI / time_max.toSec() * elapsed_time_.toSec()));
 
   for (auto joint_handle : velocity_joint_handles_) {
     joint_handle.setCommand(omega);
   }
+  elapsed_time_ += period;
 }
 
 void JointVelocityExampleController::stopping(const ros::Time& /*time*/) {

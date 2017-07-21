@@ -19,14 +19,14 @@ class JointVelocityExampleController
   bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
             ros::NodeHandle&);
-  void update(const ros::Time& time, const ros::Duration&);
+  void update(const ros::Time&, const ros::Duration& period);
   void stopping(const ros::Time&);
 
  private:
   std::vector<std::string> joint_names_;
   hardware_interface::VelocityJointInterface* velocity_joint_interface_;
   std::vector<hardware_interface::JointHandle> velocity_joint_handles_;
-  ros::Time start_time_stamp_;
+  ros::Duration elapsed_time_;
 };
 
 }  // namespace franka_example_controllers
