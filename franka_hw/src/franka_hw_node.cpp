@@ -96,6 +96,10 @@ int main(int argc, char** argv) {
           });
 
   franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle);
+
+  // Initialize robot state before loading any controller
+  franka_control.update(robot.readOnce());
+
   controller_manager::ControllerManager control_manager(&franka_control,
                                                         node_handle);
 
