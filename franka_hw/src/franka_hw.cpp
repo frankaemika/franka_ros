@@ -180,8 +180,8 @@ bool FrankaHW::checkForConflict(
                        << " claimed with more than two interfaces. Conflict!");
       return true;
     }
-    u_int8_t torque_claims = 0;
-    u_int8_t other_claims = 0;
+    uint8_t torque_claims = 0;
+    uint8_t other_claims = 0;
     if (map_it->second.size() == 2) {
       for (auto& claimed_by : map_it->second) {
         if (claimed_by[2].compare("hardware_interface::EffortJointInterface") ==
