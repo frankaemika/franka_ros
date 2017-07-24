@@ -61,13 +61,14 @@ GripperServer::GripperServer(const std::string& robot_ip,
 }
 
 bool GripperServer::getGripperState(franka::GripperState* state) {
-    try {
-         *state = gripper_.readOnce();
-    } catch (const franka::Exception& ex) {
-        ROS_ERROR_STREAM("GripperServer: Exception reading gripper state: " << ex.what());
-        return false;
-    }
-    return true;
+  try {
+    *state = gripper_.readOnce();
+  } catch (const franka::Exception& ex) {
+    ROS_ERROR_STREAM(
+        "GripperServer: Exception reading gripper state: " << ex.what());
+    return false;
+  }
+  return true;
 }
 
 void GripperServer::move(const Move::Request& request) {
