@@ -1,6 +1,5 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
-
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
