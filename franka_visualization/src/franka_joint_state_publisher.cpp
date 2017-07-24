@@ -8,10 +8,9 @@
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_joint_state_publisher");
   ros::NodeHandle private_nodehandle("~");
-  ros::NodeHandle public_nodehandle;
   ros::Rate rate(30.0);
   ros::Publisher joint_pub =
-      public_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
+      private_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
   std::vector<std::string> joint_names;
   XmlRpc::XmlRpcValue params;
   private_nodehandle.getParam("joint_names", params);

@@ -6,5 +6,4 @@ joint_names:
   - franka_emika_joint5
   - franka_emika_joint6
   - franka_emika_joint7
-  
-robot_ip: 127.0.0.1
+
