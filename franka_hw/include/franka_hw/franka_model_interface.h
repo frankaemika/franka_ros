@@ -36,7 +36,7 @@ class FrankaModelHandle {
   * Returns the inertia matrix, given the current robot state and given external
   * loads
   *
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
@@ -53,7 +53,7 @@ class FrankaModelHandle {
   * loads
   *
   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
@@ -70,7 +70,7 @@ class FrankaModelHandle {
   * Returns the coriolis torques given the current robot state and given
   * external loads
   *
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
@@ -88,7 +88,7 @@ class FrankaModelHandle {
   * loads
   *
   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
@@ -105,7 +105,7 @@ class FrankaModelHandle {
   * Returns the gravity torques, given the current robot state and given
   * external loads
   *
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
@@ -124,7 +124,7 @@ class FrankaModelHandle {
   * loads
   *
   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-  * @param[in] load_inertia The colummn major inertia tensor for a load w.r.t. F
+  * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
   * frame
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
