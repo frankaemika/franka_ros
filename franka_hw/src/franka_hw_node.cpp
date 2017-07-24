@@ -8,6 +8,7 @@
 #include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>

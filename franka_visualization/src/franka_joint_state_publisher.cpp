@@ -1,5 +1,6 @@
 #include <cinttypes>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 #include <ros/ros.h>
