@@ -64,7 +64,6 @@ void CartesianPoseExampleController::update(const ros::Time& /*time*/,
   new_pose[12] += delta_x;
   new_pose[14] += delta_z;
   cartesian_pose_handle_->setCommand(new_pose);
-  return;
 }
 
 }  // namespace franka_example_controllers
