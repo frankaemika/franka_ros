@@ -24,14 +24,52 @@ class GripperServer {
   static constexpr double kWidthTolerance{0.005};
 
   GripperServer() = delete;
+
+  /**
+  * Constructs an instance of GripperServer
+  *
+  * @param[in] robot_ip The IP address of the robot
+  * @param[in] node_handle A nodehandle to parse parameters and publish
+  */
   GripperServer(const std::string& robot_ip, ros::NodeHandle& node_handle);
+
+  /**
+  * Reads the current gripper state from the hardware
+  *
+  * @param[in] state A pointer to store the new gripper state
+  */
   bool getGripperState(franka::GripperState* state);
 
  private:
+  /**
+  * Calls the libfranka move service of the gripper
+  *
+  * @param[in] request A move command with target width and velocity
+  */
   void move(const Move::Request& request);
+
+  /**
+  * Calls the libfranka homing service of the gripper
+  */
   void homing();
+
+  /**
+  * Calls the libfranka stop service of the gripper to stop applying force
+  */
   void stop();
+
+  /**
+  * Calls the libfranka grasp service of the gripper
+  *
+  * @param[in] request A grasp command with target width,velocity and max effort
+  */
   void grasp(const Grasp::Request& request);
+
+  /**
+  * A callback function for a control_msgs/GripperCommand action
+  *
+  * @param[in] goal A gripper action goal
+  */
   void executeGripperCommand(
       const control_msgs::GripperCommandGoalConstPtr& goal);
 
