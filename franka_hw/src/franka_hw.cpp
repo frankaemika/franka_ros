@@ -12,7 +12,7 @@ namespace franka_hw {
 constexpr double FrankaHW::kMaximumJointAcceleration;
 constexpr double FrankaHW::kMaximumJointJerk;
 
-FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
+FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    const std::string& arm_id,
                    const ros::NodeHandle& node_handle)
     : joint_names_(joint_names),

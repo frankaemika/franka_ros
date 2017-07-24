@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include <array>
 #include <random>
 #include <string>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -13,7 +15,7 @@
 #include <franka_hw/franka_hw.h>
 
 extern std::string arm_id;
-extern std::vector<std::string> joint_names;
+extern std::array<std::string, 7> joint_names;
 
 namespace franka_hw {
 

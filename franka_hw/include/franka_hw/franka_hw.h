@@ -4,7 +4,6 @@
 #include <atomic>
 #include <functional>
 #include <string>
-#include <vector>
 
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
@@ -29,14 +28,13 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW() = delete;
 
   /**
-  * Constructs an instance of FrankaHW
-  *
-  * @param[in] joint_names A vector of joint names for all franka joint
-  * @param[in] arm_id Unique identifier for the Franka arm that the class
-  * controls
-  * @param[in] nh A nodehandle e.g to get parameters
-  */
-  FrankaHW(const std::vector<std::string>& joint_names,
+   * Constructs an instance of FrankaHW.
+   *
+   * @param[in] joint_names An array of joint names being controlled.
+   * @param[in] arm_id Unique identifier for the FRANKA arm being controlled.
+   * @param[in] node_handle A node handle to get parameters from.
+   */
+  FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
 
@@ -172,7 +170,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   franka::RobotState robot_state_{};
 
-  std::vector<std::string> joint_names_;
+  std::array<std::string, 7> joint_names_;
   const std::string arm_id_;
 
   franka::JointPositions position_joint_command_;

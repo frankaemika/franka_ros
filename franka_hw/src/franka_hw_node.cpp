@@ -1,13 +1,14 @@
+#include <array>
 #include <atomic>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <controller_manager/controller_manager.h>
 #include <ros/ros.h>
 #include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
@@ -32,8 +33,8 @@ int main(int argc, char** argv) {
 
   XmlRpc::XmlRpcValue params;
   node_handle.getParam("joint_names", params);
-  std::vector<std::string> joint_names(params.size());
-  for (int i = 0; i < params.size(); ++i) {
+  std::array<std::string, 7> joint_names;
+  for (size_t i = 0; i < joint_names.size(); i++) {
     joint_names[i] = static_cast<std::string>(params[i]);
   }
   std::string robot_ip;
