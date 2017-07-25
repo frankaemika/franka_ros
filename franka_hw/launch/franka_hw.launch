@@ -3,7 +3,6 @@
   <arg name="robot_ip" default="robot.franka.de" />
   <arg name="arm_id" default="franka_emika" />
   <arg name="load_gripper" default="true" />
-  
 
   <node name="$(arg arm_id)" pkg="franka_hw" type="franka_hw_node" output="screen" required="true">
     <rosparam command="load" file="$(find franka_hw)/config/franka_hw.yaml" />
@@ -21,6 +20,7 @@
       <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01_Gripper.urdf.xacro'" />
       <rosparam  if="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states, franka_gripper_node/joint_states] </rosparam>
       <rosparam  unless="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states] </rosparam>
+      <param name="rate" value="30"/>
     </node>   
   </group>
 </launch>
