@@ -5,8 +5,7 @@
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
-  <arg     if="$(arg debug)" name="launch_prefix"
-	   value="gdb -x $(find franka_moveit_config)/launch/gdb_settings.gdb --ex run --args" />
+  <arg     if="$(arg debug)" name="launch_prefix" value="gdb -x $(find franka_moveit_config)/launch/gdb_settings.gdb --ex run --args" />
 
   <!-- Verbose Mode Option -->
   <arg name="info" default="$(arg debug)" />
