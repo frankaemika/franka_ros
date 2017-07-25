@@ -11,14 +11,23 @@
 
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/franka_model_interface.h>
 
 extern std::string arm_id;
 extern std::vector<std::string> joint_names;
 
 namespace franka_hw {
 
+
+TEST(FrankaHWTests, CanGetModelInterface) {
+  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  FrankaModelInterface* fm_interface = robotptr->get<FrankaModelInterface>();
+  ASSERT_NE(nullptr, fm_interface);
+  EXPECT_NO_THROW(FrankaModelHandle fm_handle = fm_interface->getHandle(arm_id + "_model"));
+}
+
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
-  std::unique_ptr<franka_hw::FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
   hardware_interface::JointStateInterface* js_interface =
       robotptr->get<hardware_interface::JointStateInterface>();
   hardware_interface::PositionJointInterface* pj_interface =
@@ -27,12 +36,12 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
       robotptr->get<hardware_interface::VelocityJointInterface>();
   hardware_interface::EffortJointInterface* ej_interface =
       robotptr->get<hardware_interface::EffortJointInterface>();
-  franka_hw::FrankaPoseCartesianInterface* fpc_interface =
-      robotptr->get<franka_hw::FrankaPoseCartesianInterface>();
-  franka_hw::FrankaVelocityCartesianInterface* fvc_interface =
-      robotptr->get<franka_hw::FrankaVelocityCartesianInterface>();
-  franka_hw::FrankaStateInterface* fs_interface =
-      robotptr->get<franka_hw::FrankaStateInterface>();
+  FrankaPoseCartesianInterface* fpc_interface =
+      robotptr->get<FrankaPoseCartesianInterface>();
+  FrankaVelocityCartesianInterface* fvc_interface =
+      robotptr->get<FrankaVelocityCartesianInterface>();
+  FrankaStateInterface* fs_interface =
+      robotptr->get<FrankaStateInterface>();
 
   ASSERT_NE(nullptr, js_interface);
   ASSERT_NE(nullptr, pj_interface);
@@ -42,9 +51,9 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   ASSERT_NE(nullptr, fvc_interface);
   ASSERT_NE(nullptr, fs_interface);
 
-  EXPECT_NO_THROW(franka_hw::FrankaCartesianPoseHandle fpc_handle =
+  EXPECT_NO_THROW(FrankaCartesianPoseHandle fpc_handle =
       fpc_interface->getHandle(arm_id + "_robot"));
-  franka_hw::FrankaCartesianPoseHandle fpc_handle =
+  FrankaCartesianPoseHandle fpc_handle =
         fpc_interface->getHandle(arm_id + "_robot");
   std::array<double, 16> pose_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                          1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
@@ -52,9 +61,9 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   fpc_handle.setCommand(pose_command);
   EXPECT_EQ(pose_command, fpc_handle.getCommand());
 
-  EXPECT_NO_THROW(franka_hw::FrankaCartesianVelocityHandle fvc_handle =
+  EXPECT_NO_THROW(FrankaCartesianVelocityHandle fvc_handle =
       fvc_interface->getHandle(arm_id + "_robot"));
-  franka_hw::FrankaCartesianVelocityHandle fvc_handle =
+  FrankaCartesianVelocityHandle fvc_handle =
         fvc_interface->getHandle(arm_id + "_robot");
   std::array<double, 6> vel_command = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   fvc_handle.setCommand(vel_command);
@@ -64,7 +73,7 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
-  std::unique_ptr<franka_hw::FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
 
   hardware_interface::PositionJointInterface* pj_interface =
       robot_ptr->get<hardware_interface::PositionJointInterface>();

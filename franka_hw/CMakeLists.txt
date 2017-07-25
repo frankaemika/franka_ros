@@ -7,22 +7,22 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
+  controller_interface
+  controller_manager
+  franka_description
+  geometry_msgs
   hardware_interface
+  joint_limits_interface
+  pluginlib
+  message_generation
   roscpp
+  realtime_tools
   std_msgs
   sensor_msgs
-  geometry_msgs
-  message_generation
-  realtime_tools
   tf2_msgs
   tf
   urdf
-  joint_limits_interface
   xmlrpcpp
-  controller_manager
-  franka_description
-  pluginlib
-  controller_interface
 )
 
 find_package(Franka REQUIRED)
@@ -32,15 +32,16 @@ add_message_files(FILES
 )
 
 add_service_files(FILES
-  SetJointImpedance.srv
+  ErrorRecovery.srv
   SetCartesianImpedance.srv
-  SetFullCollisionBehavior.srv
-  SetForceTorqueCollisionBehavior.srv
   SetEEFrame.srv
+  SetForceTorqueCollisionBehavior.srv
+  SetFullCollisionBehavior.srv
+  SetJointImpedance.srv
   SetKFrame.srv
   SetLoad.srv
   SetTimeScalingFactor.srv
-  ErrorRecovery.srv
+
 )
 
 generate_messages(DEPENDENCIES
@@ -75,9 +76,9 @@ target_include_directories(franka_hw_services PUBLIC
 
 add_library(franka_hw
   src/franka_hw.cpp
-  src/trigger_rate.cpp
-  src/franka_hw_helper_functions.cpp
   src/franka_controller_switching_types.cpp
+  src/franka_hw_helper_functions.cpp
+  src/trigger_rate.cpp
 )
 
 add_dependencies(franka_hw

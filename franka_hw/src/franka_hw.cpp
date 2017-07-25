@@ -23,12 +23,14 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       effort_joint_interface_(),
       franka_pose_cartesian_interface_(),
       franka_velocity_cartesian_interface_(),
+      franka_model_interface_(),
       position_joint_limit_interface_(),
       velocity_joint_limit_interface_(),
       effort_joint_limit_interface_(),
       joint_names_(),
       arm_id_(arm_id),
       robot_(robot),
+      model_(nullptr),
       robot_state_(),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -129,6 +131,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   }
 
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
+  franka_state_interface_.registerHandle(franka_state_handle);
   FrankaCartesianPoseHandle franka_cartesian_pose_handle(
       franka_state_handle, pose_cartesian_command_.O_T_EE);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
@@ -136,8 +139,21 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
       franka_state_handle, velocity_cartesian_command_.O_dP_EE);
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
-  franka_state_interface_.registerHandle(franka_state_handle);
 
+  // This will be changed in a later pull-request where the robot is removed as
+  // member
+  // and the model will be passed in from the hardware node
+  if (robot_ != nullptr) {
+    model_.reset(new franka::Model(robot_->loadModel()));
+    ROS_INFO("FrankaHW: loaded Model");
+  }
+
+  franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", &model_,
+                                            robot_state_);
+
+  franka_model_interface_.registerHandle(model_handle);
+
+  registerInterface(&franka_model_interface_);
   registerInterface(&franka_state_interface_);
   registerInterface(&joint_state_interface_);
   registerInterface(&position_joint_interface_);

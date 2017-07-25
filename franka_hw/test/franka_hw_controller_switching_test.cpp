@@ -75,7 +75,7 @@ public:
      return robot_->prepareSwitch(info_list, info_list);
  }
  private:
- std::unique_ptr<franka_hw::FrankaHW>  robot_;
+ std::unique_ptr<FrankaHW>  robot_;
 };
 
 class NoControllerConflict : public
@@ -89,7 +89,7 @@ public:
      return robot_->prepareSwitch(info_list, info_list);
  }
  private:
- std::unique_ptr<franka_hw::FrankaHW>  robot_;
+ std::unique_ptr<FrankaHW>  robot_;
 };
 
 string arm_id2("franka_emika2");
