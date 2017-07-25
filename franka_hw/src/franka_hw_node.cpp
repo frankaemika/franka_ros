@@ -9,7 +9,6 @@
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
 #include <ros/ros.h>
-#include <ros/spinner.h>
 #include <xmlrpcpp/XmlRpc.h>
 
 class ServiceContainer {
