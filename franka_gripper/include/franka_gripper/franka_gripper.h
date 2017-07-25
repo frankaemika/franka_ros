@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <string>
 
 #include <actionlib/server/simple_action_server.h>
@@ -20,7 +21,8 @@ class GripperServer {
  public:
   static constexpr double kCommandVelocity{0.1};
   static constexpr double kNewtonToMilliAmpereFactor{
-      1.0};  // TODO CJ: Get precise value
+      14.95};  // derived from motor constant and gear ratios for the static
+               // case (no friction losses)
   static constexpr double kWidthTolerance{0.005};
 
   GripperServer() = delete;
