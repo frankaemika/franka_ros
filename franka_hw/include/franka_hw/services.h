@@ -1,5 +1,6 @@
 #pragma once
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 #include <ros/console.h>
 #include <ros/node_handle.h>

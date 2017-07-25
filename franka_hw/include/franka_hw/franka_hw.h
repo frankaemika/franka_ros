@@ -3,6 +3,7 @@
 #include <array>
 #include <atomic>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -13,10 +14,11 @@
 #include <ros/node_handle.h>
 #include <ros/time.h>
 
+#include <franka/model.h>
 #include <franka/robot.h>
-
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
+#include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 
 namespace franka_hw {
@@ -164,6 +166,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_;
   franka_hw::FrankaVelocityCartesianInterface
       franka_velocity_cartesian_interface_;
+  franka_hw::FrankaModelInterface franka_model_interface_;
 
   joint_limits_interface::PositionJointSoftLimitsInterface
       position_joint_limit_interface_;
@@ -176,6 +179,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   const std::string arm_id_;
 
   franka::Robot* const robot_;
+  std::unique_ptr<franka::Model> model_;
   franka::RobotState robot_state_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
