@@ -5,6 +5,10 @@
 #include <functional>
 #include <string>
 
+#include <franka/duration.h>
+#include <franka/model.h>
+#include <franka/robot.h>
+#include <franka/robot_state.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
@@ -12,8 +16,6 @@
 #include <ros/node_handle.h>
 #include <ros/time.h>
 
-#include <franka/model.h>
-#include <franka/robot.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_model_interface.h>
@@ -152,15 +154,19 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration kPeriod);
 
  private:
+  using Callback =
+      std::function<bool(const franka::RobotState&, franka::Duration)>;
+
   template <typename T>
   T controlCallback(const T& command,
-                    std::function<bool()> ros_callback,
-                    const franka::RobotState& robot_state) {
+                    Callback ros_callback,
+                    const franka::RobotState& robot_state,
+                    franka::Duration time_step) {
     robot_state_ = robot_state;
     if (!controller_active_) {
       return franka::Stop;
     }
-    if (ros_callback && !ros_callback()) {
+    if (ros_callback && !ros_callback(robot_state, time_step)) {
       return franka::Stop;
     }
     return command;
@@ -194,7 +200,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
 
-  std::function<void(franka::Robot&, std::function<bool()>)> run_function_;
+  std::function<void(franka::Robot&, Callback)> run_function_;
 
   std::atomic_bool controller_active_{false};
   ControlMode current_control_mode_ = ControlMode::None;
