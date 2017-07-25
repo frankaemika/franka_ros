@@ -122,20 +122,6 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
   franka_velocity_cartesian_interface_.registerHandle(
       franka_cartesian_velocity_handle);
 
-  // This will be changed in a later pull-request where the robot is removed as
-  // member
-  // and the model will be passed in from the hardware node
-  if (robot_ != nullptr) {
-    model_.reset(new franka::Model(robot_->loadModel()));
-    ROS_INFO("FrankaHW: loaded Model");
-  }
-
-  franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", &model_,
-                                            robot_state_);
-
-  franka_model_interface_.registerHandle(model_handle);
-
-  registerInterface(&franka_model_interface_);
   registerInterface(&franka_state_interface_);
   registerInterface(&joint_state_interface_);
   registerInterface(&position_joint_interface_);
@@ -143,6 +129,19 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
   registerInterface(&effort_joint_interface_);
   registerInterface(&franka_pose_cartesian_interface_);
   registerInterface(&franka_velocity_cartesian_interface_);
+}
+
+FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
+                   const std::string& arm_id,
+                   const ros::NodeHandle& node_handle,
+                   franka::Model& model)
+    : FrankaHW(joint_names, arm_id, node_handle) {
+  franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", model,
+                                            robot_state_);
+
+  franka_model_interface_.registerHandle(model_handle);
+
+  registerInterface(&franka_model_interface_);
 }
 
 void FrankaHW::update(const franka::RobotState& robot_state, bool reset) {

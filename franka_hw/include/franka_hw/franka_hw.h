@@ -3,7 +3,6 @@
 #include <array>
 #include <atomic>
 #include <functional>
-#include <memory>
 #include <string>
 
 #include <hardware_interface/joint_command_interface.h>
@@ -30,7 +29,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW() = delete;
 
   /**
-   * Constructs an instance of FrankaHW.
+   * Constructs an instance of FrankaHW that does not provide a model interface.
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the FRANKA arm being controlled.
@@ -39,6 +38,19 @@ class FrankaHW : public hardware_interface::RobotHW {
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
            const ros::NodeHandle& node_handle);
+
+  /**
+   * Constructs an instance of FrankaHW that provides a model interface.
+   *
+   * @param[in] joint_names An array of joint names being controlled.
+   * @param[in] arm_id Unique identifier for the FRANKA arm being controlled.
+   * @param[in] node_handle A node handle to get parameters from.
+   * @param[in] model FRANKA model.
+   */
+  FrankaHW(const std::array<std::string, 7>& joint_names,
+           const std::string& arm_id,
+           const ros::NodeHandle& node_handle,
+           franka::Model& model);
 
   ~FrankaHW() override = default;
 
@@ -162,7 +174,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_{};
   franka_hw::FrankaVelocityCartesianInterface
       franka_velocity_cartesian_interface_{};
-  franka_hw::FrankaModelInterface franka_model_interface_;
+  franka_hw::FrankaModelInterface franka_model_interface_{};
 
   joint_limits_interface::PositionJointSoftLimitsInterface
       position_joint_limit_interface_{};
@@ -176,7 +188,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<std::string, 7> joint_names_;
   const std::string arm_id_;
 
-  std::unique_ptr<franka::Model> model_;
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
   franka::Torques effort_joint_command_;

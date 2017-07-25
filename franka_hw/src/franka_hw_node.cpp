@@ -94,7 +94,8 @@ int main(int argc, char** argv) {
             has_error = false;
           });
 
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle);
+  franka::Model model = robot.loadModel();
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());

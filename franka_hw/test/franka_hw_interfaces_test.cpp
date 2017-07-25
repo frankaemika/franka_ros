@@ -20,14 +20,6 @@ extern std::array<std::string, 7> joint_names;
 
 namespace franka_hw {
 
-
-TEST(FrankaHWTests, CanGetModelInterface) {
-  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
-  FrankaModelInterface* fm_interface = robotptr->get<FrankaModelInterface>();
-  ASSERT_NE(nullptr, fm_interface);
-  EXPECT_NO_THROW(FrankaModelHandle fm_handle = fm_interface->getHandle(arm_id + "_model"));
-}
-
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, arm_id, ros::NodeHandle()));
   hardware_interface::JointStateInterface* js_interface =
@@ -52,6 +44,10 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   ASSERT_NE(nullptr, fpc_interface);
   ASSERT_NE(nullptr, fvc_interface);
   ASSERT_NE(nullptr, fs_interface);
+
+  // Model interface not available with this signature
+  FrankaModelInterface* fm_interface = robotptr->get<FrankaModelInterface>();
+  ASSERT_EQ(nullptr, fm_interface);
 
   EXPECT_NO_THROW(FrankaCartesianPoseHandle fpc_handle =
       fpc_interface->getHandle(arm_id + "_robot"));
