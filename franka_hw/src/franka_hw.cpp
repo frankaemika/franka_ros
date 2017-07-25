@@ -42,7 +42,7 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
   joint_names_ = joint_names;
 
   for (size_t i = 0; i < joint_names_.size(); ++i) {
-    hardware_interface::JointStateHandle joint_handle_qd(
+    hardware_interface::JointStateHandle joint_handle_q_d(
         joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq[i],
         &robot_state_.tau_J[i]);
 
@@ -53,11 +53,11 @@ FrankaHW::FrankaHW(const std::vector<std::string>& joint_names,
     joint_state_interface_.registerHandle(joint_handle_q);
 
     hardware_interface::JointHandle position_joint_handle(
-        joint_handle_qd, &position_joint_command_.q[i]);
+        joint_handle_q_d, &position_joint_command_.q[i]);
     position_joint_interface_.registerHandle(position_joint_handle);
 
     hardware_interface::JointHandle velocity_joint_handle(
-        joint_handle_qd, &velocity_joint_command_.dq[i]);
+        joint_handle_q_d, &velocity_joint_command_.dq[i]);
     velocity_joint_interface_.registerHandle(velocity_joint_handle);
 
     hardware_interface::JointHandle effort_joint_handle(
