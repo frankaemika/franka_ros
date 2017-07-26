@@ -6,7 +6,6 @@
 #include <ros/node_handle.h>
 #include <ros/service_server.h>
 
-#include <franka_hw/ErrorRecovery.h>
 #include <franka_hw/SetCartesianImpedance.h>
 #include <franka_hw/SetEEFrame.h>
 #include <franka_hw/SetForceTorqueCollisionBehavior.h>
@@ -66,9 +65,6 @@ void setLoad(franka::Robot& robot,
 void setTimeScalingFactor(franka::Robot& robot,
                           const SetTimeScalingFactor::Request& req,
                           SetTimeScalingFactor::Response& res);
-void errorRecovery(franka::Robot& robot,
-                   const ErrorRecovery::Request& req,
-                   ErrorRecovery::Response& res);
 
 }  // namespace services
 }  // namespace franka_hw
