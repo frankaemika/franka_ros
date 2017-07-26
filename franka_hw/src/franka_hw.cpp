@@ -24,24 +24,26 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                                1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
   for (size_t i = 0; i < joint_names_.size(); ++i) {
-    hardware_interface::JointStateHandle joint_handle(
+    hardware_interface::JointStateHandle joint_handle_q_d(
         joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq[i],
         &robot_state_.tau_J[i]);
-    joint_state_interface_.registerHandle(joint_handle);
+
+    hardware_interface::JointStateHandle joint_handle_q(
+        joint_names_[i], &robot_state_.q[i], &robot_state_.dq[i],
+        &robot_state_.tau_J[i]);
+
+    joint_state_interface_.registerHandle(joint_handle_q);
 
     hardware_interface::JointHandle position_joint_handle(
-        joint_state_interface_.getHandle(joint_names_[i]),
-        &position_joint_command_.q[i]);
+        joint_handle_q_d, &position_joint_command_.q[i]);
     position_joint_interface_.registerHandle(position_joint_handle);
 
     hardware_interface::JointHandle velocity_joint_handle(
-        joint_state_interface_.getHandle(joint_names_[i]),
-        &velocity_joint_command_.dq[i]);
+        joint_handle_q_d, &velocity_joint_command_.dq[i]);
     velocity_joint_interface_.registerHandle(velocity_joint_handle);
 
     hardware_interface::JointHandle effort_joint_handle(
-        joint_state_interface_.getHandle(joint_names_[i]),
-        &effort_joint_command_.tau_J[i]);
+        joint_handle_q, &effort_joint_command_.tau_J[i]);
     effort_joint_interface_.registerHandle(effort_joint_handle);
   }
 
