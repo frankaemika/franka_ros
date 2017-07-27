@@ -12,6 +12,44 @@
 #include <franka/gripper_state.h>
 #include <franka_gripper/franka_gripper.h>
 
+namespace {
+
+template <typename T_action, typename T_goal, typename T_result>
+void handleErrors(actionlib::SimpleActionServer<T_action>* server,
+                  std::function<bool(const T_goal&)> handler,
+                  const T_goal& goal) {
+  T_result result;
+  try {
+    result.success = handler(goal);
+    server->setSucceeded(result);
+  } catch (const franka::Exception& ex) {
+    ROS_ERROR_STREAM("" << ex.what());
+    result.success = false;
+    result.error = ex.what();
+    server->setAborted(result);
+  }
+}
+
+}  // anonymous namespace
+
+using actionlib::SimpleActionServer;
+using franka_gripper::GraspAction;
+using franka_gripper::MoveAction;
+using franka_gripper::HomingAction;
+using franka_gripper::StopAction;
+using franka_gripper::GraspGoalConstPtr;
+using franka_gripper::MoveGoalConstPtr;
+using franka_gripper::StopGoalConstPtr;
+using franka_gripper::HomingGoalConstPtr;
+using franka_gripper::HomingResult;
+using franka_gripper::GraspResult;
+using franka_gripper::MoveResult;
+using franka_gripper::StopResult;
+using franka_gripper::homing;
+using franka_gripper::stop;
+using franka_gripper::grasp;
+using franka_gripper::move;
+
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_gripper_node");
   ros::NodeHandle node_handle("~");
@@ -20,8 +58,67 @@ int main(int argc, char** argv) {
     ROS_ERROR("franka_gripper_node: Could not parse robot_ip parameter");
     return -1;
   }
+  double width_tolerance(0.01);
+  if (node_handle.getParam("width_tolerance", width_tolerance)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found width_tolerance"
+                    << width_tolerance);
+  }
 
-  franka_gripper::GripperServer gripper_server(robot_ip, node_handle);
+  double default_speed(0.1);
+  if (node_handle.getParam("default_speed", default_speed)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found default_speed"
+                    << default_speed);
+  }
+
+  double newton_to_m_ampere_factor(14.9);
+  if (node_handle.getParam("newton_to_m_ampere_factor",
+                           newton_to_m_ampere_factor)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found newton_to_m_ampere_factor"
+                    << newton_to_m_ampere_factor);
+  }
+
+  franka::Gripper gripper(robot_ip);
+  franka_gripper::GripperServer gripper_server(gripper, node_handle,
+                                               width_tolerance, default_speed,
+                                               newton_to_m_ampere_factor);
+
+  std::function<bool(const HomingGoalConstPtr&)> homing_handler =
+      std::bind(homing, &gripper, std::placeholders::_1);
+  std::function<bool(const StopGoalConstPtr&)> stop_handler =
+      std::bind(stop, &gripper, std::placeholders::_1);
+  std::function<bool(const GraspGoalConstPtr&)> grasp_handler =
+      std::bind(grasp, &gripper, std::placeholders::_1);
+  std::function<bool(const MoveGoalConstPtr&)> move_handler =
+      std::bind(move, &gripper, width_tolerance, std::placeholders::_1);
+
+  SimpleActionServer<HomingAction> homing_action_server_(
+      node_handle, "homing",
+      std::bind(handleErrors<HomingAction, HomingGoalConstPtr, HomingResult>,
+                &homing_action_server_, homing_handler, std::placeholders::_1),
+      false);
+
+  SimpleActionServer<StopAction> stop_action_server_(
+      node_handle, "stop",
+      std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
+                &stop_action_server_, stop_handler, std::placeholders::_1),
+      false);
+
+  SimpleActionServer<MoveAction> move_action_server_(
+      node_handle, "move",
+      std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
+                &move_action_server_, move_handler, std::placeholders::_1),
+      false);
+
+  SimpleActionServer<GraspAction> grasp_action_server_(
+      node_handle, "grasp",
+      std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
+                &grasp_action_server_, grasp_handler, std::placeholders::_1),
+      false);
+  homing_action_server_.start();
+  stop_action_server_.start();
+  move_action_server_.start();
+  grasp_action_server_.start();
+
   double publish_rate(30.0);
   if (!node_handle.getParam("publish_rate", publish_rate)) {
     ROS_INFO_STREAM(
@@ -58,7 +155,7 @@ int main(int argc, char** argv) {
 
   ros::Publisher gripper_state_publisher =
       node_handle.advertise<sensor_msgs::JointState>("joint_states", 1);
-  ros::AsyncSpinner spinner(1);
+  ros::AsyncSpinner spinner(2);
   spinner.start();
   ros::Rate rate(publish_rate);
   while (ros::ok()) {

@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
   ros::Rate rate(30.0);
   ros::Publisher joint_pub =
 
-  private_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
+      private_nodehandle.advertise<sensor_msgs::JointState>("joint_states", 1);
   const size_t kNumberOfJoints = 7;
   std::array<std::string, kNumberOfJoints> joint_names;
   XmlRpc::XmlRpcValue params;
