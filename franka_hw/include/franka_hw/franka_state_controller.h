@@ -34,14 +34,14 @@ class FrankaStateController
   */
   bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
-            ros::NodeHandle& controller_node_handle);
+            ros::NodeHandle& controller_node_handle) override;
 
   /**
   * Reads a new franka robot state and publishes it
   *
   * @param[in] time Current ros time
   */
-  void update(const ros::Time& time, const ros::Duration&);
+  void update(const ros::Time& time, const ros::Duration&) override;
 
  private:
   /**

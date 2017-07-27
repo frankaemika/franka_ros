@@ -20,7 +20,7 @@ class FrankaStateHandle {
       : name_(name), robot_state_(&robot_state) {}
 
   const std::string& getName() const { return name_; }
-  const franka::RobotState getRobotState() const { return *robot_state_; }
+  const franka::RobotState& getRobotState() const { return *robot_state_; }
 
  private:
   std::string name_;

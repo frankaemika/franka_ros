@@ -1,9 +1,10 @@
-#include <gtest/gtest.h>
 #include <array>
 #include <list>
 #include <random>
 #include <set>
 #include <string>
+
+#include <gtest/gtest.h>
 
 #include <hardware_interface/controller_info.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -21,7 +22,7 @@ using hardware_interface::InterfaceResources;
 using hardware_interface::ControllerInfo;
 
 std::string arm_id("franka_emika");
-std::vector<std::string> joint_names  = {arm_id + "_joint1",
+std::array<std::string, 7> joint_names  = {arm_id + "_joint1",
         arm_id + "_joint2",
         arm_id + "_joint3",
         arm_id + "_joint4",
@@ -67,7 +68,7 @@ hardware_interface::ControllerInfo newInfo(
 class ControllerConflict :
         public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- ControllerConflict() : robot_(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle())) {}
+ ControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, ros::NodeHandle())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -81,7 +82,7 @@ public:
 class NoControllerConflict : public
         ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- NoControllerConflict() : robot_(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle())) {}
+ NoControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, ros::NodeHandle())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
