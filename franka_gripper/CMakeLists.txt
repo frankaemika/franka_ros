@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   sensor_msgs
   xmlrpcpp
+  actionlib_msgs
 )
 
 find_package(Franka REQUIRED)
@@ -24,12 +25,26 @@ add_service_files(FILES
    Homing.srv
 )
 
-generate_messages()
+add_action_files(
+  DIRECTORY action
+  FILES Grasp.action
+        Homing.action
+        Stop.action
+        Move.action
+)
+
+generate_messages(DEPENDENCIES actionlib_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_gripper
-  CATKIN_DEPENDS roscpp message_runtime control_msgs actionlib sensor_msgs xmlrpcpp
+  CATKIN_DEPENDS roscpp
+                 message_runtime
+                 control_msgs
+                 actionlib
+                 sensor_msgs
+                 xmlrpcpp
+                 actionlib_msgs
   DEPENDS Franka
 )
 

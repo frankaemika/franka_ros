@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
     ROS_ERROR("franka_gripper_node: Could not parse robot_ip parameter");
     return -1;
   }
+
   franka_gripper::GripperServer gripper_server(robot_ip, node_handle);
   double publish_rate(30.0);
   if (!node_handle.getParam("publish_rate", publish_rate)) {
