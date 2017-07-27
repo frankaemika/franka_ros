@@ -101,10 +101,7 @@ bool move(franka::Gripper* gripper,
           double width_tolerance,
           const MoveGoalConstPtr& goal) {
   gripper->move(goal->width, goal->speed);
-  if (std::fabs(gripper->readOnce().width - goal->width) < width_tolerance) {
-    return true;
-  }
-  return false;
+  return (std::fabs(gripper->readOnce().width - goal->width) < width_tolerance);
 }
 
 bool homing(franka::Gripper* gripper, const HomingGoalConstPtr& /*goal*/) {
