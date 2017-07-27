@@ -1,17 +1,15 @@
+#include <array>
 #include <atomic>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <controller_manager/controller_manager.h>
-#include <ros/ros.h>
-#include <ros/spinner.h>
-#include <xmlrpcpp/XmlRpc.h>
-
 #include <franka/exception.h>
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
+#include <ros/ros.h>
+#include <xmlrpcpp/XmlRpc.h>
 
 class ServiceContainer {
  public:
@@ -33,8 +31,8 @@ int main(int argc, char** argv) {
 
   XmlRpc::XmlRpcValue params;
   node_handle.getParam("joint_names", params);
-  std::vector<std::string> joint_names(params.size());
-  for (int i = 0; i < params.size(); ++i) {
+  std::array<std::string, 7> joint_names;
+  for (size_t i = 0; i < joint_names.size(); i++) {
     joint_names[i] = static_cast<std::string>(params[i]);
   }
   std::string robot_ip;
@@ -96,7 +94,12 @@ int main(int argc, char** argv) {
             has_error = false;
           });
 
-  franka_hw::FrankaHW franka_control(joint_names, &robot, arm_id, node_handle);
+  franka::Model model = robot.loadModel();
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
+
+  // Initialize robot state before loading any controller
+  franka_control.update(robot.readOnce());
+
   controller_manager::ControllerManager control_manager(&franka_control,
                                                         node_handle);
 
@@ -109,7 +112,7 @@ int main(int argc, char** argv) {
 
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
-      franka_control.readOnce();
+      franka_control.update(robot.readOnce());
 
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);
@@ -123,12 +126,12 @@ int main(int argc, char** argv) {
     // Reset controllers before starting a motion
     ros::Time now = ros::Time::now();
     control_manager.update(now, now - last_time, true);
-    franka_control.reset();
+    franka_control.update(robot.readOnce(), true);
 
     try {
       // Run control loop. Will exit if the controller is switched.
       franka_control.control(
-          [&](const ros::Time& now, const ros::Duration& period) {
+          robot, [&](const ros::Time& now, const ros::Duration& period) {
             control_manager.update(now, period);
             franka_control.enforceLimits(period);
             return ros::ok();

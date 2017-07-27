@@ -1,12 +1,11 @@
 #pragma once
 
-#include <hardware_interface/internal/hardware_resource_manager.h>
 #include <array>
-#include <memory>
 #include <string>
 
 #include <franka/model.h>
 #include <franka/robot_state.h>
+#include <hardware_interface/internal/hardware_resource_manager.h>
 
 namespace franka_hw {
 
@@ -23,9 +22,9 @@ class FrankaModelHandle {
   * @param[in] robot_state A reference to the storage of the current robot state
   */
   FrankaModelHandle(const std::string& name,
-                    const std::unique_ptr<franka::Model>* model,
-                    const franka::RobotState& robot_state)
-      : name_(name), model_(model), robot_state_(&robot_state) {}
+                    franka::Model& model,
+                    franka::RobotState& robot_state)
+      : name_(name), model_(&model), robot_state_(&robot_state) {}
 
   /**
   * Returns the resource name of the Handle
@@ -45,7 +44,7 @@ class FrankaModelHandle {
                                  double load_mass,
                                  const std::array<double, 3>& F_x_Cload)
       const {  // NOLINT (readability-identifier-naming)
-    return (*model_)->mass(*robot_state_, load_inertia, load_mass, F_x_Cload);
+    return model_->mass(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
   /**
@@ -63,7 +62,7 @@ class FrankaModelHandle {
                                  double load_mass,
                                  const std::array<double, 3>& F_x_Cload)
       const {  // NOLINT (readability-identifier-naming)
-    return (*model_)->mass(robot_state, load_inertia, load_mass, F_x_Cload);
+    return model_->mass(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 
   /**
@@ -79,8 +78,7 @@ class FrankaModelHandle {
                                     double load_mass,
                                     const std::array<double, 3>& F_x_Cload)
       const {  // NOLINT (readability-identifier-naming)
-    return (*model_)->coriolis(*robot_state_, load_inertia, load_mass,
-                               F_x_Cload);
+    return model_->coriolis(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
   /**
@@ -98,7 +96,7 @@ class FrankaModelHandle {
                                     double load_mass,
                                     const std::array<double, 3>& F_x_Cload)
       const {  // NOLINT (readability-identifier-naming)
-    return (*model_)->coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
+    return model_->coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 
   /**
@@ -115,8 +113,7 @@ class FrankaModelHandle {
       const std::array<double, 3>&
           F_x_Cload,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const {
-    return (*model_)->gravity(*robot_state_, load_mass, F_x_Cload,
-                              gravity_earth);
+    return model_->gravity(*robot_state_, load_mass, F_x_Cload, gravity_earth);
   }
 
   /**
@@ -135,12 +132,12 @@ class FrankaModelHandle {
       const std::array<double, 3>&
           F_x_Cload,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const {
-    return (*model_)->gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
+    return model_->gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
   }
 
  private:
   std::string name_;
-  const std::unique_ptr<franka::Model>* model_;
+  const franka::Model* model_;
   const franka::RobotState* robot_state_;
 };
 

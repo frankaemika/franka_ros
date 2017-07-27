@@ -1,13 +1,10 @@
 #pragma once
 
 #include <list>
-#include <map>
 #include <string>
-#include <vector>
-
-#include <hardware_interface/controller_info.h>
 
 #include <franka_hw/franka_controller_switching_types.h>
+#include <hardware_interface/controller_info.h>
 
 namespace franka_hw {
 

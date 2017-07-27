@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include <array>
 #include <random>
 #include <string>
+#include <vector>
+
+#include <gtest/gtest.h>
 
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits.h>
@@ -14,20 +16,12 @@
 #include <franka_hw/franka_model_interface.h>
 
 extern std::string arm_id;
-extern std::vector<std::string> joint_names;
+extern std::array<std::string, 7> joint_names;
 
 namespace franka_hw {
 
-
-TEST(FrankaHWTests, CanGetModelInterface) {
-  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
-  FrankaModelInterface* fm_interface = robotptr->get<FrankaModelInterface>();
-  ASSERT_NE(nullptr, fm_interface);
-  EXPECT_NO_THROW(FrankaModelHandle fm_handle = fm_interface->getHandle(arm_id + "_model"));
-}
-
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
-  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, arm_id, ros::NodeHandle()));
   hardware_interface::JointStateInterface* js_interface =
       robotptr->get<hardware_interface::JointStateInterface>();
   hardware_interface::PositionJointInterface* pj_interface =
@@ -51,6 +45,10 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
   ASSERT_NE(nullptr, fvc_interface);
   ASSERT_NE(nullptr, fs_interface);
 
+  // Model interface not available with this signature
+  FrankaModelInterface* fm_interface = robotptr->get<FrankaModelInterface>();
+  ASSERT_EQ(nullptr, fm_interface);
+
   EXPECT_NO_THROW(FrankaCartesianPoseHandle fpc_handle =
       fpc_interface->getHandle(arm_id + "_robot"));
   FrankaCartesianPoseHandle fpc_handle =
@@ -73,7 +71,7 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
-  std::unique_ptr<FrankaHW> robot_ptr(new FrankaHW(joint_names, nullptr, arm_id, ros::NodeHandle()));
+  std::unique_ptr<FrankaHW> robot_ptr(new FrankaHW(joint_names, arm_id, ros::NodeHandle()));
 
   hardware_interface::PositionJointInterface* pj_interface =
       robot_ptr->get<hardware_interface::PositionJointInterface>();

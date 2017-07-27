@@ -1,4 +1,3 @@
-
 #include <franka_example_controllers/cartesian_pose_example_controller.h>
 
 #include <cmath>
@@ -6,12 +5,11 @@
 #include <string>
 
 #include <controller_interface/controller_base.h>
+#include <franka_hw/franka_cartesian_command_interface.h>
 #include <hardware_interface/hardware_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <xmlrpcpp/XmlRpcValue.h>
-
-#include <franka_hw/franka_cartesian_command_interface.h>
 
 namespace franka_example_controllers {
 
@@ -54,6 +52,8 @@ bool CartesianPoseExampleController::init(
 
 void CartesianPoseExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
+  elapsed_time_ += period;
+
   double radius = 0.3;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   double delta_x = radius * std::sin(angle);
@@ -62,8 +62,6 @@ void CartesianPoseExampleController::update(const ros::Time& /*time*/,
   new_pose[12] += delta_x;
   new_pose[14] += delta_z;
   cartesian_pose_handle_->setCommand(new_pose);
-  elapsed_time_ += period;
-  return;
 }
 
 }  // namespace franka_example_controllers

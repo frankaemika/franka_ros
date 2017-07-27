@@ -1,4 +1,3 @@
-
 #include <franka_example_controllers/joint_velocity_example_controller.h>
 
 #include <cmath>
@@ -59,6 +58,8 @@ bool JointVelocityExampleController::init(
 
 void JointVelocityExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
+  elapsed_time_ += period;
+
   ros::Duration time_max(8.0);
   double omega_max = 0.1;
   double cycle = std::floor(
@@ -72,7 +73,6 @@ void JointVelocityExampleController::update(const ros::Time& /*time*/,
   for (auto joint_handle : velocity_joint_handles_) {
     joint_handle.setCommand(omega);
   }
-  elapsed_time_ += period;
 }
 
 void JointVelocityExampleController::stopping(const ros::Time& /*time*/) {
