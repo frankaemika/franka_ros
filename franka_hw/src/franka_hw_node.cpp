@@ -90,20 +90,21 @@ int main(int argc, char** argv) {
                     _1, _2));
 
   actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction>
-      recovery_action_server(node_handle, "error_recovery",
-                             [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
-                               franka_hw::ErrorRecoveryResult result{};
-                               try {
-                                 robot.automaticErrorRecovery();
-                                 has_error = false;
-                                 result.success = true;
-                               } catch (const franka::Exception& ex) {
-                                 result.success = false;
-                                 result.error = ex.what();
-                               }
-                               recovery_action_server.setSucceeded(result);
-                             },
-                             false);
+      recovery_action_server(
+          node_handle, "error_recovery",
+          [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
+            franka_hw::ErrorRecoveryResult result{};
+            try {
+              robot.automaticErrorRecovery();
+              has_error = false;
+              result.success = static_cast<decltype(result.success)>(true);
+            } catch (const franka::Exception& ex) {
+              result.success = static_cast<decltype(result.success)>(false);
+              result.error = ex.what();
+            }
+            recovery_action_server.setSucceeded(result);
+          },
+          false);
 
   franka::Model model = robot.loadModel();
   franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
