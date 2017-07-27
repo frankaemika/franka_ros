@@ -86,8 +86,8 @@ void GripperServer::gripperCommandexecuteCallback(
       control_msgs::GripperCommandResult result;
       result.effort = 0.0;
       result.position = state.width;
-      result.reached_goal = true;
-      result.stalled = false;
+      result.reached_goal = static_cast<decltype(result.reached_goal)>(true);
+      result.stalled = static_cast<decltype(result.stalled)>(false);
       gripper_command_action_server_.setSucceeded(result);
       return;
     }
