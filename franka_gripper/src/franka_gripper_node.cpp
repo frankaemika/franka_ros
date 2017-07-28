@@ -33,6 +33,7 @@ void handleErrors(actionlib::SimpleActionServer<T_action>* server,
 }  // anonymous namespace
 
 using actionlib::SimpleActionServer;
+using control_msgs::GripperCommandAction;
 using franka_gripper::GraspAction;
 using franka_gripper::MoveAction;
 using franka_gripper::HomingAction;
@@ -49,6 +50,8 @@ using franka_gripper::homing;
 using franka_gripper::stop;
 using franka_gripper::grasp;
 using franka_gripper::move;
+using franka_gripper::gripperCommandExecuteCallback;
+using franka_gripper::getGripperState;
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_gripper_node");
@@ -78,9 +81,6 @@ int main(int argc, char** argv) {
   }
 
   franka::Gripper gripper(robot_ip);
-  franka_gripper::GripperServer gripper_server(gripper, node_handle,
-                                               width_tolerance, default_speed,
-                                               newton_to_m_ampere_factor);
 
   std::function<bool(const HomingGoalConstPtr&)> homing_handler =
       std::bind(homing, &gripper, std::placeholders::_1);
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
   std::function<bool(const GraspGoalConstPtr&)> grasp_handler =
       std::bind(grasp, &gripper, std::placeholders::_1);
   std::function<bool(const MoveGoalConstPtr&)> move_handler =
-      std::bind(move, &gripper, width_tolerance, std::placeholders::_1);
+      std::bind(move, &gripper, std::placeholders::_1);
 
   SimpleActionServer<HomingAction> homing_action_server_(
       node_handle, "homing",
@@ -114,10 +114,19 @@ int main(int argc, char** argv) {
       std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
                 &grasp_action_server_, grasp_handler, std::placeholders::_1),
       false);
+
+  SimpleActionServer<GripperCommandAction> gripper_command_action_server(
+      node_handle, "gripper_action",
+      std::bind(&gripperCommandExecuteCallback, &gripper, default_speed,
+                newton_to_m_ampere_factor, &gripper_command_action_server,
+                std::placeholders::_1),
+      false);
+
   homing_action_server_.start();
   stop_action_server_.start();
   move_action_server_.start();
   grasp_action_server_.start();
+  gripper_command_action_server.start();
 
   double publish_rate(30.0);
   if (!node_handle.getParam("publish_rate", publish_rate)) {
@@ -142,11 +151,11 @@ int main(int argc, char** argv) {
   }
 
   franka::GripperState gripper_state;
-  std::thread read_thread([&gripper_state, &gripper_server]() {
+  std::thread read_thread([&gripper_state, &gripper]() {
     ros::Rate read_rate(10);
     franka::GripperState new_gripper_state;
     while (ros::ok()) {
-      if (gripper_server.getGripperState(&new_gripper_state)) {
+      if (getGripperState(&new_gripper_state, &gripper)) {
         gripper_state = new_gripper_state;
       }
       read_rate.sleep();
