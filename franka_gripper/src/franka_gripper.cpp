@@ -15,9 +15,10 @@
 
 namespace franka_gripper {
 
-bool getGripperState(franka::GripperState* state, franka::Gripper* gripper) {
+bool getGripperState(franka::GripperState* state,
+                     const franka::Gripper& gripper) {
   try {
-    *state = gripper->readOnce();
+    *state = gripper.readOnce();
   } catch (const franka::Exception& ex) {
     ROS_ERROR_STREAM(
         "GripperServer: Exception reading gripper state: " << ex.what());
@@ -27,14 +28,14 @@ bool getGripperState(franka::GripperState* state, franka::Gripper* gripper) {
 }
 
 void gripperCommandExecuteCallback(
-    franka::Gripper* gripper,
+    const franka::Gripper& gripper,
     const double kDefaultSpeed,
     const double kNewtonToMAmpereFactor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
         action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal) {
-  std::function<bool()> gripper_command_handler = [=]() {
-    franka::GripperState state = gripper->readOnce();
+  std::function<bool()> gripper_command_handler = [=, &gripper]() {
+    franka::GripperState state = gripper.readOnce();
     if (goal->command.position > state.max_width ||
         goal->command.position < 0.0) {
       ROS_ERROR_STREAM(
@@ -43,11 +44,11 @@ void gripperCommandExecuteCallback(
       return false;
     }
     if (goal->command.position >= state.width) {
-      gripper->move(goal->command.position, kDefaultSpeed);
+      gripper.move(goal->command.position, kDefaultSpeed);
       return true;
     }
-    return gripper->grasp(goal->command.position, kDefaultSpeed,
-                          goal->command.max_effort * kNewtonToMAmpereFactor);
+    return gripper.grasp(goal->command.position, kDefaultSpeed,
+                         goal->command.max_effort * kNewtonToMAmpereFactor);
   };
 
   try {
@@ -69,23 +70,24 @@ void gripperCommandExecuteCallback(
   action_server->setAborted();
 }
 
-bool move(franka::Gripper* gripper, const MoveGoalConstPtr& goal) {
-  gripper->move(goal->width, goal->speed);
+bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal) {
+  gripper.move(goal->width, goal->speed);
   return true;
 }
 
-bool homing(franka::Gripper* gripper, const HomingGoalConstPtr& /*goal*/) {
-  gripper->homing();
+bool homing(const franka::Gripper& gripper,
+            const HomingGoalConstPtr& /*goal*/) {
+  gripper.homing();
   return true;
 }
 
-bool stop(franka::Gripper* gripper, const StopGoalConstPtr& /*goal*/) {
-  gripper->stop();
+bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/) {
+  gripper.stop();
   return true;
 }
 
-bool grasp(franka::Gripper* gripper, const GraspGoalConstPtr& goal) {
-  return gripper->grasp(goal->width, goal->speed, goal->max_current);
+bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal) {
+  return gripper.grasp(goal->width, goal->speed, goal->max_current);
 }
 
 }  // namespace franka_gripper

@@ -23,7 +23,8 @@ namespace franka_gripper {
   * @param[in] state A gripper state to update
   * @param[in] gripper A pointer to a franka gripper
   */
-bool getGripperState(franka::GripperState* state, franka::Gripper* gripper);
+bool getGripperState(franka::GripperState* state,
+                     const franka::Gripper& gripper);
 
 /**
   * Wraps the execution of a gripper command action to catch exceptions and
@@ -37,7 +38,7 @@ bool getGripperState(franka::GripperState* state, franka::Gripper* gripper);
   * @param[in] goal A gripper action goal
   */
 void gripperCommandExecuteCallback(
-    franka::Gripper* gripper,
+    const franka::Gripper& gripper,
     const double kDefaultSpeed,
     const double kNewtonToMAmpereFactor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
@@ -50,21 +51,21 @@ void gripperCommandExecuteCallback(
  * @param[in] gripper A gripper instance to execute the command
  * @param[in] goal A move goal with target width and velocity
  */
-bool move(franka::Gripper* gripper, const MoveGoalConstPtr& goal);
+bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal);
 
 /**
  * Calls the libfranka homing service of the gripper
  *
  * @param[in] gripper A gripper instance to execute the command
  */
-bool homing(franka::Gripper* gripper, const HomingGoalConstPtr& /*goal*/);
+bool homing(const franka::Gripper& gripper, const HomingGoalConstPtr& /*goal*/);
 
 /**
  * Calls the libfranka stop service of the gripper to stop applying force
  *
  * @param[in] gripper A gripper instance to execute the command
  */
-bool stop(franka::Gripper* gripper, const StopGoalConstPtr& /*goal*/);
+bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/);
 
 /**
  * Calls the libfranka grasp service of the gripper
@@ -72,6 +73,6 @@ bool stop(franka::Gripper* gripper, const StopGoalConstPtr& /*goal*/);
  * @param[in] gripper A gripper instance to execute the command
  * @param[in] goal A grasp goal with target width, velocity and effort
  */
-bool grasp(franka::Gripper* gripper, const GraspGoalConstPtr& goal);
+bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal);
 
 }  // namespace franka_gripper

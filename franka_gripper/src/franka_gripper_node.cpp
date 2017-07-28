@@ -1,3 +1,4 @@
+#include <functional>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -84,13 +85,13 @@ int main(int argc, char** argv) {
   franka::Gripper gripper(robot_ip);
 
   std::function<bool(const HomingGoalConstPtr&)> homing_handler =
-      std::bind(homing, &gripper, std::placeholders::_1);
+      std::bind(homing, std::cref(gripper), std::placeholders::_1);
   std::function<bool(const StopGoalConstPtr&)> stop_handler =
-      std::bind(stop, &gripper, std::placeholders::_1);
+      std::bind(stop, std::cref(gripper), std::placeholders::_1);
   std::function<bool(const GraspGoalConstPtr&)> grasp_handler =
-      std::bind(grasp, &gripper, std::placeholders::_1);
+      std::bind(grasp, std::cref(gripper), std::placeholders::_1);
   std::function<bool(const MoveGoalConstPtr&)> move_handler =
-      std::bind(move, &gripper, std::placeholders::_1);
+      std::bind(move, std::cref(gripper), std::placeholders::_1);
 
   SimpleActionServer<HomingAction> homing_action_server_(
       node_handle, "homing",
@@ -118,9 +119,9 @@ int main(int argc, char** argv) {
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
-      std::bind(&gripperCommandExecuteCallback, &gripper, default_speed,
-                newton_to_m_ampere_factor, &gripper_command_action_server,
-                std::placeholders::_1),
+      std::bind(&gripperCommandExecuteCallback, std::cref(gripper),
+                default_speed, newton_to_m_ampere_factor,
+                &gripper_command_action_server, std::placeholders::_1),
       false);
 
   homing_action_server_.start();
@@ -158,7 +159,7 @@ int main(int argc, char** argv) {
     franka::GripperState new_gripper_state;
 
     while (ros::ok()) {
-      if (getGripperState(&new_gripper_state, &gripper) && lock.try_lock()) {
+      if (getGripperState(&new_gripper_state, gripper) && lock.try_lock()) {
         gripper_state = new_gripper_state;
         lock.unlock();
       }
