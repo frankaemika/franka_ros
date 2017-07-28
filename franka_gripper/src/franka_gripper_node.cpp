@@ -153,17 +153,16 @@ int main(int argc, char** argv) {
   }
 
   franka::GripperState gripper_state;
-  std::mutex lock;
-  std::thread read_thread([&gripper_state, &gripper, &lock]() {
+  std::mutex gripper_state_mutex;
+  std::thread read_thread([&gripper_state, &gripper, &gripper_state_mutex]() {
     ros::Rate read_rate(10);
     franka::GripperState new_gripper_state;
-
-    while (ros::ok()) {
-      if (getGripperState(gripper, &new_gripper_state) && lock.try_lock()) {
+    while (read_rate.sleep() && ros::ok()) {
+      std::lock_guard<std::mutex> lock(gripper_state_mutex);
+      if (getGripperState(gripper, &new_gripper_state) &&
+          gripper_state_mutex.try_lock()) {
         gripper_state = new_gripper_state;
-        lock.unlock();
       }
-      read_rate.sleep();
     }
   });
 
@@ -173,7 +172,7 @@ int main(int argc, char** argv) {
   spinner.start();
   ros::Rate rate(publish_rate);
   while (ros::ok()) {
-    if (lock.try_lock()) {
+    if (gripper_state_mutex.try_lock()) {
       sensor_msgs::JointState joint_states;
       joint_states.header.stamp = ros::Time::now();
       joint_states.name.push_back(joint_names[0]);
@@ -185,7 +184,7 @@ int main(int argc, char** argv) {
       joint_states.effort.push_back(0.0);
       joint_states.effort.push_back(0.0);
       gripper_state_publisher.publish(joint_states);
-      lock.unlock();
+      gripper_state_mutex.unlock();
     }
     rate.sleep();
   }
