@@ -3,9 +3,11 @@
 #include <string>
 #include <utility>
 
+#include <actionlib/server/simple_action_server.h>
 #include <controller_manager/controller_manager.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
+#include <franka_hw/ErrorRecoveryAction.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
 #include <ros/ros.h>
@@ -85,14 +87,22 @@ int main(int argc, char** argv) {
       .advertiseService<franka_hw::SetTimeScalingFactor>(
           node_handle, "set_time_scaling_factor",
           std::bind(franka_hw::services::setTimeScalingFactor, std::ref(robot),
-                    _1, _2))
-      .advertiseService<franka_hw::ErrorRecovery>(
-          node_handle, "error_recovery",
-          [&](const franka_hw::ErrorRecovery::Request& req,
-              franka_hw::ErrorRecovery::Response& res) {
-            franka_hw::services::errorRecovery(robot, req, res);
-            has_error = false;
-          });
+                    _1, _2));
+
+  actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction>
+      recovery_action_server(node_handle, "error_recovery",
+                             [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
+                               try {
+                                 robot.automaticErrorRecovery();
+                                 has_error = false;
+                                 recovery_action_server.setSucceeded();
+                               } catch (const franka::Exception& ex) {
+                                 recovery_action_server.setAborted(
+                                     franka_hw::ErrorRecoveryResult(),
+                                     ex.what());
+                               }
+                             },
+                             false);
 
   franka::Model model = robot.loadModel();
   franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
@@ -102,6 +112,8 @@ int main(int argc, char** argv) {
 
   controller_manager::ControllerManager control_manager(&franka_control,
                                                         node_handle);
+
+  recovery_action_server.start();
 
   // Start background thread for message handling
   ros::AsyncSpinner spinner(1);

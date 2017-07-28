@@ -128,11 +128,5 @@ void setTimeScalingFactor(franka::Robot& robot,
   robot.setTimeScalingFactor(req.time_scaling_factor);
 }
 
-void errorRecovery(franka::Robot& robot,
-                   const ErrorRecovery::Request& /* req */,
-                   ErrorRecovery::Response& /* res */) {
-  robot.automaticErrorRecovery();
-}
-
 }  // namespace services
 }  // namespace franka_hw

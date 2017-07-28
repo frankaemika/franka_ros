@@ -11,42 +11,47 @@
   <url type="website">http://wiki.ros.org/franka_hw</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
-  
+
   <buildtool_depend>catkin</buildtool_depend>
-  
+
   <build_depend>Franka</build_depend>
-  <build_depend>hardware_interface</build_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
   <build_depend>controller_interface</build_depend>
-  <build_depend>joint_limits_interface</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>realtime_tools</build_depend>
-  <build_depend>tf2_msgs</build_depend>
+  <build_depend>controller_manager</build_depend>
   <build_depend>geometry_msgs</build_depend>
+  <build_depend>hardware_interface</build_depend>
+  <build_depend>joint_limits_interface</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>realtime_tools</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>tf2_msgs</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>urdf</build_depend>
   <build_depend>xmlrpcpp</build_depend>
-  <build_depend>controller_manager</build_depend>
-  <build_depend>pluginlib</build_depend>
 
   <run_depend>Franka</run_depend>
-  <run_depend>hardware_interface</run_depend>
+  <run_depend>actionlib</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
   <run_depend>controller_interface</run_depend>
-  <run_depend>joint_limits_interface</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>realtime_tools</run_depend>
-  <run_depend>tf2_msgs</run_depend>
+  <run_depend>controller_manager</run_depend>
   <run_depend>geometry_msgs</run_depend>
+  <run_depend>hardware_interface</run_depend>
+  <run_depend>joint_limits_interface</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>realtime_tools</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf2_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>urdf</run_depend>
   <run_depend>xmlrpcpp</run_depend>
-  <run_depend>controller_manager</run_depend>
-  <run_depend>pluginlib</run_depend>
 
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
