@@ -7,20 +7,21 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
+  actionlib_msgs
   controller_interface
   controller_manager
   franka_description
   geometry_msgs
   hardware_interface
   joint_limits_interface
-  pluginlib
   message_generation
-  roscpp
+  pluginlib
   realtime_tools
-  std_msgs
+  roscpp
   sensor_msgs
-  tf2_msgs
+  std_msgs
   tf
+  tf2_msgs
   urdf
   xmlrpcpp
 )
@@ -32,7 +33,6 @@ add_message_files(FILES
 )
 
 add_service_files(FILES
-  ErrorRecovery.srv
   SetCartesianImpedance.srv
   SetEEFrame.srv
   SetForceTorqueCollisionBehavior.srv
@@ -41,18 +41,22 @@ add_service_files(FILES
   SetKFrame.srv
   SetLoad.srv
   SetTimeScalingFactor.srv
+)
 
+add_action_files(FILES
+  ErrorRecovery.action
 )
 
 generate_messages(DEPENDENCIES
+  actionlib_msgs
   std_msgs
 )
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw franka_state_controller
-  CATKIN_DEPENDS hardware_interface roscpp message_runtime realtime_tools
-                 controller_interface pluginlib
+  CATKIN_DEPENDS actionlib_msgs controller_interface pluginlib
+                 hardware_interface message_runtime realtime_tools roscpp
   DEPENDS Franka
 )
 

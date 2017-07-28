@@ -242,7 +242,7 @@ void FrankaStateController::publishJointStates(const ros::Time& time) {
   if (publisher_joint_states_.trylock()) {
     for (size_t i = 0; i < 7; ++i) {
       publisher_joint_states_.msg_.name[i] = joint_names_[i];
-      publisher_joint_states_.msg_.position[i] = robot_state_.q_d[i];
+      publisher_joint_states_.msg_.position[i] = robot_state_.q[i];
       publisher_joint_states_.msg_.velocity[i] = robot_state_.dq[i];
       publisher_joint_states_.msg_.effort[i] = robot_state_.tau_J[i];
     }
