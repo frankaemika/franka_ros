@@ -159,7 +159,7 @@ int main(int argc, char** argv) {
     franka::GripperState new_gripper_state;
 
     while (ros::ok()) {
-      if (getGripperState(&new_gripper_state, gripper) && lock.try_lock()) {
+      if (getGripperState(gripper, &new_gripper_state) && lock.try_lock()) {
         gripper_state = new_gripper_state;
         lock.unlock();
       }
