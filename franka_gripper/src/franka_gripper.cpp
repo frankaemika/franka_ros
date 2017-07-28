@@ -29,7 +29,7 @@ bool getGripperState(franka::GripperState* state, franka::Gripper* gripper) {
 void gripperCommandExecuteCallback(
     franka::Gripper* gripper,
     const double kDefaultSpeed,
-    const double newton_to_m_ampere_factor,
+    const double kNewtonToMAmpereFactor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
         action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal) {
@@ -48,7 +48,7 @@ void gripperCommandExecuteCallback(
     } else {
       return gripper->grasp(
           goal->command.position, kDefaultSpeed,
-          goal->command.max_effort * newton_to_m_ampere_factor);
+          goal->command.max_effort * kNewtonToMAmpereFactor);
     }
   };
 
