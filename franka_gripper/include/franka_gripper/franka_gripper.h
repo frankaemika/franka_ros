@@ -36,7 +36,8 @@ bool getGripperState(franka::GripperState* state, franka::Gripper* gripper);
   * @param[in] action_server A pointer to a gripper action server
   * @param[in] goal A gripper action goal
   */
-void gripperCommandExecuteCallback(franka::Gripper* gripper,
+void gripperCommandExecuteCallback(
+    franka::Gripper* gripper,
     const double kDefaultSpeed,
     const double kNewtonToMAmpereFactor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*

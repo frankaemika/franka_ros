@@ -46,9 +46,8 @@ void gripperCommandExecuteCallback(
       gripper->move(goal->command.position, kDefaultSpeed);
       return true;
     } else {
-      return gripper->grasp(
-          goal->command.position, kDefaultSpeed,
-          goal->command.max_effort * kNewtonToMAmpereFactor);
+      return gripper->grasp(goal->command.position, kDefaultSpeed,
+                            goal->command.max_effort * kNewtonToMAmpereFactor);
     }
   };
 
