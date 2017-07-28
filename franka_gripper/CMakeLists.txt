@@ -18,13 +18,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(Franka REQUIRED)
 
-add_service_files(FILES
-   Stop.srv
-   Move.srv
-   Grasp.srv
-   Homing.srv
-)
-
 add_action_files(
   DIRECTORY action
   FILES Grasp.action
