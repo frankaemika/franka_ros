@@ -30,48 +30,48 @@ bool getGripperState(franka::GripperState* state, franka::Gripper* gripper);
   * report results
   *
   * @param[in] gripper A pointer to a franka gripper
-  * @param[in] default_speed The default speed for a gripper action
+  * @param[in] kDefaultSpeed The default speed for a gripper action
   * @param[in] newton_to_m_ampere_factor The mapping factor from Newton to milli
- * Ampere
+  * Ampere
   * @param[in] action_server A pointer to a gripper action server
   * @param[in] goal A gripper action goal
   */
 void gripperCommandExecuteCallback(
     franka::Gripper* gripper,
-    const double default_speed,
+    const double kDefaultSpeed,
     const double newton_to_m_ampere_factor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
         action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
 
 /**
-* Calls the libfranka move service of the gripper
-*
-* @param[in] gripper A gripper instance to execute the command
-* @param[in] goal A move goal with target width and velocity
-*/
+ * Calls the libfranka move service of the gripper
+ *
+ * @param[in] gripper A gripper instance to execute the command
+ * @param[in] goal A move goal with target width and velocity
+ */
 bool move(franka::Gripper* gripper, const MoveGoalConstPtr& goal);
 
 /**
-* Calls the libfranka homing service of the gripper
-*
-* @param[in] gripper A gripper instance to execute the command
-*/
+ * Calls the libfranka homing service of the gripper
+ *
+ * @param[in] gripper A gripper instance to execute the command
+ */
 bool homing(franka::Gripper* gripper, const HomingGoalConstPtr& /*goal*/);
 
 /**
-* Calls the libfranka stop service of the gripper to stop applying force
-*
-* @param[in] gripper A gripper instance to execute the command
-*/
+ * Calls the libfranka stop service of the gripper to stop applying force
+ *
+ * @param[in] gripper A gripper instance to execute the command
+ */
 bool stop(franka::Gripper* gripper, const StopGoalConstPtr& /*goal*/);
 
 /**
-* Calls the libfranka grasp service of the gripper
-*
-* @param[in] gripper A gripper instance to execute the command
-* @param[in] goal A grasp goal with target width, velocity and effort
-*/
+ * Calls the libfranka grasp service of the gripper
+ *
+ * @param[in] gripper A gripper instance to execute the command
+ * @param[in] goal A grasp goal with target width, velocity and effort
+ */
 bool grasp(franka::Gripper* gripper, const GraspGoalConstPtr& goal);
 
 }  // namespace franka_gripper
