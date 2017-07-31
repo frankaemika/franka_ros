@@ -15,8 +15,8 @@
 
 namespace franka_gripper {
 
-bool getGripperState(const franka::Gripper& gripper,
-                     franka::GripperState* state) {
+bool updateGripperState(const franka::Gripper& gripper,
+                        franka::GripperState* state) {
   try {
     *state = gripper.readOnce();
   } catch (const franka::Exception& ex) {
@@ -54,7 +54,7 @@ void gripperCommandExecuteCallback(
   try {
     if (gripper_command_handler()) {
       franka::GripperState state;
-      if (getGripperState(gripper, &state)) {
+      if (updateGripperState(gripper, &state)) {
         control_msgs::GripperCommandResult result;
         result.effort = 0.0;
         result.position = state.width;

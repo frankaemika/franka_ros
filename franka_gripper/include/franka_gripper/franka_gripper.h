@@ -23,8 +23,8 @@ namespace franka_gripper {
   * @param[in] state A gripper state to update
   * @param[in] gripper A pointer to a franka gripper
   */
-bool getGripperState(const franka::Gripper& gripper,
-                     franka::GripperState* state);
+bool updateGripperState(const franka::Gripper& gripper,
+                        franka::GripperState* state);
 
 /**
   * Wraps the execution of a gripper command action to catch exceptions and

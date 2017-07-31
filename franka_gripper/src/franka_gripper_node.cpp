@@ -53,7 +53,7 @@ using franka_gripper::stop;
 using franka_gripper::grasp;
 using franka_gripper::move;
 using franka_gripper::gripperCommandExecuteCallback;
-using franka_gripper::getGripperState;
+using franka_gripper::updateGripperState;
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_gripper_node");
@@ -159,10 +159,7 @@ int main(int argc, char** argv) {
     franka::GripperState new_gripper_state;
     while (read_rate.sleep() && ros::ok()) {
       std::lock_guard<std::mutex> lock(gripper_state_mutex);
-      if (getGripperState(gripper, &new_gripper_state) &&
-          gripper_state_mutex.try_lock()) {
-        gripper_state = new_gripper_state;
-      }
+      updateGripperState(gripper, &gripper_state);
     }
   });
 
