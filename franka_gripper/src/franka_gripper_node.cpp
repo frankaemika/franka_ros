@@ -156,7 +156,6 @@ int main(int argc, char** argv) {
   std::mutex gripper_state_mutex;
   std::thread read_thread([&gripper_state, &gripper, &gripper_state_mutex]() {
     ros::Rate read_rate(10);
-    franka::GripperState new_gripper_state;
     while (read_rate.sleep() && ros::ok()) {
       std::lock_guard<std::mutex> lock(gripper_state_mutex);
       updateGripperState(gripper, &gripper_state);
