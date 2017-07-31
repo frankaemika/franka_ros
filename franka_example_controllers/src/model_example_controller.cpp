@@ -39,7 +39,7 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
     ROS_ERROR_STREAM(
-        "ModelExampleController: Error getting model interface from harware");
+        "ModelExampleController: Error getting model interface from hardware");
     return false;
   }
 
@@ -49,8 +49,7 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   } catch (hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting model handle from "
-        "interface: "
-        << e.what());
+        "interface: " << e.what());
     return false;
   }
   return true;
