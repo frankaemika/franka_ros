@@ -96,14 +96,15 @@ class FrankaHW : public hardware_interface::RobotHW {
   bool controllerActive() const noexcept;
 
   /**
-  * Checks whether a requested controller can be run, based on the resources and
-  * interfaces it claims
-  *
-  * @param[in] info A list of all controllers to be started, including the
-  * resources they claim
-  * @return Returns true in case of a conflict, false in case of valid
-  * controllers
-  */
+   * Checks whether a requested controller can be run, based on the resources
+   * and
+   * interfaces it claims
+   *
+   * @param[in] info A list of all controllers to be started, including the
+   * resources they claim
+   * @return Returns true in case of a conflict, false in case of valid
+   * controllers
+   */
   bool checkForConflict(
       const std::list<hardware_interface::ControllerInfo>& info) const override;
 
@@ -126,31 +127,31 @@ class FrankaHW : public hardware_interface::RobotHW {
       const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
-  * Getter for the current Joint Position Command
-  *
-  * @return The current Joint Position command
-  */
+   * Getter for the current Joint Position Command
+   *
+   * @return The current Joint Position command
+   */
   std::array<double, 7> getJointPositionCommand() const;
 
   /**
-  * Getter for the current Joint Velocity Command
-  *
-  * @return The current Joint Velocity command
-  */
+   * Getter for the current Joint Velocity Command
+   *
+   * @return The current Joint Velocity command
+   */
   std::array<double, 7> getJointVelocityCommand() const;
 
   /**
-  * Getter for the current Joint Torque Command
-  *
-  * @return The current Joint Torque command
-  */
+   * Getter for the current Joint Torque Command
+   *
+   * @return The current Joint Torque command
+   */
   std::array<double, 7> getJointEffortCommand() const;
 
   /**
-  * Enforces joint limits on position velocity and torque level
-  *
-  * @param[in] kPeriod The duration of the current cycle
-  */
+   * Enforces joint limits on position velocity and torque level
+   *
+   * @param[in] kPeriod The duration of the current cycle
+   */
   void enforceLimits(const ros::Duration kPeriod);
 
  private:

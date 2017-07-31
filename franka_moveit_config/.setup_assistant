@@ -1,10 +1,10 @@
 moveit_setup_assistant_config:
   URDF:
     package: franka_description
-    relative_path: robots/FEA_01_01.urdf.xacro
+    relative_path: robots/FEA_01_01_Gripper.urdf.xacro
   SRDF:
     relative_path: config/franka_emika.srdf
   CONFIG:
     author_name: Franka Emika GmbH
     author_email: info@franka.de
-    generated_timestamp: 1496132153
+    generated_timestamp: 1500885580

@@ -1,0 +1,6 @@
+float64 width  # [m]
+float64 speed  # [m/s]
+---
+bool success
+string error
+---
