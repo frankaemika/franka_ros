@@ -49,7 +49,8 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   } catch (hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting model handle from "
-        "interface: " << e.what());
+        "interface: "
+        << e.what());
     return false;
   }
   return true;

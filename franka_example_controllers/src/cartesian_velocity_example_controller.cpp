@@ -74,8 +74,7 @@ void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
 void CartesianVelocityExampleController::stopping(const ros::Time& /*time*/) {
   try {
     franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
-        velocity_cartesian_interface_->getHandle(arm_id_ +
-                                                 std::string("_cartesian")));
+        velocity_cartesian_interface_->getHandle(arm_id_ + "_robot"));
     std::array<double, 6> command = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     cartesian_velocity_handle.setCommand(command);
   } catch (const hardware_interface::HardwareInterfaceException& e) {

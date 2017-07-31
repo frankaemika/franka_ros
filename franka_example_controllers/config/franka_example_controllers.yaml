@@ -14,7 +14,7 @@ model_example_controller:
     type: franka_example_controllers/ModelExampleController
     arm_id: franka_emika
 
-joint_impedance_example_controlller:
+joint_impedance_example_controller:
     type: franka_example_controllers/JointImpedanceExampleController
     arm_id: franka_emika
     joint_names:

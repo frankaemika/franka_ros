@@ -26,7 +26,7 @@ add_library(franka_example_controllers
   src/joint_position_example_controller.cpp
   src/joint_velocity_example_controller.cpp
   src/model_example_controller.cpp
-  src/joint_impedance_with_motion_generator_example_controller.cpp
+  src/joint_impedance_example_controller.cpp
 )
 
 add_dependencies(franka_example_controllers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
