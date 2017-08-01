@@ -29,6 +29,6 @@ joint_impedance_example_controller:
     d_gains: [50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0]
     radius: 0.1
     acceleration_time: 2.0
-    vel_max: 0.03
+    vel_max: 0.06
     
 
