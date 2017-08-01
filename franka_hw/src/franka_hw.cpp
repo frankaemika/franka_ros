@@ -178,9 +178,11 @@ void FrankaHW::control(
 }
 
 void FrankaHW::enforceLimits(const ros::Duration kPeriod) {
-  position_joint_limit_interface_.enforceLimits(kPeriod);
-  velocity_joint_limit_interface_.enforceLimits(kPeriod);
-  effort_joint_limit_interface_.enforceLimits(kPeriod);
+  if (kPeriod.toSec() > 0.0) {
+    position_joint_limit_interface_.enforceLimits(kPeriod);
+    velocity_joint_limit_interface_.enforceLimits(kPeriod);
+    effort_joint_limit_interface_.enforceLimits(kPeriod);
+  }
 }
 
 bool FrankaHW::checkForConflict(
