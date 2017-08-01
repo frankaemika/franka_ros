@@ -152,7 +152,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @param[in] kPeriod The duration of the current cycle
    */
-  void enforceLimits(const ros::Duration kPeriod);
+  void enforceLimits(const ros::Duration& kPeriod);
 
  private:
   using Callback =
