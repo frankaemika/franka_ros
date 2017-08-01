@@ -65,19 +65,16 @@ int main(int argc, char** argv) {
   }
   double width_tolerance(0.01);
   if (node_handle.getParam("width_tolerance", width_tolerance)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found width_tolerance"
-                    << width_tolerance);
+    ROS_INFO_STREAM("franka_gripper_node: Found width_tolerance" << width_tolerance);
   }
 
   double default_speed(0.1);
   if (node_handle.getParam("default_speed", default_speed)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found default_speed"
-                    << default_speed);
+    ROS_INFO_STREAM("franka_gripper_node: Found default_speed" << default_speed);
   }
 
   double newton_to_m_ampere_factor(14.9);
-  if (node_handle.getParam("newton_to_m_ampere_factor",
-                           newton_to_m_ampere_factor)) {
+  if (node_handle.getParam("newton_to_m_ampere_factor", newton_to_m_ampere_factor)) {
     ROS_INFO_STREAM("franka_gripper_node: Found newton_to_m_ampere_factor"
                     << newton_to_m_ampere_factor);
   }
@@ -100,28 +97,24 @@ int main(int argc, char** argv) {
       false);
 
   SimpleActionServer<StopAction> stop_action_server_(
-      node_handle, "stop",
-      std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
-                &stop_action_server_, stop_handler, std::placeholders::_1),
+      node_handle, "stop", std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
+                                     &stop_action_server_, stop_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<MoveAction> move_action_server_(
-      node_handle, "move",
-      std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
-                &move_action_server_, move_handler, std::placeholders::_1),
+      node_handle, "move", std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
+                                     &move_action_server_, move_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GraspAction> grasp_action_server_(
-      node_handle, "grasp",
-      std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
-                &grasp_action_server_, grasp_handler, std::placeholders::_1),
+      node_handle, "grasp", std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
+                                      &grasp_action_server_, grasp_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
-      std::bind(&gripperCommandExecuteCallback, std::cref(gripper),
-                default_speed, newton_to_m_ampere_factor,
-                &gripper_command_action_server, std::placeholders::_1),
+      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_speed,
+                newton_to_m_ampere_factor, &gripper_command_action_server, std::placeholders::_1),
       false);
 
   homing_action_server_.start();
@@ -132,10 +125,7 @@ int main(int argc, char** argv) {
 
   double publish_rate(30.0);
   if (!node_handle.getParam("publish_rate", publish_rate)) {
-    ROS_INFO_STREAM(
-        "franka_gripper_node: Could not find parameter publish_rate. "
-        "Defaulting to "
-        << publish_rate);
+    ROS_INFO_STREAM("franka_gripper_node: Could not find parameter publish_rate. Defaulting to " << publish_rate);
   }
 
   XmlRpc::XmlRpcValue params;

@@ -13,9 +13,8 @@
 
 namespace franka_example_controllers {
 
-class CartesianPoseExampleController
-    : public controller_interface::MultiInterfaceController<
-          franka_hw::FrankaPoseCartesianInterface> {
+class CartesianPoseExampleController : public controller_interface::MultiInterfaceController<
+                                           franka_hw::FrankaPoseCartesianInterface> {
  public:
   CartesianPoseExampleController();
   bool init(hardware_interface::RobotHW* robot_hardware,
@@ -27,9 +26,8 @@ class CartesianPoseExampleController
  private:
   std::string arm_id_;
   franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface_;
-  std::array<double, 16> initial_pose_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                           0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-                                           0.0, 0.0}};
+  std::array<double, 16> initial_pose_ = {
+      {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   ros::Duration elapsed_time_;
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
 };

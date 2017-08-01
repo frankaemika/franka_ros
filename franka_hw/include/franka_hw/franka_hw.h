@@ -74,9 +74,8 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @throw franka::RealtimeException if realtime priority can not be set for
    * the current thread.
    */
-  void control(
-      franka::Robot& robot,
-      std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
+  void control(franka::Robot& robot,
+               std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
 
   /**
    * Updates the controller interfaces from the given robot state.
@@ -105,8 +104,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @return Returns true in case of a conflict, false in case of valid
    * controllers
    */
-  bool checkForConflict(
-      const std::list<hardware_interface::ControllerInfo>& info) const override;
+  bool checkForConflict(const std::list<hardware_interface::ControllerInfo>& info) const override;
 
   /**
   * Performs the switch between controllers and is real-time capable
@@ -122,9 +120,8 @@ class FrankaHW : public hardware_interface::RobotHW {
   * @param[in] start_list Information list about all controllers requested to be
   * started
   */
-  bool prepareSwitch(
-      const std::list<hardware_interface::ControllerInfo>& start_list,
-      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+  bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                     const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
    * Getter for the current Joint Position Command
@@ -155,8 +152,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   void enforceLimits(const ros::Duration& kPeriod);
 
  private:
-  using Callback =
-      std::function<bool(const franka::RobotState&, franka::Duration)>;
+  using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
 
   template <typename T>
   T controlCallback(const T& command,
@@ -179,16 +175,12 @@ class FrankaHW : public hardware_interface::RobotHW {
   hardware_interface::VelocityJointInterface velocity_joint_interface_{};
   hardware_interface::EffortJointInterface effort_joint_interface_{};
   franka_hw::FrankaPoseCartesianInterface franka_pose_cartesian_interface_{};
-  franka_hw::FrankaVelocityCartesianInterface
-      franka_velocity_cartesian_interface_{};
+  franka_hw::FrankaVelocityCartesianInterface franka_velocity_cartesian_interface_{};
   franka_hw::FrankaModelInterface franka_model_interface_{};
 
-  joint_limits_interface::PositionJointSoftLimitsInterface
-      position_joint_limit_interface_{};
-  joint_limits_interface::VelocityJointSoftLimitsInterface
-      velocity_joint_limit_interface_{};
-  joint_limits_interface::EffortJointSoftLimitsInterface
-      effort_joint_limit_interface_{};
+  joint_limits_interface::PositionJointSoftLimitsInterface position_joint_limit_interface_{};
+  joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limit_interface_{};
+  joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_{};
 
   franka::RobotState robot_state_{};
 

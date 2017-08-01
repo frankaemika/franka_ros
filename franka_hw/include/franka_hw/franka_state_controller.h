@@ -19,8 +19,7 @@
 namespace franka_hw {
 
 class FrankaStateController
-    : public controller_interface::MultiInterfaceController<
-          franka_hw::FrankaStateInterface> {
+    : public controller_interface::MultiInterfaceController<franka_hw::FrankaStateInterface> {
  public:
   FrankaStateController();
 
@@ -79,12 +78,9 @@ class FrankaStateController
   std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
 
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
-  realtime_tools::RealtimePublisher<franka_hw::FrankaState>
-      publisher_franka_states_;
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState>
-      publisher_joint_states_;
-  realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>
-      publisher_external_wrench_;
+  realtime_tools::RealtimePublisher<franka_hw::FrankaState> publisher_franka_states_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher_joint_states_;
+  realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> publisher_external_wrench_;
   franka_hw::TriggerRate trigger_publish_;
   franka::RobotState robot_state_;
   uint64_t sequence_number_ = 0;

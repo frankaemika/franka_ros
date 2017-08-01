@@ -15,13 +15,11 @@
 
 namespace franka_gripper {
 
-bool updateGripperState(const franka::Gripper& gripper,
-                        franka::GripperState* state) {
+bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* state) {
   try {
     *state = gripper.readOnce();
   } catch (const franka::Exception& ex) {
-    ROS_ERROR_STREAM(
-        "GripperServer: Exception reading gripper state: " << ex.what());
+    ROS_ERROR_STREAM("GripperServer: Exception reading gripper state: " << ex.what());
     return false;
   }
   return true;
@@ -31,16 +29,13 @@ void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
     double default_speed,
     double newton_to_m_ampere_factor,
-    actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
-        action_server,
+    actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal) {
   std::function<bool()> gripper_command_handler = [=, &gripper]() {
     franka::GripperState state = gripper.readOnce();
-    if (goal->command.position > state.max_width ||
-        goal->command.position < 0.0) {
-      ROS_ERROR_STREAM(
-          "GripperServer: Commanding out of range width! max_width = "
-          << state.max_width << " command = " << goal->command.position);
+    if (goal->command.position > state.max_width || goal->command.position < 0.0) {
+      ROS_ERROR_STREAM("GripperServer: Commanding out of range width! max_width = "
+                       << state.max_width << " command = " << goal->command.position);
       return false;
     }
     if (goal->command.position >= state.width) {
@@ -75,8 +70,7 @@ bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal) {
   return true;
 }
 
-bool homing(const franka::Gripper& gripper,
-            const HomingGoalConstPtr& /*goal*/) {
+bool homing(const franka::Gripper& gripper, const HomingGoalConstPtr& /*goal*/) {
   gripper.homing();
   return true;
 }

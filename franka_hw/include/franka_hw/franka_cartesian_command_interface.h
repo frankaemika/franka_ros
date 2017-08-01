@@ -20,9 +20,7 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
                             std::array<double, 16>& command)
       : FrankaStateHandle(franka_state_handle), command_(&command) {}
 
-  void setCommand(const std::array<double, 16>& command) {
-    *command_ = command;
-  }
+  void setCommand(const std::array<double, 16>& command) { *command_ = command; }
   const std::array<double, 16>& getCommand() const { return *command_; }
 
  private:
@@ -32,9 +30,8 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
 /** \brief Hardware interface to support commanding Cartesian poses to a Franka.
  */
 class FrankaPoseCartesianInterface
-    : public hardware_interface::HardwareResourceManager<
-          FrankaCartesianPoseHandle,
-          hardware_interface::ClaimResources> {};
+    : public hardware_interface::HardwareResourceManager<FrankaCartesianPoseHandle,
+                                                         hardware_interface::ClaimResources> {};
 
 /** \brief A handle used to read and command a Cartesian Velocity to a Franka.
  */
@@ -62,8 +59,7 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
  * Franka
  */
 class FrankaVelocityCartesianInterface
-    : public hardware_interface::HardwareResourceManager<
-          FrankaCartesianVelocityHandle,
-          hardware_interface::ClaimResources> {};
+    : public hardware_interface::HardwareResourceManager<FrankaCartesianVelocityHandle,
+                                                         hardware_interface::ClaimResources> {};
 
 }  // namespace franka_hw

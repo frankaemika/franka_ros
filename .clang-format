@@ -1,2 +1,3 @@
 BasedOnStyle: Chromium
 SortIncludes: true
+ColumnLimit: 100

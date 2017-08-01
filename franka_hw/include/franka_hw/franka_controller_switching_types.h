@@ -8,8 +8,7 @@
 
 namespace franka_hw {
 
-using ResourceWithClaimsMap =
-    std::map<std::string, std::vector<std::vector<std::string>>>;
+using ResourceWithClaimsMap = std::map<std::string, std::vector<std::vector<std::string>>>;
 
 struct ResourceClaims {
   uint8_t joint_position_claims = 0;
@@ -34,26 +33,22 @@ std::ostream& operator<<(std::ostream& ostream, ControlMode mode);
 
 // Implement operators for BitmaskType concept
 constexpr ControlMode operator&(ControlMode left, ControlMode right) {
-  return static_cast<ControlMode>(
-      static_cast<std::underlying_type_t<ControlMode>>(left) &
-      static_cast<std::underlying_type_t<ControlMode>>(right));
+  return static_cast<ControlMode>(static_cast<std::underlying_type_t<ControlMode>>(left) &
+                                  static_cast<std::underlying_type_t<ControlMode>>(right));
 }
 
 constexpr ControlMode operator|(ControlMode left, ControlMode right) {
-  return static_cast<ControlMode>(
-      static_cast<std::underlying_type_t<ControlMode>>(left) |
-      static_cast<std::underlying_type_t<ControlMode>>(right));
+  return static_cast<ControlMode>(static_cast<std::underlying_type_t<ControlMode>>(left) |
+                                  static_cast<std::underlying_type_t<ControlMode>>(right));
 }
 
 constexpr ControlMode operator^(ControlMode left, ControlMode right) {
-  return static_cast<ControlMode>(
-      static_cast<std::underlying_type_t<ControlMode>>(left) ^
-      static_cast<std::underlying_type_t<ControlMode>>(right));
+  return static_cast<ControlMode>(static_cast<std::underlying_type_t<ControlMode>>(left) ^
+                                  static_cast<std::underlying_type_t<ControlMode>>(right));
 }
 
 constexpr ControlMode operator~(ControlMode mode) {
-  return static_cast<ControlMode>(
-      ~static_cast<std::underlying_type_t<ControlMode>>(mode));
+  return static_cast<ControlMode>(~static_cast<std::underlying_type_t<ControlMode>>(mode));
 }
 
 constexpr ControlMode& operator&=(ControlMode& left, ControlMode right) {
