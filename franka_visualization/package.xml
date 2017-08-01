@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_visualization</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>This package contains visualization tools for FRANKA EMIKA.</description>
 
   <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
