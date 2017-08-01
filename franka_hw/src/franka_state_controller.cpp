@@ -30,8 +30,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                                  ros::NodeHandle& controller_node_handle) {
   franka_state_interface_ = robot_hardware->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
-    ROS_ERROR(
-        "FrankaStateController: Could not get Franka state interface from hardware");
+    ROS_ERROR("FrankaStateController: Could not get Franka state interface from hardware");
     return false;
   }
   if (!root_node_handle.getParam("arm_id", arm_id_)) {
@@ -42,7 +41,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   if (controller_node_handle.getParam("publish_rate", publish_rate)) {
     trigger_publish_ = franka_hw::TriggerRate(publish_rate);
   } else {
-    ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default " << publish_rate << " [Hz].");
+    ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default "
+                    << publish_rate << " [Hz].");
   }
   XmlRpc::XmlRpcValue params;
 

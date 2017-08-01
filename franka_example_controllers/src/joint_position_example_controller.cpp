@@ -19,7 +19,8 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
                                           ros::NodeHandle& /*controller_node_handle*/) {
   position_joint_interface_ = robot_hardware->get<hardware_interface::PositionJointInterface>();
   if (position_joint_interface_ == nullptr) {
-    ROS_ERROR("JointPositionExampleController: Error getting position joint interface from hardware!");
+    ROS_ERROR(
+        "JointPositionExampleController: Error getting position joint interface from hardware!");
     return false;
   }
   XmlRpc::XmlRpcValue parameters;
@@ -27,7 +28,8 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
     ROS_ERROR("JointPositionExampleController: Could not parse joint names");
   }
   if (parameters.size() != 7) {
-    ROS_ERROR_STREAM("JointPositionExampleController: Wrong number of joint names, got " << int(parameters.size()) << " instead of 7 names!");
+    ROS_ERROR_STREAM("JointPositionExampleController: Wrong number of joint names, got "
+                     << int(parameters.size()) << " instead of 7 names!");
     return false;
   }
   position_joint_handles_.resize(7);
@@ -38,7 +40,8 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
       position_joint_handles_[i] = position_joint_interface_->getHandle(joint_names_[i]);
       initial_pose_[i] = position_joint_handles_[i].getPosition();
     } catch (const hardware_interface::HardwareInterfaceException& e) {
-      ROS_ERROR_STREAM("JointPositionExampleController: Exception getting joint handles: " << e.what());
+      ROS_ERROR_STREAM(
+          "JointPositionExampleController: Exception getting joint handles: " << e.what());
       return false;
     }
   }

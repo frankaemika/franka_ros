@@ -29,14 +29,17 @@ bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot
   velocity_cartesian_interface_ =
       robot_hardware->get<franka_hw::FrankaVelocityCartesianInterface>();
   if (velocity_cartesian_interface_ == nullptr) {
-    ROS_ERROR("CartesianVelocityExampleController: Could not get Cartesian velocity interface from hardware");
+    ROS_ERROR(
+        "CartesianVelocityExampleController: Could not get Cartesian velocity interface from "
+        "hardware");
     return false;
   }
   try {
     velocity_cartesian_handle_.reset(new franka_hw::FrankaCartesianVelocityHandle(
         velocity_cartesian_interface_->getHandle(arm_id_ + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM("CartesianVelocityExampleController: Exception getting cartesian handle: " << e.what());
+    ROS_ERROR_STREAM(
+        "CartesianVelocityExampleController: Exception getting cartesian handle: " << e.what());
     return false;
   }
 

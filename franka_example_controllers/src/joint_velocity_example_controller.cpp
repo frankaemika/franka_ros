@@ -39,7 +39,8 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
     try {
       velocity_joint_handles_[i] = velocity_joint_interface_->getHandle(joint_names_[i]);
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
-      ROS_ERROR_STREAM("JointVelocityExampleController: Exception getting joint handles: " << ex.what());
+      ROS_ERROR_STREAM(
+          "JointVelocityExampleController: Exception getting joint handles: " << ex.what());
       return false;
     }
   }

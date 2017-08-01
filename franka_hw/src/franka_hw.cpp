@@ -169,7 +169,8 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
   // for 2 claims it must be one torque and one non-torque claim
   for (auto map_it = resource_map.begin(); map_it != resource_map.end(); map_it++) {
     if (map_it->second.size() > 2) {
-      ROS_ERROR_STREAM("FrankaHW: Resource " << map_it->first << " claimed with more than two interfaces. Conflict!");
+      ROS_ERROR_STREAM("FrankaHW: Resource "
+                       << map_it->first << " claimed with more than two interfaces. Conflict!");
       return true;
     }
     uint8_t torque_claims = 0;
@@ -183,7 +184,9 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
         }
       }
       if (torque_claims != 1) {
-        ROS_ERROR_STREAM("FrankaHW: Resource " << map_it->first << " is claimed with two non-compatible interfaces. Conflict!");
+        ROS_ERROR_STREAM("FrankaHW: Resource "
+                         << map_it->first
+                         << " is claimed with two non-compatible interfaces. Conflict!");
         return true;
       }
     }
@@ -215,7 +218,8 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
          arm_claim_map[arm_id_].joint_velocity_claims != 7) ||
         (arm_claim_map[arm_id_].joint_torque_claims > 0 &&
          arm_claim_map[arm_id_].joint_torque_claims != 7)) {
-      ROS_ERROR_STREAM("FrankaHW: Non-consistent claims on the joints of " << arm_id_ << ". Not supported. Conflict!");
+      ROS_ERROR_STREAM("FrankaHW: Non-consistent claims on the joints of "
+                       << arm_id_ << ". Not supported. Conflict!");
       return true;
     }
   }

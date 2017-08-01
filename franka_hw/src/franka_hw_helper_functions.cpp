@@ -44,7 +44,9 @@ bool getArmClaimedMap(ResourceWithClaimsMap& resource_map, ArmClaimedMap& arm_cl
   // 7 non-torque claims on joint_level or one claim on cartesian level.
   for (auto map_it = resource_map.begin(); map_it != resource_map.end(); map_it++) {
     if (!findArmIdInResourceId(map_it->first, &current_arm_id)) {
-      ROS_ERROR_STREAM("Could not find arm_id in resource " << map_it->first << ". Conflict! Name joints as '<robot_arm_id>_joint<jointnumber>'");
+      ROS_ERROR_STREAM("Could not find arm_id in resource "
+                       << map_it->first
+                       << ". Conflict! Name joints as '<robot_arm_id>_joint<jointnumber>'");
       return false;
     }
     ResourceClaims new_claim;
