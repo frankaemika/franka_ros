@@ -39,8 +39,7 @@ void gripperCommandExecuteCallback(
       return false;
     }
     if (goal->command.position >= state.width) {
-      gripper.move(goal->command.position, default_speed);
-      return true;
+      return gripper.move(goal->command.position, default_speed);
     }
     return gripper.grasp(goal->command.position, default_speed,
                          goal->command.max_effort * newton_to_m_ampere_factor);
@@ -66,18 +65,15 @@ void gripperCommandExecuteCallback(
 }
 
 bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal) {
-  gripper.move(goal->width, goal->speed);
-  return true;
+  return gripper.move(goal->width, goal->speed);
 }
 
 bool homing(const franka::Gripper& gripper, const HomingGoalConstPtr& /*goal*/) {
-  gripper.homing();
-  return true;
+  return gripper.homing();
 }
 
 bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/) {
-  gripper.stop();
-  return true;
+  return gripper.stop();
 }
 
 bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal) {
