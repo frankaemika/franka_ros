@@ -155,11 +155,11 @@ void FrankaHW::control(franka::Robot& robot,
   });
 }
 
-void FrankaHW::enforceLimits(const ros::Duration& kPeriod) {
-  if (kPeriod.toSec() > 0.0) {
-    position_joint_limit_interface_.enforceLimits(kPeriod);
-    velocity_joint_limit_interface_.enforceLimits(kPeriod);
-    effort_joint_limit_interface_.enforceLimits(kPeriod);
+void FrankaHW::enforceLimits(const ros::Duration& period) {
+  if (period.toSec() > 0.0) {
+    position_joint_limit_interface_.enforceLimits(period);
+    velocity_joint_limit_interface_.enforceLimits(period);
+    effort_joint_limit_interface_.enforceLimits(period);
   }
 }
 
