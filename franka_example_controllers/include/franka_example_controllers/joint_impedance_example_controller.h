@@ -7,9 +7,11 @@
 #include <controller_interface/multi_interface_controller.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
 
+#include <franka_example_controllers/JointTorqueComparison.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/trigger_rate.h>
@@ -47,6 +49,7 @@ class JointImpedanceExampleController
   double angle_{0.0};
   double vel_current_{0.0};
   std::array<double, 16> initial_pose_;
+  realtime_tools::RealtimePublisher<JointTorqueComparison> torques_publisher_;
 };
 
 }  // namespace franka_example_controllers
