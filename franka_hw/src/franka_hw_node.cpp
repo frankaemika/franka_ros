@@ -145,7 +145,9 @@ int main(int argc, char** argv) {
       franka_control.control(
           robot, [&](const ros::Time& now, const ros::Duration& period) {
             control_manager.update(now, period);
-            franka_control.enforceLimits(period);
+            if (period.toSec() > 0.0) {
+              franka_control.enforceLimits(period);
+            }
             return ros::ok();
           });
     } catch (const franka::ControlException& e) {
