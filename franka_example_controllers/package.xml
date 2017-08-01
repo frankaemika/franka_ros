@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>franka_example_controllers</name>
   <version>0.0.0</version>
   <description>The franka_example_controllers package</description>
@@ -9,15 +9,11 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>controller_interface</build_depend>
-  <build_depend>franka_description</build_depend>
-  <build_depend>franka_hw</build_depend>
-  <build_depend>pluginlib</build_depend>
-
-  <run_depend>controller_interface</run_depend>
-  <run_depend>franka_description</run_depend>
-  <run_depend>franka_hw</run_depend>
-  <run_depend>pluginlib</run_depend>
+  
+  <depend>controller_interface</depend>
+  <depend>franka_description</depend>
+  <depend>franka_hw</depend>
+  <depend>pluginlib</depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml"/>
