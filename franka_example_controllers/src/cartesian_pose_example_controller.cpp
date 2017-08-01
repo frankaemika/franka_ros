@@ -59,8 +59,8 @@ void CartesianPoseExampleController::update(const ros::Time& /*time*/,
   double delta_x = radius * std::sin(angle);
   double delta_z = radius * (std::cos(angle) - 1);
   std::array<double, 16> new_pose = initial_pose_;
-  new_pose[12] += delta_x;
-  new_pose[14] += delta_z;
+  new_pose[12] -= delta_x;
+  new_pose[14] -= delta_z;
   cartesian_pose_handle_->setCommand(new_pose);
 }
 

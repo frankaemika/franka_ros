@@ -176,11 +176,9 @@ bool JointImpedanceExampleController::init(
 
 void JointImpedanceExampleController::update(const ros::Time& /*time*/,
                                              const ros::Duration& period) {
-  ROS_INFO("JointImpedanceExampleController: Control Loop");
   if (vel_current_ < vel_max_) {
     vel_current_ += period.toSec() * std::fabs(vel_max_ / acceleration_time_);
   }
-  ROS_INFO("JointImpedanceExampleController: DB1");
   vel_current_ = std::fmin(vel_current_, vel_max_);
 
   angle_ += period.toSec() * vel_current_ / std::fabs(radius_);
@@ -188,7 +186,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
     angle_ -= 2 * M_PI;
   }
 
-  ROS_INFO("JointImpedanceExampleController: DB2");
   double delta_y = radius_ * (1 - std::cos(angle_));
   double delta_z = radius_ * std::sin(angle_);
 
@@ -197,7 +194,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   pose_desired[14] += delta_z;
   cartesian_pose_handle_->setCommand(pose_desired);
 
-  ROS_INFO("JointImpedanceExampleController: DB3");
   franka::RobotState robot_state = cartesian_pose_handle_->getRobotState();
   std::array<double, 7> q_desired = robot_state.q_d;
   std::array<double, 7> q_current = robot_state.q;
@@ -206,7 +202,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
   std::array<double, 7> gravity =
       model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
-  ROS_INFO("JointImpedanceExampleController: DB4");
 
   std::array<double, 7> tau_d;
   for (size_t i = 0; i < 7; ++i) {
@@ -214,7 +209,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
                std::fabs(d_gains_[i]) * dq[i] + coriolis[i];
     joint_handles_[i].setCommand(tau_d[i]);
   }
-  ROS_INFO("JointImpedanceExampleController: DB5");
 
   if (rate_trigger_()) {
     std::array<double, 7> tau_j = robot_state.tau_J;
@@ -229,11 +223,9 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
     }
   }
 
-  ROS_INFO("JointImpedanceExampleController: DB6");
   for (size_t i = 0; i < 7; ++i) {
     last_tau_d_[i] = tau_d[i] + gravity[i];
   }
-  ROS_INFO("Finishing control loop");
   return;
 }
 
