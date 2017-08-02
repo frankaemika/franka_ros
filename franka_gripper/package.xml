@@ -1,36 +1,26 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>franka_gripper</name>
-  <version>0.0.0</version>
-  <description>This package implements the franka gripper of Franka Emika for the use via service calls</description>
+  <version>0.0.1</version>
+  <description>This package implements the franka gripper of type Franka Hand for the use in ros</description>
   <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
-  <author>FRANKA EMIKA Research Interface Team</author>
-
   <license>NONE</license>
-
-  <url type="website">http://wiki.ros.org/franka_hw</url>
+  
+  <url type="website">http://wiki.ros.org/franka_gripper</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>Franka</build_depend>
-  <build_depend>control_msgs</build_depend>
-  <build_depend>actionlib</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>xmlrpcpp</build_depend>
-  <build_depend>actionlib_msgs</build_depend>
-  
-  <run_depend>Franka</run_depend>
-  <run_depend>message_generation</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>control_msgs</run_depend>
-  <run_depend>actionlib</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>xmlrpcpp</run_depend>
-  <run_depend>actionlib_msgs</run_depend>
-  
+  <depend>roscpp</depend>
+  <depend>message_generation</depend>
+  <depend>Franka</depend>
+  <depend>control_msgs</depend>
+  <depend>actionlib</depend>
+  <depend>sensor_msgs</depend>
+  <depend>xmlrpcpp</depend>
+  <depend>actionlib_msgs</depend>
+    
+  <exec_depend>message_runtime</exec_depend> 
 </package>
