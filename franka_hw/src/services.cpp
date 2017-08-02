@@ -16,8 +16,7 @@ void setJointImpedance(franka::Robot& robot,
                        const SetJointImpedance::Request& req,
                        SetJointImpedance::Response& /* res */) {
   std::array<double, 7> joint_stiffness;
-  std::copy(req.joint_stiffness.cbegin(), req.joint_stiffness.cend(),
-            joint_stiffness.begin());
+  std::copy(req.joint_stiffness.cbegin(), req.joint_stiffness.cend(), joint_stiffness.begin());
   robot.setJointImpedance(joint_stiffness);
 }
 
@@ -37,31 +36,25 @@ void setKFrame(franka::Robot& robot,
   robot.setK(EE_T_K);
 }
 
-void setForceTorqueCollisionBehavior(
-    franka::Robot& robot,
-    const SetForceTorqueCollisionBehavior::Request& req,
-    SetForceTorqueCollisionBehavior::Response& /* res */
-    ) {
+void setForceTorqueCollisionBehavior(franka::Robot& robot,
+                                     const SetForceTorqueCollisionBehavior::Request& req,
+                                     SetForceTorqueCollisionBehavior::Response& /* res */
+                                     ) {
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
-            req.lower_torque_thresholds_nominal.cend(),
-            lower_torque_thresholds_nominal.begin());
+            req.lower_torque_thresholds_nominal.cend(), lower_torque_thresholds_nominal.begin());
   std::array<double, 7> upper_torque_thresholds_nominal;
   std::copy(req.upper_torque_thresholds_nominal.cbegin(),
-            req.upper_torque_thresholds_nominal.cend(),
-            upper_torque_thresholds_nominal.begin());
+            req.upper_torque_thresholds_nominal.cend(), upper_torque_thresholds_nominal.begin());
   std::array<double, 6> lower_force_thresholds_nominal;
-  std::copy(req.lower_force_thresholds_nominal.cbegin(),
-            req.lower_force_thresholds_nominal.cend(),
+  std::copy(req.lower_force_thresholds_nominal.cbegin(), req.lower_force_thresholds_nominal.cend(),
             lower_force_thresholds_nominal.begin());
   std::array<double, 6> upper_force_thresholds_nominal;
-  std::copy(req.upper_force_thresholds_nominal.cbegin(),
-            req.upper_force_thresholds_nominal.cend(),
+  std::copy(req.upper_force_thresholds_nominal.cbegin(), req.upper_force_thresholds_nominal.cend(),
             upper_force_thresholds_nominal.begin());
 
-  robot.setCollisionBehavior(
-      lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
-      lower_force_thresholds_nominal, upper_force_thresholds_nominal);
+  robot.setCollisionBehavior(lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
+                             lower_force_thresholds_nominal, upper_force_thresholds_nominal);
 }
 
 void setFullCollisionBehavior(franka::Robot& robot,
@@ -77,12 +70,10 @@ void setFullCollisionBehavior(franka::Robot& robot,
             upper_torque_thresholds_acceleration.begin());
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
-            req.lower_torque_thresholds_nominal.cend(),
-            lower_torque_thresholds_nominal.begin());
+            req.lower_torque_thresholds_nominal.cend(), lower_torque_thresholds_nominal.begin());
   std::array<double, 7> upper_torque_thresholds_nominal;
   std::copy(req.upper_torque_thresholds_nominal.cbegin(),
-            req.upper_torque_thresholds_nominal.cend(),
-            upper_torque_thresholds_nominal.begin());
+            req.upper_torque_thresholds_nominal.cend(), upper_torque_thresholds_nominal.begin());
   std::array<double, 6> lower_force_thresholds_acceleration;
   std::copy(req.lower_force_thresholds_acceleration.cbegin(),
             req.lower_force_thresholds_acceleration.cend(),
@@ -92,32 +83,24 @@ void setFullCollisionBehavior(franka::Robot& robot,
             req.upper_force_thresholds_acceleration.cend(),
             upper_force_thresholds_acceleration.begin());
   std::array<double, 6> lower_force_thresholds_nominal;
-  std::copy(req.lower_force_thresholds_nominal.cbegin(),
-            req.lower_force_thresholds_nominal.cend(),
+  std::copy(req.lower_force_thresholds_nominal.cbegin(), req.lower_force_thresholds_nominal.cend(),
             lower_force_thresholds_nominal.begin());
   std::array<double, 6> upper_force_thresholds_nominal;
-  std::copy(req.upper_force_thresholds_nominal.cbegin(),
-            req.upper_force_thresholds_nominal.cend(),
+  std::copy(req.upper_force_thresholds_nominal.cbegin(), req.upper_force_thresholds_nominal.cend(),
             upper_force_thresholds_nominal.begin());
-  robot.setCollisionBehavior(
-      lower_torque_thresholds_acceleration,
-      upper_torque_thresholds_acceleration, lower_torque_thresholds_nominal,
-      upper_torque_thresholds_nominal, lower_force_thresholds_acceleration,
-      upper_force_thresholds_acceleration, lower_force_thresholds_nominal,
-      upper_force_thresholds_nominal);
+  robot.setCollisionBehavior(lower_torque_thresholds_acceleration,
+                             upper_torque_thresholds_acceleration, lower_torque_thresholds_nominal,
+                             upper_torque_thresholds_nominal, lower_force_thresholds_acceleration,
+                             upper_force_thresholds_acceleration, lower_force_thresholds_nominal,
+                             upper_force_thresholds_nominal);
 }
 
-void setLoad(franka::Robot& robot,
-             const SetLoad::Request& req,
-             SetLoad::Response& /* res */) {
+void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Response& /* res */) {
   double mass(req.mass);
-  std::array<double, 3>
-      F_x_center_load;  // NOLINT [readability-identifier-naming]
-  std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(),
-            F_x_center_load.begin());
+  std::array<double, 3> F_x_center_load;  // NOLINT [readability-identifier-naming]
+  std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(), F_x_center_load.begin());
   std::array<double, 9> load_inertia;
-  std::copy(req.load_inertia.cbegin(), req.load_inertia.cend(),
-            load_inertia.begin());
+  std::copy(req.load_inertia.cbegin(), req.load_inertia.cend(), load_inertia.begin());
 
   robot.setLoad(mass, F_x_center_load, load_inertia);
 }

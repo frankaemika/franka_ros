@@ -14,12 +14,10 @@
 namespace franka_example_controllers {
 
 class ModelExampleController
-    : public controller_interface::MultiInterfaceController<
-          franka_hw::FrankaModelInterface> {
+    : public controller_interface::MultiInterfaceController<franka_hw::FrankaModelInterface> {
  public:
   ModelExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& node_handle);
+  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
   void update(const ros::Time&, const ros::Duration&);
 
  private:

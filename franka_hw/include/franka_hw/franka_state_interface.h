@@ -36,7 +36,7 @@ class FrankaStateHandle {
  * robot base_link and the homogenous transformation from
  * End-effector frame to base_link frame as well joint_specific states
  */
-class FrankaStateInterface
-    : public hardware_interface::HardwareResourceManager<FrankaStateHandle> {};
+class FrankaStateInterface : public hardware_interface::HardwareResourceManager<FrankaStateHandle> {
+};
 
 }  // namespace franka_hw

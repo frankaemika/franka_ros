@@ -25,8 +25,7 @@ std::ostream& operator<<(std::ostream& ostream, ControlMode mode) {
     if ((mode & ControlMode::CartesianPose) != ControlMode::None) {
       names.emplace_back("CartesianPose");
     }
-    std::copy(names.cbegin(), names.cend() - 1,
-              std::ostream_iterator<std::string>(ostream, ", "));
+    std::copy(names.cbegin(), names.cend() - 1, std::ostream_iterator<std::string>(ostream, ", "));
     ostream << names.back();
   }
   return ostream;
