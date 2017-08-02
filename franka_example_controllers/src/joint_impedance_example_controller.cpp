@@ -13,8 +13,7 @@ namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
-  std::copy(array.cbegin(), array.cend() - 1,
-            std::ostream_iterator<T>(ostream, ","));
+  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
   std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
   ostream << "]";
   return ostream;
@@ -23,52 +22,42 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 namespace franka_example_controllers {
 
-JointImpedanceExampleController::JointImpedanceExampleController()
-    : rate_trigger_(1.0) {}
+JointImpedanceExampleController::JointImpedanceExampleController() : rate_trigger_(1.0) {}
 
-bool JointImpedanceExampleController::init(
-    hardware_interface::RobotHW* robot_hw,
-    ros::NodeHandle& node_handle) {
+bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
+                                           ros::NodeHandle& node_handle) {
   if (!node_handle.getParam("arm_id", arm_id_)) {
-    ROS_ERROR(
-        "JointImpedanceExampleController: Could not read parameter arm_id");
+    ROS_ERROR("JointImpedanceExampleController: Could not read parameter arm_id");
     return false;
   }
   if (!node_handle.getParam("radius", radius_)) {
     ROS_INFO_STREAM(
-        "JointImpedanceExampleController: No parameter radius, defaulting to: "
-        << radius_);
+        "JointImpedanceExampleController: No parameter radius, defaulting to: " << radius_);
   }
   if (std::fabs(radius_) < 0.005) {
-    ROS_INFO_STREAM(
-        "JointImpedanceExampleController: Set radius to small, defaulting to: "
-        << 0.1);
+    ROS_INFO_STREAM("JointImpedanceExampleController: Set radius to small, defaulting to: " << 0.1);
     radius_ = 0.1;
   }
 
   if (!node_handle.getParam("vel_max", vel_max_)) {
     ROS_INFO_STREAM(
-        "JointImpedanceExampleController: No parameter vel_max, defaulting to: "
-        << vel_max_);
+        "JointImpedanceExampleController: No parameter vel_max, defaulting to: " << vel_max_);
   }
   if (!node_handle.getParam("acceleration_time", acceleration_time_)) {
     ROS_INFO_STREAM(
-        "JointImpedanceExampleController: No parameter acceleration_time, "
-        "defaulting to: "
+        "JointImpedanceExampleController: No parameter acceleration_time, defaulting to: "
         << acceleration_time_);
   }
 
   XmlRpc::XmlRpcValue tmp;
   if (!node_handle.getParam("joint_names", tmp)) {
     ROS_ERROR(
-        "JointImpedanceExampleController: Could not get joint_names, aborting "
-        "controller init!");
+        "JointImpedanceExampleController: Could not get joint_names, aborting controller init!");
     return false;
   }
   if (tmp.size() != 7) {
     ROS_ERROR(
-        "JointImpedanceExampleController: Wrong number of joint_names, "
-        "aborting controller init!");
+        "JointImpedanceExampleController: Wrong number of joint_names, aborting controller init!");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
@@ -77,15 +66,12 @@ bool JointImpedanceExampleController::init(
 
   tmp.clear();
   if (!node_handle.getParam("k_gains", tmp)) {
-    ROS_ERROR(
-        "JointImpedanceExampleController: Could not get k_gains, aborting "
-        "controller init!");
+    ROS_ERROR("JointImpedanceExampleController: Could not get k_gains, aborting controller init!");
     return false;
   }
   if (tmp.size() != 7) {
     ROS_ERROR(
-        "JointImpedanceExampleController: Wrong number of k_gains, aborting "
-        "controller init!");
+        "JointImpedanceExampleController: Wrong number of k_gains, aborting controller init!");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
@@ -94,15 +80,12 @@ bool JointImpedanceExampleController::init(
 
   tmp.clear();
   if (!node_handle.getParam("d_gains", tmp)) {
-    ROS_ERROR(
-        "JointImpedanceExampleController: Could not get d_gains, aborting "
-        "controller init!");
+    ROS_ERROR("JointImpedanceExampleController: Could not get d_gains, aborting controller init!");
     return false;
   }
   if (tmp.size() != 7) {
     ROS_ERROR(
-        "JointImpedanceExampleController: Wrong number of d_gains, aborting "
-        "controller init!");
+        "JointImpedanceExampleController: Wrong number of d_gains, aborting controller init!");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
@@ -112,58 +95,48 @@ bool JointImpedanceExampleController::init(
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting model interface from "
-        "hardware");
+        "JointImpedanceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
-    model_handle_.reset(new franka_hw::FrankaModelHandle(
-        model_interface_->getHandle(arm_id_ + "_model")));
-  } catch (hardware_interface::HardwareInterfaceException& e) {
+    model_handle_.reset(
+        new franka_hw::FrankaModelHandle(model_interface_->getHandle(arm_id_ + "_model")));
+  } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Exception getting model handle from "
-        "interface: "
-        << e.what());
+        "JointImpedanceExampleController: Exception getting model handle from interface: "
+        << ex.what());
     return false;
   }
 
-  cartesian_pose_interface_ =
-      robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
+  cartesian_pose_interface_ = robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface_ == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting cartesian pose "
-        "interface from hardware");
+        "JointImpedanceExampleController: Error getting cartesian pose interface from hardware");
     return false;
   }
   try {
     cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
         cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
-  } catch (hardware_interface::HardwareInterfaceException& e) {
+  } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Exception getting cartesian pose "
-        "handle from "
-        "interface: "
-        << e.what());
+        "JointImpedanceExampleController: Exception getting cartesian pose handle from interface: "
+        << ex.what());
     return false;
   }
   initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
 
-  effort_joint_interface_ =
-      robot_hw->get<hardware_interface::EffortJointInterface>();
+  effort_joint_interface_ = robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface_ == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting effort joint interface "
-        "from hardware");
+        "JointImpedanceExampleController: Error getting effort joint interface from hardware");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
     try {
-      joint_handles_.push_back(
-          effort_joint_interface_->getHandle(joint_names_[i]));
+      joint_handles_.push_back(effort_joint_interface_->getHandle(joint_names_[i]));
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
       ROS_ERROR_STREAM(
-          "JointImpedanceExampleController: Exception getting joint handles: "
-          << ex.what());
+          "JointImpedanceExampleController: Exception getting joint handles: " << ex.what());
       return false;
     }
   }
@@ -198,13 +171,12 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   std::array<double, 7> dq = robot_state.dq;
   std::array<double, 7> coriolis = model_handle_->getCoriolis(
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
-  std::array<double, 7> gravity =
-      model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
+  std::array<double, 7> gravity = model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
 
   std::array<double, 7> tau_d;
   for (size_t i = 0; i < 7; ++i) {
-    tau_d[i] = k_gains_[i] * (q_desired[i] - q_current[i]) -
-               std::fabs(d_gains_[i]) * dq[i] + coriolis[i];
+    tau_d[i] =
+        k_gains_[i] * (q_desired[i] - q_current[i]) - std::fabs(d_gains_[i]) * dq[i] + coriolis[i];
     joint_handles_[i].setCommand(tau_d[i]);
   }
 
@@ -241,6 +213,5 @@ void JointImpedanceExampleController::stopping(const ros::Time& /*time*/) {
 
 }  // namespace franka_example_controllers
 
-PLUGINLIB_EXPORT_CLASS(
-    franka_example_controllers::JointImpedanceExampleController,
-    controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::JointImpedanceExampleController,
+                       controller_interface::ControllerBase)

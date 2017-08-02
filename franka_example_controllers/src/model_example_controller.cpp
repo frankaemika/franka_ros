@@ -17,8 +17,7 @@ namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
-  std::copy(array.cbegin(), array.cend() - 1,
-            std::ostream_iterator<T>(ostream, ","));
+  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
   std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
   ostream << "]";
   return ostream;
@@ -38,35 +37,28 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
-    ROS_ERROR_STREAM(
-        "ModelExampleController: Error getting model interface from hardware");
+    ROS_ERROR_STREAM("ModelExampleController: Error getting model interface from hardware");
     return false;
   }
 
   try {
-    model_handle_.reset(new franka_hw::FrankaModelHandle(
-        model_interface_->getHandle(arm_id_ + "_model")));
-  } catch (hardware_interface::HardwareInterfaceException& e) {
+    model_handle_.reset(
+        new franka_hw::FrankaModelHandle(model_interface_->getHandle(arm_id_ + "_model")));
+  } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "ModelExampleController: Exception getting model handle from "
-        "interface: "
-        << e.what());
+        "ModelExampleController: Exception getting model handle from interface: " << ex.what());
     return false;
   }
   return true;
 }
 
-void ModelExampleController::update(const ros::Time& /*time*/,
-                                    const ros::Duration& /*period*/) {
+void ModelExampleController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   if (rate_trigger_()) {
-    std::array<double, 49> mass =
-        model_handle_->getMass({{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}},
-                               0.0, {{0.0, 0.0, 0.0}});
+    std::array<double, 49> mass = model_handle_->getMass(
+        {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
     std::array<double, 7> coriolis = model_handle_->getCoriolis(
-        {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0,
-        {{0.0, 0.0, 0.0}});
-    std::array<double, 7> gravity =
-        model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
+        {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
+    std::array<double, 7> gravity = model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
     ROS_INFO("--------------------------------------------------");
     ROS_INFO_STREAM("mass :" << mass);
     ROS_INFO_STREAM("coriolis: " << coriolis);

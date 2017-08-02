@@ -18,15 +18,13 @@
 
 namespace franka_example_controllers {
 
-class JointImpedanceExampleController
-    : public controller_interface::MultiInterfaceController<
-          franka_hw::FrankaModelInterface,
-          hardware_interface::EffortJointInterface,
-          franka_hw::FrankaPoseCartesianInterface> {
+class JointImpedanceExampleController : public controller_interface::MultiInterfaceController<
+                                            franka_hw::FrankaModelInterface,
+                                            hardware_interface::EffortJointInterface,
+                                            franka_hw::FrankaPoseCartesianInterface> {
  public:
   JointImpedanceExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw,
-            ros::NodeHandle& node_handle);
+  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
   void update(const ros::Time&, const ros::Duration& period);
   void stopping(const ros::Time&);
 
