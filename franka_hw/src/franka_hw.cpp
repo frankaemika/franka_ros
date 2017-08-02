@@ -331,10 +331,13 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
       return false;
   }
 
-  ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to " << requested_control_mode);
-  current_control_mode_ = requested_control_mode;
+  if (current_control_mode_ != requested_control_mode) {
+    ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
+                        << requested_control_mode);
+    current_control_mode_ = requested_control_mode;
 
-  controller_active_ = false;
+    controller_active_ = false;
+  }
 
   return true;
 }
