@@ -25,10 +25,10 @@ joint_impedance_example_controller:
         - franka_emika_joint5
         - franka_emika_joint6
         - franka_emika_joint7
-    k_gains: [1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0, 1000.0]
-    d_gains: [50.0, 50.0, 50.0, 50.0, 50.0, 50.0, 50.0]
+    k_gains: [1000.0, 1000.0, 1000.0, 1000.0, 500.0, 300.0, 100.0]
+    d_gains: [100.0, 100.0, 100.0, 100.0, 50.0, 30.0, 10.0]
     radius: 0.1
     acceleration_time: 2.0
-    vel_max: 0.06
-    
-
+    vel_max: 0.15
+    publish_rate: 10.0    
+    coriolis_factor: 1.0

@@ -92,6 +92,18 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
     d_gains_[i] = (static_cast<double>(tmp[i]));
   }
 
+  double publish_rate(30.0);
+  if (!node_handle.getParam("publish_rate", publish_rate)) {
+    ROS_INFO_STREAM("JointImpedanceExampleController: publish_rate not found. Defaulting to "
+                    << publish_rate);
+  }
+  rate_trigger_ = franka_hw::TriggerRate(publish_rate);
+
+  if (!node_handle.getParam("coriolis_factor", coriolis_factor_)) {
+    ROS_INFO_STREAM("JointImpedanceExampleController: coriolis_factor not found. Defaulting to "
+                    << coriolis_factor_);
+  }
+
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
     ROS_ERROR_STREAM(
@@ -175,8 +187,8 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
 
   std::array<double, 7> tau_d;
   for (size_t i = 0; i < 7; ++i) {
-    tau_d[i] =
-        k_gains_[i] * (q_desired[i] - q_current[i]) - std::fabs(d_gains_[i]) * dq[i] + coriolis[i];
+    tau_d[i] = k_gains_[i] * (q_desired[i] - q_current[i]) - std::fabs(d_gains_[i]) * dq[i] +
+               coriolis_factor_ * coriolis[i];
     joint_handles_[i].setCommand(tau_d[i]);
   }
 

@@ -48,6 +48,7 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   double vel_current_{0.0};
   std::array<double, 16> initial_pose_;
   realtime_tools::RealtimePublisher<JointTorqueComparison> torques_publisher_;
+  double coriolis_factor_{1.0};
 };
 
 }  // namespace franka_example_controllers
