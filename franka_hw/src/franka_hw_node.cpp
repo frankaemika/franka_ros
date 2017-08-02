@@ -44,14 +44,11 @@ int main(int argc, char** argv) {
   franka::Robot robot(robot_ip);
 
   // Set default collision behavior
-  robot.setCollisionBehavior({{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-                             {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-                             {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-                             {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
-                             {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
-                             {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
-                             {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
-                             {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
+  robot.setCollisionBehavior(
+      {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+      {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+      {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
+      {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
   std::atomic_bool has_error(false);
 
@@ -61,12 +58,10 @@ int main(int argc, char** argv) {
   services
       .advertiseService<franka_hw::SetJointImpedance>(
           node_handle, "set_joint_impedance",
-          std::bind(franka_hw::services::setJointImpedance, std::ref(robot), _1,
-                    _2))
+          std::bind(franka_hw::services::setJointImpedance, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
-          std::bind(franka_hw::services::setCartesianImpedance, std::ref(robot),
-                    _1, _2))
+          std::bind(franka_hw::services::setCartesianImpedance, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetEEFrame>(
           node_handle, "set_EE_frame",
           std::bind(franka_hw::services::setEEFrame, std::ref(robot), _1, _2))
@@ -75,34 +70,28 @@ int main(int argc, char** argv) {
           std::bind(franka_hw::services::setKFrame, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
-          std::bind(franka_hw::services::setForceTorqueCollisionBehavior,
-                    std::ref(robot), _1, _2))
+          std::bind(franka_hw::services::setForceTorqueCollisionBehavior, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
-          std::bind(franka_hw::services::setFullCollisionBehavior,
-                    std::ref(robot), _1, _2))
+          std::bind(franka_hw::services::setFullCollisionBehavior, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetLoad>(
-          node_handle, "set_load",
-          std::bind(franka_hw::services::setLoad, std::ref(robot), _1, _2))
+          node_handle, "set_load", std::bind(franka_hw::services::setLoad, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetTimeScalingFactor>(
           node_handle, "set_time_scaling_factor",
-          std::bind(franka_hw::services::setTimeScalingFactor, std::ref(robot),
-                    _1, _2));
+          std::bind(franka_hw::services::setTimeScalingFactor, std::ref(robot), _1, _2));
 
-  actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction>
-      recovery_action_server(node_handle, "error_recovery",
-                             [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
-                               try {
-                                 robot.automaticErrorRecovery();
-                                 has_error = false;
-                                 recovery_action_server.setSucceeded();
-                               } catch (const franka::Exception& ex) {
-                                 recovery_action_server.setAborted(
-                                     franka_hw::ErrorRecoveryResult(),
-                                     ex.what());
-                               }
-                             },
-                             false);
+  actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction> recovery_action_server(
+      node_handle, "error_recovery",
+      [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
+        try {
+          robot.automaticErrorRecovery();
+          has_error = false;
+          recovery_action_server.setSucceeded();
+        } catch (const franka::Exception& ex) {
+          recovery_action_server.setAborted(franka_hw::ErrorRecoveryResult(), ex.what());
+        }
+      },
+      false);
 
   franka::Model model = robot.loadModel();
   franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
@@ -110,8 +99,7 @@ int main(int argc, char** argv) {
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
 
-  controller_manager::ControllerManager control_manager(&franka_control,
-                                                        node_handle);
+  controller_manager::ControllerManager control_manager(&franka_control, node_handle);
 
   recovery_action_server.start();
 
@@ -142,12 +130,11 @@ int main(int argc, char** argv) {
 
     try {
       // Run control loop. Will exit if the controller is switched.
-      franka_control.control(
-          robot, [&](const ros::Time& now, const ros::Duration& period) {
-            control_manager.update(now, period);
-            franka_control.enforceLimits(period);
-            return ros::ok();
-          });
+      franka_control.control(robot, [&](const ros::Time& now, const ros::Duration& period) {
+        control_manager.update(now, period);
+        franka_control.enforceLimits(period);
+        return ros::ok();
+      });
     } catch (const franka::ControlException& e) {
       ROS_ERROR("%s", e.what());
       has_error = true;

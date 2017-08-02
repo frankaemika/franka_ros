@@ -21,9 +21,7 @@ class FrankaModelHandle {
   * @param[in] model A reference to a a franka::Model model instance
   * @param[in] robot_state A reference to the storage of the current robot state
   */
-  FrankaModelHandle(const std::string& name,
-                    franka::Model& model,
-                    franka::RobotState& robot_state)
+  FrankaModelHandle(const std::string& name, franka::Model& model, franka::RobotState& robot_state)
       : name_(name), model_(&model), robot_state_(&robot_state) {}
 
   /**
@@ -40,10 +38,10 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 49> getMass(const std::array<double, 9>& load_inertia,
-                                 double load_mass,
-                                 const std::array<double, 3>& F_x_Cload)
-      const {  // NOLINT (readability-identifier-naming)
+  std::array<double, 49> getMass(
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>& F_x_Cload) const {  // NOLINT (readability-identifier-naming)
     return model_->mass(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -57,11 +55,11 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 49> getMass(const franka::RobotState& robot_state,
-                                 const std::array<double, 9>& load_inertia,
-                                 double load_mass,
-                                 const std::array<double, 3>& F_x_Cload)
-      const {  // NOLINT (readability-identifier-naming)
+  std::array<double, 49> getMass(
+      const franka::RobotState& robot_state,
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>& F_x_Cload) const {  // NOLINT (readability-identifier-naming)
     return model_->mass(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -74,10 +72,10 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 7> getCoriolis(const std::array<double, 9>& load_inertia,
-                                    double load_mass,
-                                    const std::array<double, 3>& F_x_Cload)
-      const {  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> getCoriolis(
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>& F_x_Cload) const {  // NOLINT (readability-identifier-naming)
     return model_->coriolis(*robot_state_, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -91,11 +89,11 @@ class FrankaModelHandle {
   * @param[in] load_mass The mass of the load
   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
   */
-  std::array<double, 7> getCoriolis(const franka::RobotState& robot_state,
-                                    const std::array<double, 9>& load_inertia,
-                                    double load_mass,
-                                    const std::array<double, 3>& F_x_Cload)
-      const {  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> getCoriolis(
+      const franka::RobotState& robot_state,
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>& F_x_Cload) const {  // NOLINT (readability-identifier-naming)
     return model_->coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
   }
 
@@ -110,8 +108,7 @@ class FrankaModelHandle {
   */
   std::array<double, 7> getGravity(
       double load_mass,
-      const std::array<double, 3>&
-          F_x_Cload,  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const {
     return model_->gravity(*robot_state_, load_mass, F_x_Cload, gravity_earth);
   }
@@ -129,8 +126,7 @@ class FrankaModelHandle {
   std::array<double, 7> getGravity(
       const franka::RobotState& robot_state,
       double load_mass,
-      const std::array<double, 3>&
-          F_x_Cload,  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const {
     return model_->gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
   }
@@ -150,7 +146,7 @@ class FrankaModelHandle {
  * contact states etc.).
  *
  */
-class FrankaModelInterface
-    : public hardware_interface::HardwareResourceManager<FrankaModelHandle> {};
+class FrankaModelInterface : public hardware_interface::HardwareResourceManager<FrankaModelHandle> {
+};
 
 }  // namespace franka_hw

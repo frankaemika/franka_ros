@@ -23,8 +23,7 @@ namespace franka_gripper {
   * @param[in] state A gripper state to update
   * @param[in] gripper A pointer to a franka gripper
   */
-bool updateGripperState(const franka::Gripper& gripper,
-                        franka::GripperState* state);
+bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* state);
 
 /**
   * Wraps the execution of a gripper command action to catch exceptions and
@@ -32,8 +31,7 @@ bool updateGripperState(const franka::Gripper& gripper,
   *
   * @param[in] gripper A pointer to a franka gripper
   * @param[in] default_speed The default speed for a gripper action
-  * @param[in] newton_to_m_ampere_factor The mapping factor from Newton to milli
-  * Ampere
+  * @param[in] newton_to_m_ampere_factor The mapping factor from Newton to milliampere
   * @param[in] action_server A pointer to a gripper action server
   * @param[in] goal A gripper action goal
   */
@@ -41,8 +39,7 @@ void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
     double default_speed,
     double newton_to_m_ampere_factor,
-    actionlib::SimpleActionServer<control_msgs::GripperCommandAction>*
-        action_server,
+    actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
 
 /**

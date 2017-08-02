@@ -11,9 +11,8 @@
 
 namespace franka_example_controllers {
 
-class JointVelocityExampleController
-    : public controller_interface::MultiInterfaceController<
-          hardware_interface::VelocityJointInterface> {
+class JointVelocityExampleController : public controller_interface::MultiInterfaceController<
+                                           hardware_interface::VelocityJointInterface> {
  public:
   JointVelocityExampleController();
   bool init(hardware_interface::RobotHW* robot_hardware,
