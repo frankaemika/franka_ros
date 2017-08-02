@@ -3,14 +3,13 @@
   <name>franka_visualization</name>
   <version>0.0.1</version>
   <description>This package contains visualization tools for FRANKA EMIKA.</description>
-
   <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
-  <author>FRANKA EMIKA Research Interface Team</author>
-
   <license>NONE</license>
+  
   <url type="website">http://wiki.ros.org/franka_visualization</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -19,5 +18,4 @@
   <depend>Franka</depend>
   
   <exec_depend>xacro</exec_depend>
-
 </package>

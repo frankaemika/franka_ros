@@ -2,15 +2,14 @@
 <package format="2">
   <name>franka_gripper</name>
   <version>0.0.1</version>
-  <description>This package implements the franka gripper of Franka Emika for the use via service calls</description>
+  <description>This package implements the franka gripper of type Franka Hand for the use in ros</description>
   <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
-  <author>FRANKA EMIKA Research Interface Team</author>
-
   <license>NONE</license>
-
-  <url type="website">http://wiki.ros.org/franka_hw</url>
+  
+  <url type="website">http://wiki.ros.org/franka_gripper</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -23,6 +22,5 @@
   <depend>xmlrpcpp</depend>
   <depend>actionlib_msgs</depend>
     
-  <exec_depend>message_runtime</exec_depend>
-  
+  <exec_depend>message_runtime</exec_depend> 
 </package>

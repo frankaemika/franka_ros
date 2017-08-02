@@ -3,9 +3,14 @@
   <name>franka_example_controllers</name>
   <version>0.0.1</version>
   <description>The franka_example_controllers package</description>
-  <maintainer email="christoph.jaehne@franka.de">Christoph Jähne</maintainer>
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
   <license>NONE</license>
-
+  
+  <url type="website">http://wiki.ros.org/franka_example_controllers</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
+  
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roscpp</build_depend>
@@ -18,5 +23,4 @@
   <export>
     <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml"/>
   </export>
-
 </package>

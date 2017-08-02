@@ -2,17 +2,14 @@
 <package format="2">
   <name>franka_moveit_config</name>
   <version>0.0.1</version>
-  <description>
-     An automatically generated package with all the configuration and launch files for using FRANKA EMIKA with the MoveIt! Motion Planning Framework
-  </description>
-
-  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
-  <author>FRANKA EMIKA Research Interface Team</author>
-
+  <description> A partly automatically generated package with all the configuration and launch files for using FRANKA EMIKA with MoveIt!</description>
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer> 
   <license>NONE</license>
-
+  
+  <url type="website">http://wiki.ros.org/franka_moveit_config</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -29,7 +26,4 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>xacro</exec_depend>
-  <!-- This package is referenced in the warehouse launch files, but does not build out of the box at the moment. Commented the dependency until this works. -->
-  <!-- <run_depend>warehouse_ros_mongo</run_depend> -->
-
 </package>
