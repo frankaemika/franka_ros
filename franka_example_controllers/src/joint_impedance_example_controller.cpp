@@ -50,20 +50,26 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
   }
 
   if (!node_handle.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
-    ROS_ERROR("JointImpedanceExampleController: Invalid or no joint_names parameters provided, aborting controller init!");
+    ROS_ERROR(
+        "JointImpedanceExampleController: Invalid or no joint_names parameters provided, aborting "
+        "controller init!");
     return false;
   }
   for (auto name : joint_names_) {
-      ROS_INFO_STREAM("joint_names: " << name);
+    ROS_INFO_STREAM("joint_names: " << name);
   }
 
   if (!node_handle.getParam("k_gains", k_gains_) || k_gains_.size() != 7) {
-    ROS_ERROR("JointImpedanceExampleController:  Invalid or no k_gain parameters provided, aborting controller init!");
+    ROS_ERROR(
+        "JointImpedanceExampleController:  Invalid or no k_gain parameters provided, aborting "
+        "controller init!");
     return false;
   }
 
   if (!node_handle.getParam("d_gains", d_gains_) || d_gains_.size() != 7) {
-    ROS_ERROR("JointImpedanceExampleController:  Invalid or no d_gain parameters provided, aborting controller init!");
+    ROS_ERROR(
+        "JointImpedanceExampleController:  Invalid or no d_gain parameters provided, aborting "
+        "controller init!");
     return false;
   }
 
@@ -79,7 +85,8 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
                     << coriolis_factor_);
   }
 
-  franka_hw::FrankaModelInterface*  model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
+  franka_hw::FrankaModelInterface* model_interface =
+      robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting model interface from hardware");
@@ -95,7 +102,8 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
     return false;
   }
 
-  franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface = robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
+  franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface =
+      robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting cartesian pose interface from hardware");
@@ -112,7 +120,8 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
   }
   initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
 
-  hardware_interface::EffortJointInterface* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
+  hardware_interface::EffortJointInterface* effort_joint_interface =
+      robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting effort joint interface from hardware");
