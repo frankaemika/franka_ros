@@ -29,21 +29,17 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   void stopping(const ros::Time&);
 
  private:
-  franka_hw::FrankaModelInterface* model_interface_;
-  franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface_;
-  hardware_interface::EffortJointInterface* effort_joint_interface_;
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
   std::array<double, 7> last_tau_d_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   franka_hw::TriggerRate rate_trigger_;
-  std::string arm_id_;
   double radius_{0.1};
   double acceleration_time_{2.0};
   double vel_max_{0.05};
   std::vector<std::string> joint_names_;
-  std::array<double, 7> k_gains_;
-  std::array<double, 7> d_gains_;
+  std::vector<double> k_gains_;
+  std::vector<double> d_gains_;
   double angle_{0.0};
   double vel_current_{0.0};
   std::array<double, 16> initial_pose_;
