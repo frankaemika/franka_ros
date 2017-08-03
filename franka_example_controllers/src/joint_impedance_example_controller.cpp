@@ -55,9 +55,6 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
         "controller init!");
     return false;
   }
-  for (auto name : joint_names_) {
-    ROS_INFO_STREAM("joint_names: " << name);
-  }
 
   if (!node_handle.getParam("k_gains", k_gains_) || k_gains_.size() != 7) {
     ROS_ERROR(
