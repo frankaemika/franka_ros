@@ -151,6 +151,11 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   void enforceLimits(const ros::Duration& period);
 
+  /**
+   * Resets the joint limits interface
+   */
+  void reset();
+
  private:
   using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
 

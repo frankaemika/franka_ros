@@ -123,16 +123,17 @@ int main(int argc, char** argv) {
       }
     }
 
-    // Reset controllers before starting a motion
-    ros::Time now = ros::Time::now();
-    control_manager.update(now, now - last_time, true);
-    franka_control.update(robot.readOnce(), true);
-
     try {
       // Run control loop. Will exit if the controller is switched.
       franka_control.control(robot, [&](const ros::Time& now, const ros::Duration& period) {
-        control_manager.update(now, period);
-        franka_control.enforceLimits(period);
+        if (period.toSec() == 0.0) {
+          // Reset controllers before starting a motion
+          control_manager.update(now, period, true);
+          franka_control.reset();
+        } else {
+          control_manager.update(now, period);
+          franka_control.enforceLimits(period);
+        }
         return ros::ok();
       });
     } catch (const franka::ControlException& e) {
