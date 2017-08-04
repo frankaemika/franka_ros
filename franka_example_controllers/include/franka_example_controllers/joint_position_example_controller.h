@@ -19,6 +19,7 @@ class JointPositionExampleController : public controller_interface::MultiInterfa
   bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
             ros::NodeHandle& /*controller_node_handle*/);
+  void starting(const ros::Time&);
   void update(const ros::Time&, const ros::Duration& period);
 
  private:

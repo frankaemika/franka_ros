@@ -25,8 +25,8 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
  public:
   JointImpedanceExampleController();
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
+  void starting(const ros::Time&);
   void update(const ros::Time&, const ros::Duration& period);
-  void stopping(const ros::Time&);
 
  private:
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;

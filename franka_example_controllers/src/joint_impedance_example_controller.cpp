@@ -115,7 +115,6 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
         << ex.what());
     return false;
   }
-  initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
 
   hardware_interface::EffortJointInterface* effort_joint_interface =
       robot_hw->get<hardware_interface::EffortJointInterface>();
@@ -136,6 +135,10 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
   torques_publisher_.init(node_handle, "torque_comparison", 1);
 
   return true;
+}
+
+void JointImpedanceExampleController::starting(const ros::Time& /*time*/) {
+  initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
 }
 
 void JointImpedanceExampleController::update(const ros::Time& /*time*/,
@@ -194,12 +197,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
     last_tau_d_[i] = tau_d[i] + gravity[i];
   }
   return;
-}
-
-void JointImpedanceExampleController::stopping(const ros::Time& /*time*/) {
-  for (size_t i = 0; i < 7; ++i) {
-    joint_handles_[i].setCommand(0.0);
-  }
 }
 
 }  // namespace franka_example_controllers

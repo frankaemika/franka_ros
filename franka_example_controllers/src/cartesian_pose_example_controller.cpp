@@ -35,7 +35,6 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
   try {
     cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
         cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
-    initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "CartesianPoseExampleController: Exception getting cartesian handle: " << e.what());
@@ -43,6 +42,10 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
   }
   elapsed_time_ = ros::Duration(0.0);
   return true;
+}
+
+void CartesianPoseExampleController::starting(const ros::Time& /*time*/) {
+  initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
 }
 
 void CartesianPoseExampleController::update(const ros::Time& /*time*/,
