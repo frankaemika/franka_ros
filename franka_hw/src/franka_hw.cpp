@@ -126,11 +126,8 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
   registerInterface(&franka_model_interface_);
 }
 
-void FrankaHW::update(const franka::RobotState& robot_state, bool reset) {
+void FrankaHW::update(const franka::RobotState& robot_state) {
   robot_state_ = robot_state;
-  if (reset) {
-    position_joint_limit_interface_.reset();
-  }
 }
 
 bool FrankaHW::controllerActive() const noexcept {
@@ -229,8 +226,8 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
 // doSwitch runs on the main realtime thread
 void FrankaHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* start_list */,
                         const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
-  position_joint_limit_interface_.reset();
   if (current_control_mode_ != ControlMode::None) {
+    reset();
     controller_active_ = true;
   }
 }

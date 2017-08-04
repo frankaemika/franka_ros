@@ -81,11 +81,10 @@ class FrankaHW : public hardware_interface::RobotHW {
    * Updates the controller interfaces from the given robot state.
    *
    * @param[in] robot_state Current robot state.
-   * @param[in] reset If true, resets the controller interfaces.
    *
    * @throw franka::NetworkException if the connection is lost.
    */
-  void update(const franka::RobotState& robot_state, bool reset = false);
+  void update(const franka::RobotState& robot_state);
 
   /**
    * Indicates whether there is an active controller.
