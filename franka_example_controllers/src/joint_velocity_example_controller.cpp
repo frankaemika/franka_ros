@@ -66,9 +66,9 @@ void JointVelocityExampleController::update(const ros::Time& /*time*/,
 }
 
 void JointVelocityExampleController::stopping(const ros::Time& /*time*/) {
-  for (auto joint_handle : velocity_joint_handles_) {
-    joint_handle.setCommand(0.0);
-  }
+    // WARNING: DO NOT SEND ZERO VELOCITIES HERE AS IN CASE OF ABORTING DURING MOTION
+    // A JUMP TO ZERO WILL BE COMMANDED PUTTING HIGH LOADS ON THE ROBOT. LET THE DEFAULT
+    // BUILT-IN STOPPING BEHAVIOR SLOW DOWN THE ROBOT.
 }
 
 }  // namespace franka_example_controllers
