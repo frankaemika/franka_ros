@@ -109,6 +109,7 @@
     <disable_collisions link1="franka_emika_leftfinger" link2="franka_emika_link4" reason="Never" />
     <disable_collisions link1="franka_emika_leftfinger" link2="franka_emika_link6" reason="Never" />
     <disable_collisions link1="franka_emika_leftfinger" link2="franka_emika_link7" reason="Never" />
+    <disable_collisions link1="franka_emika_leftfinger" link2="franka_emika_rightfinger" reason="Default" />
     <disable_collisions link1="franka_emika_link0" link2="franka_emika_link1" reason="Adjacent" />
     <disable_collisions link1="franka_emika_link0" link2="franka_emika_link2" reason="Never" />
     <disable_collisions link1="franka_emika_link0" link2="franka_emika_link3" reason="Never" />
@@ -129,7 +130,7 @@
     <disable_collisions link1="franka_emika_link4" link2="franka_emika_link7" reason="Never" />
     <disable_collisions link1="franka_emika_link4" link2="franka_emika_rightfinger" reason="Never" />
     <disable_collisions link1="franka_emika_link5" link2="franka_emika_link6" reason="Adjacent" />
-    <disable_collisions link1="franka_emika_link5" link2="franka_emika_link7" reason="Never" />
+    <disable_collisions link1="franka_emika_link5" link2="franka_emika_link7" reason="Default" />
     <disable_collisions link1="franka_emika_link6" link2="franka_emika_link7" reason="Adjacent" />
     <disable_collisions link1="franka_emika_link6" link2="franka_emika_rightfinger" reason="Never" />
     <disable_collisions link1="franka_emika_link7" link2="franka_emika_rightfinger" reason="Never" />
