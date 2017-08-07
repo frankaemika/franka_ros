@@ -13,6 +13,8 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>message_generation</build_depend>
+
   <depend>Franka</depend>
   <depend>actionlib</depend>
   <depend>actionlib_msgs</depend>
@@ -21,7 +23,6 @@
   <depend>geometry_msgs</depend>
   <depend>hardware_interface</depend>
   <depend>joint_limits_interface</depend>
-  <depend>message_generation</depend>
   <depend>pluginlib</depend>
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>

@@ -38,7 +38,6 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
     joint_names_[i] = static_cast<std::string>(parameters[i]);
     try {
       position_joint_handles_[i] = position_joint_interface_->getHandle(joint_names_[i]);
-      initial_pose_[i] = position_joint_handles_[i].getPosition();
     } catch (const hardware_interface::HardwareInterfaceException& e) {
       ROS_ERROR_STREAM(
           "JointPositionExampleController: Exception getting joint handles: " << e.what());
@@ -47,6 +46,12 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
   }
   elapsed_time_ = ros::Duration(0.0);
   return true;
+}
+
+void JointPositionExampleController::starting(const ros::Time& /*time*/) {
+  for (size_t i = 0; i < 7; ++i) {
+    initial_pose_[i] = position_joint_handles_[i].getPosition();
+  }
 }
 
 void JointPositionExampleController::update(const ros::Time& /*time*/,

@@ -24,4 +24,9 @@
       A controller that evaluates and prints the dynamic model of Franka
     </description>
   </class>
+    <class name="franka_example_controllers/JointImpedanceExampleController" type="franka_example_controllers::JointImpedanceExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that tracks a cartesian path with a joint impedance controller that compensates coriolis torques. The torque commands are compared to measured torques in Console outputs.
+    </description>
+  </class>
 </library>
