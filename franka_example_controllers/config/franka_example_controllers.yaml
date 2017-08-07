@@ -13,3 +13,36 @@ cartesian_velocity_example_controller:
 model_example_controller:
     type: franka_example_controllers/ModelExampleController
     arm_id: franka_emika
+
+joint_impedance_example_controller:
+    type: franka_example_controllers/JointImpedanceExampleController
+    arm_id: franka_emika
+    joint_names:
+        - franka_emika_joint1
+        - franka_emika_joint2
+        - franka_emika_joint3
+        - franka_emika_joint4
+        - franka_emika_joint5
+        - franka_emika_joint6
+        - franka_emika_joint7
+    k_gains:
+        - 1000.0
+        - 1000.0
+        - 1000.0
+        - 1000.0
+        - 500.0
+        - 300.0
+        - 100.0
+    d_gains:
+        - 100.0
+        - 100.0
+        - 100.0
+        - 100.0
+        - 50.0
+        - 30.0
+        - 10.0
+    radius: 0.1
+    acceleration_time: 2.0
+    vel_max: 0.15
+    publish_rate: 10.0    
+    coriolis_factor: 1.0

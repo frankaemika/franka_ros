@@ -9,8 +9,16 @@ find_package(catkin REQUIRED COMPONENTS
   franka_description
   franka_hw
   pluginlib
+  realtime_tools
   roscpp
+  message_generation
 )
+
+add_message_files(FILES
+  JointTorqueComparison.msg
+)
+
+generate_messages()
 
 catkin_package(
   INCLUDE_DIRS include
@@ -26,9 +34,14 @@ add_library(franka_example_controllers
   src/joint_position_example_controller.cpp
   src/joint_velocity_example_controller.cpp
   src/model_example_controller.cpp
+  src/joint_impedance_example_controller.cpp
 )
 
-add_dependencies(franka_example_controllers ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(franka_example_controllers
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_generate_messages_cpp
+)
 
 target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})
 
