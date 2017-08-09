@@ -9,7 +9,21 @@ position_joint_trajectory_controller:
     - franka_emika_joint6
     - franka_emika_joint7
   constraints:
-    goal_time: 0.01
+    goal_time: 0.5
+    franka_emika_joint1:
+      goal: 0.05
+    franka_emika_joint2:
+      goal: 0.05
+    franka_emika_joint3:
+      goal: 0.05
+    franka_emika_joint4:
+      goal: 0.05
+    franka_emika_joint5:
+      goal: 0.05
+    franka_emika_joint6:
+      goal: 0.05
+    franka_emika_joint7:
+      goal: 0.05
 
 effort_joint_trajectory_controller:
   type: "effort_controllers/JointTrajectoryController"
@@ -22,7 +36,21 @@ effort_joint_trajectory_controller:
     - franka_emika_joint6
     - franka_emika_joint7
   constraints:
-    goal_time: 0.01
+    goal_time: 0.5
+    franka_emika_joint1:
+      goal: 0.05
+    franka_emika_joint2:
+      goal: 0.05
+    franka_emika_joint3:
+      goal: 0.05
+    franka_emika_joint4:
+      goal: 0.05
+    franka_emika_joint5:
+      goal: 0.05
+    franka_emika_joint6:
+      goal: 0.05
+    franka_emika_joint7:
+      goal: 0.05
   gains:
     franka_emika_joint1: {p: 100, d: 10, i: 0, i_clamp: 1}
     franka_emika_joint2: {p: 100, d: 10, i: 0, i_clamp: 1}
