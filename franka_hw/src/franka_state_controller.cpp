@@ -14,6 +14,15 @@
 
 #include <franka_hw/franka_cartesian_command_interface.h>
 
+namespace {
+tf::Transform convertArrayToTf(const std::array<double, 16>& transform) {
+  tf::Matrix3x3 rotation(transform[0], transform[4], transform[8], transform[1], transform[5],
+                         transform[9], transform[2], transform[6], transform[10]);
+  tf::Vector3 translation(transform[12], transform[13], transform[14]);
+  return tf::Transform(rotation, translation);
+}
+}  // anonymous namespace
+
 namespace franka_hw {
 
 FrankaStateController::FrankaStateController()
@@ -44,20 +53,12 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default "
                     << publish_rate << " [Hz].");
   }
-  XmlRpc::XmlRpcValue params;
 
-  if (!root_node_handle.getParam("joint_names", params)) {
-    ROS_ERROR("FrankaStateController: Could not get parameter joint_names");
+  if (!root_node_handle.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
+    ROS_ERROR(
+        "FrankaStateController: Invalid or no joint_names parameters provided, aborting "
+        "controller init!");
     return false;
-  }
-
-  if (params.size() != 7) {
-    ROS_ERROR("FrankaStateController: Could not get 7 joint names from params");
-    return false;
-  }
-  joint_names_.resize(params.size());
-  for (int i = 0; i < params.size(); ++i) {
-    joint_names_[i] = static_cast<std::string>(params[i]);
   }
 
   try {
@@ -235,9 +236,9 @@ void FrankaStateController::publishTransforms(const ros::Time& time) {
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
-    translation = tf::Vector3(0.0, 0.0, 0.0);
-    transform = tf::Transform(quaternion, translation);
-    trafo = tf::StampedTransform(transform, time, arm_id_ + "_EE", arm_id_ + "_K");
+
+    trafo = tf::StampedTransform(convertArrayToTf(robot_state_.EE_T_K), time, arm_id_ + "_EE",
+                                 arm_id_ + "_K");
     transformStampedTFToMsg(trafo, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
     publisher_transforms_.unlockAndPublish();
