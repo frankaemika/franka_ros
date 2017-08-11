@@ -210,7 +210,7 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     }
 
     for (size_t i = 0; i < 3; ++i) {
-      publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_xCload[i];
+      publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_x_Cload[i];
     }
 
     publisher_franka_states_.msg_.time = robot_state_.time.s();
