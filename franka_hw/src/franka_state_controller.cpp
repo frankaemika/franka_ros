@@ -134,14 +134,16 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
-    tf::StampedTransform trafo(transform, ros::Time::now(), arm_id_ + "_link8", arm_id_ + "_EE");
+    tf::StampedTransform stamped_transform(transform, ros::Time::now(), arm_id_ + "_link8",
+                                           arm_id_ + "_EE");
     geometry_msgs::TransformStamped transform_message;
-    transformStampedTFToMsg(trafo, transform_message);
+    transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
     translation = tf::Vector3(0.0, 0.0, 0.0);
     transform = tf::Transform(quaternion, translation);
-    trafo = tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_EE", arm_id_ + "_K");
-    transformStampedTFToMsg(trafo, transform_message);
+    stamped_transform =
+        tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_EE", arm_id_ + "_K");
+    transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
   }
   {
@@ -240,14 +242,14 @@ void FrankaStateController::publishJointStates(const ros::Time& time) {
 
 void FrankaStateController::publishTransforms(const ros::Time& time) {
   if (publisher_transforms_.trylock()) {
-    tf::StampedTransform trafo(convertArrayToTf(robot_state_.F_T_EE), time, arm_id_ + "_link8",
-                               arm_id_ + "_EE");
+    tf::StampedTransform stamped_transform(convertArrayToTf(robot_state_.F_T_EE), time,
+                                           arm_id_ + "_link8", arm_id_ + "_EE");
     geometry_msgs::TransformStamped transform_message;
-    transformStampedTFToMsg(trafo, transform_message);
+    transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
-    trafo = tf::StampedTransform(convertArrayToTf(robot_state_.EE_T_K), time, arm_id_ + "_EE",
-                                 arm_id_ + "_K");
-    transformStampedTFToMsg(trafo, transform_message);
+    stamped_transform = tf::StampedTransform(convertArrayToTf(robot_state_.EE_T_K), time,
+                                             arm_id_ + "_EE", arm_id_ + "_K");
+    transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
     publisher_transforms_.unlockAndPublish();
   }
