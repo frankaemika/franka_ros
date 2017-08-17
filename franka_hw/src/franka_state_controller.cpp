@@ -73,7 +73,8 @@ franka_hw::Errors errorsToMessage(const franka::Errors& error) {
       static_cast<decltype(message.joint_motion_generator_velocity_discontinuity)>(
           error.joint_motion_generator_velocity_discontinuity);
   message.joint_motion_generator_velocity_limits_violation =
-      message.joint_motion_generator_velocity_limits_violation;
+      static_cast<decltype(message.joint_motion_generator_velocity_limits_violation)>(
+          error.joint_motion_generator_velocity_limits_violation);
   message.joint_position_limits_violation =
       static_cast<decltype(message.joint_position_limits_violation)>(
           error.joint_position_limits_violation);
