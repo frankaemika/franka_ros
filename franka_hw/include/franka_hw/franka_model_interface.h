@@ -133,144 +133,82 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the Cartesian pose of a joint w.r.t. the O-frame of the robot
+   * Returns the Cartesian pose matrix of a frame w.r.t. the O-frame of the robot
    *
-   * @param[in] joint_name The name of the joint
-   * @param[in] robot_state A user-given robot state to evaluate the forward kinematics
-   *
-   * @return Vectorized 4x4 homogeneous transform, column-major.
-   */
-  std::array<double, 16> getJointPose(const std::string& joint_name,
-                                      const franka::RobotState& robot_state) {
-    franka::Frame frame;
-    if (getFrameFromName(joint_name, &frame)) {
-      return model_->jointPose(frame, robot_state);
-    }
-    return {{1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0}};
-  }
-
-  /**
-   * Returns the Cartesian pose of a joint w.r.t. the O-frame of the robot
-   *
-   * @param[in] joint_name The name of the joint
+   * @param[in] frame The desired frame.
+   * @param[in] robot_state A user-given robot state to evaluate the forward kinematics.
    *
    * @return Vectorized 4x4 homogeneous transform, column-major.
    */
-  std::array<double, 16> getJointPose(const std::string& joint_name) {
-    return getJointPose(joint_name, *robot_state_);
+  std::array<double, 16> getPose(const franka::Frame& frame,
+                                 const franka::RobotState& robot_state) {
+    return model_->pose(frame, robot_state);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given joint w.r.t. the joint frame. The Jacobian is represented
+   * Returns the Cartesian pose matrix of a frame w.r.t. the O-frame of the robot
+   *
+   * @param[in] frame The desired frame.
+   *
+   * @return Vectorized 4x4 homogeneous transform, column-major.
+   */
+  std::array<double, 16> getPose(const franka::Frame& frame) {
+    return getPose(frame, *robot_state_);
+  }
+
+  /**
+   * Gets the 6x7 Jacobian for the given frame w.r.t. that frame. The Jacobian is represented
    * as a 6x7 matrix in column-major format and is evaluated at the given robot state
    *
-   * @param[in] joint_name The name of the desired joint.
+   * @param[in] frame The desired frame.
    * @param[in] robot_state State from which the pose should be calculated.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  std::array<double, 42> getBodyJacobian(const std::string& joint_name,
+  std::array<double, 42> getBodyJacobian(const franka::Frame& frame,
                                          const franka::RobotState& robot_state) {
-    franka::Frame frame;
-    if (getFrameFromName(joint_name, &frame)) {
-      return model_->bodyJacobian(frame, robot_state);
-    }
-    ROS_WARN_STREAM("FrankaModelInterface: Could not get Jacobian with name " << joint_name);
-    std::array<double, 42> empty{};
-    return empty;
+    return model_->bodyJacobian(frame, robot_state);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given joint w.r.t. the joint frame and for the current robot
+   * Gets the 6x7 Jacobian for the given frame w.r.t. that frame and for the current robot
    * state. The Jacobian is represented as a 6x7 matrix in column-major format.
    *
-   * @param[in] joint_name The name of the desired joint.
+   * @param[in] frame The desired frame.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  std::array<double, 42> getBodyJacobian(const std::string& joint_name) {
-    return getBodyJacobian(joint_name, *robot_state_);
+  std::array<double, 42> getBodyJacobian(const franka::Frame& frame) {
+    return getBodyJacobian(frame, *robot_state_);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given joint w.r.t. the link0 frame. The Jacobian is represented
+   * Gets the 6x7 Jacobian for the given frame w.r.t. the link0 frame. The Jacobian is represented
    * as a 6x7 matrix in column-major format and is evaluated at the given robot state
    *
-   * @param[in] joint_name The name of the desired joint.
+   * @param[in] frame The desired frame.
    * @param[in] robot_state State from which the pose should be calculated.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  std::array<double, 42> getZeroJacobian(const std::string& joint_name,
+  std::array<double, 42> getZeroJacobian(const franka::Frame& frame,
                                          const franka::RobotState& robot_state) {
-    franka::Frame frame;
-    if (getFrameFromName(joint_name, &frame)) {
-      return model_->zeroJacobian(frame, robot_state);
-    }
-    ROS_WARN_STREAM("FrankaModelInterface: Could not get Jacobian with name " << joint_name);
-    std::array<double, 42> empty{};
-    return empty;
+    return model_->zeroJacobian(frame, robot_state);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given joint w.r.t. the link0 frame and for the current robot
+   * Gets the 6x7 Jacobian for the given frame w.r.t. the link0 frame and for the current robot
    * state. The Jacobian is represented as a 6x7 matrix in column-major format.
    *
-   * @param[in] joint_name The name of the desired joint.
+   * @param[in] frame The desired frame.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  std::array<double, 42> getZeroJacobian(const std::string& joint_name) {
-    return getZeroJacobian(joint_name, *robot_state_);
+  std::array<double, 42> getZeroJacobian(const franka::Frame& frame) {
+    return getZeroJacobian(frame, *robot_state_);
   }
 
  private:
-  bool getFrameFromName(const std::string& name, franka::Frame* frame) {
-    int joint_index = std::atoi(&name.back());
-    std::string joint_string("joint");
-    joint_string.push_back(name.back());
-    if (joint_index >= 1 && joint_index <= 7 && name.rfind(joint_string) == name.length() - 6 &&
-        name.rfind(joint_string) != std::string::npos) {
-      switch (joint_index) {
-        case 1: {
-          *frame = franka::Frame::kJoint1;
-        }
-        case 2: {
-          *frame = franka::Frame::kJoint2;
-        }
-        case 3: {
-          *frame = franka::Frame::kJoint3;
-        }
-        case 4: {
-          *frame = franka::Frame::kJoint4;
-        }
-        case 5: {
-          *frame = franka::Frame::kJoint5;
-        }
-        case 6: {
-          *frame = franka::Frame::kJoint6;
-        }
-        case 7: {
-          *frame = franka::Frame::kJoint7;
-        }
-      }
-      return true;
-    }
-    size_t position_ee = name.rfind("_EE");
-    if (position_ee == name.length() - 3 && position_ee != std::string::npos) {
-      *frame = franka::Frame::kEndEffector;
-      return true;
-    }
-    size_t position_f = name.rfind("_F");
-    size_t position_link8 = name.rfind("link8");
-    if (position_f == name.length() - 2 && position_f != std::string::npos ||
-        position_link8 != std::string::npos) {
-      *frame = franka::Frame::kFlange;
-      return true;
-    }
-    return false;
-  }
-
   std::string name_;
   const franka::Model* model_;
   const franka::RobotState* robot_state_;
