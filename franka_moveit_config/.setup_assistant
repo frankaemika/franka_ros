@@ -7,4 +7,4 @@ moveit_setup_assistant_config:
   CONFIG:
     author_name: Franka Emika GmbH
     author_email: info@franka.de
-    generated_timestamp: 1500885580
+    generated_timestamp: 1501848099

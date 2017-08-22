@@ -5,7 +5,6 @@
   <arg name="controller" default="position" />
 
   <group ns="$(arg arm_id)">
-    <rosparam command="load" file="$(find franka_hw)/config/default_controllers.yaml" />
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controller)_joint_trajectory_controller --shutdown-timeout 2"/>
     <include file="$(find franka_moveit_config)/launch/move_group.launch" />
   </group>

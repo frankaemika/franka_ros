@@ -25,7 +25,7 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
   for (size_t i = 0; i < joint_names_.size(); ++i) {
     hardware_interface::JointStateHandle joint_handle_q_d(
-        joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq[i], &robot_state_.tau_J[i]);
+        joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq_d[i], &robot_state_.tau_J[i]);
 
     hardware_interface::JointStateHandle joint_handle_q(
         joint_names_[i], &robot_state_.q[i], &robot_state_.dq[i], &robot_state_.tau_J[i]);
@@ -126,11 +126,8 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
   registerInterface(&franka_model_interface_);
 }
 
-void FrankaHW::update(const franka::RobotState& robot_state, bool reset) {
+void FrankaHW::update(const franka::RobotState& robot_state) {
   robot_state_ = robot_state;
-  if (reset) {
-    position_joint_limit_interface_.reset();
-  }
 }
 
 bool FrankaHW::controllerActive() const noexcept {
@@ -229,8 +226,8 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
 // doSwitch runs on the main realtime thread
 void FrankaHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* start_list */,
                         const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
-  position_joint_limit_interface_.reset();
   if (current_control_mode_ != ControlMode::None) {
+    reset();
     controller_active_ = true;
   }
 }
@@ -331,10 +328,12 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
       return false;
   }
 
-  ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to " << requested_control_mode);
-  current_control_mode_ = requested_control_mode;
+  if (current_control_mode_ != requested_control_mode) {
+    ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to " << requested_control_mode);
+    current_control_mode_ = requested_control_mode;
 
-  controller_active_ = false;
+    controller_active_ = false;
+  }
 
   return true;
 }
@@ -349,6 +348,10 @@ std::array<double, 7> FrankaHW::getJointVelocityCommand() const {
 
 std::array<double, 7> FrankaHW::getJointEffortCommand() const {
   return effort_joint_command_.tau_J;
+}
+
+void FrankaHW::reset() {
+  position_joint_limit_interface_.reset();
 }
 
 }  // namespace franka_hw

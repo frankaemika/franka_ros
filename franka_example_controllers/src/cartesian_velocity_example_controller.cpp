@@ -52,7 +52,7 @@ void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
   elapsed_time_ += period;
 
   double time_max = 4.0;
-  double v_max = 0.1;
+  double v_max = 0.05;
   double angle = M_PI / 4.0;
   double cycle = std::floor(
       pow(-1.0, (elapsed_time_.toSec() - std::fmod(elapsed_time_.toSec(), time_max)) / time_max));
@@ -64,17 +64,9 @@ void CartesianVelocityExampleController::update(const ros::Time& /*time*/,
 }
 
 void CartesianVelocityExampleController::stopping(const ros::Time& /*time*/) {
-  try {
-    franka_hw::FrankaCartesianVelocityHandle cartesian_velocity_handle(
-        velocity_cartesian_interface_->getHandle(arm_id_ + "_robot"));
-    std::array<double, 6> command = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-    cartesian_velocity_handle.setCommand(command);
-  } catch (const hardware_interface::HardwareInterfaceException& e) {
-    ROS_ERROR_STREAM(
-        "CartesianVelocityExampleController: Exception getting cartesian "
-        "handle: "
-        << e.what());
-  }
+  // WARNING: DO NOT SEND ZERO VELOCITIES HERE AS IN CASE OF ABORTING DURING MOTION
+  // A JUMP TO ZERO WILL BE COMMANDED PUTTING HIGH LOADS ON THE ROBOT. LET THE DEFAULT
+  // BUILT-IN STOPPING BEHAVIOR SLOW DOWN THE ROBOT.
 }
 
 }  // namespace franka_example_controllers
