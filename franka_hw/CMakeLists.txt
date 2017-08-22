@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Franka REQUIRED)
 
 add_message_files(FILES
+  Errors.msg
   FrankaState.msg
 )
 
