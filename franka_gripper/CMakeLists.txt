@@ -53,7 +53,7 @@ add_dependencies(franka_gripper
 
 target_link_libraries(franka_gripper
    ${catkin_LIBRARIES}
-   Franka::franka
+   Franka::Franka
 )
 
 target_include_directories(franka_gripper PUBLIC
