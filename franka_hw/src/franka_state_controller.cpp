@@ -129,7 +129,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                     << publish_rate << " [Hz].");
   }
 
-  if (!root_node_handle.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
+  if (!root_node_handle.getParam("joint_names", joint_names_) ||
+      joint_names_.size() != robot_state_.q.size()) {
     ROS_ERROR(
         "FrankaStateController: Invalid or no joint_names parameters provided, aborting "
         "controller init!");
@@ -152,7 +153,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   {
     std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> > lock(
         publisher_joint_states_);
-    publisher_joint_states_.msg_.name.resize(7);
+    publisher_joint_states_.msg_.name.resize(joint_names_.size());
     publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
     publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
     publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
@@ -203,14 +204,35 @@ void FrankaStateController::update(const ros::Time& time, const ros::Duration& /
 
 void FrankaStateController::publishFrankaStates(const ros::Time& time) {
   if (publisher_franka_states_.trylock()) {
-    for (size_t i = 0; i < robot_state_.cartesian_collision.size(); ++i) {
+    static_assert(
+        sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.cartesian_contact),
+        "Robot state Cartesian members do not have same size");
+    static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.K_F_ext_hat_K),
+                  "Robot state Cartesian members do not have same size");
+    static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_F_ext_hat_K),
+                  "Robot state Cartesian members do not have same size");
+    for (size_t i = 0; i < robot_state_.cartesian_collision.size(); i++) {
       publisher_franka_states_.msg_.cartesian_collision[i] = robot_state_.cartesian_collision[i];
       publisher_franka_states_.msg_.cartesian_contact[i] = robot_state_.cartesian_contact[i];
       publisher_franka_states_.msg_.K_F_ext_hat_K[i] = robot_state_.K_F_ext_hat_K[i];
       publisher_franka_states_.msg_.O_F_ext_hat_K[i] = robot_state_.O_F_ext_hat_K[i];
     }
 
-    for (size_t i = 0; i < robot_state_.q.size(); ++i) {
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_J),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dtau_J),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.joint_collision),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.joint_contact),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.q_d),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_ext_hat_filtered),
+                  "Robot state joint members do not have same size");
+    for (size_t i = 0; i < robot_state_.q.size(); i++) {
       publisher_franka_states_.msg_.q[i] = robot_state_.q[i];
       publisher_franka_states_.msg_.dq[i] = robot_state_.dq[i];
       publisher_franka_states_.msg_.tau_J[i] = robot_state_.tau_J[i];
@@ -221,15 +243,21 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.tau_ext_hat_filtered[i] = robot_state_.tau_ext_hat_filtered[i];
     }
 
-    for (size_t i = 0; i < robot_state_.elbow.size(); ++i) {
+    for (size_t i = 0; i < robot_state_.elbow.size(); i++) {
       publisher_franka_states_.msg_.elbow[i] = robot_state_.elbow[i];
     }
 
-    for (size_t i = 0; i < robot_state_.elbow_d.size(); ++i) {
+    for (size_t i = 0; i < robot_state_.elbow_d.size(); i++) {
       publisher_franka_states_.msg_.elbow_d[i] = robot_state_.elbow_d[i];
     }
 
-    for (size_t i = 0; i < 16; ++i) {
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.F_T_EE),
+                  "Robot state transforms do not have same size");
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.EE_T_K),
+                  "Robot state transforms do not have same size");
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.O_T_EE_d),
+                  "Robot state transforms do not have same size");
+    for (size_t i = 0; i < robot_state_.O_T_EE.size(); i++) {
       publisher_franka_states_.msg_.O_T_EE[i] = robot_state_.O_T_EE[i];
       publisher_franka_states_.msg_.F_T_EE[i] = robot_state_.F_T_EE[i];
       publisher_franka_states_.msg_.EE_T_K[i] = robot_state_.EE_T_K[i];
@@ -237,11 +265,11 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     }
     publisher_franka_states_.msg_.m_load = robot_state_.m_load;
 
-    for (size_t i = 0; i < 9; ++i) {
+    for (size_t i = 0; i < robot_state_.I_load.size(); i++) {
       publisher_franka_states_.msg_.I_load[i] = robot_state_.I_load[i];
     }
 
-    for (size_t i = 0; i < 3; ++i) {
+    for (size_t i = 0; i < robot_state_.F_x_Cload.size(); i++) {
       publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_x_Cload[i];
     }
 
@@ -258,7 +286,11 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
 
 void FrankaStateController::publishJointStates(const ros::Time& time) {
   if (publisher_joint_states_.trylock()) {
-    for (size_t i = 0; i < 7; ++i) {
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_J),
+                  "Robot state joint members do not have same size");
+    for (size_t i = 0; i < robot_state_.q.size(); i++) {
       publisher_joint_states_.msg_.name[i] = joint_names_[i];
       publisher_joint_states_.msg_.position[i] = robot_state_.q[i];
       publisher_joint_states_.msg_.velocity[i] = robot_state_.dq[i];
