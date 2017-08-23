@@ -29,7 +29,7 @@ foreach(executable ${EXECUTABLES})
   )
   target_link_libraries(${executable}
     ${catkin_LIBRARIES}
-    Franka::franka
+    Franka::Franka
   )
   target_include_directories(${executable} PUBLIC
     ${catkin_INCLUDE_DIRS}

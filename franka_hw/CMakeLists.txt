@@ -29,6 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Franka REQUIRED)
 
 add_message_files(FILES
+  Errors.msg
   FrankaState.msg
 )
 
@@ -70,7 +71,7 @@ add_dependencies(franka_hw_services
 
 target_link_libraries(franka_hw_services
    ${catkin_LIBRARIES}
-   Franka::franka
+   Franka::Franka
 )
 
 target_include_directories(franka_hw_services PUBLIC
@@ -92,7 +93,7 @@ add_dependencies(franka_hw
 
 target_link_libraries(franka_hw
   ${catkin_LIBRARIES}
-  Franka::franka
+  Franka::Franka
 )
 
 target_include_directories(franka_hw PUBLIC
@@ -112,7 +113,7 @@ add_dependencies(franka_state_controller
 
 target_link_libraries(franka_state_controller
   ${catkin_LIBRARIES}
-  Franka::franka
+  Franka::Franka
 )
 
 target_include_directories(franka_state_controller PUBLIC
