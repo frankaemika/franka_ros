@@ -218,7 +218,11 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.O_F_ext_hat_K[i] = robot_state_.O_F_ext_hat_K[i];
     }
 
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.q_d),
+                  "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq_d),
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_J),
                   "Robot state joint members do not have same size");
@@ -228,18 +232,17 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.joint_contact),
                   "Robot state joint members do not have same size");
-    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.q_d),
-                  "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_ext_hat_filtered),
                   "Robot state joint members do not have same size");
     for (size_t i = 0; i < robot_state_.q.size(); i++) {
       publisher_franka_states_.msg_.q[i] = robot_state_.q[i];
+      publisher_franka_states_.msg_.q_d[i] = robot_state_.q_d[i];
       publisher_franka_states_.msg_.dq[i] = robot_state_.dq[i];
+      publisher_franka_states_.msg_.dq_d[i] = robot_state_.dq_d[i];
       publisher_franka_states_.msg_.tau_J[i] = robot_state_.tau_J[i];
       publisher_franka_states_.msg_.dtau_J[i] = robot_state_.dtau_J[i];
       publisher_franka_states_.msg_.joint_collision[i] = robot_state_.joint_collision[i];
       publisher_franka_states_.msg_.joint_contact[i] = robot_state_.joint_contact[i];
-      publisher_franka_states_.msg_.q_d[i] = robot_state_.q_d[i];
       publisher_franka_states_.msg_.tau_ext_hat_filtered[i] = robot_state_.tau_ext_hat_filtered[i];
     }
 
