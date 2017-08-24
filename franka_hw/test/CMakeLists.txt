@@ -14,7 +14,7 @@ add_dependencies(franka_hw_test
 
 target_link_libraries(franka_hw_test
   ${catkin_LIBRARIES}
-  Franka::franka
+  Franka::Franka
   franka_hw
 )
 
