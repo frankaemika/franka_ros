@@ -20,6 +20,8 @@
 #include <franka_example_controllers/compliance_paramConfig.h>
 #include <boost/scoped_ptr.hpp>
 
+#include <geometry_msgs/PoseStamped.h>
+
 namespace franka_example_controllers {
 
 class CartesianImpedanceExampleController : public controller_interface::MultiInterfaceController<
@@ -33,6 +35,8 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   void update(const ros::Time&, const ros::Duration& period);
 
  private:
+  std::string arm_id_;
+  ros::NodeHandle node_handle_;
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
@@ -53,8 +57,11 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   boost::scoped_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
       dynamic_server_compliance_param;
   ros::NodeHandle dynamic_reconfigure_compliance_param_node;
-
   void compliance_param_callback(franka_example_controllers::compliance_paramConfig& config, uint32_t level);
+
+  // Equilibrium pose subscriber
+  ros::Subscriber sub_equilibrium_pose_;
+  void equilibrium_pose_callback(const geometry_msgs::PoseStampedConstPtr &msg);
 };
 
 }  // namespace franka_example_controllers

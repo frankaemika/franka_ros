@@ -12,5 +12,6 @@
     <rosparam command="load" file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="cartesian_impedance_example_controller --shutdown-timeout 2"/>
     <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_description)/rviz/franka_description.rviz"/>
+    <node name="interactive_target" pkg="franka_emika_example_controllers" type="launch/scripts/interactive_target.py" required="true" output="screen" />
   </group>
 </launch>

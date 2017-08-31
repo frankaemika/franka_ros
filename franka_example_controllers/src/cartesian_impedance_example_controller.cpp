@@ -8,40 +8,46 @@
 
 #include <franka/robot_state.h>
 
+#include <franka_hw/SetForceTorqueCollisionBehavior.h>
+
 namespace franka_example_controllers {
 
 CartesianImpedanceExampleController::CartesianImpedanceExampleController() = default;
 
 bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                            ros::NodeHandle& node_handle) {
-  std::string arm_id;
   std::vector<double> cartesian_stiffness_vector;
   std::vector<double> cartesian_damping_vector;
-  if (!node_handle.getParam("arm_id", arm_id)) {
-    ROS_ERROR("CartesianImpedanceExampleController: Could not read parameter arm_id");
+  node_handle_ = node_handle;
+
+  sub_equilibrium_pose_ = node_handle_.subscribe("equilibrium_pose",1,
+                                                 &CartesianImpedanceExampleController::equilibrium_pose_callback, this);
+
+  if (!node_handle_.getParam("arm_id", arm_id_)) {
+    ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
     return false;
   }
-  if (!node_handle.getParam("pos_error_max", pos_error_max_)) {
+  if (!node_handle_.getParam("pos_error_max", pos_error_max_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter pos_error_max, defaulting to: " << pos_error_max_);
   }
-  if (!node_handle.getParam("rot_error_max", rot_error_max_)) {
+  if (!node_handle_.getParam("rot_error_max", rot_error_max_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter rot_error_max, defaulting to: " << rot_error_max_);
   }
-  if (!node_handle.getParam("k_p_nullspace", k_p_nullspace_)) {
+  if (!node_handle_.getParam("k_p_nullspace", k_p_nullspace_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter k_p_nullspace, defaulting to: " << k_p_nullspace_);
   }
-  if (!node_handle.getParam("k_ext", k_ext_)) {
+  if (!node_handle_.getParam("k_ext", k_ext_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter k_ext, defaulting to: " << k_ext_);
   }
-  if (!node_handle.getParam("filter_gain", filter_gain_)) {
+  if (!node_handle_.getParam("filter_gain", filter_gain_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter filter_gain, defaulting to: " << filter_gain_);
   }
-  if (!node_handle.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
+  if (!node_handle_.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
     ROS_ERROR(
         "CartesianImpedanceExampleController: Invalid or no joint_names parameters provided, aborting "
         "controller init!");
@@ -57,7 +63,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   }
   try {
     model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id + "_model")));
+        new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id_ + "_model")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Exception getting model handle from interface: "
@@ -74,7 +80,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   }
   try {
     state_handle_.reset(new franka_hw::FrankaStateHandle(
-        state_interface->getHandle(arm_id + "_robot")));
+        state_interface->getHandle(arm_id_ + "_robot")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Exception getting state handle from interface: "
@@ -106,22 +112,30 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
         franka_example_controllers::compliance_paramConfig>(dynamic_reconfigure_compliance_param_node));
   dynamic_server_compliance_param->setCallback(
       boost::bind(&CartesianImpedanceExampleController::compliance_param_callback, this, _1, _2));
-  ROS_INFO("CartesianImpedanceExampleController:: initialized [dynamic reconfigure]!");
+  ROS_INFO("CartesianImpedanceExampleController:: initialized dynamic reconfigure");
 
   position_d_.setZero();
   orientation_d_.coeffs() << 0.0, 0.0, 0.0, 1.0;
   dx_.setZero();
 
-  std::cout << "Cartesian stiffness: " << cartesian_stiffness_ << std::endl;
-  std::cout << "Cartesian damping: " << cartesian_damping_ << std::endl;
+  // Set force/torque collision behavior
+//  ros::ServiceClient client = node_handle_.serviceClient<franka_hw::SetForceTorqueCollisionBehavior> (
+//      "/" + arm_id_ + "/set_force_torque_collision_behavior");
+//  franka_hw::SetForceTorqueCollisionBehavior collision_srv;
+//  collision_srv.request.lower_torque_thresholds_nominal = {{70.0, 70.0, 70.0, 70.0, 70.0, 70.0, 70.0}};
+//  collision_srv.request.upper_torque_thresholds_nominal = {{70.0, 70.0, 70.0, 70.0, 70.0, 70.0, 70.0}};
+//  collision_srv.request.lower_force_thresholds_nominal = {{70.0, 70.0, 70.0, 70.0, 70.0, 70.0}};
+//  collision_srv.request.upper_force_thresholds_nominal = {{70.0, 70.0, 70.0, 70.0, 70.0, 70.0}};
+//  if (!client.call(collision_srv)) {
+//    ROS_ERROR_STREAM("Failed to call set_force_torque_collision_behavior service: " + collision_srv.response.error);
+//  }
 
   return true;
 }
 
 void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
-  franka::RobotState initial_state = state_handle_->getRobotState();
-
   /* Compute initial velocity with jacobian and set x_attractor and q_d_nullspace to initial configuration*/
+  franka::RobotState initial_state = state_handle_->getRobotState();
   // get jacobian
   std::array<double, 42> jacobian_array = model_handle_->getZeroJacobian(franka::Frame::kEndEffector, initial_state);
   // convert to eigen
@@ -170,8 +184,8 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::VectorXd eigenvals = es.eigenvalues().real();
   // Ensure positive definiteness
   for (size_t e=1 ; e < 6 ; e++) {
-    if (eigenvals(e) < 1e-15) {
-      eigenvals(e) = 1e-15;
+    if (eigenvals(e) < 1e-20) {
+      eigenvals(e) = 1e-20;
     }
   }
   Eigen::Matrix<double, 6, 6> cartesian_mass = es.eigenvectors().real() *
@@ -229,12 +243,6 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
         - k_ext_ * robot_state.tau_ext_hat_filtered[i]; // "reduces" mass at a joint level
     joint_handles_[i].setCommand(tau_d[i]);
   }
-
-  std::cout << "tau_d " << joint_handles_[0].getCommand() << " " << joint_handles_[1].getCommand() << " "
-            << joint_handles_[2].getCommand() << " " << joint_handles_[3].getCommand() << " "
-            << joint_handles_[4].getCommand() << " " << joint_handles_[5].getCommand() << " "
-            << joint_handles_[6].getCommand() << std::endl;
-
   return;
 }
 
@@ -250,6 +258,12 @@ void CartesianImpedanceExampleController::compliance_param_callback(
     config.translational_damping * Eigen::Matrix3d::Identity();
   cartesian_damping_.bottomRightCorner(3, 3) <<
     config.rotational_damping * Eigen::Matrix3d::Identity();
+}
+
+void CartesianImpedanceExampleController::equilibrium_pose_callback(const geometry_msgs::PoseStampedConstPtr &msg) {
+  position_d_ << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
+  orientation_d_.coeffs() << msg->pose.orientation.x, msg->pose.orientation.y,
+    msg->pose.orientation.z, msg->pose.orientation.w;
 }
 
 }  // namespace franka_example_controllers
