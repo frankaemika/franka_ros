@@ -14,6 +14,10 @@ model_example_controller:
     type: franka_example_controllers/ModelExampleController
     arm_id: panda
 
+force_example_controller:
+    type: franka_example_controllers/ForceExampleController
+    arm_id: franka_emika
+
 joint_impedance_example_controller:
     type: franka_example_controllers/JointImpedanceExampleController
     arm_id: panda

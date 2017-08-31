@@ -27,6 +27,7 @@ generate_messages()
 
 generate_dynamic_reconfigure_options(
     cfg/compliance_param.cfg
+    cfg/desired_mass_param.cfg
 )
 
 catkin_package(
@@ -45,6 +46,7 @@ add_library(franka_example_controllers
   src/model_example_controller.cpp
   src/joint_impedance_example_controller.cpp
   src/cartesian_impedance_example_controller.cpp
+  src/force_example_controller.cpp
 )
 
 add_dependencies(franka_example_controllers
