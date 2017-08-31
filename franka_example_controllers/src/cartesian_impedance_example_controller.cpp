@@ -105,14 +105,13 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     }
   }
 
-  dynamic_reconfigure_compliance_param_node = ros::NodeHandle("dynamic_reconfigure_compliance_param_node");
+  dynamic_reconfigure_compliance_param_node_ = ros::NodeHandle("dynamic_reconfigure_compliance_param_node");
 
-  dynamic_server_compliance_param.reset(
+  dynamic_server_compliance_param_.reset(
       new dynamic_reconfigure::Server<
-        franka_example_controllers::compliance_paramConfig>(dynamic_reconfigure_compliance_param_node));
-  dynamic_server_compliance_param->setCallback(
+        franka_example_controllers::compliance_paramConfig>(dynamic_reconfigure_compliance_param_node_));
+  dynamic_server_compliance_param_->setCallback(
       boost::bind(&CartesianImpedanceExampleController::compliance_param_callback, this, _1, _2));
-  ROS_INFO("CartesianImpedanceExampleController:: initialized dynamic reconfigure");
 
   position_d_.setZero();
   orientation_d_.coeffs() << 0.0, 0.0, 0.0, 1.0;

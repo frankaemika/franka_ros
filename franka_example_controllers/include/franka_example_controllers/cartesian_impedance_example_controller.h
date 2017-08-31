@@ -55,8 +55,8 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
 
   // Dynamic reconfigure
   boost::scoped_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
-      dynamic_server_compliance_param;
-  ros::NodeHandle dynamic_reconfigure_compliance_param_node;
+      dynamic_server_compliance_param_;
+  ros::NodeHandle dynamic_reconfigure_compliance_param_node_;
   void compliance_param_callback(franka_example_controllers::compliance_paramConfig& config, uint32_t level);
 
   // Equilibrium pose subscriber
