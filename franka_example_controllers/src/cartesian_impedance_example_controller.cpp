@@ -20,8 +20,9 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   std::vector<double> cartesian_damping_vector;
   node_handle_ = node_handle;
 
-  sub_equilibrium_pose_ = node_handle_.subscribe("equilibrium_pose",1,
-                                                 &CartesianImpedanceExampleController::equilibrium_pose_callback, this);
+  sub_equilibrium_pose_ = node_handle_.subscribe("/equilibrium_pose",20,
+                                                 &CartesianImpedanceExampleController::equilibrium_pose_callback,
+                                                 this, ros::TransportHints().reliable().tcpNoDelay());
 
   if (!node_handle_.getParam("arm_id", arm_id_)) {
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
@@ -58,7 +59,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
       robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting model interface from hardware");
+        "CartesianImpedanceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
@@ -66,7 +67,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
         new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id_ + "_model")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Exception getting model handle from interface: "
+        "CartesianImpedanceExampleController: Exception getting model handle from interface: "
             << ex.what());
     return false;
   }
@@ -75,7 +76,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
       robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting state interface from hardware");
+        "CartesianImpedanceExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
@@ -83,7 +84,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
         state_interface->getHandle(arm_id_ + "_robot")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Exception getting state handle from interface: "
+        "CartesianImpedanceExampleController: Exception getting state handle from interface: "
             << ex.what());
     return false;
   }
@@ -92,7 +93,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
       robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting effort joint interface from hardware");
+        "CartesianImpedanceExampleController: Error getting effort joint interface from hardware");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
@@ -100,7 +101,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
       joint_handles_.push_back(effort_joint_interface->getHandle(joint_names_[i]));
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
       ROS_ERROR_STREAM(
-          "JointImpedanceExampleController: Exception getting joint handles: " << ex.what());
+          "CartesianImpedanceExampleController: Exception getting joint handles: " << ex.what());
       return false;
     }
   }
