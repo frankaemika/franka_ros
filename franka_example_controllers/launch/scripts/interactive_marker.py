@@ -27,7 +27,7 @@ def processFeedback(feedback):
 if __name__ == "__main__":
     rospy.init_node("equilibrium_pose_node")
     listener = tf.TransformListener()
-    pose_pub = rospy.Publisher("/equilibrium_pose", geometry_msgs.msg.PoseStamped, queue_size=4)
+    pose_pub = rospy.Publisher("/equilibrium_pose", geometry_msgs.msg.PoseStamped, queue_size=10)
 
     # get initial pose through TF
     try:
@@ -58,7 +58,7 @@ if __name__ == "__main__":
     marker_pose.pose = int_marker.pose
 
     # Publisher for the topic
-    rospy.Timer(rospy.Duration(0.002), publisherCallback)
+    rospy.Timer(rospy.Duration(0.005), publisherCallback)
 
     # insert a box
     control = InteractiveMarkerControl()
