@@ -276,7 +276,7 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_x_Cload[i];
     }
 
-    publisher_franka_states_.msg_.time = robot_state_.time.s();
+    publisher_franka_states_.msg_.time = robot_state_.time.toSec();
     publisher_franka_states_.msg_.current_errors = errorsToMessage(robot_state_.current_errors);
     publisher_franka_states_.msg_.last_motion_errors =
         errorsToMessage(robot_state_.last_motion_errors);

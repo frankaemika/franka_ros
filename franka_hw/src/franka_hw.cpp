@@ -146,7 +146,7 @@ void FrankaHW::control(franka::Robot& robot,
                                                         franka::Duration time_step) {
     if (last_time != robot_state.time) {
       last_time = robot_state.time;
-      return ros_callback(ros::Time::now(), ros::Duration(time_step.s()));
+      return ros_callback(ros::Time::now(), ros::Duration(time_step.toSec()));
     }
     return true;
   });
