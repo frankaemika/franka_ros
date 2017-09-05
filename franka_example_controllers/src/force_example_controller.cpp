@@ -10,15 +10,20 @@
 
 namespace franka_example_controllers {
 
-ForceExampleController::ForceExampleController() {}
+ForceExampleController::ForceExampleController() = default;
 
 bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                            ros::NodeHandle& node_handle) {
-  std::string arm_id;
   std::vector<std::string> joint_names;
-
+  std::string arm_id;
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("ForceExampleController: Could not read parameter arm_id");
+    return false;
+  }
+  if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
+    ROS_ERROR(
+        "ForceExampleController: Invalid or no joint_names parameters provided, aborting "
+            "controller init!");
     return false;
   }
 
@@ -43,7 +48,7 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
       robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Error getting state interface from hardware");
+        "ForceExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
@@ -51,7 +56,7 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
         state_interface->getHandle(arm_id + "_robot")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "JointImpedanceExampleController: Exception getting state handle from interface: "
+        "ForceExampleController: Exception getting state handle from interface: "
             << ex.what());
     return false;
   }
@@ -102,12 +107,13 @@ void ForceExampleController::update(const ros::Time& /*time*/,
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d(i));
   }
+  desired_mass_ = filter_gain_ * target_mass_ + (1 - filter_gain_) * desired_mass_;
   return;
 }
 
 void ForceExampleController::desired_mass_param_callback(
     franka_example_controllers::desired_mass_paramConfig& config, uint32_t level) {
-  desired_mass_ = config.desired_mass;
+  target_mass_ = config.desired_mass;
 }
 
 }  // namespace franka_example_controllers

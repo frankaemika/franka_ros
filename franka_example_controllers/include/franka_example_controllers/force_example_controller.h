@@ -36,6 +36,8 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
   double desired_mass_{0.0};
+  double target_mass_{0.0};
+  double filter_gain_{0.05};
 
   // Dynamic reconfigure
   boost::scoped_ptr<dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>
