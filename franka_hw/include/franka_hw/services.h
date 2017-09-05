@@ -13,7 +13,6 @@
 #include <franka_hw/SetJointImpedance.h>
 #include <franka_hw/SetKFrame.h>
 #include <franka_hw/SetLoad.h>
-#include <franka_hw/SetTimeScalingFactor.h>
 
 namespace franka_hw {
 namespace services {
@@ -53,9 +52,6 @@ void setFullCollisionBehavior(franka::Robot& robot,
                               const SetFullCollisionBehavior::Request& req,
                               SetFullCollisionBehavior::Response& res);
 void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Response& res);
-void setTimeScalingFactor(franka::Robot& robot,
-                          const SetTimeScalingFactor::Request& req,
-                          SetTimeScalingFactor::Response& res);
 
 }  // namespace services
 }  // namespace franka_hw

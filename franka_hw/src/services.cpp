@@ -105,11 +105,5 @@ void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Respons
   robot.setLoad(mass, F_x_center_load, load_inertia);
 }
 
-void setTimeScalingFactor(franka::Robot& robot,
-                          const SetTimeScalingFactor::Request& req,
-                          SetTimeScalingFactor::Response& /* res */) {
-  robot.setTimeScalingFactor(req.time_scaling_factor);
-}
-
 }  // namespace services
 }  // namespace franka_hw

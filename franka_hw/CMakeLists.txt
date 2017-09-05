@@ -41,7 +41,6 @@ add_service_files(FILES
   SetJointImpedance.srv
   SetKFrame.srv
   SetLoad.srv
-  SetTimeScalingFactor.srv
 )
 
 add_action_files(FILES

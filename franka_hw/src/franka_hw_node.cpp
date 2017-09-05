@@ -75,10 +75,7 @@ int main(int argc, char** argv) {
           node_handle, "set_full_collision_behavior",
           std::bind(franka_hw::services::setFullCollisionBehavior, std::ref(robot), _1, _2))
       .advertiseService<franka_hw::SetLoad>(
-          node_handle, "set_load", std::bind(franka_hw::services::setLoad, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetTimeScalingFactor>(
-          node_handle, "set_time_scaling_factor",
-          std::bind(franka_hw::services::setTimeScalingFactor, std::ref(robot), _1, _2));
+          node_handle, "set_load", std::bind(franka_hw::services::setLoad, std::ref(robot), _1, _2));
 
   actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction> recovery_action_server(
       node_handle, "error_recovery",
