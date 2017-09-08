@@ -13,9 +13,12 @@ namespace franka_example_controllers {
 ForceExampleController::ForceExampleController() = default;
 
 bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
-                                           ros::NodeHandle& node_handle) {
+                                  ros::NodeHandle& node_handle) {
   std::vector<std::string> joint_names;
   std::string arm_id;
+  ROS_WARN(
+      "ForceExampleController: Make sure your robot's endeffector is in contact "
+      "with a horizontal surface before starting the controller!");
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("ForceExampleController: Could not read parameter arm_id");
     return false;
@@ -23,15 +26,14 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
   if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
     ROS_ERROR(
         "ForceExampleController: Invalid or no joint_names parameters provided, aborting "
-            "controller init!");
+        "controller init!");
     return false;
   }
 
   franka_hw::FrankaModelInterface* model_interface =
       robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
-    ROS_ERROR_STREAM(
-        "ForceExampleController: Error getting model interface from hardware");
+    ROS_ERROR_STREAM("ForceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
@@ -39,49 +41,45 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
         new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id + "_model")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "ForceExampleController: Exception getting model handle from interface: "
-        << ex.what());
+        "ForceExampleController: Exception getting model handle from interface: " << ex.what());
     return false;
   }
 
   franka_hw::FrankaStateInterface* state_interface =
       robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
-    ROS_ERROR_STREAM(
-        "ForceExampleController: Error getting state interface from hardware");
+    ROS_ERROR_STREAM("ForceExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
-    state_handle_.reset(new franka_hw::FrankaStateHandle(
-        state_interface->getHandle(arm_id + "_robot")));
+    state_handle_.reset(
+        new franka_hw::FrankaStateHandle(state_interface->getHandle(arm_id + "_robot")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "ForceExampleController: Exception getting state handle from interface: "
-            << ex.what());
+        "ForceExampleController: Exception getting state handle from interface: " << ex.what());
     return false;
   }
 
   hardware_interface::EffortJointInterface* effort_joint_interface =
       robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
-    ROS_ERROR_STREAM(
-        "ForceExampleController: Error getting effort joint interface from hardware");
+    ROS_ERROR_STREAM("ForceExampleController: Error getting effort joint interface from hardware");
     return false;
   }
   for (size_t i = 0; i < 7; ++i) {
     try {
       joint_handles_.push_back(effort_joint_interface->getHandle(joint_names[i]));
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
-      ROS_ERROR_STREAM(
-          "ForceExampleController: Exception getting joint handles: " << ex.what());
+      ROS_ERROR_STREAM("ForceExampleController: Exception getting joint handles: " << ex.what());
       return false;
     }
   }
 
-  dynamic_reconfigure_desired_mass_param_node_ = ros::NodeHandle("dynamic_reconfigure_desired_mass_param_node");
+  dynamic_reconfigure_desired_mass_param_node_ =
+      ros::NodeHandle("dynamic_reconfigure_desired_mass_param_node");
   dynamic_server_desired_mass_param_.reset(
-      new dynamic_reconfigure::Server<
-          franka_example_controllers::desired_mass_paramConfig>(dynamic_reconfigure_desired_mass_param_node_));
+      new dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>(
+          dynamic_reconfigure_desired_mass_param_node_));
   dynamic_server_desired_mass_param_->setCallback(
       boost::bind(&ForceExampleController::desired_mass_param_callback, this, _1, _2));
 
@@ -89,31 +87,48 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
 }
 
 void ForceExampleController::starting(const ros::Time& /*time*/) {
+  franka::RobotState robot_state = state_handle_->getRobotState();
+  std::array<double, 7> gravity_array =
+      model_handle_->getGravity(robot_state, 0.0, {{0.0, 0.0, 0.0}});
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
+  // Bias correction for the current external torque
+  tau_ext_initial_ = tau_measured - gravity;
 }
 
-void ForceExampleController::update(const ros::Time& /*time*/,
-                                             const ros::Duration& period) {
-
+void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& period) {
   franka::RobotState robot_state = state_handle_->getRobotState();
-  std::array<double, 42> jacobian_array = model_handle_->getZeroJacobian(
-      franka::Frame::kEndEffector, robot_state);
+  std::array<double, 42> jacobian_array =
+      model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
+  std::array<double, 7> gravity_array =
+      model_handle_->getGravity(robot_state, 0.0, {{0.0, 0.0, 0.0}});
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > dtau_measured(robot_state.dtau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
 
-  Eigen::VectorXd tau_d(7), desired_force_torque(6);
+  Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_feedback(7), tau_ext(7);
   desired_force_torque.setZero();
   desired_force_torque(2) = desired_mass_ * -9.81;
+  tau_ext = tau_measured - gravity - tau_ext_initial_;
   tau_d = jacobian.transpose() * desired_force_torque;
-
+  // FF + FB control
+  tau_feedback = tau_d + k_f_ * (tau_d - tau_ext) - 2.0 * sqrt(k_f_) * dtau_measured;
   for (size_t i = 0; i < 7; ++i) {
-    joint_handles_[i].setCommand(tau_d(i));
+    joint_handles_[i].setCommand(tau_feedback(i));
   }
+
+  // Update signals changed online through dynamic reconfigure
   desired_mass_ = filter_gain_ * target_mass_ + (1 - filter_gain_) * desired_mass_;
+  k_f_ = filter_gain_ * target_k_f_ + (1 - filter_gain_) * k_f_;
   return;
 }
 
 void ForceExampleController::desired_mass_param_callback(
-    franka_example_controllers::desired_mass_paramConfig& config, uint32_t level) {
+    franka_example_controllers::desired_mass_paramConfig& config,
+    uint32_t level) {
   target_mass_ = config.desired_mass;
+  target_k_f_ = config.k_f;
 }
 
 }  // namespace franka_example_controllers

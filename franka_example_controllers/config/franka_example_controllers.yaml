@@ -70,8 +70,6 @@ cartesian_impedance_example_controller:
         - franka_emika_joint5
         - franka_emika_joint6
         - franka_emika_joint7
-    pos_error_max: 0.5
-    rot_error_max: 0.5
     k_p_nullspace: 50.0
     k_ext: 0.95
-    filter_gain: 0.95
+    filter_gain: 0.5
