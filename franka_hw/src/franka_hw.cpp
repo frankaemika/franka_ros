@@ -269,25 +269,25 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
       break;
     case ControlMode::JointPosition:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.move(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                              std::cref(position_joint_command_), ros_callback, _1, _2));
       };
       break;
     case ControlMode::JointVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.move(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                              std::cref(velocity_joint_command_), ros_callback, _1, _2));
       };
       break;
     case ControlMode::CartesianPose:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.move(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                              std::cref(pose_cartesian_command_), ros_callback, _1, _2));
       };
       break;
     case ControlMode::CartesianVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.move(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
                              std::cref(velocity_cartesian_command_), ros_callback, _1, _2));
       };
       break;
