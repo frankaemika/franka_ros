@@ -59,10 +59,19 @@ void ModelExampleController::update(const ros::Time& /*time*/, const ros::Durati
     std::array<double, 7> coriolis = model_handle_->getCoriolis(
         {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
     std::array<double, 7> gravity = model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
+    std::array<double, 16> pose = model_handle_->getPose(franka::Frame::kJoint4);
+    std::array<double, 42> joint4_body_jacobian =
+        model_handle_->getBodyJacobian(franka::Frame::kJoint4);
+    std::array<double, 42> endeffector_zero_jacobian =
+        model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
+
     ROS_INFO("--------------------------------------------------");
     ROS_INFO_STREAM("mass :" << mass);
     ROS_INFO_STREAM("coriolis: " << coriolis);
     ROS_INFO_STREAM("gravity :" << gravity);
+    ROS_INFO_STREAM("joint_pose :" << pose);
+    ROS_INFO_STREAM("joint4_body_jacobian :" << joint4_body_jacobian);
+    ROS_INFO_STREAM("joint_zero_jacobian :" << endeffector_zero_jacobian);
   }
 }
 

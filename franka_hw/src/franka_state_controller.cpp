@@ -25,74 +25,100 @@ tf::Transform convertArrayToTf(const std::array<double, 16>& transform) {
 
 franka_hw::Errors errorsToMessage(const franka::Errors& error) {
   franka_hw::Errors message;
-  message.cartesian_motion_generator_acceleration_discontinuity =
-      static_cast<decltype(message.cartesian_motion_generator_acceleration_discontinuity)>(
-          error.cartesian_motion_generator_acceleration_discontinuity);
-  message.cartesian_motion_generator_elbow_limit_violation =
-      static_cast<decltype(message.cartesian_motion_generator_elbow_limit_violation)>(
-          error.cartesian_motion_generator_elbow_limit_violation);
-  message.cartesian_motion_generator_elbow_sign_inconsistent =
-      static_cast<decltype(message.cartesian_motion_generator_elbow_sign_inconsistent)>(
-          error.cartesian_motion_generator_elbow_sign_inconsistent);
-  message.cartesian_motion_generator_start_elbow_invalid =
-      static_cast<decltype(message.cartesian_motion_generator_start_elbow_invalid)>(
-          error.cartesian_motion_generator_start_elbow_invalid);
-  message.cartesian_motion_generator_velocity_discontinuity =
-      static_cast<decltype(message.cartesian_motion_generator_velocity_discontinuity)>(
-          error.cartesian_motion_generator_velocity_discontinuity);
-  message.cartesian_motion_generator_velocity_limits_violation =
-      static_cast<decltype(message.cartesian_motion_generator_velocity_limits_violation)>(
-          error.cartesian_motion_generator_velocity_limits_violation);
-  message.cartesian_position_limits_violation =
-      static_cast<decltype(message.cartesian_position_limits_violation)>(
-          error.cartesian_position_limits_violation);
-  message.cartesian_position_motion_generator_start_pose_invalid =
-      static_cast<decltype(message.cartesian_position_motion_generator_start_pose_invalid)>(
-          error.cartesian_position_motion_generator_start_pose_invalid);
-  message.cartesian_reflex =
-      static_cast<decltype(message.cartesian_reflex)>(error.cartesian_reflex);
-  message.cartesian_velocity_profile_safety_violation =
-      static_cast<decltype(message.cartesian_velocity_profile_safety_violation)>(
-          error.cartesian_velocity_profile_safety_violation);
-  message.cartesian_velocity_violation =
-      static_cast<decltype(message.cartesian_velocity_violation)>(
-          error.cartesian_velocity_violation);
-  message.force_controller_desired_force_tolerance_violation =
-      static_cast<decltype(message.force_controller_desired_force_tolerance_violation)>(
-          error.force_controller_desired_force_tolerance_violation);
-  message.force_control_safety_violation =
-      static_cast<decltype(message.force_control_safety_violation)>(
-          error.force_control_safety_violation);
-  message.joint_motion_generator_acceleration_discontinuity =
-      static_cast<decltype(message.joint_motion_generator_acceleration_discontinuity)>(
-          error.joint_motion_generator_acceleration_discontinuity);
-  message.joint_motion_generator_position_limits_violation =
-      static_cast<decltype(message.joint_motion_generator_position_limits_violation)>(
-          error.joint_motion_generator_position_limits_violation);
-  message.joint_motion_generator_velocity_discontinuity =
-      static_cast<decltype(message.joint_motion_generator_velocity_discontinuity)>(
-          error.joint_motion_generator_velocity_discontinuity);
-  message.joint_motion_generator_velocity_limits_violation =
-      static_cast<decltype(message.joint_motion_generator_velocity_limits_violation)>(
-          error.joint_motion_generator_velocity_limits_violation);
   message.joint_position_limits_violation =
       static_cast<decltype(message.joint_position_limits_violation)>(
           error.joint_position_limits_violation);
-  message.joint_position_motion_generator_start_pose_invalid =
-      static_cast<decltype(message.joint_position_motion_generator_start_pose_invalid)>(
-          error.joint_position_motion_generator_start_pose_invalid);
-  message.joint_reflex = static_cast<decltype(message.joint_reflex)>(error.joint_reflex);
+  message.cartesian_position_limits_violation =
+      static_cast<decltype(message.cartesian_position_limits_violation)>(
+          error.cartesian_position_limits_violation);
+  message.self_collision_avoidance_violation =
+      static_cast<decltype(message.self_collision_avoidance_violation)>(
+          error.self_collision_avoidance_violation);
   message.joint_velocity_violation =
       static_cast<decltype(message.joint_velocity_violation)>(error.joint_velocity_violation);
+  message.cartesian_velocity_violation =
+      static_cast<decltype(message.cartesian_velocity_violation)>(
+          error.cartesian_velocity_violation);
+  message.force_control_safety_violation =
+      static_cast<decltype(message.force_control_safety_violation)>(
+          error.force_control_safety_violation);
+  message.joint_reflex = static_cast<decltype(message.joint_reflex)>(error.joint_reflex);
+  message.cartesian_reflex =
+      static_cast<decltype(message.cartesian_reflex)>(error.cartesian_reflex);
   message.max_goal_pose_deviation_violation =
       static_cast<decltype(message.max_goal_pose_deviation_violation)>(
           error.max_goal_pose_deviation_violation);
   message.max_path_pose_deviation_violation =
       static_cast<decltype(message.max_path_pose_deviation_violation)>(
           error.max_path_pose_deviation_violation);
-  message.self_collision_avoidance_violation =
-      static_cast<decltype(message.self_collision_avoidance_violation)>(
-          error.self_collision_avoidance_violation);
+  message.cartesian_velocity_profile_safety_violation =
+      static_cast<decltype(message.cartesian_velocity_profile_safety_violation)>(
+          error.cartesian_velocity_profile_safety_violation);
+  message.joint_position_motion_generator_start_pose_invalid =
+      static_cast<decltype(message.joint_position_motion_generator_start_pose_invalid)>(
+          error.joint_position_motion_generator_start_pose_invalid);
+  message.joint_motion_generator_position_limits_violation =
+      static_cast<decltype(message.joint_motion_generator_position_limits_violation)>(
+          error.joint_motion_generator_position_limits_violation);
+  message.joint_motion_generator_velocity_limits_violation =
+      static_cast<decltype(message.joint_motion_generator_velocity_limits_violation)>(
+          error.joint_motion_generator_velocity_limits_violation);
+  message.joint_motion_generator_velocity_discontinuity =
+      static_cast<decltype(message.joint_motion_generator_velocity_discontinuity)>(
+          error.joint_motion_generator_velocity_discontinuity);
+  message.joint_motion_generator_acceleration_discontinuity =
+      static_cast<decltype(message.joint_motion_generator_acceleration_discontinuity)>(
+          error.joint_motion_generator_acceleration_discontinuity);
+  message.cartesian_position_motion_generator_start_pose_invalid =
+      static_cast<decltype(message.cartesian_position_motion_generator_start_pose_invalid)>(
+          error.cartesian_position_motion_generator_start_pose_invalid);
+  message.cartesian_motion_generator_elbow_limit_violation =
+      static_cast<decltype(message.cartesian_motion_generator_elbow_limit_violation)>(
+          error.cartesian_motion_generator_elbow_limit_violation);
+  message.cartesian_motion_generator_velocity_limits_violation =
+      static_cast<decltype(message.cartesian_motion_generator_velocity_limits_violation)>(
+          error.cartesian_motion_generator_velocity_limits_violation);
+  message.cartesian_motion_generator_velocity_discontinuity =
+      static_cast<decltype(message.cartesian_motion_generator_velocity_discontinuity)>(
+          error.cartesian_motion_generator_velocity_discontinuity);
+  message.cartesian_motion_generator_acceleration_discontinuity =
+      static_cast<decltype(message.cartesian_motion_generator_acceleration_discontinuity)>(
+          error.cartesian_motion_generator_acceleration_discontinuity);
+  message.cartesian_motion_generator_elbow_sign_inconsistent =
+      static_cast<decltype(message.cartesian_motion_generator_elbow_sign_inconsistent)>(
+          error.cartesian_motion_generator_elbow_sign_inconsistent);
+  message.cartesian_motion_generator_start_elbow_invalid =
+      static_cast<decltype(message.cartesian_motion_generator_start_elbow_invalid)>(
+          error.cartesian_motion_generator_start_elbow_invalid);
+  message.cartesian_motion_generator_joint_position_limits_violation =
+      static_cast<decltype(message.cartesian_motion_generator_joint_position_limits_violation)>(
+          error.cartesian_motion_generator_joint_position_limits_violation);
+  message.cartesian_motion_generator_joint_velocity_limits_violation =
+      static_cast<decltype(message.cartesian_motion_generator_joint_velocity_limits_violation)>(
+          error.cartesian_motion_generator_joint_velocity_limits_violation);
+  message.cartesian_motion_generator_joint_velocity_discontinuity =
+      static_cast<decltype(message.cartesian_motion_generator_joint_velocity_discontinuity)>(
+          error.cartesian_motion_generator_joint_velocity_discontinuity);
+  message.cartesian_motion_generator_joint_acceleration_discontinuity =
+      static_cast<decltype(message.cartesian_motion_generator_joint_acceleration_discontinuity)>(
+          error.cartesian_motion_generator_joint_acceleration_discontinuity);
+  message.cartesian_position_motion_generator_invalid_frame =
+      static_cast<decltype(message.cartesian_position_motion_generator_invalid_frame)>(
+          error.cartesian_position_motion_generator_invalid_frame);
+  message.force_controller_desired_force_tolerance_violation =
+      static_cast<decltype(message.force_controller_desired_force_tolerance_violation)>(
+          error.force_controller_desired_force_tolerance_violation);
+  message.controller_torque_discontinuity =
+      static_cast<decltype(message.controller_torque_discontinuity)>(
+          error.controller_torque_discontinuity);
+  message.start_elbow_sign_inconsistent =
+      static_cast<decltype(message.start_elbow_sign_inconsistent)>(
+          error.start_elbow_sign_inconsistent);
+  message.communication_constraints_violation =
+      static_cast<decltype(message.communication_constraints_violation)>(
+          error.communication_constraints_violation);
+  message.power_limit_violation =
+      static_cast<decltype(message.power_limit_violation)>(error.power_limit_violation);
   return message;
 }
 

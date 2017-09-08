@@ -103,8 +103,8 @@ int main(int argc, char** argv) {
 
   recovery_action_server.start();
 
-  // Start background thread for message handling
-  ros::AsyncSpinner spinner(1);
+  // Start background threads for message handling
+  ros::AsyncSpinner spinner(4);
   spinner.start();
 
   while (ros::ok()) {
