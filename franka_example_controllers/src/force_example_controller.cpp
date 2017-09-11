@@ -81,7 +81,7 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
       new dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>(
           dynamic_reconfigure_desired_mass_param_node_));
   dynamic_server_desired_mass_param_->setCallback(
-      boost::bind(&ForceExampleController::desired_mass_param_callback, this, _1, _2));
+      boost::bind(&ForceExampleController::desiredMassParamCallback, this, _1, _2));
 
   return true;
 }
