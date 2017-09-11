@@ -1,7 +1,0 @@
-<library path="lib/libfranka_state_controller">
-  <class name="franka_hw/FrankaStateController" type="franka_hw::FrankaStateController" base_class_type="controller_interface::ControllerBase">
-    <description>
-      A controller that publishes all relevant franka robot states
-    </description>
-  </class>
-</library>

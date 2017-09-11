@@ -1,4 +1,4 @@
-#include "franka_hw/control_mode.h"
+#include <franka_hw/control_mode.h>
 
 #include <algorithm>
 #include <iterator>

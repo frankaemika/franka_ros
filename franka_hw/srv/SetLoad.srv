@@ -1,7 +1,0 @@
-float64 mass
-float64[3] F_x_center_load
-float64[9] load_inertia
----
-bool success
-string error
-

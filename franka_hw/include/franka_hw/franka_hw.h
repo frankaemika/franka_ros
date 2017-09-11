@@ -16,8 +16,8 @@
 #include <ros/node_handle.h>
 #include <ros/time.h>
 
+#include <franka_hw/control_mode.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
-#include <franka_hw/franka_controller_switching_types.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 

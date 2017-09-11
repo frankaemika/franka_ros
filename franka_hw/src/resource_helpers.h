@@ -1,12 +1,27 @@
 #pragma once
 
 #include <list>
+#include <map>
 #include <string>
+#include <vector>
 
-#include <franka_hw/franka_controller_switching_types.h>
 #include <hardware_interface/controller_info.h>
 
+#include <franka_hw/control_mode.h>
+
 namespace franka_hw {
+
+using ResourceWithClaimsMap = std::map<std::string, std::vector<std::vector<std::string>>>;
+
+struct ResourceClaims {
+  uint8_t joint_position_claims = 0;
+  uint8_t joint_velocity_claims = 0;
+  uint8_t joint_torque_claims = 0;
+  uint8_t cartesian_velocity_claims = 0;
+  uint8_t cartesian_pose_claims = 0;
+};
+
+using ArmClaimedMap = std::map<std::string, ResourceClaims>;
 
 bool findArmIdInResourceId(const std::string& resource_id, std::string* arm_id);
 

@@ -1,24 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <map>
 #include <ostream>
-#include <string>
-#include <vector>
 
 namespace franka_hw {
-
-using ResourceWithClaimsMap = std::map<std::string, std::vector<std::vector<std::string>>>;
-
-struct ResourceClaims {
-  uint8_t joint_position_claims = 0;
-  uint8_t joint_velocity_claims = 0;
-  uint8_t joint_torque_claims = 0;
-  uint8_t cartesian_velocity_claims = 0;
-  uint8_t cartesian_pose_claims = 0;
-};
-
-using ArmClaimedMap = std::map<std::string, ResourceClaims>;
 
 enum class ControlMode {
   None = 0,
