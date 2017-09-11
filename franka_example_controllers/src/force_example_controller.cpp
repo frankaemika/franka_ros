@@ -96,7 +96,7 @@ void ForceExampleController::starting(const ros::Time& /*time*/) {
   tau_ext_initial_ = tau_measured - gravity;
 }
 
-void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& period) {
+void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
@@ -124,9 +124,9 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   return;
 }
 
-void ForceExampleController::desired_mass_param_callback(
+void ForceExampleController::desiredMassParamCallback(
     franka_example_controllers::desired_mass_paramConfig& config,
-    uint32_t level) {
+    uint32_t /*level*/) {
   target_mass_ = config.desired_mass;
   target_k_f_ = config.k_f;
 }

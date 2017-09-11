@@ -143,7 +143,7 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
 }
 
 void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
-                                                 const ros::Duration& period) {
+                                                 const ros::Duration& /*period*/) {
   // Get state variables
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 7> coriolis_array = model_handle_->getCoriolis(
@@ -217,9 +217,9 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   return;
 }
 
-void CartesianImpedanceExampleController::compliance_param_callback(
+void CartesianImpedanceExampleController::complianceParamCallback(
     franka_example_controllers::compliance_paramConfig& config,
-    uint32_t level) {
+    uint32_t /*level*/) {
   cartesian_stiffness_target_.setIdentity();
   cartesian_stiffness_target_.topLeftCorner(3, 3)
       << config.translational_stiffness * Eigen::Matrix3d::Identity();
@@ -233,7 +233,7 @@ void CartesianImpedanceExampleController::compliance_param_callback(
   nullspace_stiffness_target_ = config.nullspace_stiffness;
 }
 
-void CartesianImpedanceExampleController::equilibrium_pose_callback(
+void CartesianImpedanceExampleController::equilibriumPoseCallback(
     const geometry_msgs::PoseStampedConstPtr& msg) {
   position_d_target_ << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
   Eigen::Quaterniond last_orientation_d_target(orientation_d_target_);

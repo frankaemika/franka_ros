@@ -47,7 +47,7 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
       dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>
       dynamic_server_desired_mass_param_;
   ros::NodeHandle dynamic_reconfigure_desired_mass_param_node_;
-  void desired_mass_param_callback(franka_example_controllers::desired_mass_paramConfig& config,
+  void desiredMassParamCallback(franka_example_controllers::desired_mass_paramConfig& config,
                                    uint32_t level);
 };
 
