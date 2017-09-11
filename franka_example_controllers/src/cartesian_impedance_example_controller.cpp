@@ -21,8 +21,8 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   node_handle_ = node_handle;
 
   sub_equilibrium_pose_ = node_handle_.subscribe(
-      "/equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibriumPoseCallback,
-      this, ros::TransportHints().reliable().tcpNoDelay());
+      "/equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibriumPoseCallback, this,
+      ros::TransportHints().reliable().tcpNoDelay());
 
   if (!node_handle_.getParam("arm_id", arm_id_)) {
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
