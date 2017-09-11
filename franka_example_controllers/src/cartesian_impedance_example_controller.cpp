@@ -21,7 +21,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   node_handle_ = node_handle;
 
   sub_equilibrium_pose_ = node_handle_.subscribe(
-      "/equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibrium_pose_callback,
+      "/equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibriumPoseCallback,
       this, ros::TransportHints().reliable().tcpNoDelay());
 
   if (!node_handle_.getParam("arm_id", arm_id_)) {
