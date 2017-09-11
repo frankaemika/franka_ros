@@ -34,6 +34,6 @@
   <exec_depend>message_runtime</exec_depend>
 
   <export>
-    <controller_interface plugin="${prefix}/franka_control_controller_plugin.xml"/>
+    <controller_interface plugin="${prefix}/franka_controller_plugins.xml"/>
   </export>
 </package>
