@@ -146,7 +146,7 @@ void FrankaHW::control(franka::Robot& robot,
                                                         franka::Duration time_step) {
     if (last_time != robot_state.time) {
       last_time = robot_state.time;
-      return ros_callback(ros::Time::now(), ros::Duration(time_step.s()));
+      return ros_callback(ros::Time::now(), ros::Duration(time_step.toSec()));
     }
     return true;
   });
@@ -293,34 +293,34 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
       break;
     case (ControlMode::JointTorque | ControlMode::JointPosition):
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                                std::cref(position_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2));
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
+                                std::cref(position_joint_command_), ros_callback, _1, _2));
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointVelocity):
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                                std::cref(velocity_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2));
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+                                std::cref(velocity_joint_command_), ros_callback, _1, _2));
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianPose):
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                                std::cref(pose_cartesian_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2));
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+                                std::cref(pose_cartesian_command_), ros_callback, _1, _2));
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2));
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
+                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2));
       };
       break;
     default:
