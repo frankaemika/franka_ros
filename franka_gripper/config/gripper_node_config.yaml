@@ -4,4 +4,3 @@ joint_names:
   - franka_emika_finger_joint2
 width_tolerance: 0.01  # [m]
 default_speed: 0.1  # [m/s]
-newton_to_m_ampere_factor: 14.9  # [mA/N]

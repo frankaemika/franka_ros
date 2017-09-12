@@ -73,12 +73,6 @@ int main(int argc, char** argv) {
     ROS_INFO_STREAM("franka_gripper_node: Found default_speed" << default_speed);
   }
 
-  double newton_to_m_ampere_factor(14.9);
-  if (node_handle.getParam("newton_to_m_ampere_factor", newton_to_m_ampere_factor)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found newton_to_m_ampere_factor"
-                    << newton_to_m_ampere_factor);
-  }
-
   franka::Gripper gripper(robot_ip);
 
   std::function<bool(const HomingGoalConstPtr&)> homing_handler =
@@ -114,7 +108,7 @@ int main(int argc, char** argv) {
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
       std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_speed,
-                newton_to_m_ampere_factor, &gripper_command_action_server, std::placeholders::_1),
+                &gripper_command_action_server, std::placeholders::_1),
       false);
 
   homing_action_server_.start();
