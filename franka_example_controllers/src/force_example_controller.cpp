@@ -111,7 +111,7 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   desired_force_torque.setZero();
   desired_force_torque(2) = desired_mass_ * -9.81;
   tau_ext = tau_measured - gravity - tau_ext_initial_;
-  tau_d = jacobian.transpose() * desired_force_torque;
+  tau_d << jacobian.transpose() * desired_force_torque;
   // FF + FB control
   tau_feedback = tau_d + k_f_ * (tau_d - tau_ext) - 2.0 * sqrt(k_f_) * dtau_measured;
   for (size_t i = 0; i < 7; ++i) {

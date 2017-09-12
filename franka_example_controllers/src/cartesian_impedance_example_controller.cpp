@@ -131,9 +131,9 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
 
   // set equilibrium point to current state
   position_d_ = initial_transform.translation();
-  orientation_d_ = Eigen::Quaterniond(initial_transform.rotation());
+  orientation_d_ = Eigen::Quaterniond(initial_transform.linear());
   position_d_target_ = initial_transform.translation();
-  orientation_d_target_ = Eigen::Quaterniond(initial_transform.rotation());
+  orientation_d_target_ = Eigen::Quaterniond(initial_transform.linear());
 
   // set nullspace equilibrium configuration to current state
   q_d_nullspace_ = q_initial;
@@ -158,7 +158,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Map<Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
-  Eigen::Quaterniond orientation(transform.rotation());
+  Eigen::Quaterniond orientation(transform.linear());
 
   // exponential smoother to filter twist signal
   dx_ = filter_gain_ * (jacobian * dq) + (1.0 - filter_gain_) * dx_;
@@ -185,8 +185,8 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::MatrixXd jacobian_transpose_pinv;
   pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
 
-  tau_task = jacobian.transpose() * (-cartesian_stiffness_ * error - cartesian_damping_ * dx_);
-  tau_nullspace =
+  tau_task << jacobian.transpose() * (-cartesian_stiffness_ * error - cartesian_damping_ * dx_);
+  tau_nullspace <<
       (Eigen::MatrixXd::Identity(7, 7) - jacobian.transpose() * jacobian_transpose_pinv) *
       (nullspace_stiffness_ * (q_d_nullspace_ - q) - (2.0 * sqrt(nullspace_stiffness_)) * dq);
 
