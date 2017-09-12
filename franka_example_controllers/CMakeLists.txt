@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
@@ -16,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   message_generation
   dynamic_reconfigure
-  cmake_modules
 )
 
 add_message_files(FILES
@@ -26,8 +24,8 @@ add_message_files(FILES
 generate_messages()
 
 generate_dynamic_reconfigure_options(
-    cfg/compliance_param.cfg
-    cfg/desired_mass_param.cfg
+  cfg/compliance_param.cfg
+  cfg/desired_mass_param.cfg
 )
 
 catkin_package(

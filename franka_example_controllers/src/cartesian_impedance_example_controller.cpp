@@ -117,8 +117,8 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
 }
 
 void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
-  /* Compute initial velocity with jacobian and set x_attractor and q_d_nullspace to initial
-   * configuration*/
+  // compute initial velocity with jacobian and set x_attractor and q_d_nullspace
+  // to initial configuration
   franka::RobotState initial_state = state_handle_->getRobotState();
   // get jacobian
   std::array<double, 42> jacobian_array =
@@ -129,29 +129,29 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
   Eigen::Map<Eigen::Matrix<double, 7, 1> > q_initial(initial_state.q.data());
   Eigen::Affine3d initial_transform(Eigen::Matrix4d::Map(initial_state.O_T_EE.data()));
 
-  // Set equilibrium point to current state
+  // set equilibrium point to current state
   position_d_ = initial_transform.translation();
   orientation_d_ = Eigen::Quaterniond(initial_transform.rotation());
   position_d_target_ = initial_transform.translation();
   orientation_d_target_ = Eigen::Quaterniond(initial_transform.rotation());
 
-  // Set nullspace equilibrium configuration to current state
+  // set nullspace equilibrium configuration to current state
   q_d_nullspace_ = q_initial;
 
-  // Initial twist
+  // initial twist
   dx_ << jacobian * dq_initial;
 }
 
 void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                                  const ros::Duration& /*period*/) {
-  // Get state variables
+  // get state variables
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 7> coriolis_array = model_handle_->getCoriolis(
       {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
 
-  // Convert to Eigen
+  // convert to Eigen
   Eigen::Map<Eigen::Matrix<double, 7, 1> > coriolis(coriolis_array.data());
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
@@ -160,15 +160,15 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.rotation());
 
-  /*** Exponential smoother to filter twist signal ***/
+  // exponential smoother to filter twist signal
   dx_ = filter_gain_ * (jacobian * dq) + (1.0 - filter_gain_) * dx_;
 
-  /*** compute error to desired pose ***/
-  /* position error */
+  // compute error to desired pose
+  // position error
   Eigen::Matrix<double, 6, 1> error;
   error.head(3) << position - position_d_;
 
-  /* orientation error */
+  // prientation error
   // "difference" quaternion
   Eigen::Quaterniond error_quaternion(orientation * orientation_d_.inverse());
   // convert to axis angle
@@ -176,12 +176,12 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // compute "orientation error"
   error.tail(3) << error_quaternion_angle_axis.axis() * error_quaternion_angle_axis.angle();
 
-  /*** Compute control ***/
-  // Allocate variables
+  // compute control
+  // allocate variables
   Eigen::VectorXd tau_task(7), tau_nullspace(7);
 
-  /* Pseudoinverse for nullspace handling */
-  // Kinematic pseuoinverse
+  // pseudoinverse for nullspace handling
+  // kinematic pseuoinverse
   Eigen::MatrixXd jacobian_transpose_pinv;
   pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
 
@@ -197,7 +197,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     joint_handles_[i].setCommand(tau_d[i]);
   }
 
-  // Update parameters changed online either through dynamic reconfigure or through the interactive
+  // update parameters changed online either through dynamic reconfigure or through the interactive
   // target by filtering
   cartesian_stiffness_ =
       filter_params_ * cartesian_stiffness_target_ + (1.0 - filter_params_) * cartesian_stiffness_;
@@ -213,8 +213,6 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   aa_orientation_d.angle() = filter_params_ * aa_orientation_d_target.angle() +
                              (1.0 - filter_params_) * aa_orientation_d.angle();
   orientation_d_ = Eigen::Quaterniond(aa_orientation_d);
-
-  return;
 }
 
 void CartesianImpedanceExampleController::complianceParamCallback(
