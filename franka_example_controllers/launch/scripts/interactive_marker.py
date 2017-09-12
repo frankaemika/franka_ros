@@ -1,46 +1,42 @@
 #!/usr/bin/python
 
 import rospy
-import numpy
 import tf
 
-from interactive_markers.interactive_marker_server import *
-from interactive_markers.menu_handler import *
-from visualization_msgs.msg import *
-from geometry_msgs.msg import Point
-from geometry_msgs.msg import Wrench
-from tf.broadcaster import TransformBroadcaster
+from interactive_markers.interactive_marker_server import \
+    InteractiveMarkerServer, InteractiveMarkerFeedback
+from visualization_msgs.msg import InteractiveMarker, \
+    InteractiveMarkerControl
+from geometry_msgs.msg import PoseStamped
 
-marker_pose = geometry_msgs.msg.PoseStamped()
+marker_pose = PoseStamped()
 pose_pub = None
+
 
 def publisherCallback(msg):
     marker_pose.header.frame_id = "franka_emika_link0"
     marker_pose.header.stamp = rospy.Time(0)
     pose_pub.publish(marker_pose)
 
+
 def processFeedback(feedback):
     if feedback.event_type == InteractiveMarkerFeedback.POSE_UPDATE:
         marker_pose.pose = feedback.pose
     server.applyChanges()
 
+
 if __name__ == "__main__":
     rospy.init_node("equilibrium_pose_node")
     listener = tf.TransformListener()
-
-    # get initial pose through TF
-    transform_found = True
     try:
-        listener.waitForTransform("/franka_emika_link0", "/franka_emika_EE", rospy.Time(0), rospy.Duration(10.0))
-        (initial_translation,initial_quaternion) = listener.lookupTransform("/franka_emika_link0", "/franka_emika_EE", rospy.Time(0))
-    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-        rospy.loginfo("Coudn't find transforms franka_emika_EE transform!")
-        transform_found = False
-
-    if transform_found == True:
-        pose_pub = rospy.Publisher("/equilibrium_pose", geometry_msgs.msg.PoseStamped, queue_size=10)
+        # get initial pose through TF
+        listener.waitForTransform("/franka_emika_link0", "/franka_emika_EE",
+                                  rospy.Time(0), rospy.Duration(10.0))
+        (initial_translation, initial_quaternion) = listener.lookupTransform(
+            "/franka_emika_link0", "/franka_emika_EE", rospy.Time(0))
+        pose_pub = rospy.Publisher(
+            "/equilibrium_pose", PoseStamped, queue_size=10)
         server = InteractiveMarkerServer("equilibrium_pose_marker")
-        pf_wrap = lambda fb: processFeedback(fb)
 
         int_marker = InteractiveMarker()
         int_marker.header.frame_id = "franka_emika_link0"
@@ -58,7 +54,7 @@ if __name__ == "__main__":
         # set initial message for the topic
         marker_pose.pose = int_marker.pose
 
-        # Publisher for the topic
+        # run pose publisher
         rospy.Timer(rospy.Duration(0.005), publisherCallback)
 
         # insert a box
@@ -111,8 +107,11 @@ if __name__ == "__main__":
         control.name = "move_z"
         control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
         int_marker.controls.append(control)
-        server.insert(int_marker, pf_wrap)
+        server.insert(int_marker, processFeedback)
 
         server.applyChanges()
 
         rospy.spin()
+    except (tf.LookupException,
+            tf.ConnectivityException, tf.ExtrapolationException):
+        rospy.logerr("Coudn't find franka_emika_EE transform!")
