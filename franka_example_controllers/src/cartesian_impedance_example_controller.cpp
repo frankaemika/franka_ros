@@ -186,9 +186,10 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
 
   tau_task << jacobian.transpose() * (-cartesian_stiffness_ * error - cartesian_damping_ * dx_);
-  tau_nullspace <<
-      (Eigen::MatrixXd::Identity(7, 7) - jacobian.transpose() * jacobian_transpose_pinv) *
-      (nullspace_stiffness_ * (q_d_nullspace_ - q) - (2.0 * sqrt(nullspace_stiffness_)) * dq);
+  tau_nullspace << (Eigen::MatrixXd::Identity(7, 7) -
+                    jacobian.transpose() * jacobian_transpose_pinv) *
+                       (nullspace_stiffness_ * (q_d_nullspace_ - q) -
+                        (2.0 * sqrt(nullspace_stiffness_)) * dq);
 
   std::array<double, 7> tau_d;
   for (size_t i = 0; i < 7; ++i) {
