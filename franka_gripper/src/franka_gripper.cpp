@@ -28,7 +28,6 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
     double default_speed,
-    double newton_to_m_ampere_factor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal) {
   std::function<bool()> gripper_command_handler = [=, &gripper]() {
@@ -41,8 +40,7 @@ void gripperCommandExecuteCallback(
     if (goal->command.position >= state.width) {
       return gripper.move(goal->command.position, default_speed);
     }
-    return gripper.grasp(goal->command.position, default_speed,
-                         goal->command.max_effort * newton_to_m_ampere_factor);
+    return gripper.grasp(goal->command.position, default_speed, goal->command.max_effort);
   };
 
   try {
@@ -77,7 +75,7 @@ bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/) {
 }
 
 bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal) {
-  return gripper.grasp(goal->width, goal->speed, goal->max_current);
+  return gripper.grasp(goal->width, goal->speed, goal->force);
 }
 
 }  // namespace franka_gripper

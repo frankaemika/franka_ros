@@ -1,6 +1,6 @@
 float64 width    # [m]
 float64 speed    # [m/s]
-float64 max_current  # [mA]
+float64 force  # [N]
 ---
 bool success
 string error
