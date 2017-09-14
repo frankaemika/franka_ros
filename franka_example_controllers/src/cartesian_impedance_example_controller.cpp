@@ -10,6 +10,8 @@
 
 #include <franka_hw/SetForceTorqueCollisionBehavior.h>
 
+#include "pseudo_inversion.h"
+
 namespace franka_example_controllers {
 
 CartesianImpedanceExampleController::CartesianImpedanceExampleController() = default;

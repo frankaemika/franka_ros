@@ -14,7 +14,6 @@
 #include <franka_hw/franka_state_interface.h>
 
 #include <eigen3/Eigen/Dense>
-#include "pseudo_inversion.h"
 
 #include <dynamic_reconfigure/server.h>
 #include <franka_example_controllers/compliance_paramConfig.h>
