@@ -1,12 +1,17 @@
-# MoveIt! for FRANKA EMIKA
+# ROS integration for FRANKA EMIKA research robots
 
-## Launch the joint trajectory controllers
+See the [FRANKA Control Interface documentation][fci-docs] for more information.
 
-This assumes that the robot is reachable at robot.franka.de. If this is not the case, add `robot_ip:=<ip>`.
+## MoveIt! quickstart
 
-    roslaunch franka_hw franka_hw.launch
+1. Launch the joint trajectory controller
 
-## Launch MoveIt! and RViz
+    roslaunch franka_control franka_control.launch robot_ip:=<ip>
+
+2. Launch MoveIt!
 
     roslaunch franka_moveit_config franka_moveit.launch
+
+3. Launch RViz
+
     roslaunch franka_moveit_config moveit_rviz.launch

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>franka_control</name>
+  <version>0.0.1</version>
+  <description>franka_control provides a hardware node to control a FRANKA EMIKA research robot</description>
+  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
+  <license>NONE</license>
+
+  <url type="website">http://wiki.ros.org/franka_control</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>FRANKA EMIKA Research Interface Team</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <depend>Franka</depend>
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
+  <depend>controller_interface</depend>
+  <depend>controller_manager</depend>
+  <depend>franka_description</depend>
+  <depend>franka_hw</depend>
+  <depend>franka_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>pluginlib</depend>
+  <depend>realtime_tools</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf2_msgs</depend>
+  <depend>tf</depend>
+
+  <exec_depend>message_runtime</exec_depend>
+
+  <export>
+    <controller_interface plugin="${prefix}/franka_controller_plugins.xml"/>
+  </export>
+</package>

@@ -6,16 +6,15 @@
 #include <ros/node_handle.h>
 #include <ros/service_server.h>
 
-#include <franka_hw/SetCartesianImpedance.h>
-#include <franka_hw/SetEEFrame.h>
-#include <franka_hw/SetForceTorqueCollisionBehavior.h>
-#include <franka_hw/SetFullCollisionBehavior.h>
-#include <franka_hw/SetJointImpedance.h>
-#include <franka_hw/SetKFrame.h>
-#include <franka_hw/SetLoad.h>
+#include <franka_control/SetCartesianImpedance.h>
+#include <franka_control/SetEEFrame.h>
+#include <franka_control/SetForceTorqueCollisionBehavior.h>
+#include <franka_control/SetFullCollisionBehavior.h>
+#include <franka_control/SetJointImpedance.h>
+#include <franka_control/SetKFrame.h>
+#include <franka_control/SetLoad.h>
 
-namespace franka_hw {
-namespace services {
+namespace franka_control {
 
 template <typename T>
 ros::ServiceServer advertiseService(
@@ -53,5 +52,4 @@ void setFullCollisionBehavior(franka::Robot& robot,
                               SetFullCollisionBehavior::Response& res);
 void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Response& res);
 
-}  // namespace services
-}  // namespace franka_hw
+}  // namespace franka_control

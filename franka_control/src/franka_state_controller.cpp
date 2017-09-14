@@ -1,21 +1,20 @@
-#include <franka_hw/franka_state_controller.h>
+#include <franka_control/franka_state_controller.h>
 
 #include <cmath>
 #include <mutex>
 #include <string>
 
-#include <controller_interface/controller_base.h>
+#include <franka/errors.h>
+#include <franka_hw/franka_cartesian_command_interface.h>
+#include <franka_msgs/Errors.h>
 #include <hardware_interface/hardware_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <tf/tf.h>
 #include <tf/transform_datatypes.h>
-#include <xmlrpcpp/XmlRpcValue.h>
-
-#include <franka_hw/Errors.h>
-#include <franka_hw/franka_cartesian_command_interface.h>
 
 namespace {
+
 tf::Transform convertArrayToTf(const std::array<double, 16>& transform) {
   tf::Matrix3x3 rotation(transform[0], transform[4], transform[8], transform[1], transform[5],
                          transform[9], transform[2], transform[6], transform[10]);
@@ -23,8 +22,8 @@ tf::Transform convertArrayToTf(const std::array<double, 16>& transform) {
   return tf::Transform(rotation, translation);
 }
 
-franka_hw::Errors errorsToMessage(const franka::Errors& error) {
-  franka_hw::Errors message;
+franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
+  franka_msgs::Errors message;
   message.joint_position_limits_violation =
       static_cast<decltype(message.joint_position_limits_violation)>(
           error.joint_position_limits_violation);
@@ -124,7 +123,7 @@ franka_hw::Errors errorsToMessage(const franka::Errors& error) {
 
 }  // anonymous namespace
 
-namespace franka_hw {
+namespace franka_control {
 
 FrankaStateController::FrankaStateController()
     : franka_state_interface_(nullptr),
@@ -360,6 +359,6 @@ void FrankaStateController::publishExternalWrench(const ros::Time& time) {
   }
 }
 
-}  // namespace franka_hw
+}  // namespace franka_control
 
-PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaStateController, controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(franka_control::FrankaStateController, controller_interface::ControllerBase)

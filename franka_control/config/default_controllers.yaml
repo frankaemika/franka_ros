@@ -1,5 +1,5 @@
 position_joint_trajectory_controller:
-  type: "position_controllers/JointTrajectoryController"
+  type: position_controllers/JointTrajectoryController
   joints:
     - franka_emika_joint1
     - franka_emika_joint2
@@ -26,7 +26,7 @@ position_joint_trajectory_controller:
       goal: 0.05
 
 effort_joint_trajectory_controller:
-  type: "effort_controllers/JointTrajectoryController"
+  type: effort_controllers/JointTrajectoryController
   joints:
     - franka_emika_joint1
     - franka_emika_joint2
@@ -61,6 +61,6 @@ effort_joint_trajectory_controller:
     franka_emika_joint7: {p: 100, d: 10, i: 0, i_clamp: 1}
 
 franka_state_controller:
-  type: franka_hw/FrankaStateController
+  type: franka_control/FrankaStateController
   publish_rate: 30  # [Hz]
 

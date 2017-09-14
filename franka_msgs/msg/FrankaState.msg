@@ -22,5 +22,5 @@ float64[16] O_T_EE_d
 float64[16] F_T_EE
 float64[16] EE_T_K
 float64 time
-franka_hw/Errors current_errors
-franka_hw/Errors last_motion_errors
+franka_msgs/Errors current_errors
+franka_msgs/Errors last_motion_errors

@@ -1,7 +1,6 @@
-#include "franka_hw/services.h"
+#include <franka_control/services.h>
 
-namespace franka_hw {
-namespace services {
+namespace franka_control {
 
 void setCartesianImpedance(franka::Robot& robot,
                            const SetCartesianImpedance::Request& req,
@@ -105,5 +104,4 @@ void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Respons
   robot.setLoad(mass, F_x_center_load, load_inertia);
 }
 
-}  // namespace services
-}  // namespace franka_hw
+}  // namespace franka_control

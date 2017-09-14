@@ -5,19 +5,15 @@
 #include <vector>
 
 #include <controller_interface/multi_interface_controller.h>
-#include <franka_hw/FrankaState.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <franka_hw/franka_state_interface.h>
+#include <franka_hw/trigger_rate.h>
+#include <franka_msgs/FrankaState.h>
 #include <geometry_msgs/WrenchStamped.h>
-#include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
 #include <sensor_msgs/JointState.h>
 #include <tf2_msgs/TFMessage.h>
 
-#include <franka_hw/FrankaState.h>
-#include <franka_hw/franka_state_interface.h>
-#include <franka_hw/trigger_rate.h>
-
-namespace franka_hw {
+namespace franka_control {
 
 class FrankaStateController
     : public controller_interface::MultiInterfaceController<franka_hw::FrankaStateInterface> {
@@ -79,7 +75,7 @@ class FrankaStateController
   std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
 
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
-  realtime_tools::RealtimePublisher<franka_hw::FrankaState> publisher_franka_states_;
+  realtime_tools::RealtimePublisher<franka_msgs::FrankaState> publisher_franka_states_;
   realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher_joint_states_;
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> publisher_external_wrench_;
   franka_hw::TriggerRate trigger_publish_;
@@ -88,4 +84,4 @@ class FrankaStateController
   std::vector<std::string> joint_names_;
 };
 
-}  // namespace franka_hw
+}  // namespace franka_control

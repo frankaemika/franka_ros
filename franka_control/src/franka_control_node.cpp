@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <string>
@@ -7,18 +8,17 @@
 #include <controller_manager/controller_manager.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
-#include <franka_hw/ErrorRecoveryAction.h>
 #include <franka_hw/franka_hw.h>
-#include <franka_hw/services.h>
 #include <ros/ros.h>
-#include <xmlrpcpp/XmlRpc.h>
+
+#include <franka_control/ErrorRecoveryAction.h>
+#include <franka_control/services.h>
 
 class ServiceContainer {
  public:
   template <typename T, typename... TArgs>
   ServiceContainer& advertiseService(TArgs&&... args) {
-    ros::ServiceServer server =
-        franka_hw::services::advertiseService<T>(std::forward<TArgs>(args)...);
+    ros::ServiceServer server = franka_control::advertiseService<T>(std::forward<TArgs>(args)...);
     services_.push_back(server);
     return *this;
   }
@@ -31,12 +31,14 @@ int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_hw");
   ros::NodeHandle node_handle("~");
 
-  XmlRpc::XmlRpcValue params;
-  node_handle.getParam("joint_names", params);
-  std::array<std::string, 7> joint_names;
-  for (size_t i = 0; i < joint_names.size(); i++) {
-    joint_names[i] = static_cast<std::string>(params[i]);
+  std::vector<std::string> joint_names_vector;
+  if (!node_handle.getParam("joint_names", joint_names_vector) || joint_names_vector.size() != 7) {
+    ROS_ERROR("Invalid or no joint_names parameters provided");
+    return 1;
   }
+  std::array<std::string, 7> joint_names;
+  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
+
   std::string robot_ip;
   node_handle.getParam("robot_ip", robot_ip);
   std::string arm_id;
@@ -56,37 +58,35 @@ int main(int argc, char** argv) {
   using std::placeholders::_2;
   ServiceContainer services;
   services
-      .advertiseService<franka_hw::SetJointImpedance>(
+      .advertiseService<franka_control::SetJointImpedance>(
           node_handle, "set_joint_impedance",
-          std::bind(franka_hw::services::setJointImpedance, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetCartesianImpedance>(
+          std::bind(franka_control::setJointImpedance, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
-          std::bind(franka_hw::services::setCartesianImpedance, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetEEFrame>(
+          std::bind(franka_control::setCartesianImpedance, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetEEFrame>(
           node_handle, "set_EE_frame",
-          std::bind(franka_hw::services::setEEFrame, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetKFrame>(
-          node_handle, "set_K_frame",
-          std::bind(franka_hw::services::setKFrame, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetForceTorqueCollisionBehavior>(
+          std::bind(franka_control::setEEFrame, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetKFrame>(
+          node_handle, "set_K_frame", std::bind(franka_control::setKFrame, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
-          std::bind(franka_hw::services::setForceTorqueCollisionBehavior, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetFullCollisionBehavior>(
+          std::bind(franka_control::setForceTorqueCollisionBehavior, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
-          std::bind(franka_hw::services::setFullCollisionBehavior, std::ref(robot), _1, _2))
-      .advertiseService<franka_hw::SetLoad>(
-          node_handle, "set_load",
-          std::bind(franka_hw::services::setLoad, std::ref(robot), _1, _2));
+          std::bind(franka_control::setFullCollisionBehavior, std::ref(robot), _1, _2))
+      .advertiseService<franka_control::SetLoad>(
+          node_handle, "set_load", std::bind(franka_control::setLoad, std::ref(robot), _1, _2));
 
-  actionlib::SimpleActionServer<franka_hw::ErrorRecoveryAction> recovery_action_server(
+  actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> recovery_action_server(
       node_handle, "error_recovery",
-      [&](const franka_hw::ErrorRecoveryGoalConstPtr&) {
+      [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
         try {
           robot.automaticErrorRecovery();
           has_error = false;
           recovery_action_server.setSucceeded();
         } catch (const franka::Exception& ex) {
-          recovery_action_server.setAborted(franka_hw::ErrorRecoveryResult(), ex.what());
+          recovery_action_server.setAborted(franka_control::ErrorRecoveryResult(), ex.what());
         }
       },
       false);

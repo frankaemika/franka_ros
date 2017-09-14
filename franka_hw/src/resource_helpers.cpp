@@ -1,4 +1,4 @@
-#include "franka_hw_helper_functions.h"
+#include "resource_helpers.h"
 
 #include <ros/console.h>
 

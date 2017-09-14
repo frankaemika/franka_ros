@@ -5,7 +5,7 @@
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <urdf/model.h>
 
-#include "franka_hw_helper_functions.h"
+#include "resource_helpers.h"
 
 namespace franka_hw {
 
