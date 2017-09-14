@@ -2,39 +2,49 @@
 
 #include <franka/robot_state.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
-#include <array>
-#include <cassert>
 #include <string>
 
 namespace franka_hw {
 
-/** A handle used to read the complete state of a franka robot. */
+/**
+ * Handle to read the complete state of a robot.
+ */
 class FrankaStateHandle {
  public:
   FrankaStateHandle() = delete;
+
   /**
-   * @param[in] name The name of the state handle
-   * @param[in] robot_state A reference to the robot_state
+   * Creates an instance of a FrankaStateHandle.
+   *
+   * @param[in] name The name of the state handle.
+   * @param[in] robot_state A reference to the robot state wrapped by this handle.
    */
   FrankaStateHandle(const std::string& name, franka::RobotState& robot_state)
       : name_(name), robot_state_(&robot_state) {}
 
-  const std::string& getName() const { return name_; }
-  const franka::RobotState& getRobotState() const { return *robot_state_; }
+  /**
+   * Gets the name of the state handle.
+   *
+   * @return Name of the state handle.
+   */
+  const std::string& getName() const noexcept { return name_; }
+
+  /**
+   * Gets the current robot state.
+   *
+   * @return Current robot state.
+   */
+  const franka::RobotState& getRobotState() const noexcept { return *robot_state_; }
 
  private:
   std::string name_;
   const franka::RobotState* robot_state_;
 };
 
-/** \brief Hardware interface to support reading the complete robot state of a
- * franka robot
+/**
+ * Hardware interface to read the complete robot state.
  *
- * This HardwareInterface supports reading the state of a franka robot
- * This inludes a collision state, a contact state, estimated external
- * wrench exerted to the robot w.r.t. the end-effector frame and the
- * robot base_link and the homogenous transformation from
- * End-effector frame to base_link frame as well joint_specific states
+ * @see franka::RobotState for a description of the values included in the robot state.
  */
 class FrankaStateInterface : public hardware_interface::HardwareResourceManager<FrankaStateHandle> {
 };

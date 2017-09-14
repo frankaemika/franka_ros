@@ -338,15 +338,15 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
   return true;
 }
 
-std::array<double, 7> FrankaHW::getJointPositionCommand() const {
+std::array<double, 7> FrankaHW::getJointPositionCommand() const noexcept {
   return position_joint_command_.q;
 }
 
-std::array<double, 7> FrankaHW::getJointVelocityCommand() const {
+std::array<double, 7> FrankaHW::getJointVelocityCommand() const noexcept {
   return velocity_joint_command_.dq;
 }
 
-std::array<double, 7> FrankaHW::getJointEffortCommand() const {
+std::array<double, 7> FrankaHW::getJointEffortCommand() const noexcept {
   return effort_joint_command_.tau_J;
 }
 

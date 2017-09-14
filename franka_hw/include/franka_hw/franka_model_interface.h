@@ -9,34 +9,42 @@
 
 namespace franka_hw {
 
-/** A handle used to get the dynamic model of franka in joint-space. */
+/**
+ * Handle to perform calculations using the dynamic model of a robot.
+ */
 class FrankaModelHandle {
  public:
   FrankaModelHandle() = delete;
 
   /**
-   * Constructs an instance of a FrankaModelHandle
+   * Creates an instance of a FrankaModelHandle.
    *
-   * @param[in] name The name of the handle
-   * @param[in] model A reference to a a franka::Model model instance
-   * @param[in] robot_state A reference to the storage of the current robot state
+   * @param[in] name The name of the model handle.
+   * @param[in] model A reference to the franka::Model instance wrapped by this handle.
+   * @param[in] robot_state A reference to the current robot state.
    */
   FrankaModelHandle(const std::string& name, franka::Model& model, franka::RobotState& robot_state)
       : name_(name), model_(&model), robot_state_(&robot_state) {}
 
   /**
-   * Returns the resource name of the Handle
+   * Gets the name of the model handle.
+   *
+   * @return Name of the model handle.
    */
-  std::string getName() const { return name_; }
+  std::string getName() const noexcept { return name_; }
 
   /**
-   * Returns the inertia matrix, given the current robot state and given external
-   * loads
+   * Calculates the 7x7 mass matrix from the current robot state. Unit: \f$[kg \times m^2]\f$.
    *
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Vectorized 7x7 mass matrix, column-major.
+   *
+   * @see franka::Model::mass
    */
   std::array<double, 49> getMass(
       const std::array<double, 9>& load_inertia,
@@ -46,14 +54,18 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the inertia matrix, given the input robot state and given external
-   * loads
+   * Calculates the 7x7 mass matrix from a given robot state. Unit: \f$[kg \times m^2]\f$.
    *
-   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] robot_state State from which the pose should be calculated.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Vectorized 7x7 mass matrix, column-major.
+   *
+   * @see franka::Model::mass
    */
   std::array<double, 49> getMass(
       const franka::RobotState& robot_state,
@@ -64,13 +76,18 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the coriolis torques given the current robot state and given
-   * external loads
+   * Calculates the Coriolis force vector (state-space equation) from the current robot state:
+   * \f$ c= C \times dq\f$, in \f$[Nm]\f$.
    *
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Coriolis force vector.
+   *
+   * @see franka::Model::coriolis
    */
   std::array<double, 7> getCoriolis(
       const std::array<double, 9>& load_inertia,
@@ -80,14 +97,19 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the coriolis torques, given the input robot state and given external
-   * loads
+   * Calculates the Coriolis force vector (state-space equation) from a given robot state:
+   * \f$ c= C \times dq\f$, in \f$[Nm]\f$.
    *
-   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] robot_state State from which the Coriolis force vector should be calculated.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Coriolis force vector.
+   *
+   * @see franka::Model::coriolis
    */
   std::array<double, 7> getCoriolis(
       const franka::RobotState& robot_state,
@@ -98,13 +120,17 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the gravity torques, given the current robot state and given
-   * external loads
+   * Calculates the gravity vector from the current robot state. Unit: \f$[Nm]\f$.
    *
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
+   * Default to {0.0, 0.0, -9.81}.
+   *
+   * @return Gravity vector.
+   *
+   * @see franka::Model::gravity
    */
   std::array<double, 7> getGravity(
       double load_mass,
@@ -114,14 +140,18 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the gravity torques, given the input robot state and given external
-   * loads
+   * Calculates the gravity vector from the given robot state. Unit: \f$[Nm]\f$.
    *
-   * @param[in] robot_state A user-given robot state to evaluate the dynamics
-   * @param[in] load_inertia The column major inertia tensor for a load w.r.t. F
-   * frame
-   * @param[in] load_mass The mass of the load
-   * @param[in] F_x_Cload The center of mass of the load w.r.t. F-frame
+   * @param[in] robot_state State from which the gravity vector should be calculated.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
+   * Default to {0.0, 0.0, -9.81}.
+   *
+   * @return Gravity vector.
+   *
+   * @see franka::Model::gravity
    */
   std::array<double, 7> getGravity(
       const franka::RobotState& robot_state,
@@ -132,79 +162,105 @@ class FrankaModelHandle {
   }
 
   /**
-   * Returns the Cartesian pose matrix of a frame w.r.t. the O-frame of the robot
+   * Gets the 4x4 pose matrix for the given frame in base frame, calculated from the current
+   * robot state.
    *
-   * @param[in] frame The desired frame.
-   * @param[in] robot_state A user-given robot state to evaluate the forward kinematics.
-   *
-   * @return Vectorized 4x4 homogeneous transform, column-major.
-   */
-  std::array<double, 16> getPose(const franka::Frame& frame,
-                                 const franka::RobotState& robot_state) {
-    return model_->pose(frame, robot_state);
-  }
-
-  /**
-   * Returns the Cartesian pose matrix of a frame w.r.t. the O-frame of the robot
+   * The pose is represented as a 4x4 matrix in column-major format.
    *
    * @param[in] frame The desired frame.
    *
-   * @return Vectorized 4x4 homogeneous transform, column-major.
+   * @return Vectorized 4x4 pose matrix, column-major.
+   *
+   * @see franka::Model::pose
    */
-  std::array<double, 16> getPose(const franka::Frame& frame) {
+  std::array<double, 16> getPose(const franka::Frame& frame) const {
     return getPose(frame, *robot_state_);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given frame w.r.t. that frame. The Jacobian is represented
-   * as a 6x7 matrix in column-major format and is evaluated at the given robot state
+   * Gets the 4x4 pose matrix for the given frame in base frame, calculated from the given
+   * robot state.
+   *
+   * The pose is represented as a 4x4 matrix in column-major format.
    *
    * @param[in] frame The desired frame.
    * @param[in] robot_state State from which the pose should be calculated.
    *
-   * @return Vectorized 6x7 Jacobian, column-major.
+   * @return Vectorized 4x4 pose matrix, column-major.
+   *
+   * @see franka::Model::pose
    */
-  std::array<double, 42> getBodyJacobian(const franka::Frame& frame,
-                                         const franka::RobotState& robot_state) {
-    return model_->bodyJacobian(frame, robot_state);
+  std::array<double, 16> getPose(const franka::Frame& frame,
+                                 const franka::RobotState& robot_state) const {
+    return model_->pose(frame, robot_state);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given frame w.r.t. that frame and for the current robot
-   * state. The Jacobian is represented as a 6x7 matrix in column-major format.
+   * Gets the 6x7 Jacobian for the given frame, relative to that frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format and calculated from
+   * the current robot state.
    *
    * @param[in] frame The desired frame.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
+   *
+   * @see franka::Model::bodyJacobian
    */
-  std::array<double, 42> getBodyJacobian(const franka::Frame& frame) {
+  std::array<double, 42> getBodyJacobian(const franka::Frame& frame) const {
     return getBodyJacobian(frame, *robot_state_);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given frame w.r.t. the link0 frame. The Jacobian is represented
-   * as a 6x7 matrix in column-major format and is evaluated at the given robot state
+   * Gets the 6x7 Jacobian for the given frame, relative to that frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format and calculated from
+   * the given robot state.
    *
    * @param[in] frame The desired frame.
    * @param[in] robot_state State from which the pose should be calculated.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
+   *
+   * @see franka::Model::bodyJacobian
    */
-  std::array<double, 42> getZeroJacobian(const franka::Frame& frame,
-                                         const franka::RobotState& robot_state) {
-    return model_->zeroJacobian(frame, robot_state);
+  std::array<double, 42> getBodyJacobian(const franka::Frame& frame,
+                                         const franka::RobotState& robot_state) const {
+    return model_->bodyJacobian(frame, robot_state);
   }
 
   /**
-   * Gets the 6x7 Jacobian for the given frame w.r.t. the link0 frame and for the current robot
-   * state. The Jacobian is represented as a 6x7 matrix in column-major format.
+   * Gets the 6x7 Jacobian for the given joint relative to the base frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format and calculated from
+   * the current robot state.
    *
    * @param[in] frame The desired frame.
    *
    * @return Vectorized 6x7 Jacobian, column-major.
+   *
+   * @see franka::Model::zeroJacobian
    */
-  std::array<double, 42> getZeroJacobian(const franka::Frame& frame) {
+  std::array<double, 42> getZeroJacobian(const franka::Frame& frame) const {
     return getZeroJacobian(frame, *robot_state_);
+  }
+
+  /**
+   * Gets the 6x7 Jacobian for the given joint relative to the base frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format and calculated from
+   * the given robot state.
+   *
+   * @param[in] frame The desired frame.
+   * @param[in] robot_state State from which the pose should be calculated.
+   *
+   * @return Vectorized 6x7 Jacobian, column-major.
+   *
+   * @see franka::Model::zeroJacobian
+   */
+  std::array<double, 42> getZeroJacobian(const franka::Frame& frame,
+                                         const franka::RobotState& robot_state) const {
+    return model_->zeroJacobian(frame, robot_state);
   }
 
  private:
@@ -213,14 +269,8 @@ class FrankaModelHandle {
   const franka::RobotState* robot_state_;
 };
 
-/** \brief Hardware interface to support reading the joint-space dynamics of a
- * franka robot
- *
- * This \ref HardwareInterface supports reading the state of an array of named
- * Franka joints, each of which has some position, velocity, and effort and
- * additional quantities (e.g. collision and
- * contact states etc.).
- *
+/**
+ * Hardware interface to perform calculations using the dynamic model of a robot.
  */
 class FrankaModelInterface : public hardware_interface::HardwareResourceManager<FrankaModelHandle> {
 };

@@ -1,62 +1,88 @@
 #pragma once
 
+#include <array>
 #include <franka_hw/franka_state_interface.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
-#include <string>
 
 namespace franka_hw {
 
-/** \brief A handle used to read and command a Cartesian Pose to a Franka. */
+/**
+ * Handle to read and command a Cartesian pose.
+ */
 class FrankaCartesianPoseHandle : public FrankaStateHandle {
  public:
   FrankaCartesianPoseHandle() = delete;
 
   /**
-   * \param cartesian_state_handle The cartesian state handle
-   * \param command A reference to the storage field for the cartesian pose
-   * passed a desired homogeneous transformation O_T_EE_d
+   * Creates an instance of a FrankaCartesianPoseHandle.
+   *
+   * @param[in] franka_state_handle Robot state handle.
+   * @param[in] command A reference to the Cartesian pose command wrapped by this handle.
    */
   FrankaCartesianPoseHandle(const FrankaStateHandle& franka_state_handle,
                             std::array<double, 16>& command)
       : FrankaStateHandle(franka_state_handle), command_(&command) {}
 
-  void setCommand(const std::array<double, 16>& command) { *command_ = command; }
-  const std::array<double, 16>& getCommand() const { return *command_; }
+  /**
+   * Sets the given command.
+   *
+   * @param[in] command Command to set.
+   */
+  void setCommand(const std::array<double, 16>& command) noexcept { *command_ = command; }
+
+  /**
+   * Gets the current command.
+   *
+   * @return Current command.
+   */
+  const std::array<double, 16>& getCommand() const noexcept { return *command_; }
 
  private:
   std::array<double, 16>* command_;
 };
 
-/** \brief Hardware interface to support commanding Cartesian poses to a Franka.
+/**
+ * Hardware interface to command Cartesian poses.
  */
 class FrankaPoseCartesianInterface
     : public hardware_interface::HardwareResourceManager<FrankaCartesianPoseHandle,
                                                          hardware_interface::ClaimResources> {};
 
-/** \brief A handle used to read and command a Cartesian Velocity to a Franka.
+/**
+ * Handle to read and command a Cartesian velocity.
  */
 class FrankaCartesianVelocityHandle : public FrankaStateHandle {
  public:
   FrankaCartesianVelocityHandle() = delete;
 
   /**
-   * \param cartesian_state_handle The cartesian state handle
-   * \param command A reference to the storage field for the cartesian velocity
-   * passed a desired homogeneous transformation O_T_EE_d
+   * @param[in] franka_state_handle Robot state handle.
+   * @param[in] command A reference to the Cartesian velocity command wrapped by this handle.
    */
   FrankaCartesianVelocityHandle(const FrankaStateHandle& franka_state_handle,
                                 std::array<double, 6>& command)
       : FrankaStateHandle(franka_state_handle), command_(&command) {}
 
-  void setCommand(std::array<double, 6>& command) { *command_ = command; }
-  const std::array<double, 6>& getCommand() const { return *command_; }
+  /**
+   * Sets the given command.
+   *
+   * @param[in] command Command to set.
+   */
+  void setCommand(std::array<double, 6>& command) noexcept { *command_ = command; }
+
+  /**
+   * Gets the current command.
+   *
+   * @return Current command.
+   */
+  const std::array<double, 6>& getCommand() const noexcept { return *command_; }
 
  private:
   std::array<double, 6>* command_;
 };
 
-/** \brief Hardware interface to support commanding Cartesian velocities to a
- * Franka
+/**
+ * Hardware interface to command Cartesian velocities.
  */
 class FrankaVelocityCartesianInterface
     : public hardware_interface::HardwareResourceManager<FrankaCartesianVelocityHandle,
