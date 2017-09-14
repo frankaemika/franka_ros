@@ -14,7 +14,7 @@ node {
         step([$class: 'CopyArtifact',
               filter: 'libfranka-*-amd64.tar.gz',
               fingerprintArtifacts: true,
-              projectName: "SWDEV/libfranka/${BRANCH_NAME}",
+              projectName: "SWDEV/libfranka/${java.net.URLEncoder.encode(env.BRANCH_NAME, "UTF-8")}",
               selector: [$class: 'StatusBuildSelector', stable: false]])
       } catch (e) {
         // Fall back to master branch.
