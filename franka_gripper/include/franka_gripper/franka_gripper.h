@@ -31,14 +31,12 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
   *
   * @param[in] gripper A pointer to a franka gripper
   * @param[in] default_speed The default speed for a gripper action
-  * @param[in] newton_to_m_ampere_factor The mapping factor from Newton to milliampere
   * @param[in] action_server A pointer to a gripper action server
   * @param[in] goal A gripper action goal
   */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
     double default_speed,
-    double newton_to_m_ampere_factor,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
 
