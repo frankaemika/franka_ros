@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_gripper)
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+  message(STATUS "CMAKE_BUILD_TYPE not set; defaulting to 'RelWithDebInfo'")
+endif()
+
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
 set(CMAKE_CXX_STANDARD 14)

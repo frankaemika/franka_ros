@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_example_controllers)
 
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo)
+  message(STATUS "CMAKE_BUILD_TYPE not set; defaulting to 'RelWithDebInfo'")
+endif()
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
