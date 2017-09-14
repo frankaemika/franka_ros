@@ -44,7 +44,7 @@ generate_messages(DEPENDENCIES actionlib_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES franka_state_controller
+  LIBRARIES franka_state_controller franka_control_services
   CATKIN_DEPENDS
     actionlib
     controller_interface
@@ -60,6 +60,7 @@ catkin_package(
   DEPENDS Franka
 )
 
+## franka_state_controller
 add_library(franka_state_controller
   src/franka_state_controller.cpp
 )
@@ -79,9 +80,29 @@ target_include_directories(franka_state_controller PUBLIC
   include
 )
 
+## franka_control_services
+add_library(franka_control_services
+  src/services.cpp
+)
+
+add_dependencies(franka_control_services
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(franka_control_services
+  ${catkin_LIBRARIES}
+  Franka::Franka
+)
+
+target_include_directories(franka_control_services PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  include
+)
+
+## franka_control_node
 add_executable(franka_control_node
   src/franka_control_node.cpp
-  src/services.cpp
 )
 
 add_dependencies(franka_control_node
@@ -91,6 +112,7 @@ add_dependencies(franka_control_node
 
 target_link_libraries(franka_control_node
   ${catkin_LIBRARIES}
+  franka_control_services
   Franka::Franka
 )
 

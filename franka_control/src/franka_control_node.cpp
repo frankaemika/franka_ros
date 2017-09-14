@@ -8,11 +8,11 @@
 #include <controller_manager/controller_manager.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
-#include <franka_control/ErrorRecoveryAction.h>
 #include <franka_hw/franka_hw.h>
 #include <ros/ros.h>
 
-#include "services.h"
+#include <franka_control/ErrorRecoveryAction.h>
+#include <franka_control/services.h>
 
 class ServiceContainer {
  public:
