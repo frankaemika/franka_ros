@@ -28,18 +28,19 @@ def processFeedback(feedback):
 if __name__ == "__main__":
     rospy.init_node("equilibrium_pose_node")
     listener = tf.TransformListener()
+    arm_id = rospy.get_param("arm_id")
     try:
         # get initial pose through TF
-        listener.waitForTransform("/franka_emika_link0", "/franka_emika_EE",
+        listener.waitForTransform(arm_id + "_link0", arm_id + "_EE",
                                   rospy.Time(0), rospy.Duration(10.0))
         (initial_translation, initial_quaternion) = listener.lookupTransform(
-            "/franka_emika_link0", "/franka_emika_EE", rospy.Time(0))
+            arm_id + "_link0", arm_id + "_EE", rospy.Time(0))
         pose_pub = rospy.Publisher(
             "/equilibrium_pose", PoseStamped, queue_size=10)
         server = InteractiveMarkerServer("equilibrium_pose_marker")
 
         int_marker = InteractiveMarker()
-        int_marker.header.frame_id = "franka_emika_link0"
+        int_marker.header.frame_id = arm_id + "_link0"
         int_marker.pose.position.x = initial_translation[0]
         int_marker.pose.position.y = initial_translation[1]
         int_marker.pose.position.z = initial_translation[2]
@@ -114,4 +115,5 @@ if __name__ == "__main__":
         rospy.spin()
     except (tf.LookupException,
             tf.ConnectivityException, tf.ExtrapolationException):
-        rospy.logerr("Coudn't find franka_emika_EE transform!")
+        rospy.logerr("Coudn't find " + arm_id + "_EE to " +
+                     arm_id + "_link0 transform!")
