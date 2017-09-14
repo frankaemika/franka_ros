@@ -1,8 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include <franka/robot_state.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
-#include <string>
 
 namespace franka_hw {
 

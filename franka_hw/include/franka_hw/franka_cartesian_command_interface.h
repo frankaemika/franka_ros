@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+
 #include <franka_hw/franka_state_interface.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 
