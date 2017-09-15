@@ -4,7 +4,7 @@
   <version>0.0.1</version>
   <description>This package implements the franka gripper of type Franka Hand for the use in ros</description>
   <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
-  <license>NONE</license>
+  <license>Apache 2.0</license>
   
   <url type="website">http://wiki.ros.org/franka_gripper</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
