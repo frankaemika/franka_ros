@@ -72,4 +72,4 @@ cartesian_impedance_example_controller:
         - franka_emika_joint7
     k_p_nullspace: 50.0
     k_ext: 0.95
-    filter_gain: 0.5
+    filter_twist: 0.5

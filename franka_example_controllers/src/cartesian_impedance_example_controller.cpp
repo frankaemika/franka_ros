@@ -34,9 +34,10 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter k_ext, defaulting to: " << k_ext_);
   }
-  if (!node_handle_.getParam("filter_gain", filter_gain_)) {
-    ROS_INFO_STREAM("CartesianImpedanceExampleController: No parameter filter_gain, defaulting to: "
-                    << filter_gain_);
+  if (!node_handle_.getParam("filter_twist", filter_twist_)) {
+    ROS_INFO_STREAM(
+        "CartesianImpedanceExampleController: No parameter filter_twist, defaulting to: "
+        << filter_twist_);
   }
   if (!node_handle_.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
     ROS_ERROR(
@@ -163,7 +164,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Quaterniond orientation(transform.linear());
 
   // exponential smoother to filter twist signal
-  dx_ = filter_gain_ * (jacobian * dq) + (1.0 - filter_gain_) * dx_;
+  dx_ = filter_twist_ * (jacobian * dq) + (1.0 - filter_twist_) * dx_;
 
   // compute error to desired pose
   // position error
