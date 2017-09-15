@@ -94,9 +94,10 @@ void ForceExampleController::starting(const ros::Time& /*time*/) {
   Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
   // Bias correction for the current external torque
   tau_ext_initial_ = tau_measured - gravity;
+  tau_error_.setZero();
 }
 
-void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
+void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& period) {
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
@@ -104,31 +105,32 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
       model_handle_->getGravity(robot_state, 0.0, {{0.0, 0.0, 0.0}});
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > dtau_measured(robot_state.dtau_J.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
 
-  Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_feedback(7), tau_ext(7);
+  Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_cmd(7), tau_ext(7);
   desired_force_torque.setZero();
   desired_force_torque(2) = desired_mass_ * -9.81;
   tau_ext = tau_measured - gravity - tau_ext_initial_;
-  tau_d << jacobian.transpose() * desired_force_torque;
-  // FF + FB control
-  tau_feedback = tau_d + k_f_ * (tau_d - tau_ext) - 2.0 * sqrt(k_f_) * dtau_measured;
+  tau_d = jacobian.transpose() * desired_force_torque;
+  tau_error_ = tau_error_ + period.toSec() * (tau_d - tau_ext);
+  // FF + PI control (PI gains are intially all 0)
+  tau_cmd = tau_d + k_p_ * (tau_d - tau_ext) + k_i_ * tau_error_;
   for (size_t i = 0; i < 7; ++i) {
-    joint_handles_[i].setCommand(tau_feedback(i));
+    joint_handles_[i].setCommand(tau_cmd(i));
   }
 
   // Update signals changed online through dynamic reconfigure
   desired_mass_ = filter_gain_ * target_mass_ + (1 - filter_gain_) * desired_mass_;
-  k_f_ = filter_gain_ * target_k_f_ + (1 - filter_gain_) * k_f_;
-  return;
+  k_p_ = filter_gain_ * target_k_p_ + (1 - filter_gain_) * k_p_;
+  k_i_ = filter_gain_ * target_k_i_ + (1 - filter_gain_) * k_i_;
 }
 
 void ForceExampleController::desiredMassParamCallback(
     franka_example_controllers::desired_mass_paramConfig& config,
     uint32_t /*level*/) {
   target_mass_ = config.desired_mass;
-  target_k_f_ = config.k_f;
+  target_k_p_ = config.k_p;
+  target_k_i_ = config.k_i;
 }
 
 }  // namespace franka_example_controllers

@@ -37,10 +37,13 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   std::vector<hardware_interface::JointHandle> joint_handles_;
   double desired_mass_{0.0};
   double target_mass_{0.0};
-  double k_f_{0.0};
-  double target_k_f_{0.0};
+  double k_p_{0.0};
+  double k_i_{0.0};
+  double target_k_p_{0.0};
+  double target_k_i_{0.0};
   double filter_gain_{0.001};
   Eigen::Matrix<double, 7, 1> tau_ext_initial_;
+  Eigen::Matrix<double, 7, 1> tau_error_;
 
   // Dynamic reconfigure
   boost::scoped_ptr<
