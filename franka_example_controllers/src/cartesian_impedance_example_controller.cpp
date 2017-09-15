@@ -8,7 +8,7 @@
 
 #include <franka/robot_state.h>
 
-#include <franka_hw/SetForceTorqueCollisionBehavior.h>
+#include <franka_control/SetForceTorqueCollisionBehavior.h>
 
 #include "pseudo_inversion.h"
 
