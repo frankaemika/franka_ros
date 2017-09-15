@@ -216,7 +216,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   return true;
 }
 
-void FrankaStateController::update(const ros::Time& time, const ros::Duration& /*period*/) {
+void FrankaStateController::update(const ros::Time& time, const ros::Duration& /* period */) {
   if (trigger_publish_()) {
     robot_state_ = franka_state_handle_->getRobotState();
     publishFrankaStates(time);

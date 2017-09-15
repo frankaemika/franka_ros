@@ -15,58 +15,40 @@
 
 namespace franka_control {
 
+/**
+ * Controller to publish the robot state as ROS topics.
+ */
 class FrankaStateController
     : public controller_interface::MultiInterfaceController<franka_hw::FrankaStateInterface> {
  public:
+  /**
+   * Creates an instance of a FrankaStateController.
+   */
   FrankaStateController();
 
   /**
-  * Initializes the controller with interfaces and publishers
-  *
-  * @param[in] hardware Pointer to the robot hardware
-  * @param[in] root_node_handle Nodehandle on root level passed from HW node
-  * @param[in] controller_node_handle Nodehandle in the controller namespace
-  * passed from HW node
-  */
+   * Initializes the controller with interfaces and publishers.
+   *
+   * @param[in] robot_hardware RobotHW instance to get a franka_hw::FrankaStateInterface from.
+   * @param[in] root_node_handle Node handle in the controller_manager namespace.
+   * @param[in] controller_node_handle Node handle in the controller namespace.
+   */
   bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
             ros::NodeHandle& controller_node_handle) override;
 
   /**
-  * Reads a new franka robot state and publishes it
+  * Reads the current robot state from the franka_hw::FrankaStateInterface and publishes it.
   *
-  * @param[in] time Current ros time
+  * @param[in] time Current ROS time.
+  * @param[in] period Time since the last update.
   */
-  void update(const ros::Time& time, const ros::Duration&) override;
+  void update(const ros::Time& time, const ros::Duration& period) override;
 
  private:
-  /**
-  * Publishes all relevant data received from the Franka arm
-  *
-  * @param[in] time Current ros time
-  */
   void publishFrankaStates(const ros::Time& time);
-
-  /**
-  * Publishes the joint states of the Franka arm
-  *
-  * @param[in] time Current ros time
-  */
   void publishJointStates(const ros::Time& time);
-
-  /**
-  * Publishes the transforms for EE and K frame which define the end-effector
-  * (EE) and the Cartesian impedance reference frame (K)
-  *
-  * @param[in] time Current ros time
-  */
   void publishTransforms(const ros::Time& time);
-
-  /**
-  * Publishes the estimated external wrench felt by the Franka
-  *
-  * @param[in] time Current ros time
-  */
   void publishExternalWrench(const ros::Time& time);
 
   std::string arm_id_;
