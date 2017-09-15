@@ -6,19 +6,19 @@
   <arg name="robot_description" default="robot_description"/>
 
   <!-- Load universal robot description format (URDF) -->
-  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/FEA_01_01_Gripper.urdf.xacro'"/>
+  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'"/>
 
   <!-- The semantic description that corresponds to the URDF -->
-  <param name="$(arg robot_description)_semantic" textfile="$(find franka_moveit_config)/config/franka_emika.srdf" />
+  <param name="$(arg robot_description)_semantic" textfile="$(find panda_moveit_config)/config/panda_arm_hand.srdf" />
   
   <!-- Load updated joint limits (override information from URDF) -->
   <group ns="$(arg robot_description)_planning">
-    <rosparam command="load" file="$(find franka_moveit_config)/config/joint_limits.yaml"/>
+    <rosparam command="load" file="$(find panda_moveit_config)/config/joint_limits.yaml"/>
   </group>
 
   <!-- Load default settings for kinematics; these settings are overridden by settings in a node's namespace -->
   <group ns="$(arg robot_description)_kinematics">
-    <rosparam command="load" file="$(find franka_moveit_config)/config/kinematics.yaml"/>
+    <rosparam command="load" file="$(find panda_moveit_config)/config/kinematics.yaml"/>
   </group>
   
 </launch>

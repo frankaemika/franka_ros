@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <launch>
-  <arg name="arm_id" default="franka_emika" />
+  <arg name="arm_id" default="panda" />
   <!-- Valid values: "position", "effort" -->
   <arg name="controller" default="position" />
 
   <group ns="$(arg arm_id)">
     <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="$(arg controller)_joint_trajectory_controller --shutdown-timeout 2"/>
-    <include file="$(find franka_moveit_config)/launch/move_group.launch" />
+    <include file="$(find panda_moveit_config)/launch/move_group.launch" />
   </group>
 </launch>
