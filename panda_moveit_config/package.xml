@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>panda_moveit_config</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description> A partly automatically generated package with all the configuration and launch files for using Panda research with MoveIt!</description>
   <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
