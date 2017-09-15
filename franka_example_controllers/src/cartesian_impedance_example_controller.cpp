@@ -170,7 +170,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Matrix<double, 6, 1> error;
   error.head(3) << position - position_d_;
 
-  // prientation error
+  // orientation error
   // "difference" quaternion
   Eigen::Quaterniond error_quaternion(orientation * orientation_d_.inverse());
   // convert to axis angle
