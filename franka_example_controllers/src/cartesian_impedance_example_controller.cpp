@@ -30,10 +30,6 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
     return false;
   }
-  if (!node_handle_.getParam("k_ext", k_ext_)) {
-    ROS_INFO_STREAM(
-        "CartesianImpedanceExampleController: No parameter k_ext, defaulting to: " << k_ext_);
-  }
   if (!node_handle_.getParam("filter_twist", filter_twist_)) {
     ROS_INFO_STREAM(
         "CartesianImpedanceExampleController: No parameter filter_twist, defaulting to: "
@@ -181,13 +177,14 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
 
   // compute control
   // allocate variables
-  Eigen::VectorXd tau_task(7), tau_nullspace(7);
+  Eigen::VectorXd tau_task(7), tau_nullspace(7), tau_d(7);
 
   // pseudoinverse for nullspace handling
   // kinematic pseuoinverse
   Eigen::MatrixXd jacobian_transpose_pinv;
   pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
 
+  // Cartesian PD control with damping ratio = 1
   tau_task << jacobian.transpose() * (-cartesian_stiffness_ * error - cartesian_damping_ * dx_);
   // nullspace PD control with damping ratio = 1
   tau_nullspace << (Eigen::MatrixXd::Identity(7, 7) -
@@ -195,11 +192,9 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                        (nullspace_stiffness_ * (q_d_nullspace_ - q) -
                         (2.0 * sqrt(nullspace_stiffness_)) * dq);
 
-  std::array<double, 7> tau_d;
+  tau_d << tau_task + tau_nullspace + coriolis;
   for (size_t i = 0; i < 7; ++i) {
-    tau_d[i] = tau_task(i) + tau_nullspace(i) + coriolis(i) -
-               k_ext_ * robot_state.tau_ext_hat_filtered[i];  // "reduces" mass at a joint level
-    joint_handles_[i].setCommand(tau_d[i]);
+    joint_handles_[i].setCommand(tau_d(i));
   }
 
   // update parameters changed online either through dynamic reconfigure or through the interactive
@@ -229,6 +224,7 @@ void CartesianImpedanceExampleController::complianceParamCallback(
   cartesian_stiffness_target_.bottomRightCorner(3, 3)
       << config.rotational_stiffness * Eigen::Matrix3d::Identity();
   cartesian_damping_target_.setIdentity();
+  // Damping ratio = 1
   cartesian_damping_target_.topLeftCorner(3, 3)
       << 2.0 * sqrt(config.translational_stiffness) * Eigen::Matrix3d::Identity();
   cartesian_damping_target_.bottomRightCorner(3, 3)
