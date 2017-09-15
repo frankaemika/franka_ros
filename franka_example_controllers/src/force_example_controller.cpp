@@ -114,6 +114,8 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   tau_d << jacobian.transpose() * desired_force_torque;
   // FF + FB control
   tau_feedback = tau_d + k_f_ * (tau_d - tau_ext) - 2.0 * sqrt(k_f_) * dtau_measured;
+  std::cout << "Desired torques: " << tau_feedback.transpose() << std::endl;
+  std::cout << "Measured torques: " << tau_measured.transpose() << std::endl;
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_feedback(i));
   }
