@@ -25,16 +25,27 @@ namespace franka_hw {
 
 class FrankaHW : public hardware_interface::RobotHW {
  public:
+  /**
+   * Maximum allowed joint acceleration.
+   *
+   * Used to limit commanded joint positions, velocities, and torques.
+   */
   static constexpr double kMaximumJointAcceleration{1.0};
+
+  /**
+   * Maximum allowed joint jerk.
+   *
+   * Used to limit commanded joint positions, velocities, and torques.
+   */
   static constexpr double kMaximumJointJerk{4000.0};
 
   FrankaHW() = delete;
 
   /**
-   * Constructs an instance of FrankaHW that does not provide a model interface.
+   * Creates an instance of FrankaHW that does not provide a model interface.
    *
    * @param[in] joint_names An array of joint names being controlled.
-   * @param[in] arm_id Unique identifier for the FRANKA arm being controlled.
+   * @param[in] arm_id Unique identifier for the robot being controlled.
    * @param[in] node_handle A node handle to get parameters from.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
@@ -42,12 +53,12 @@ class FrankaHW : public hardware_interface::RobotHW {
            const ros::NodeHandle& node_handle);
 
   /**
-   * Constructs an instance of FrankaHW that provides a model interface.
+   * Creates an instance of FrankaHW that provides a model interface.
    *
    * @param[in] joint_names An array of joint names being controlled.
-   * @param[in] arm_id Unique identifier for the FRANKA arm being controlled.
+   * @param[in] arm_id Unique identifier for the robot being controlled.
    * @param[in] node_handle A node handle to get parameters from.
-   * @param[in] model FRANKA model.
+   * @param[in] model Robot model.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
@@ -59,20 +70,18 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Runs the currently active controller in a realtime loop.
    *
-   * If no controller is active, the function immediately exits.
-   * When running a controller, the function only exits when ros_callback
-   * returns false.
+   * If no controller is active, the function immediately exits. When running a controller,
+   * the function only exits when ros_callback returns false.
    *
    * @param[in] robot Robot instance.
-   * @param[in] ros_callback A callback function that is executed at each time
-   * step and runs all ROS-side functionality of the hardware. Execution is
-   * stopped if it returns false.
+   * @param[in] ros_callback A callback function that is executed at each time step and runs
+   * all ROS-side functionality of the hardware. Execution is stopped if it returns false.
    *
-   * @throw franka::ControlException if an error related to control occurred.
-   * @throw franka::NetworkException if the connection is lost, e.g. after a
-   * timeout.
-   * @throw franka::RealtimeException if realtime priority can not be set for
-   * the current thread.
+   * @throw franka::ControlException if an error related to torque control or motion generation
+   * occurred.
+   * @throw franka::InvalidOperationException if a conflicting operation is already running.
+   * @throw franka::NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
   void control(franka::Robot& robot,
                std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
@@ -82,6 +91,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @param[in] robot_state Current robot state.
    *
+   * @throw franka::InvalidOperationException if a conflicting operation is already running.
    * @throw franka::NetworkException if the connection is lost.
    */
   void update(const franka::RobotState& robot_state);
@@ -95,63 +105,61 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
    * Checks whether a requested controller can be run, based on the resources
-   * and
-   * interfaces it claims
+   * and interfaces it claims.
    *
-   * @param[in] info A list of all controllers to be started, including the
-   * resources they claim
-   * @return Returns true in case of a conflict, false in case of valid
-   * controllers
+   * @param[in] info Controllers to be running at the same time.
+   *
+   * @return True in case of a conflict, false in case of valid controllers.
    */
   bool checkForConflict(const std::list<hardware_interface::ControllerInfo>& info) const override;
 
   /**
-  * Performs the switch between controllers and is real-time capable
-  *
-  */
+   * Performs controller switching (real-time capable).
+   */
   void doSwitch(const std::list<hardware_interface::ControllerInfo>&,
                 const std::list<hardware_interface::ControllerInfo>&) override;
 
   /**
-  * Prepares the switching between controllers. This function is not real-time
-  * capable.
+  * Prepares switching between controllers (not real-time capable).
   *
-  * @param[in] start_list Information list about all controllers requested to be
-  * started
+  * @param[in] start_list Controllers requested to be started.
+  * @param[in] stop_list Controllers requested to be stopped.
+  *
+  * @return True if the preparation has been successful, false otherwise.
   */
   bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
-   * Getter for the current Joint Position Command
+   * Gets the current joint position command.
    *
-   * @return The current Joint Position command
+   * @return Current joint position command.
    */
-  std::array<double, 7> getJointPositionCommand() const;
+  std::array<double, 7> getJointPositionCommand() const noexcept;
 
   /**
-   * Getter for the current Joint Velocity Command
+   * Gets the current joint velocity command.
    *
-   * @return The current Joint Velocity command
+   * @return Current joint velocity command.
    */
-  std::array<double, 7> getJointVelocityCommand() const;
+  std::array<double, 7> getJointVelocityCommand() const noexcept;
 
   /**
-   * Getter for the current Joint Torque Command
+   * Gets the current joint torque command.
    *
-   * @return The current Joint Torque command
+   * @return Current joint torque command.
    */
-  std::array<double, 7> getJointEffortCommand() const;
+  std::array<double, 7> getJointEffortCommand() const noexcept;
 
   /**
-   * Enforces joint limits on position velocity and torque level
+   * Enforces limits on position, velocity, and torque level.
    *
-   * @param[in] kPeriod The duration of the current cycle
+   * @param[in] period Duration of the current cycle.
    */
   void enforceLimits(const ros::Duration& period);
 
   /**
-   * Resets the joint limits interface
+   * Resets the limit interfaces.
    */
   void reset();
 
