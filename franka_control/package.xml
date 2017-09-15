@@ -2,14 +2,14 @@
 <package format="2">
   <name>franka_control</name>
   <version>0.0.1</version>
-  <description>franka_control provides a hardware node to control a FRANKA EMIKA research robot</description>
-  <maintainer email="info@franka.de">FRANKA EMIKA Research Interface Team</maintainer>
+  <description>franka_control provides a hardware node to control a Franka Emika research robot</description>
+  <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
   <license>NONE</license>
 
   <url type="website">http://wiki.ros.org/franka_control</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
-  <author>FRANKA EMIKA Research Interface Team</author>
+  <author>Franka Emika GmbH</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
