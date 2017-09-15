@@ -1,11 +1,11 @@
 joint_names:
-  - franka_emika_joint1
-  - franka_emika_joint2
-  - franka_emika_joint3
-  - franka_emika_joint4
-  - franka_emika_joint5
-  - franka_emika_joint6
-  - franka_emika_joint7
+  - panda_joint1
+  - panda_joint2
+  - panda_joint3
+  - panda_joint4
+  - panda_joint5
+  - panda_joint6
+  - panda_joint7
 
-arm_id: franka_emika
+arm_id: panda
 robot_ip: 127.0.0.1

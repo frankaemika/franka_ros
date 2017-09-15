@@ -2,7 +2,7 @@
 
 See the [FRANKA Control Interface documentation][fci-docs] for more information.
 
-## MoveIt! quickstart
+## MoveIt! quickstart for Panda research
 
 1. Launch the joint trajectory controller
 
@@ -10,8 +10,8 @@ See the [FRANKA Control Interface documentation][fci-docs] for more information.
 
 2. Launch MoveIt!
 
-    roslaunch franka_moveit_config franka_moveit.launch
+    roslaunch panda_moveit_config panda_moveit.launch
 
 3. Launch RViz
 
-    roslaunch franka_moveit_config moveit_rviz.launch
+    roslaunch panda_moveit_config moveit_rviz.launch

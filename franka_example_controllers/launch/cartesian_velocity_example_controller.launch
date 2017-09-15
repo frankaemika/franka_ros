@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_ip" default="robot.franka.de" />
-  <arg name="arm_id" value="franka_emika" />
+  <arg name="arm_id" value="panda" />
   <arg name="load_gripper" default="true" />
   <include file="$(find franka_control)/launch/franka_control.launch" >
     <arg name="robot_ip" value="$(arg robot_ip)" />

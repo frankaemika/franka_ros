@@ -21,7 +21,7 @@ using std::set;
 using hardware_interface::InterfaceResources;
 using hardware_interface::ControllerInfo;
 
-std::string arm_id("franka_emika");
+std::string arm_id("panda");
 std::array<std::string, 7> joint_names  = {arm_id + "_joint1",
         arm_id + "_joint2",
         arm_id + "_joint3",
@@ -93,7 +93,7 @@ public:
  std::unique_ptr<FrankaHW>  robot_;
 };
 
-string arm_id2("franka_emika2");
+string arm_id2("panda2");
 string jp_iface_str("hardware_interface::PositionJointInterface");
 string jv_iface_str("hardware_interface::VelocityJointInterface");
 string jt_iface_str("hardware_interface::EffortJointInterface");

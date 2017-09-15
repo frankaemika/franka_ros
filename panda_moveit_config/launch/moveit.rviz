@@ -66,61 +66,61 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          franka_emika_hand:
+          panda_hand:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_leftfinger:
+          panda_leftfinger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link0:
+          panda_link0:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link1:
+          panda_link1:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link2:
+          panda_link2:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link3:
+          panda_link3:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link4:
+          panda_link4:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link5:
+          panda_link5:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link6:
+          panda_link6:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link7:
+          panda_link7:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link8:
+          panda_link8:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          franka_emika_rightfinger:
+          panda_rightfinger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -147,14 +147,14 @@ Visualization Manager:
         Goal State Color: 250; 128; 0
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
-        Planning Group: franka_with_gripper
+        Planning Group: panda_arm_hand
         Query Goal State: true
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
         Start State Color: 0; 255; 0
       Planning Scene Topic: move_group/monitored_planning_scene
-      Robot Description: franka_emika/robot_description
+      Robot Description: robot_description
       Scene Geometry:
         Scene Alpha: 1
         Scene Color: 50; 230; 50
@@ -170,61 +170,61 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          franka_emika_hand:
+          panda_hand:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_leftfinger:
+          panda_leftfinger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link0:
+          panda_link0:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link1:
+          panda_link1:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link2:
+          panda_link2:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link3:
+          panda_link3:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link4:
+          panda_link4:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link5:
+          panda_link5:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link6:
+          panda_link6:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link7:
+          panda_link7:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          franka_emika_link8:
+          panda_link8:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          franka_emika_rightfinger:
+          panda_rightfinger:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -236,7 +236,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: franka_emika_link0
+    Fixed Frame: panda_link0
     Frame Rate: 30
   Name: root
   Tools:
@@ -263,7 +263,7 @@ Visualization Manager:
       Name: Current View
       Near Clip Distance: 0.00999999978
       Pitch: 0.104796879
-      Target Frame: franka_emika_link0
+      Target Frame: panda_link0
       Value: XYOrbit (rviz)
       Yaw: 5.9349494
     Saved: ~
