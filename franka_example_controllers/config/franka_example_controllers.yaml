@@ -70,4 +70,3 @@ cartesian_impedance_example_controller:
         - panda_joint5
         - panda_joint6
         - panda_joint7
-    filter_twist: 0.5

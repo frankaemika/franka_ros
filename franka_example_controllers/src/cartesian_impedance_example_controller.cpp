@@ -30,11 +30,6 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
     return false;
   }
-  if (!node_handle_.getParam("filter_twist", filter_twist_)) {
-    ROS_INFO_STREAM(
-        "CartesianImpedanceExampleController: No parameter filter_twist, defaulting to: "
-        << filter_twist_);
-  }
   if (!node_handle_.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
     ROS_ERROR(
         "CartesianImpedanceExampleController: Invalid or no joint_names parameters provided, "
@@ -107,7 +102,6 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   orientation_d_.coeffs() << 0.0, 0.0, 0.0, 1.0;
   position_d_target_.setZero();
   orientation_d_target_.coeffs() << 0.0, 0.0, 0.0, 1.0;
-  dx_.setZero();
 
   cartesian_stiffness_.setZero();
   cartesian_damping_.setZero();
@@ -136,9 +130,6 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
 
   // set nullspace equilibrium configuration to current state
   q_d_nullspace_ = q_initial;
-
-  // initial twist
-  dx_ << jacobian * dq_initial;
 }
 
 void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
@@ -155,12 +146,10 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_ext(robot_state.tau_ext_hat_filtered.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.linear());
-
-  // exponential smoother to filter twist signal
-  dx_ = filter_twist_ * (jacobian * dq) + (1.0 - filter_twist_) * dx_;
 
   // compute error to desired pose
   // position error
@@ -185,14 +174,15 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
 
   // Cartesian PD control with damping ratio = 1
-  tau_task << jacobian.transpose() * (-cartesian_stiffness_ * error - cartesian_damping_ * dx_);
+  tau_task << jacobian.transpose() *
+                  (-cartesian_stiffness_ * error - cartesian_damping_ * (jacobian * dq));
   // nullspace PD control with damping ratio = 1
   tau_nullspace << (Eigen::MatrixXd::Identity(7, 7) -
                     jacobian.transpose() * jacobian_transpose_pinv) *
                        (nullspace_stiffness_ * (q_d_nullspace_ - q) -
                         (2.0 * sqrt(nullspace_stiffness_)) * dq);
 
-  tau_d << tau_task + tau_nullspace + coriolis;
+  tau_d << tau_task + tau_nullspace + coriolis - tau_ext;
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d(i));
   }
