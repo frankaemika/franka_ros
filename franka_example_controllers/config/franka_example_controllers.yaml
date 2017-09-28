@@ -16,15 +16,15 @@ model_example_controller:
 
 force_example_controller:
     type: franka_example_controllers/ForceExampleController
-    arm_id: franka_emika
+    arm_id: panda
     joint_names:
-        - franka_emika_joint1
-        - franka_emika_joint2
-        - franka_emika_joint3
-        - franka_emika_joint4
-        - franka_emika_joint5
-        - franka_emika_joint6
-        - franka_emika_joint7
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
 
 joint_impedance_example_controller:
     type: franka_example_controllers/JointImpedanceExampleController
@@ -61,13 +61,13 @@ joint_impedance_example_controller:
 
 cartesian_impedance_example_controller:
     type: franka_example_controllers/CartesianImpedanceExampleController
-    arm_id: franka_emika
+    arm_id: panda
     joint_names:
-        - franka_emika_joint1
-        - franka_emika_joint2
-        - franka_emika_joint3
-        - franka_emika_joint4
-        - franka_emika_joint5
-        - franka_emika_joint6
-        - franka_emika_joint7
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
     filter_twist: 0.5
