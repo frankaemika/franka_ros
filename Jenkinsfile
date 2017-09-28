@@ -1,6 +1,6 @@
 #!groovy
 
-node {
+node('docker') {
   step([$class: 'StashNotifier'])
 
   try {
