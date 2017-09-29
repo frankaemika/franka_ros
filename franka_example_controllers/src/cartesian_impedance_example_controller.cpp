@@ -1,3 +1,5 @@
+// Copyright (c) 2017 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka_example_controllers/cartesian_impedance_example_controller.h>
 
 #include <cmath>
@@ -7,8 +9,6 @@
 #include <ros/ros.h>
 
 #include <franka/robot_state.h>
-
-#include <franka_control/SetForceTorqueCollisionBehavior.h>
 
 #include "pseudo_inversion.h"
 
