@@ -19,6 +19,7 @@ before_script:
 
 script:
   - docker run
+    -u "$(id -u):$(id -g)"
     -v $TRAVIS_BUILD_DIR:$TRAVIS_BUILD_DIR
     -v ~/workspace:/workspace
     worker /bin/sh -c '
