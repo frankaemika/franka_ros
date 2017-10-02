@@ -3,6 +3,7 @@
 ## 0.1.1 - UNRELEASED
 
   * Integrate franka_description as subdirectory
+  * Fix dependencies on libfranka
 
 ## 0.1.0 - 2017-09-15
 

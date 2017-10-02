@@ -15,7 +15,7 @@
 
   <depend>roscpp</depend>
   <depend>message_generation</depend>
-  <depend>Franka</depend>
+  <depend>libfranka</depend>
   <depend>control_msgs</depend>
   <depend>actionlib</depend>
   <depend>sensor_msgs</depend>
