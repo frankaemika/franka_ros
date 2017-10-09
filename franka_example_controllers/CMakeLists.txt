@@ -28,7 +28,7 @@ catkin_package(
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_library(franka_example_controllers 
+add_library(franka_example_controllers
   src/cartesian_pose_example_controller.cpp
   src/cartesian_velocity_example_controller.cpp
   src/joint_position_example_controller.cpp
@@ -44,6 +44,25 @@ add_dependencies(franka_example_controllers
 )
 
 target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})
+
+## Installation
+install(TARGETS franka_example_controllers
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(FILES franka_example_controllers_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 ## Tools
 file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
