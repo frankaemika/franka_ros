@@ -4,7 +4,7 @@
 
   * Integrate `franka_description` as subdirectory
   * Fix dependencies on libfranka
-  * Fix RViz config file path in `franka_visualization`
+  * Fix RViz config file paths
   * Add missing `test_depend` to `franka_hw`
   * Add missing CMake install rules
 
