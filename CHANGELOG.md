@@ -5,6 +5,7 @@
   * Integrate `franka_description` as subdirectory
   * Fix dependencies on libfranka
   * Fix RViz config file path in `franka_visualization`
+  * Add missing `test_depend` to `franka_hw`
 
 ## 0.1.0 - 2017-09-15
 
