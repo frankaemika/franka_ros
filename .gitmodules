@@ -1,3 +1,0 @@
-[submodule "franka_description"]
-	path = franka_description
-	url = https://github.com/frankaemika/franka_description.git
