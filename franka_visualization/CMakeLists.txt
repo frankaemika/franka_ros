@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_visualization)
 
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -44,14 +42,18 @@ install(DIRECTORY config
 )
 
 ## Tools
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
+  RESULT_VARIABLE CLANG_TOOLS
 )
-include(ClangTools)
-add_format_target(franka_visualization FILES ${SOURCES} ${HEADERS})
-add_tidy_target(franka_visualization
-  FILES ${SOURCES}
-  DEPENDS franka_joint_state_publisher
-)
+if(CLANG_TOOLS)
+  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  file(GLOB_RECURSE HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+  )
+  add_format_target(franka_visualization FILES ${SOURCES} ${HEADERS})
+  add_tidy_target(franka_visualization
+    FILES ${SOURCES}
+    DEPENDS franka_joint_state_publisher
+  )
+endif()

@@ -65,16 +65,18 @@ install(FILES franka_example_controllers_plugin.xml
 )
 
 ## Tools
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
+  RESULT_VARIABLE CLANG_TOOLS
 )
-
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-include(ClangTools)
-add_format_target(franka_example_controllers FILES ${SOURCES} ${HEADERS})
-add_tidy_target(franka_example_controllers
-  FILES ${SOURCES}
-  DEPENDS franka_example_controllers
-)
+if(CLANG_TOOLS)
+  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  file(GLOB_RECURSE HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+  )
+  add_format_target(franka_example_controllers FILES ${SOURCES} ${HEADERS})
+  add_tidy_target(franka_example_controllers
+    FILES ${SOURCES}
+    DEPENDS franka_example_controllers
+  )
+endif()
