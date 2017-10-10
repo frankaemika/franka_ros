@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.2 - UNRELEASED
+
+  * Fixed out-of-workspace build
+
 ## 0.1.1 - 2017-10-09
 
   * Integrated `franka_description` as subdirectory
