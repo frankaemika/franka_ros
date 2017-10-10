@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.1.2 - UNRELEASED
+## 0.1.2 - 2017-10-10
 
   * Fixed out-of-workspace build
 
