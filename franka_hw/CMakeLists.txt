@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_hw)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE RelWithDebInfo)
-  message(STATUS "CMAKE_BUILD_TYPE not set; defaulting to 'RelWithDebInfo'")
-endif()
-
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
-
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -50,19 +43,33 @@ target_include_directories(franka_hw PUBLIC
   include
 )
 
+## Installation
+install(TARGETS franka_hw
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
 
 ## Tools
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
-file(GLOB_RECURSE HEADERS
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
+  RESULT_VARIABLE CLANG_TOOLS
 )
-include(ClangTools)
-add_format_target(franka_hw FILES ${SOURCES} ${HEADERS})
-add_tidy_target(franka_hw
-  FILES ${SOURCES}
-  DEPENDS franka_hw
-)
+if(CLANG_TOOLS)
+  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  file(GLOB_RECURSE HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+  )
+  add_format_target(franka_hw FILES ${SOURCES} ${HEADERS})
+  add_tidy_target(franka_hw
+    FILES ${SOURCES}
+    DEPENDS franka_hw
+  )
+endif()

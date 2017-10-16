@@ -3,19 +3,22 @@
 <launch>
   <arg name="load_gripper" default="true" />
   <arg name="robot_ip" default="robot.franka.de" />
-  
+
   <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro" />
   <param if="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm_hand.urdf.xacro" />
+
   <node name="franka_joint_state_publisher" pkg="franka_visualization" type="franka_joint_state_publisher" output="screen">
-    <rosparam command="load" file="$(find franka_visualization)/param/robot_read_settings.yaml" />
+    <rosparam command="load" file="$(find franka_visualization)/config/robot_read_settings.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
   </node>
+
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
     <param if="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'" />
     <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm.urdf.xacro'" />
     <rosparam  param="source_list">[franka_joint_state_publisher/joint_states] </rosparam>
     <param  if="$(arg load_gripper)" name="publish_default_positions" value="true" />
-  </node>  
+  </node>
+
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-  <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_description)/rviz/franka_description.rviz"/>
+  <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_visualization)/launch/franka_visualization.rviz"/>
 </launch>
