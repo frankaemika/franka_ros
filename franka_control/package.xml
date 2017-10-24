@@ -20,7 +20,6 @@
   <depend>actionlib_msgs</depend>
   <depend>controller_interface</depend>
   <depend>controller_manager</depend>
-  <depend>franka_description</depend>
   <depend>franka_hw</depend>
   <depend>franka_msgs</depend>
   <depend>geometry_msgs</depend>
@@ -31,6 +30,7 @@
   <depend>tf2_msgs</depend>
   <depend>tf</depend>
 
+  <exec_depend>franka_description</exec_depend>
   <exec_depend>message_runtime</exec_depend>
 
   <export>
