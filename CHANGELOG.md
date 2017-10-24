@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.1.3 - UNRELEASED
+
+  * Specified run-time dependencies on `franka_description`
+
 ## 0.1.2 - 2017-10-10
 
   * Fixed out-of-workspace build
