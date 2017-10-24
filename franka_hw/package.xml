@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_hw</name>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <description>franka_hw provides hardware interfaces for using Franka Emika research robots with ros_control</description>
   <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -19,6 +19,7 @@
   <depend>joint_limits_interface</depend>
   <depend>roscpp</depend>
 
+  <test_depend>franka_description</test_depend>
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
 </package>
