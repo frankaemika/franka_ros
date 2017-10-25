@@ -3,7 +3,7 @@
   <name>franka_example_controllers</name>
   <version>0.1.2</version>
   <description>The franka_example_controllers package</description>
-  <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
+  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
 
   <url type="website">http://wiki.ros.org/franka_example_controllers</url>

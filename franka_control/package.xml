@@ -3,7 +3,7 @@
   <name>franka_control</name>
   <version>0.1.2</version>
   <description>franka_control provides a hardware node to control a Franka Emika research robot</description>
-  <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
+  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
 
   <url type="website">http://wiki.ros.org/franka_control</url>
