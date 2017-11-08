@@ -40,9 +40,9 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
   */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
-    double default_speed,
     double default_epsilon_inner,
     double default_epsilon_outer,
+    double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
 
