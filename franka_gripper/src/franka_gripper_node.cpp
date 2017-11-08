@@ -65,14 +65,19 @@ int main(int argc, char** argv) {
     ROS_ERROR("franka_gripper_node: Could not parse robot_ip parameter");
     return -1;
   }
-  double width_tolerance(0.01);
-  if (node_handle.getParam("width_tolerance", width_tolerance)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found width_tolerance" << width_tolerance);
-  }
-
   double default_speed(0.1);
   if (node_handle.getParam("default_speed", default_speed)) {
     ROS_INFO_STREAM("franka_gripper_node: Found default_speed" << default_speed);
+  }
+
+  double default_epsilon_inner(0.0025);
+  if (node_handle.getParam("default_epsilon_inner", default_epsilon_inner)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found default_epsilon_inner" << default_epsilon_inner);
+  }
+
+  double default_epsilon_outer(0.0025);
+  if (node_handle.getParam("default_epsilon_outer", default_epsilon_outer)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found default_epsilon_outer" << default_epsilon_outer);
   }
 
   franka::Gripper gripper(robot_ip);
@@ -109,8 +114,9 @@ int main(int argc, char** argv) {
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
-      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_speed,
-                &gripper_command_action_server, std::placeholders::_1),
+      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_epsilon_inner,
+                default_epsilon_outer, default_speed, &gripper_command_action_server,
+                std::placeholders::_1),
       false);
 
   homing_action_server_.start();

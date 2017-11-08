@@ -33,12 +33,16 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
   *
   * @param[in] gripper A pointer to a franka gripper
   * @param[in] default_speed The default speed for a gripper action
+  * @param[in] default_epsilon_inner The default inner epsilon for a gripper action
+  * @param[in] default_epsilon_outer The default outer epsilon for a gripper action
   * @param[in] action_server A pointer to a gripper action server
   * @param[in] goal A gripper action goal
   */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
     double default_speed,
+    double default_epsilon_inner,
+    double default_epsilon_outer,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
 
@@ -68,7 +72,7 @@ bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/);
  * Calls the libfranka grasp service of the gripper
  *
  * @param[in] gripper A gripper instance to execute the command
- * @param[in] goal A grasp goal with target width, velocity and effort
+ * @param[in] goal A grasp goal with target width, epsilon_inner, epsilon_outer, velocity and effort
  */
 bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal);
 

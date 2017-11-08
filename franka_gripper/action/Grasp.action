@@ -1,4 +1,6 @@
 float64 width    # [m]
+float64 epsilon_inner    # [m]
+float64 epsilon_outer    # [m]
 float64 speed    # [m/s]
 float64 force  # [N]
 ---
