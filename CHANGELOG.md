@@ -3,6 +3,7 @@
 ## 0.1.3 - UNRELEASED
 
   * Specified run-time dependencies on `franka_description`
+  * Added epsilon to grasp action
 
 ## 0.1.2 - 2017-10-10
 
