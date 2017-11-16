@@ -35,13 +35,13 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
  *
  * @param[in] gripper A pointer to a franka gripper
  * @param[in] default_speed The default speed for a gripper action
- * @param[in] epsilon The epsilon window of the grasp.
+ * @param[in] grasp_epsilon The epsilon window of the grasp.
  * @param[in] action_server A pointer to a gripper action server
  * @param[in] goal A gripper action goal
  */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
-    const GraspEpsilon& epsilon,
+    const GraspEpsilon& grasp_epsilon,
     double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
