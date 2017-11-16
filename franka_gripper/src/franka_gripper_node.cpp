@@ -39,22 +39,23 @@ void handleErrors(actionlib::SimpleActionServer<T_action>* server,
 using actionlib::SimpleActionServer;
 using control_msgs::GripperCommandAction;
 using franka_gripper::GraspAction;
-using franka_gripper::MoveAction;
-using franka_gripper::HomingAction;
-using franka_gripper::StopAction;
+using franka_gripper::GraspEpsilon;
 using franka_gripper::GraspGoalConstPtr;
-using franka_gripper::MoveGoalConstPtr;
-using franka_gripper::StopGoalConstPtr;
+using franka_gripper::GraspResult;
+using franka_gripper::HomingAction;
 using franka_gripper::HomingGoalConstPtr;
 using franka_gripper::HomingResult;
-using franka_gripper::GraspResult;
+using franka_gripper::MoveAction;
+using franka_gripper::MoveGoalConstPtr;
 using franka_gripper::MoveResult;
+using franka_gripper::StopAction;
+using franka_gripper::StopGoalConstPtr;
 using franka_gripper::StopResult;
-using franka_gripper::homing;
-using franka_gripper::stop;
 using franka_gripper::grasp;
-using franka_gripper::move;
 using franka_gripper::gripperCommandExecuteCallback;
+using franka_gripper::homing;
+using franka_gripper::move;
+using franka_gripper::stop;
 using franka_gripper::updateGripperState;
 
 int main(int argc, char** argv) {
@@ -65,19 +66,21 @@ int main(int argc, char** argv) {
     ROS_ERROR("franka_gripper_node: Could not parse robot_ip parameter");
     return -1;
   }
+
   double default_speed(0.1);
   if (node_handle.getParam("default_speed", default_speed)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found default_speed" << default_speed);
+    ROS_INFO_STREAM("franka_gripper_node: Found default_speed " << default_speed);
   }
 
-  double default_epsilon_inner(0.0025);
-  if (node_handle.getParam("default_epsilon_inner", default_epsilon_inner)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found default_epsilon_inner" << default_epsilon_inner);
-  }
-
-  double default_epsilon_outer(0.0025);
-  if (node_handle.getParam("default_epsilon_outer", default_epsilon_outer)) {
-    ROS_INFO_STREAM("franka_gripper_node: Found default_epsilon_outer" << default_epsilon_outer);
+  GraspEpsilon default_grasp_epsilon;
+  default_grasp_epsilon.inner = 0.005;
+  default_grasp_epsilon.outer = 0.005;
+  std::map<std::string, double> epsilon_map;
+  if (node_handle.getParam("default_grasp_epsilon", epsilon_map)) {
+    ROS_INFO_STREAM("franka_gripper_node: Found default_grasp_epsilon "
+                    << "inner: " << epsilon_map["inner"] << ", outer: " << epsilon_map["outer"]);
+    default_grasp_epsilon.inner = epsilon_map["inner"];
+    default_grasp_epsilon.outer = epsilon_map["outer"];
   }
 
   franka::Gripper gripper(robot_ip);
@@ -98,25 +101,27 @@ int main(int argc, char** argv) {
       false);
 
   SimpleActionServer<StopAction> stop_action_server_(
-      node_handle, "stop", std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
-                                     &stop_action_server_, stop_handler, std::placeholders::_1),
+      node_handle, "stop",
+      std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>, &stop_action_server_,
+                stop_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<MoveAction> move_action_server_(
-      node_handle, "move", std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
-                                     &move_action_server_, move_handler, std::placeholders::_1),
+      node_handle, "move",
+      std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>, &move_action_server_,
+                move_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GraspAction> grasp_action_server_(
-      node_handle, "grasp", std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
-                                      &grasp_action_server_, grasp_handler, std::placeholders::_1),
+      node_handle, "grasp",
+      std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>, &grasp_action_server_,
+                grasp_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
-      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_epsilon_inner,
-                default_epsilon_outer, default_speed, &gripper_command_action_server,
-                std::placeholders::_1),
+      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_grasp_epsilon,
+                default_speed, &gripper_command_action_server, std::placeholders::_1),
       false);
 
   homing_action_server_.start();

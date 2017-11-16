@@ -24,6 +24,11 @@ add_action_files(
         Move.action
 )
 
+add_message_files(
+  DIRECTORY msg
+  FILES GraspEpsilon.msg
+)
+
 generate_messages(DEPENDENCIES actionlib_msgs)
 
 catkin_package(

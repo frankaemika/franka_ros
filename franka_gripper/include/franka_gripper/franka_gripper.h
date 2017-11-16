@@ -20,30 +20,28 @@
 namespace franka_gripper {
 
 /**
-  * Reads a gripper state if possible
-  *
-  * @param[in] state A gripper state to update
-  * @param[in] gripper A pointer to a franka gripper
-  *
-  * @return True if update was successful, false otherwise.
-  */
+ * Reads a gripper state if possible
+ *
+ * @param[in] state A gripper state to update
+ * @param[in] gripper A pointer to a franka gripper
+ *
+ * @return True if update was successful, false otherwise.
+ */
 bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* state);
 
 /**
-  * Wraps the execution of a gripper command action to catch exceptions and
-  * report results
-  *
-  * @param[in] gripper A pointer to a franka gripper
-  * @param[in] default_speed The default speed for a gripper action
-  * @param[in] default_epsilon_inner The default inner epsilon for a gripper action
-  * @param[in] default_epsilon_outer The default outer epsilon for a gripper action
-  * @param[in] action_server A pointer to a gripper action server
-  * @param[in] goal A gripper action goal
-  */
+ * Wraps the execution of a gripper command action to catch exceptions and
+ * report results
+ *
+ * @param[in] gripper A pointer to a franka gripper
+ * @param[in] default_speed The default speed for a gripper action
+ * @param[in] epsilon The epsilon window of the grasp.
+ * @param[in] action_server A pointer to a gripper action server
+ * @param[in] goal A gripper action goal
+ */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
-    double default_epsilon_inner,
-    double default_epsilon_outer,
+    const GraspEpsilon& epsilon,
     double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);

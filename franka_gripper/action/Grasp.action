@@ -1,6 +1,5 @@
 float64 width    # [m]
-float64 epsilon_inner    # [m]
-float64 epsilon_outer    # [m]
+GraspEpsilon epsilon
 float64 speed    # [m/s]
 float64 force  # [N]
 ---
