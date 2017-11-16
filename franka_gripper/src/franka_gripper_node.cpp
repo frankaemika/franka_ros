@@ -101,21 +101,18 @@ int main(int argc, char** argv) {
       false);
 
   SimpleActionServer<StopAction> stop_action_server_(
-      node_handle, "stop",
-      std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>, &stop_action_server_,
-                stop_handler, std::placeholders::_1),
+      node_handle, "stop", std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
+                                     &stop_action_server_, stop_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<MoveAction> move_action_server_(
-      node_handle, "move",
-      std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>, &move_action_server_,
-                move_handler, std::placeholders::_1),
+      node_handle, "move", std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
+                                     &move_action_server_, move_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GraspAction> grasp_action_server_(
-      node_handle, "grasp",
-      std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>, &grasp_action_server_,
-                grasp_handler, std::placeholders::_1),
+      node_handle, "grasp", std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
+                                      &grasp_action_server_, grasp_handler, std::placeholders::_1),
       false);
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
