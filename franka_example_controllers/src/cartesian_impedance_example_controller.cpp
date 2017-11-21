@@ -128,7 +128,7 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
   position_d_target_ = initial_transform.translation();
   orientation_d_target_ = Eigen::Quaterniond(initial_transform.linear());
 
-  // set nullspace equilibrium configuration to current state
+  // set nullspace equilibrium configuration to initial q
   q_d_nullspace_ = q_initial;
 }
 
@@ -136,17 +136,22 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                                  const ros::Duration& /*period*/) {
   // get state variables
   franka::RobotState robot_state = state_handle_->getRobotState();
-  std::array<double, 7> coriolis_array = model_handle_->getCoriolis(
-      {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
+  std::array<double, 7> gravity_array =
+      model_handle_->getGravity(robot_state.m_load, robot_state.F_x_Cload);
+  std::array<double, 7> coriolis_array =
+      model_handle_->getCoriolis(robot_state.I_load, robot_state.m_load, robot_state.F_x_Cload);
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
 
   // convert to Eigen
   Eigen::Map<Eigen::Matrix<double, 7, 1> > coriolis(coriolis_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_ext(robot_state.tau_ext_hat_filtered.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_J_d(  // NOLINT (readability-identifier-naming)
+      robot_state.tau_J_d.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.linear());
@@ -181,8 +186,10 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                     jacobian.transpose() * jacobian_transpose_pinv) *
                        (nullspace_stiffness_ * (q_d_nullspace_ - q) -
                         (2.0 * sqrt(nullspace_stiffness_)) * dq);
-
+  // Desired torque
   tau_d << tau_task + tau_nullspace + coriolis - tau_ext;
+  // Saturate torque rate to avoid discontinuities
+  tau_d << saturateTorqueRate(tau_d, tau_J_d, gravity);
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d(i));
   }
@@ -203,6 +210,20 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   aa_orientation_d.angle() = filter_params_ * aa_orientation_d_target.angle() +
                              (1.0 - filter_params_) * aa_orientation_d.angle();
   orientation_d_ = Eigen::Quaterniond(aa_orientation_d);
+}
+
+Eigen::Matrix<double, 7, 1> CartesianImpedanceExampleController::saturateTorqueRate(
+    const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+    const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
+    const Eigen::Matrix<double, 7, 1>& gravity) {
+  Eigen::Matrix<double, 7, 1> tau_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
+    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
+    tau_d_saturated[i] =
+        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max_), -delta_tau_max_);
+  }
+  return tau_d_saturated;
 }
 
 void CartesianImpedanceExampleController::complianceParamCallback(

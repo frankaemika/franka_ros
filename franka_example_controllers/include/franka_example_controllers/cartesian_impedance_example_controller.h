@@ -45,6 +45,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   double filter_params_{0.005};
   double nullspace_stiffness_{20.0};
   double nullspace_stiffness_target_{20.0};
+  const double delta_tau_max_{1.0};
   Eigen::Matrix<double, 6, 6> cartesian_stiffness_;
   Eigen::Matrix<double, 6, 6> cartesian_stiffness_target_;
   Eigen::Matrix<double, 6, 6> cartesian_damping_;
@@ -54,6 +55,12 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   Eigen::Quaterniond orientation_d_;
   Eigen::Vector3d position_d_target_;
   Eigen::Quaterniond orientation_d_target_;
+
+  // Saturation
+  Eigen::Matrix<double, 7, 1> saturateTorqueRate(
+      const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+      const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
+      const Eigen::Matrix<double, 7, 1>& gravity);
 
   // Dynamic reconfigure
   boost::scoped_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
