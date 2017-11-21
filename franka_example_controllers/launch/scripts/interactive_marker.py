@@ -11,17 +11,28 @@ from geometry_msgs.msg import PoseStamped
 
 marker_pose = PoseStamped()
 pose_pub = None
+# [[min_x, max_x], [min_y, max_y], [min_z, max_z]]
+position_limits = [[-0.6, 0.6], [-0.6, 0.6], [0.05, 0.9]]
 
 
-def publisherCallback(msg):
-    marker_pose.header.frame_id = "franka_emika_link0"
+def publisherCallback(msg, arm_id):
+    marker_pose.header.frame_id = arm_id + "_link0"
     marker_pose.header.stamp = rospy.Time(0)
     pose_pub.publish(marker_pose)
 
 
 def processFeedback(feedback):
     if feedback.event_type == InteractiveMarkerFeedback.POSE_UPDATE:
-        marker_pose.pose = feedback.pose
+        marker_pose.pose.position.x = max([min([feedback.pose.position.x,
+                                          position_limits[0][1]]),
+                                          position_limits[0][0]])
+        marker_pose.pose.position.y = max([min([feedback.pose.position.y,
+                                          position_limits[1][1]]),
+                                          position_limits[1][0]])
+        marker_pose.pose.position.z = max([min([feedback.pose.position.z,
+                                          position_limits[2][1]]),
+                                          position_limits[2][0]])
+        marker_pose.pose.orientation = feedback.pose.orientation
     server.applyChanges()
 
 
@@ -50,13 +61,17 @@ if __name__ == "__main__":
         int_marker.pose.orientation.w = initial_quaternion[3]
         int_marker.scale = 0.3
         int_marker.name = "equilibrium_pose"
-        int_marker.description = "Equilibrium pose"
+        int_marker.description = ("Equilibrium Pose\nBE CAREFUL! "
+                                  "If you move the \nequilibrium "
+                                  "pose the robot will follow it\n"
+                                  "so be aware of potential collisions")
 
         # set initial message for the topic
         marker_pose.pose = int_marker.pose
 
         # run pose publisher
-        rospy.Timer(rospy.Duration(0.005), publisherCallback)
+        rospy.Timer(rospy.Duration(0.005),
+                    lambda msg: publisherCallback(msg, arm_id))
 
         # insert a box
         control = InteractiveMarkerControl()
