@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.1.3 - UNRELEASED
+## 0.2.0 - UNRELEASED
 
   * Specified run-time dependencies on `franka_description`
   * Added epsilon to grasp action

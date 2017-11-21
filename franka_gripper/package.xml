@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_gripper</name>
-  <version>0.1.2</version>
+  <version>0.2.0</version>
   <description>This package implements the franka gripper of type Franka Hand for the use in ros</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
-  
+
   <url type="website">http://wiki.ros.org/franka_gripper</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
@@ -21,6 +21,6 @@
   <depend>sensor_msgs</depend>
   <depend>xmlrpcpp</depend>
   <depend>actionlib_msgs</depend>
-    
-  <exec_depend>message_runtime</exec_depend> 
+
+  <exec_depend>message_runtime</exec_depend>
 </package>
