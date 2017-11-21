@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
-  franka_description
   franka_hw
   pluginlib
   realtime_tools
@@ -29,7 +28,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
-  CATKIN_DEPENDS controller_interface franka_description franka_hw pluginlib
+  CATKIN_DEPENDS controller_interface franka_hw pluginlib
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS})

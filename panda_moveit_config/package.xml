@@ -3,7 +3,7 @@
   <name>panda_moveit_config</name>
   <version>0.1.2</version>
   <description> A partly automatically generated package with all the configuration and launch files for using Panda research with MoveIt!</description>
-  <maintainer email="info@franka.de">Franka Emika GmbH</maintainer>
+  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
 
   <url type="website">http://wiki.ros.org/panda_moveit_config</url>

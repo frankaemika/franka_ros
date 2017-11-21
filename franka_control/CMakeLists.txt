@@ -9,7 +9,6 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   controller_interface
   controller_manager
-  franka_description
   franka_hw
   franka_msgs
   geometry_msgs
