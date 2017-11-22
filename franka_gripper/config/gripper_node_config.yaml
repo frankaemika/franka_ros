@@ -2,5 +2,7 @@ publish_rate: 30  # [Hz]
 joint_names:
   - panda_finger_joint1
   - panda_finger_joint2
-width_tolerance: 0.01  # [m]
 default_speed: 0.1  # [m/s]
+default_grasp_epsilon:
+  inner: 0.005 # [m]
+  outer: 0.005 # [m]

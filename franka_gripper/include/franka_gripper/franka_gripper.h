@@ -20,24 +20,28 @@
 namespace franka_gripper {
 
 /**
-  * Reads a gripper state if possible
-  *
-  * @param[in] state A gripper state to update
-  * @param[in] gripper A pointer to a franka gripper
-  */
+ * Reads a gripper state if possible
+ *
+ * @param[in] state A gripper state to update
+ * @param[in] gripper A pointer to a franka gripper
+ *
+ * @return True if update was successful, false otherwise.
+ */
 bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* state);
 
 /**
-  * Wraps the execution of a gripper command action to catch exceptions and
-  * report results
-  *
-  * @param[in] gripper A pointer to a franka gripper
-  * @param[in] default_speed The default speed for a gripper action
-  * @param[in] action_server A pointer to a gripper action server
-  * @param[in] goal A gripper action goal
-  */
+ * Wraps the execution of a gripper command action to catch exceptions and
+ * report results
+ *
+ * @param[in] gripper A pointer to a franka gripper
+ * @param[in] default_speed The default speed for a gripper action
+ * @param[in] grasp_epsilon The epsilon window of the grasp.
+ * @param[in] action_server A pointer to a gripper action server
+ * @param[in] goal A gripper action goal
+ */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
+    const GraspEpsilon& grasp_epsilon,
     double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
@@ -47,6 +51,8 @@ void gripperCommandExecuteCallback(
  *
  * @param[in] gripper A gripper instance to execute the command
  * @param[in] goal A move goal with target width and velocity
+ *
+ * @return True if command was successful, false otherwise.
  */
 bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal);
 
@@ -54,6 +60,8 @@ bool move(const franka::Gripper& gripper, const MoveGoalConstPtr& goal);
  * Calls the libfranka homing service of the gripper
  *
  * @param[in] gripper A gripper instance to execute the command
+ *
+ * @return True if command was successful, false otherwise.
  */
 bool homing(const franka::Gripper& gripper, const HomingGoalConstPtr& /*goal*/);
 
@@ -61,6 +69,8 @@ bool homing(const franka::Gripper& gripper, const HomingGoalConstPtr& /*goal*/);
  * Calls the libfranka stop service of the gripper to stop applying force
  *
  * @param[in] gripper A gripper instance to execute the command
+ *
+ * @return True if command was successful, false otherwise.
  */
 bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/);
 
@@ -68,7 +78,10 @@ bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/);
  * Calls the libfranka grasp service of the gripper
  *
  * @param[in] gripper A gripper instance to execute the command
- * @param[in] goal A grasp goal with target width, velocity and effort
+ * @param[in] goal A grasp goal with target width, epsilon_inner, epsilon_outer, velocity and effort
+ *
+ * @return True if an object has been grasped, i.e.: the distance between the gripper fingers is
+ * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
  */
 bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal);
 
