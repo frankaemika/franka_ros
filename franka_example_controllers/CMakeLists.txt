@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(franka_example_controllers)
 
+set(CMAKE_BUILD_TYPE Release)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -11,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   realtime_tools
   roscpp
   message_generation
+  dynamic_reconfigure
 )
 
 add_message_files(FILES
@@ -18,6 +21,11 @@ add_message_files(FILES
 )
 
 generate_messages()
+
+generate_dynamic_reconfigure_options(
+  cfg/compliance_param.cfg
+  cfg/desired_mass_param.cfg
+)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -34,12 +42,16 @@ add_library(franka_example_controllers
   src/joint_velocity_example_controller.cpp
   src/model_example_controller.cpp
   src/joint_impedance_example_controller.cpp
+  src/cartesian_impedance_example_controller.cpp
+  src/force_example_controller.cpp
 )
 
 add_dependencies(franka_example_controllers
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_generate_messages_cpp
+  ${PROJECT_NAME}_gencpp
+  ${PROJECT_NAME}_gencfg
 )
 
 target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})

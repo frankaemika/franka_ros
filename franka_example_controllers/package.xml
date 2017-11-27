@@ -15,6 +15,7 @@
 
   <build_depend>roscpp</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
 
   <depend>controller_interface</depend>
   <depend>franka_hw</depend>
