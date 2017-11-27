@@ -1,15 +1,18 @@
 #!/usr/bin/python
 
 import rospy
-import tf
+import tf.transformations
+import numpy as np
 
 from interactive_markers.interactive_marker_server import \
     InteractiveMarkerServer, InteractiveMarkerFeedback
 from visualization_msgs.msg import InteractiveMarker, \
     InteractiveMarkerControl
 from geometry_msgs.msg import PoseStamped
+from franka_msgs.msg import FrankaState
 
 marker_pose = PoseStamped()
+initial_pose_found = False
 pose_pub = None
 # [[min_x, max_x], [min_y, max_y], [min_z, max_z]]
 position_limits = [[-0.6, 0.6], [-0.6, 0.6], [0.05, 0.9]]
@@ -19,6 +22,22 @@ def publisherCallback(msg, arm_id):
     marker_pose.header.frame_id = arm_id + "_link0"
     marker_pose.header.stamp = rospy.Time(0)
     pose_pub.publish(marker_pose)
+
+
+def franka_state_callback(msg):
+    initial_quaternion = \
+        tf.transformations.quaternion_from_matrix(
+            np.transpose(np.reshape(msg.O_T_EE,
+                                    (4, 4))))
+    marker_pose.pose.orientation.x = initial_quaternion[0]
+    marker_pose.pose.orientation.y = initial_quaternion[1]
+    marker_pose.pose.orientation.z = initial_quaternion[2]
+    marker_pose.pose.orientation.w = initial_quaternion[3]
+    marker_pose.pose.position.x = msg.O_T_EE[12]
+    marker_pose.pose.position.y = msg.O_T_EE[13]
+    marker_pose.pose.position.z = msg.O_T_EE[14]
+    global initial_pose_found
+    initial_pose_found = True
 
 
 def processFeedback(feedback):
@@ -38,97 +57,84 @@ def processFeedback(feedback):
 
 if __name__ == "__main__":
     rospy.init_node("equilibrium_pose_node")
+    state_sub = rospy.Subscriber("franka_state_controller/franka_states",
+                                 FrankaState, franka_state_callback)
     listener = tf.TransformListener()
     arm_id = rospy.get_param("arm_id")
-    try:
-        # get initial pose through TF
-        listener.waitForTransform(arm_id + "_link0", arm_id + "_EE",
-                                  rospy.Time(0), rospy.Duration(10.0))
-        (initial_translation, initial_quaternion) = listener.lookupTransform(
-            arm_id + "_link0", arm_id + "_EE", rospy.Time(0))
-        pose_pub = rospy.Publisher(
-            "/equilibrium_pose", PoseStamped, queue_size=10)
-        server = InteractiveMarkerServer("equilibrium_pose_marker")
 
-        int_marker = InteractiveMarker()
-        int_marker.header.frame_id = arm_id + "_link0"
-        int_marker.pose.position.x = initial_translation[0]
-        int_marker.pose.position.y = initial_translation[1]
-        int_marker.pose.position.z = initial_translation[2]
-        int_marker.pose.orientation.x = initial_quaternion[0]
-        int_marker.pose.orientation.y = initial_quaternion[1]
-        int_marker.pose.orientation.z = initial_quaternion[2]
-        int_marker.pose.orientation.w = initial_quaternion[3]
-        int_marker.scale = 0.3
-        int_marker.name = "equilibrium_pose"
-        int_marker.description = ("Equilibrium Pose\nBE CAREFUL! "
-                                  "If you move the \nequilibrium "
-                                  "pose the robot will follow it\n"
-                                  "so be aware of potential collisions")
+    # Get initial pose for the interactive marker
+    while not initial_pose_found:
+        rospy.sleep(1)
+    state_sub.unregister()
 
-        # set initial message for the topic
-        marker_pose.pose = int_marker.pose
+    pose_pub = rospy.Publisher(
+        "/equilibrium_pose", PoseStamped, queue_size=10)
+    server = InteractiveMarkerServer("equilibrium_pose_marker")
+    int_marker = InteractiveMarker()
+    int_marker.header.frame_id = arm_id + "_link0"
+    int_marker.scale = 0.3
+    int_marker.name = "equilibrium_pose"
+    int_marker.description = ("Equilibrium Pose\nBE CAREFUL! "
+                              "If you move the \nequilibrium "
+                              "pose the robot will follow it\n"
+                              "so be aware of potential collisions")
+    int_marker.pose = marker_pose.pose
+    # run pose publisher
+    rospy.Timer(rospy.Duration(0.005),
+                lambda msg: publisherCallback(msg, arm_id))
 
-        # run pose publisher
-        rospy.Timer(rospy.Duration(0.005),
-                    lambda msg: publisherCallback(msg, arm_id))
+    # insert a box
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 1
+    control.orientation.y = 0
+    control.orientation.z = 0
+    control.name = "rotate_x"
+    control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+    int_marker.controls.append(control)
 
-        # insert a box
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 1
-        control.orientation.y = 0
-        control.orientation.z = 0
-        control.name = "rotate_x"
-        control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-        int_marker.controls.append(control)
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 1
+    control.orientation.y = 0
+    control.orientation.z = 0
+    control.name = "move_x"
+    control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+    int_marker.controls.append(control)
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 0
+    control.orientation.y = 1
+    control.orientation.z = 0
+    control.name = "rotate_y"
+    control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+    int_marker.controls.append(control)
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 0
+    control.orientation.y = 1
+    control.orientation.z = 0
+    control.name = "move_y"
+    control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+    int_marker.controls.append(control)
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 0
+    control.orientation.y = 0
+    control.orientation.z = 1
+    control.name = "rotate_z"
+    control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
+    int_marker.controls.append(control)
+    control = InteractiveMarkerControl()
+    control.orientation.w = 1
+    control.orientation.x = 0
+    control.orientation.y = 0
+    control.orientation.z = 1
+    control.name = "move_z"
+    control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
+    int_marker.controls.append(control)
+    server.insert(int_marker, processFeedback)
 
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 1
-        control.orientation.y = 0
-        control.orientation.z = 0
-        control.name = "move_x"
-        control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-        int_marker.controls.append(control)
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 0
-        control.orientation.y = 1
-        control.orientation.z = 0
-        control.name = "rotate_y"
-        control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-        int_marker.controls.append(control)
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 0
-        control.orientation.y = 1
-        control.orientation.z = 0
-        control.name = "move_y"
-        control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-        int_marker.controls.append(control)
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 0
-        control.orientation.y = 0
-        control.orientation.z = 1
-        control.name = "rotate_z"
-        control.interaction_mode = InteractiveMarkerControl.ROTATE_AXIS
-        int_marker.controls.append(control)
-        control = InteractiveMarkerControl()
-        control.orientation.w = 1
-        control.orientation.x = 0
-        control.orientation.y = 0
-        control.orientation.z = 1
-        control.name = "move_z"
-        control.interaction_mode = InteractiveMarkerControl.MOVE_AXIS
-        int_marker.controls.append(control)
-        server.insert(int_marker, processFeedback)
+    server.applyChanges()
 
-        server.applyChanges()
-
-        rospy.spin()
-    except (tf.LookupException,
-            tf.ConnectivityException, tf.ExtrapolationException):
-        rospy.logerr("Coudn't find " + arm_id + "_EE to " +
-                     arm_id + "_link0 transform!")
+    rospy.spin()
