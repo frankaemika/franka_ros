@@ -9,7 +9,6 @@
 #include <ros/ros.h>
 
 #include <franka/robot_state.h>
-
 #include "pseudo_inversion.h"
 
 namespace franka_example_controllers {
