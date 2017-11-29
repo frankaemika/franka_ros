@@ -14,6 +14,7 @@
 #include <ros/ros.h>
 
 #include <franka_hw/franka_model_interface.h>
+#include <franka_hw/franka_state_interface.h>
 
 namespace {
 template <class T, size_t N>
@@ -29,10 +30,19 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 namespace franka_example_controllers {
 
 ModelExampleController::ModelExampleController()
-    : model_interface_(nullptr), model_handle_(nullptr), rate_trigger_(1.0) {}
+    : franka_state_interface_(nullptr),
+      franka_state_handle_(nullptr),
+      model_interface_(nullptr),
+      model_handle_(nullptr),
+      rate_trigger_(1.0) {}
 
 bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
                                   ros::NodeHandle& node_handle) {
+  franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();
+  if (franka_state_interface_ == nullptr) {
+    ROS_ERROR("ModelExampleController: Could not get Franka state interface from hardware");
+    return false;
+  }
   if (!node_handle.getParam("arm_id", arm_id_)) {
     ROS_ERROR("ModelExampleController: Could not read parameter arm_id");
     return false;
@@ -40,6 +50,15 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
   model_interface_ = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface_ == nullptr) {
     ROS_ERROR_STREAM("ModelExampleController: Error getting model interface from hardware");
+    return false;
+  }
+
+  try {
+    franka_state_handle_.reset(
+        new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id_ + "_robot")));
+  } catch (const hardware_interface::HardwareInterfaceException& ex) {
+    ROS_ERROR_STREAM(
+        "ModelExampleController: Exception getting franka state handle: " << ex.what());
     return false;
   }
 
@@ -56,11 +75,13 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
 
 void ModelExampleController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   if (rate_trigger_()) {
-    std::array<double, 49> mass = model_handle_->getMass(
-        {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
+    franka::RobotState robot_state = franka_state_handle_->getRobotState();
+    std::array<double, 49> mass =
+        model_handle_->getMass(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
     std::array<double, 7> coriolis = model_handle_->getCoriolis(
-        {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
-    std::array<double, 7> gravity = model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
+        robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
+    std::array<double, 7> gravity =
+        model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
     std::array<double, 16> pose = model_handle_->getPose(franka::Frame::kJoint4);
     std::array<double, 42> joint4_body_jacobian =
         model_handle_->getBodyJacobian(franka::Frame::kJoint4);

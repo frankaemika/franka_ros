@@ -4,6 +4,8 @@
 
   * Specified run-time dependencies on `franka_description`
   * Added epsilon to grasp action
+  * Added `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal` and `I_total`
+    to the robot state
 
 ## 0.1.2 - 2017-10-10
 

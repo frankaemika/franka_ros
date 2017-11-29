@@ -11,6 +11,7 @@
 #include <ros/time.h>
 
 #include <franka_hw/franka_model_interface.h>
+#include <franka_hw/franka_state_interface.h>
 #include <franka_hw/trigger_rate.h>
 
 namespace franka_example_controllers {
@@ -23,6 +24,8 @@ class ModelExampleController
   void update(const ros::Time&, const ros::Duration&);
 
  private:
+  franka_hw::FrankaStateInterface* franka_state_interface_;
+  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
   franka_hw::FrankaModelInterface* model_interface_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   franka_hw::TriggerRate rate_trigger_;

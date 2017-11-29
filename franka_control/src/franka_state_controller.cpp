@@ -168,7 +168,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     franka_state_handle_.reset(
         new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id_ + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& ex) {
-    ROS_ERROR_STREAM("FrankaStateController: Exception getting cartesian handle: " << ex.what());
+    ROS_ERROR_STREAM("FrankaStateController: Exception getting franka state handle: " << ex.what());
     return false;
   }
 
@@ -293,14 +293,20 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.EE_T_K[i] = robot_state_.EE_T_K[i];
       publisher_franka_states_.msg_.O_T_EE_d[i] = robot_state_.O_T_EE_d[i];
     }
+    publisher_franka_states_.msg_.m_ee = robot_state_.m_ee;
     publisher_franka_states_.msg_.m_load = robot_state_.m_load;
+    publisher_franka_states_.msg_.m_total = robot_state_.m_total;
 
     for (size_t i = 0; i < robot_state_.I_load.size(); i++) {
+      publisher_franka_states_.msg_.I_ee[i] = robot_state_.I_ee[i];
       publisher_franka_states_.msg_.I_load[i] = robot_state_.I_load[i];
+      publisher_franka_states_.msg_.I_total[i] = robot_state_.I_total[i];
     }
 
     for (size_t i = 0; i < robot_state_.F_x_Cload.size(); i++) {
+      publisher_franka_states_.msg_.F_x_Cee[i] = robot_state_.F_x_Cee[i];
       publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_x_Cload[i];
+      publisher_franka_states_.msg_.F_x_Ctotal[i] = robot_state_.F_x_Ctotal[i];
     }
 
     publisher_franka_states_.msg_.time = robot_state_.time.toSec();
