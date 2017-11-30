@@ -38,12 +38,12 @@ class FrankaModelHandle {
   /**
    * Calculates the 7x7 mass matrix from the current robot state. Unit: \f$[kg \times m^2]\f$.
    *
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    *
    * @return Vectorized 7x7 mass matrix, column-major.
@@ -61,12 +61,12 @@ class FrankaModelHandle {
    * Calculates the 7x7 mass matrix from a given robot state. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    *
    * @return Vectorized 7x7 mass matrix, column-major.
@@ -85,12 +85,12 @@ class FrankaModelHandle {
    * Calculates the Coriolis force vector (state-space equation) from the current robot state:
    * \f$ c= C \times dq\f$, in \f$[Nm]\f$.
    *
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    *
    * @return Coriolis force vector.
@@ -109,12 +109,12 @@ class FrankaModelHandle {
    * \f$ c= C \times dq\f$, in \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the Coriolis force vector should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    *
    * @return Coriolis force vector.
@@ -132,10 +132,10 @@ class FrankaModelHandle {
   /**
    * Calculates the gravity vector from the current robot state. Unit: \f$[Nm]\f$.
    *
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
    * Default to {0.0, 0.0, -9.81}.
@@ -155,10 +155,10 @@ class FrankaModelHandle {
    * Calculates the gravity vector from the given robot state. Unit: \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the gravity vector should be calculated.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load
-   * inclusive end-effector.
+   * including end effector.
    * Unit: \f$[m]\f$.
    * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
    * Default to {0.0, 0.0, -9.81}.
