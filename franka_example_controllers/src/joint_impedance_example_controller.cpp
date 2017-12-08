@@ -140,7 +140,7 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
 }
 
 void JointImpedanceExampleController::starting(const ros::Time& /*time*/) {
-  initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE;
+  initial_pose_ = cartesian_pose_handle_->getRobotState().O_T_EE_d;
 }
 
 void JointImpedanceExampleController::update(const ros::Time& /*time*/,
