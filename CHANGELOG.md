@@ -4,6 +4,7 @@
 
   * Added missing run-time dependencies to `franka_description` and `franka_control`
   * Added epsilon to grasp action
+  * Use O_T_EE_d in examples
 
 ## 0.1.2 - 2017-10-10
 
