@@ -14,6 +14,18 @@ model_example_controller:
     type: franka_example_controllers/ModelExampleController
     arm_id: panda
 
+force_example_controller:
+    type: franka_example_controllers/ForceExampleController
+    arm_id: panda
+    joint_names:
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
+
 joint_impedance_example_controller:
     type: franka_example_controllers/JointImpedanceExampleController
     arm_id: panda
@@ -46,3 +58,15 @@ joint_impedance_example_controller:
     vel_max: 0.15
     publish_rate: 10.0    
     coriolis_factor: 1.0
+
+cartesian_impedance_example_controller:
+    type: franka_example_controllers/CartesianImpedanceExampleController
+    arm_id: panda
+    joint_names:
+        - panda_joint1
+        - panda_joint2
+        - panda_joint3
+        - panda_joint4
+        - panda_joint5
+        - panda_joint6
+        - panda_joint7
