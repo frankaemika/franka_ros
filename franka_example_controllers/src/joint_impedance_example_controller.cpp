@@ -167,9 +167,10 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   std::array<double, 7> q_desired = robot_state.q_d;
   std::array<double, 7> q_current = robot_state.q;
   std::array<double, 7> dq = robot_state.dq;
-  std::array<double, 7> coriolis = model_handle_->getCoriolis(
-      {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
-  std::array<double, 7> gravity = model_handle_->getGravity(0.0, {{0.0, 0.0, 0.0}});
+  std::array<double, 7> coriolis =
+      model_handle_->getCoriolis(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
+  std::array<double, 7> gravity =
+      model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
 
   std::array<double, 7> tau_d;
   for (size_t i = 0; i < 7; ++i) {
