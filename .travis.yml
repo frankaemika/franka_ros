@@ -10,7 +10,7 @@ before_script:
     cd ~/workspace
     git clone https://github.com/frankaemika/libfranka.git
     cd libfranka
-    git checkout ${TRAVIS_PULL_REQUEST_BRANCH:-TRAVIS_BRANCH} || git checkout master
+    git checkout ${TRAVIS_PULL_REQUEST_BRANCH:-${TRAVIS_BRANCH}} || git checkout develop
     git submodule update --init --recursive
   - |
     cd ~/workspace
