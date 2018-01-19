@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/Core>
-#include <boost/scoped_ptr.hpp>
 #include <controller_interface/multi_interface_controller.h>
 #include <dynamic_reconfigure/server.h>
 #include <franka_hw/franka_model_interface.h>
@@ -16,6 +14,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <Eigen/Core>
 
 #include <franka_example_controllers/desired_mass_paramConfig.h>
 
@@ -46,8 +45,7 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   Eigen::Matrix<double, 7, 1> tau_error_;
 
   // Dynamic reconfigure
-  boost::scoped_ptr<
-      dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>
+  std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>
       dynamic_server_desired_mass_param_;
   ros::NodeHandle dynamic_reconfigure_desired_mass_param_node_;
   void desiredMassParamCallback(franka_example_controllers::desired_mass_paramConfig& config,

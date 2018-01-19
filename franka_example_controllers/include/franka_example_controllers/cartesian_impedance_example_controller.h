@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/Dense>
-#include <boost/scoped_ptr.hpp>
 #include <controller_interface/multi_interface_controller.h>
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -15,6 +13,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <Eigen/Dense>
 
 #include <franka_example_controllers/compliance_paramConfig.h>
 #include <franka_hw/franka_model_interface.h>
@@ -60,7 +59,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
       const Eigen::Matrix<double, 7, 1>& gravity);
 
   // Dynamic reconfigure
-  boost::scoped_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
+  std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
       dynamic_server_compliance_param_;
   ros::NodeHandle dynamic_reconfigure_compliance_param_node_;
   void complianceParamCallback(franka_example_controllers::compliance_paramConfig& config,
