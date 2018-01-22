@@ -5,10 +5,10 @@
 #include <cmath>
 
 #include <controller_interface/controller_base.h>
+#include <franka/robot_state.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 
-#include <franka/robot_state.h>
 #include "pseudo_inversion.h"
 
 namespace franka_example_controllers {
@@ -174,7 +174,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // pseudoinverse for nullspace handling
   // kinematic pseuoinverse
   Eigen::MatrixXd jacobian_transpose_pinv;
-  pseudo_inverse(jacobian.transpose(), jacobian_transpose_pinv);
+  pseudoInverse(jacobian.transpose(), jacobian_transpose_pinv);
 
   // Cartesian PD control with damping ratio = 1
   tau_task << jacobian.transpose() *

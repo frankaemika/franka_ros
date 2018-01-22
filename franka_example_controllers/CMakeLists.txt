@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
 )
 
+find_package(Eigen3 REQUIRED)
+
 add_message_files(FILES
   JointTorqueComparison.msg
 )
@@ -33,7 +35,7 @@ catkin_package(
   CATKIN_DEPENDS controller_interface franka_hw pluginlib
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
 
 add_library(franka_example_controllers
   src/cartesian_pose_example_controller.cpp
