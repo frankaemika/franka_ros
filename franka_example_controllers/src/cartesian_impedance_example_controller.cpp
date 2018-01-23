@@ -136,9 +136,9 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // get state variables
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state.m_load, robot_state.F_x_Cload);
+      model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
   std::array<double, 7> coriolis_array =
-      model_handle_->getCoriolis(robot_state.I_load, robot_state.m_load, robot_state.F_x_Cload);
+      model_handle_->getCoriolis(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
 
