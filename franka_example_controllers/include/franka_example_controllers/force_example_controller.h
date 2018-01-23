@@ -25,10 +25,9 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
                                    hardware_interface::EffortJointInterface,
                                    franka_hw::FrankaStateInterface> {
  public:
-  ForceExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
-  void starting(const ros::Time&);
-  void update(const ros::Time&, const ros::Duration& period);
+  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) override;
+  void starting(const ros::Time&) override;
+  void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;

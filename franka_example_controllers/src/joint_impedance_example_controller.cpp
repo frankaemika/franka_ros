@@ -23,8 +23,6 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 namespace franka_example_controllers {
 
-JointImpedanceExampleController::JointImpedanceExampleController() : rate_trigger_(1.0) {}
-
 bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                            ros::NodeHandle& node_handle) {
   std::string arm_id;

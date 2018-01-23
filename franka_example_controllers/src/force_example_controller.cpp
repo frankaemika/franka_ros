@@ -12,8 +12,6 @@
 
 namespace franka_example_controllers {
 
-ForceExampleController::ForceExampleController() = default;
-
 bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                   ros::NodeHandle& node_handle) {
   std::vector<std::string> joint_names;

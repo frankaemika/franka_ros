@@ -26,10 +26,9 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
                                                 hardware_interface::EffortJointInterface,
                                                 franka_hw::FrankaStateInterface> {
  public:
-  CartesianImpedanceExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
-  void starting(const ros::Time&);
-  void update(const ros::Time&, const ros::Duration& period);
+  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) override;
+  void starting(const ros::Time&) override;
+  void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
   std::string arm_id_;

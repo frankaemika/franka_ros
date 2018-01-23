@@ -13,12 +13,9 @@
 
 namespace franka_example_controllers {
 
-JointPositionExampleController::JointPositionExampleController()
-    : position_joint_interface_(nullptr), elapsed_time_(0.0) {}
-
 bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hardware,
                                           ros::NodeHandle& root_node_handle,
-                                          ros::NodeHandle& /*controller_node_handle*/) {
+                                          ros::NodeHandle& /* controller_node_handle */) {
   position_joint_interface_ = robot_hardware->get<hardware_interface::PositionJointInterface>();
   if (position_joint_interface_ == nullptr) {
     ROS_ERROR(
@@ -46,14 +43,26 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
       return false;
     }
   }
-  elapsed_time_ = ros::Duration(0.0);
+
+  std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+  for (size_t i = 0; i < q_start.size(); i++) {
+    if (std::abs(position_joint_handles_[i].getPosition() - q_start[i]) > 0.1) {
+      ROS_ERROR_STREAM(
+          "JointPositionExampleController: Robot is not in the expected starting position for "
+          "running this example. Run `roslaunch panda_moveit_config move_to_start.launch "
+          "robot_ip:=<robot-ip> load_gripper:=<has-attached-gripper>` first.");
+      return false;
+    }
+  }
+
   return true;
 }
 
-void JointPositionExampleController::starting(const ros::Time& /*time*/) {
+void JointPositionExampleController::starting(const ros::Time& /* time */) {
   for (size_t i = 0; i < 7; ++i) {
     initial_pose_[i] = position_joint_handles_[i].getPosition();
   }
+  elapsed_time_ = ros::Duration(0.0);
 }
 
 void JointPositionExampleController::update(const ros::Time& /*time*/,

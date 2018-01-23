@@ -29,13 +29,6 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 namespace franka_example_controllers {
 
-ModelExampleController::ModelExampleController()
-    : franka_state_interface_(nullptr),
-      franka_state_handle_(nullptr),
-      model_interface_(nullptr),
-      model_handle_(nullptr),
-      rate_trigger_(1.0) {}
-
 bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
                                   ros::NodeHandle& node_handle) {
   franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();

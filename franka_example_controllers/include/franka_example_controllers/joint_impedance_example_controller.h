@@ -25,17 +25,16 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
                                             hardware_interface::EffortJointInterface,
                                             franka_hw::FrankaPoseCartesianInterface> {
  public:
-  JointImpedanceExampleController();
-  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle);
-  void starting(const ros::Time&);
-  void update(const ros::Time&, const ros::Duration& period);
+  bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) override;
+  void starting(const ros::Time&) override;
+  void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
   std::array<double, 7> last_tau_d_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  franka_hw::TriggerRate rate_trigger_;
+  franka_hw::TriggerRate rate_trigger_{1.0};
   double radius_{0.1};
   double acceleration_time_{2.0};
   double vel_max_{0.05};
