@@ -199,7 +199,6 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   for (size_t i = 0; i < 7; ++i) {
     last_tau_d_[i] = tau_d[i] + gravity[i];
   }
-  return;
 }
 
 }  // namespace franka_example_controllers

@@ -10,7 +10,7 @@
   </include>
   <group ns="$(arg arm_id)">
     <rosparam command="load" file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="cartesian_impedance_example_controller --shutdown-timeout 2"/>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="cartesian_impedance_example_controller"/>
     <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_description_with_marker.rviz"/>
     <node name="interactive_marker" pkg="franka_example_controllers" type="interactive_marker.py" required="true" output="screen" />
     <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" />
