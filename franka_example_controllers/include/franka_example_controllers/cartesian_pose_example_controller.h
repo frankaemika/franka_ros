@@ -27,7 +27,6 @@ class CartesianPoseExampleController
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
-  std::string arm_id_;
   franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface_;
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
   ros::Duration elapsed_time_;

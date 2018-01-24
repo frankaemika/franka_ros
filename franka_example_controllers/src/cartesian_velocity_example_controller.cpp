@@ -18,7 +18,8 @@ namespace franka_example_controllers {
 bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot_hardware,
                                               ros::NodeHandle& root_node_handle,
                                               ros::NodeHandle& /* controller_node_handle */) {
-  if (!root_node_handle.getParam("arm_id", arm_id_)) {
+  std::string arm_id;
+  if (!root_node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("CartesianVelocityExampleController: Could not get parameter arm_id");
     return false;
   }
@@ -33,7 +34,7 @@ bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot
   }
   try {
     velocity_cartesian_handle_.reset(new franka_hw::FrankaCartesianVelocityHandle(
-        velocity_cartesian_interface_->getHandle(arm_id_ + "_robot")));
+        velocity_cartesian_interface_->getHandle(arm_id + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "CartesianVelocityExampleController: Exception getting Cartesian handle: " << e.what());
@@ -47,7 +48,7 @@ bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot
   }
 
   try {
-    auto state_handle = state_interface->getHandle(arm_id_ + "_robot");
+    auto state_handle = state_interface->getHandle(arm_id + "_robot");
 
     std::array<double, 7> q_start = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     for (size_t i = 0; i < q_start.size(); i++) {

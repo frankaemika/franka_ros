@@ -32,7 +32,6 @@ namespace franka_example_controllers {
 bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
                                   ros::NodeHandle& node_handle) {
   std::string arm_id;
-
   franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
     ROS_ERROR("ModelExampleController: Could not get Franka state interface from hardware");

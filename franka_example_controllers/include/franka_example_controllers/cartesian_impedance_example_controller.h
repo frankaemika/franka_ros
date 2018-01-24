@@ -31,12 +31,16 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
-  std::string arm_id_;
-  ros::NodeHandle node_handle_;
+  // Saturation
+  Eigen::Matrix<double, 7, 1> saturateTorqueRate(
+      const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+      const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
+      const Eigen::Matrix<double, 7, 1>& gravity);
+
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
-  std::vector<std::string> joint_names_;
+
   double filter_params_{0.005};
   double nullspace_stiffness_{20.0};
   double nullspace_stiffness_target_{20.0};
@@ -50,12 +54,6 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   Eigen::Quaterniond orientation_d_;
   Eigen::Vector3d position_d_target_;
   Eigen::Quaterniond orientation_d_target_;
-
-  // Saturation
-  Eigen::Matrix<double, 7, 1> saturateTorqueRate(
-      const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
-      const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
-      const Eigen::Matrix<double, 7, 1>& gravity);
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>

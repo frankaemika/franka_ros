@@ -18,6 +18,7 @@ namespace franka_example_controllers {
 bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hardware,
                                           ros::NodeHandle& root_node_handle,
                                           ros::NodeHandle& /* controller_node_handle */) {
+  std::string arm_id;
   cartesian_pose_interface_ = robot_hardware->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface_ == nullptr) {
     ROS_ERROR(
@@ -26,14 +27,14 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
     return false;
   }
 
-  if (!root_node_handle.getParam("arm_id", arm_id_)) {
+  if (!root_node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("CartesianPoseExampleController: Could not get parameter arm_id");
     return false;
   }
 
   try {
     cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
-        cartesian_pose_interface_->getHandle(arm_id_ + "_robot")));
+        cartesian_pose_interface_->getHandle(arm_id + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "CartesianPoseExampleController: Exception getting Cartesian handle: " << e.what());
@@ -47,7 +48,7 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
   }
 
   try {
-    auto state_handle = state_interface->getHandle(arm_id_ + "_robot");
+    auto state_handle = state_interface->getHandle(arm_id + "_robot");
 
     std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     for (size_t i = 0; i < q_start.size(); i++) {

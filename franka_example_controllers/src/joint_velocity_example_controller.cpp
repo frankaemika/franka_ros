@@ -32,11 +32,11 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
     return false;
   }
   velocity_joint_handles_.resize(7);
-  joint_names_.resize(7);
+  std::array<std::string, 7> joint_names;
   for (size_t i = 0; i < 7; ++i) {
-    joint_names_[i] = static_cast<std::string>(parameters[i]);
+    joint_names[i] = static_cast<std::string>(parameters[i]);
     try {
-      velocity_joint_handles_[i] = velocity_joint_interface_->getHandle(joint_names_[i]);
+      velocity_joint_handles_[i] = velocity_joint_interface_->getHandle(joint_names[i]);
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
       ROS_ERROR_STREAM(
           "JointVelocityExampleController: Exception getting joint handles: " << ex.what());

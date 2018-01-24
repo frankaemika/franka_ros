@@ -25,7 +25,6 @@ class JointPositionExampleController : public controller_interface::MultiInterfa
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
-  std::vector<std::string> joint_names_;
   hardware_interface::PositionJointInterface* position_joint_interface_;
   std::vector<hardware_interface::JointHandle> position_joint_handles_;
   ros::Duration elapsed_time_;

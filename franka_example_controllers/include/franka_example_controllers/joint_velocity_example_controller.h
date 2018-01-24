@@ -26,7 +26,6 @@ class JointVelocityExampleController : public controller_interface::MultiInterfa
   void stopping(const ros::Time&) override;
 
  private:
-  std::vector<std::string> joint_names_;
   hardware_interface::VelocityJointInterface* velocity_joint_interface_;
   std::vector<hardware_interface::JointHandle> velocity_joint_handles_;
   ros::Duration elapsed_time_;

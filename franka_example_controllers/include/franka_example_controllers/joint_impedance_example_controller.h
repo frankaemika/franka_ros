@@ -30,8 +30,8 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
+  // Saturation
   std::array<double, 7> saturateTorqueRate(
-      const double delta_tau_max,
       const std::array<double, 7>& tau_d_calculated,
       const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
       const std::array<double, 7>& gravity);
@@ -40,6 +40,7 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
 
+  const double delta_tau_max_{1.0};
   double radius_{0.1};
   double acceleration_time_{2.0};
   double vel_max_{0.05};
