@@ -10,22 +10,13 @@
 
 #include <franka/robot_state.h>
 
-namespace {
-template <class T, size_t N>
-std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
-  ostream << "[";
-  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
-  std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
-  ostream << "]";
-  return ostream;
-}
-}  // anonymous namespace
-
 namespace franka_example_controllers {
 
 bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                            ros::NodeHandle& node_handle) {
   std::string arm_id;
+  std::vector<std::string> joint_names;
+
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("JointImpedanceExampleController: Could not read parameter arm_id");
     return false;
@@ -49,7 +40,7 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
         << acceleration_time_);
   }
 
-  if (!node_handle.getParam("joint_names", joint_names_) || joint_names_.size() != 7) {
+  if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
     ROS_ERROR(
         "JointImpedanceExampleController: Invalid or no joint_names parameters provided, aborting "
         "controller init!");
@@ -125,7 +116,7 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
   }
   for (size_t i = 0; i < 7; ++i) {
     try {
-      joint_handles_.push_back(effort_joint_interface->getHandle(joint_names_[i]));
+      joint_handles_.push_back(effort_joint_interface->getHandle(joint_names[i]));
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
       ROS_ERROR_STREAM(
           "JointImpedanceExampleController: Exception getting joint handles: " << ex.what());
@@ -133,6 +124,8 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
     }
   }
   torques_publisher_.init(node_handle, "torque_comparison", 1);
+
+  std::fill(dq_filtered_.begin(), dq_filtered_.end(), 0);
 
   return true;
 }
@@ -162,19 +155,31 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   cartesian_pose_handle_->setCommand(pose_desired);
 
   franka::RobotState robot_state = cartesian_pose_handle_->getRobotState();
-  std::array<double, 7> q_desired = robot_state.q_d;
-  std::array<double, 7> q_current = robot_state.q;
-  std::array<double, 7> dq = robot_state.dq;
   std::array<double, 7> coriolis =
       model_handle_->getCoriolis(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
   std::array<double, 7> gravity =
       model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
 
-  std::array<double, 7> tau_d;
+  double alpha = 0.99;
+  for (size_t i = 0; i < 7; i++) {
+    dq_filtered_[i] = (1 - alpha) * dq_filtered_[i] + alpha * robot_state.dq[i];
+  }
+
+  std::array<double, 7> tau_d_calculated;
   for (size_t i = 0; i < 7; ++i) {
-    tau_d[i] = k_gains_[i] * (q_desired[i] - q_current[i]) - std::fabs(d_gains_[i]) * dq[i] +
-               coriolis_factor_ * coriolis[i];
-    joint_handles_[i].setCommand(tau_d[i]);
+    tau_d_calculated[i] = coriolis_factor_ * coriolis[i] +
+                          k_gains_[i] * (robot_state.q_d[i] - robot_state.q[i]) +
+                          d_gains_[i] * (robot_state.dq_d[i] - dq_filtered_[i]);
+  }
+
+  // Maximum torque difference with a sampling rate of 1 kHz. The maximum torque rate is
+  // 1000 * (1 / sampling_time).
+  const double delta_tau_max = 1.0;  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> tau_d_saturated =
+      saturateTorqueRate(delta_tau_max, tau_d_calculated, robot_state.tau_J_d, gravity);
+
+  for (size_t i = 0; i < 7; ++i) {
+    joint_handles_[i].setCommand(tau_d_saturated[i]);
   }
 
   if (rate_trigger_() && torques_publisher_.trylock()) {
@@ -195,8 +200,23 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
   }
 
   for (size_t i = 0; i < 7; ++i) {
-    last_tau_d_[i] = tau_d[i] + gravity[i];
+    last_tau_d_[i] = tau_d_saturated[i] + gravity[i];
   }
+}
+
+std::array<double, 7> JointImpedanceExampleController::saturateTorqueRate(
+    const double delta_tau_max,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 7>& tau_d_calculated,
+    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 7>& gravity) {
+  std::array<double, 7> tau_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
+    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
+    tau_d_saturated[i] =
+        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
+  }
+  return tau_d_saturated;
 }
 
 }  // namespace franka_example_controllers

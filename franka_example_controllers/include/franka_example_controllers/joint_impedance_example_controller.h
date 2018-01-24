@@ -30,22 +30,31 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
+  std::array<double, 7> saturateTorqueRate(
+      const double delta_tau_max,
+      const std::array<double, 7>& tau_d_calculated,
+      const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
+      const std::array<double, 7>& gravity);
+
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
-  std::array<double, 7> last_tau_d_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  franka_hw::TriggerRate rate_trigger_{1.0};
+
   double radius_{0.1};
   double acceleration_time_{2.0};
   double vel_max_{0.05};
-  std::vector<std::string> joint_names_;
-  std::vector<double> k_gains_;
-  std::vector<double> d_gains_;
   double angle_{0.0};
   double vel_current_{0.0};
-  std::array<double, 16> initial_pose_;
-  realtime_tools::RealtimePublisher<JointTorqueComparison> torques_publisher_;
+
+  std::vector<double> k_gains_;
+  std::vector<double> d_gains_;
   double coriolis_factor_{1.0};
+  std::array<double, 7> dq_filtered_;
+  std::array<double, 16> initial_pose_;
+
+  franka_hw::TriggerRate rate_trigger_{1.0};
+  realtime_tools::RealtimePublisher<JointTorqueComparison> torques_publisher_;
+  std::array<double, 7> last_tau_d_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
 };
 
 }  // namespace franka_example_controllers
