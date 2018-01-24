@@ -31,12 +31,14 @@ namespace franka_example_controllers {
 
 bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
                                   ros::NodeHandle& node_handle) {
+  std::string arm_id;
+
   franka_state_interface_ = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (franka_state_interface_ == nullptr) {
     ROS_ERROR("ModelExampleController: Could not get Franka state interface from hardware");
     return false;
   }
-  if (!node_handle.getParam("arm_id", arm_id_)) {
+  if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("ModelExampleController: Could not read parameter arm_id");
     return false;
   }
@@ -48,7 +50,7 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
 
   try {
     franka_state_handle_.reset(
-        new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id_ + "_robot")));
+        new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id + "_robot")));
   } catch (const hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting franka state handle: " << ex.what());
@@ -57,7 +59,7 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
 
   try {
     model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface_->getHandle(arm_id_ + "_model")));
+        new franka_hw::FrankaModelHandle(model_interface_->getHandle(arm_id + "_model")));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "ModelExampleController: Exception getting model handle from interface: " << ex.what());
