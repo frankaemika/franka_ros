@@ -30,9 +30,16 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
+  // Saturation
+  Eigen::Matrix<double, 7, 1> saturateTorqueRate(
+      const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+      const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
+      const Eigen::Matrix<double, 7, 1>& gravity);
+
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
+
   double desired_mass_{0.0};
   double target_mass_{0.0};
   double k_p_{0.0};
@@ -42,6 +49,7 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   double filter_gain_{0.001};
   Eigen::Matrix<double, 7, 1> tau_ext_initial_;
   Eigen::Matrix<double, 7, 1> tau_error_;
+  const double delta_tau_max_{1.0};
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>

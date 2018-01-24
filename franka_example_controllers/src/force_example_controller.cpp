@@ -89,7 +89,7 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
 void ForceExampleController::starting(const ros::Time& /*time*/) {
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state, 0.0, {{0.0, 0.0, 0.0}});
+      model_handle_->getGravity(robot_state, robot_state.m_total, robot_state.F_x_Ctotal);
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
   // Bias correction for the current external torque
@@ -102,9 +102,11 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
   std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state, 0.0, {{0.0, 0.0, 0.0}});
+      model_handle_->getGravity(robot_state, robot_state.m_total, robot_state.F_x_Ctotal);
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_J_d(  // NOLINT (readability-identifier-naming)
+      robot_state.tau_J_d.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
 
   Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_cmd(7), tau_ext(7);
@@ -115,6 +117,8 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   tau_error_ = tau_error_ + period.toSec() * (tau_d - tau_ext);
   // FF + PI control (PI gains are intially all 0)
   tau_cmd = tau_d + k_p_ * (tau_d - tau_ext) + k_i_ * tau_error_;
+  tau_cmd << saturateTorqueRate(tau_cmd, tau_J_d, gravity);
+
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_cmd(i));
   }
@@ -131,6 +135,20 @@ void ForceExampleController::desiredMassParamCallback(
   target_mass_ = config.desired_mass;
   target_k_p_ = config.k_p;
   target_k_i_ = config.k_i;
+}
+
+Eigen::Matrix<double, 7, 1> ForceExampleController::saturateTorqueRate(
+    const Eigen::Matrix<double, 7, 1>& tau_d_calculated,
+    const Eigen::Matrix<double, 7, 1>& tau_J_d,  // NOLINT (readability-identifier-naming)
+    const Eigen::Matrix<double, 7, 1>& gravity) {
+  Eigen::Matrix<double, 7, 1> tau_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
+    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
+    tau_d_saturated[i] =
+        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max_), -delta_tau_max_);
+  }
+  return tau_d_saturated;
 }
 
 }  // namespace franka_example_controllers
