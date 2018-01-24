@@ -11,14 +11,12 @@
 #include <hardware_interface/hardware_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
-#include <xmlrpcpp/XmlRpcValue.h>
 
 namespace franka_example_controllers {
 
 bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_hardware,
                                           ros::NodeHandle& root_node_handle,
                                           ros::NodeHandle& /* controller_node_handle */) {
-  std::string arm_id;
   cartesian_pose_interface_ = robot_hardware->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface_ == nullptr) {
     ROS_ERROR(
@@ -27,6 +25,7 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
     return false;
   }
 
+  std::string arm_id;
   if (!root_node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("CartesianPoseExampleController: Could not get parameter arm_id");
     return false;

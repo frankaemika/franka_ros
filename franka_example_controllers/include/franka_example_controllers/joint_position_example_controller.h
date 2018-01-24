@@ -17,7 +17,6 @@ namespace franka_example_controllers {
 class JointPositionExampleController : public controller_interface::MultiInterfaceController<
                                            hardware_interface::PositionJointInterface> {
  public:
-  JointPositionExampleController();
   bool init(hardware_interface::RobotHW* robot_hardware,
             ros::NodeHandle& root_node_handle,
             ros::NodeHandle& /* controller_node_handle */) override;

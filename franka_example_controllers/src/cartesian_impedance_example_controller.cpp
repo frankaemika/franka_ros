@@ -17,17 +17,17 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
                                                ros::NodeHandle& node_handle) {
   std::vector<double> cartesian_stiffness_vector;
   std::vector<double> cartesian_damping_vector;
-  std::string arm_id;
-  std::vector<std::string> joint_names;
 
   sub_equilibrium_pose_ = node_handle.subscribe(
       "/equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibriumPoseCallback, this,
       ros::TransportHints().reliable().tcpNoDelay());
 
+  std::string arm_id;
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
     return false;
   }
+  std::vector<std::string> joint_names;
   if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
     ROS_ERROR(
         "CartesianImpedanceExampleController: Invalid or no joint_names parameters provided, "

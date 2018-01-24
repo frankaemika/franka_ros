@@ -9,7 +9,6 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
-#include <xmlrpcpp/XmlRpcValue.h>
 
 namespace franka_example_controllers {
 
@@ -22,19 +21,17 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
         "JointPositionExampleController: Error getting position joint interface from hardware!");
     return false;
   }
-  XmlRpc::XmlRpcValue parameters;
-  if (!root_node_handle.getParam("joint_names", parameters)) {
+  std::vector<std::string> joint_names;
+  if (!root_node_handle.getParam("joint_names", joint_names)) {
     ROS_ERROR("JointPositionExampleController: Could not parse joint names");
   }
-  if (parameters.size() != 7) {
+  if (joint_names.size() != 7) {
     ROS_ERROR_STREAM("JointPositionExampleController: Wrong number of joint names, got "
-                     << int(parameters.size()) << " instead of 7 names!");
+                     << joint_names.size() << " instead of 7 names!");
     return false;
   }
   position_joint_handles_.resize(7);
-  std::array<std::string, 7> joint_names;
   for (size_t i = 0; i < 7; ++i) {
-    joint_names[i] = static_cast<std::string>(parameters[i]);
     try {
       position_joint_handles_[i] = position_joint_interface_->getHandle(joint_names[i]);
     } catch (const hardware_interface::HardwareInterfaceException& e) {
