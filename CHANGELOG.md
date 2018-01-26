@@ -6,8 +6,9 @@
   * Added epsilon to grasp action
   * Added `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal` and `I_total`
     to the robot state
-  * Use O_T_EE_d in examples
-  * Fix includes for Eigen3 in `franka_example_controllers`
+  * Use `O_T_EE_d` in examples
+  * Fixed includes for Eigen3 in `franka_example_controllers`
+  * Fixed gripper state publishing in `franka_gripper_node`
 
 ## 0.1.2 - 2017-10-10
 
