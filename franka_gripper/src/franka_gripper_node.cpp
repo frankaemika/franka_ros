@@ -11,7 +11,6 @@
 #include <ros/rate.h>
 #include <ros/spinner.h>
 #include <sensor_msgs/JointState.h>
-#include <xmlrpcpp/XmlRpc.h>
 
 #include <franka/gripper_state.h>
 #include <franka_gripper/franka_gripper.h>
@@ -133,27 +132,26 @@ int main(int argc, char** argv) {
                     << publish_rate);
   }
 
-  XmlRpc::XmlRpcValue params;
-  if (!node_handle.getParam("joint_names", params)) {
+  std::vector<std::string> joint_names;
+  if (!node_handle.getParam("joint_names", joint_names)) {
     ROS_ERROR("franka_gripper_node: Could not parse joint_names!");
     return -1;
   }
-  if (params.size() != 2) {
+  if (joint_names.size() != 2) {
     ROS_ERROR("franka_gripper_node: Got wrong number of joint_names!");
     return -1;
-  }
-  std::vector<std::string> joint_names(params.size());
-  for (int i = 0; i < params.size(); ++i) {
-    joint_names[i] = static_cast<std::string>(params[i]);
   }
 
   franka::GripperState gripper_state;
   std::mutex gripper_state_mutex;
   std::thread read_thread([&gripper_state, &gripper, &gripper_state_mutex]() {
     ros::Rate read_rate(10);
-    while (read_rate.sleep() && ros::ok()) {
-      std::lock_guard<std::mutex> lock(gripper_state_mutex);
-      updateGripperState(gripper, &gripper_state);
+    while (ros::ok()) {
+      {
+        std::lock_guard<std::mutex> _(gripper_state_mutex);
+        updateGripperState(gripper, &gripper_state);
+      }
+      read_rate.sleep();
     }
   });
 

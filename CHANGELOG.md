@@ -8,6 +8,7 @@
     to the robot state
   * Updated and improved examples.
   * Fix includes for Eigen3 in `franka_example_controllers`
+  * Fixed gripper state publishing in `franka_gripper_node`
 
 ## 0.1.2 - 2017-10-10
 
