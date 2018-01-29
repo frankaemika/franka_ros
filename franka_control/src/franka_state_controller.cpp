@@ -120,6 +120,13 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
           error.communication_constraints_violation);
   message.power_limit_violation =
       static_cast<decltype(message.power_limit_violation)>(error.power_limit_violation);
+  message.joint_p2p_insufficient_torque_for_planning =
+      static_cast<decltype(message.joint_p2p_insufficient_torque_for_planning)>(
+          error.joint_p2p_insufficient_torque_for_planning);
+  message.tau_j_range_violation =
+      static_cast<decltype(message.tau_j_range_violation)>(error.tau_j_range_violation);
+  message.instability_detected =
+      static_cast<decltype(message.instability_detected)>(error.instability_detected);
   return message;
 }
 
