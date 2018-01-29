@@ -134,8 +134,6 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                                  const ros::Duration& /*period*/) {
   // get state variables
   franka::RobotState robot_state = state_handle_->getRobotState();
-  std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
   std::array<double, 7> coriolis_array =
       model_handle_->getCoriolis(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
   std::array<double, 42> jacobian_array =
@@ -143,7 +141,6 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
 
   // convert to Eigen
   Eigen::Map<Eigen::Matrix<double, 7, 1> > coriolis(coriolis_array.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
@@ -159,6 +156,9 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   error.head(3) << position - position_d_;
 
   // orientation error
+  if (orientation_d_.coeffs().dot(orientation.coeffs()) < 0.0) {
+    orientation.coeffs() << -orientation.coeffs();
+  }
   // "difference" quaternion
   Eigen::Quaterniond error_quaternion(orientation * orientation_d_.inverse());
   // convert to axis angle
