@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.0 - UNRELEASED
+## 0.2.0 - 2018-01-29
 
 Requires `libfranka` >= 0.2.0
 
