@@ -35,13 +35,11 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
  *
  * @param[in] gripper A pointer to a franka gripper
  * @param[in] default_speed The default speed for a gripper action
- * @param[in] grasp_epsilon The epsilon window of the grasp.
  * @param[in] action_server A pointer to a gripper action server
  * @param[in] goal A gripper action goal
  */
 void gripperCommandExecuteCallback(
     const franka::Gripper& gripper,
-    const GraspEpsilon& grasp_epsilon,
     double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal);
@@ -78,10 +76,9 @@ bool stop(const franka::Gripper& gripper, const StopGoalConstPtr& /*goal*/);
  * Calls the libfranka grasp service of the gripper
  *
  * @param[in] gripper A gripper instance to execute the command
- * @param[in] goal A grasp goal with target width, epsilon_inner, epsilon_outer, velocity and effort
+ * @param[in] goal A grasp goal with target width, velocity and effort
  *
- * @return True if an object has been grasped, i.e.: the distance between the gripper fingers is
- * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
+ * @return True if an object has been grasped, false otherwise.
  */
 bool grasp(const franka::Gripper& gripper, const GraspGoalConstPtr& goal);
 
