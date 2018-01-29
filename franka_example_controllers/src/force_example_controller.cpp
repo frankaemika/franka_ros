@@ -115,7 +115,7 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   tau_ext = tau_measured - gravity - tau_ext_initial_;
   tau_d << jacobian.transpose() * desired_force_torque;
   tau_error_ = tau_error_ + period.toSec() * (tau_d - tau_ext);
-  // FF + PI control (PI gains are intially all 0)
+  // FF + PI control (PI gains are initially all 0)
   tau_cmd = tau_d + k_p_ * (tau_d - tau_ext) + k_i_ * tau_error_;
   tau_cmd << saturateTorqueRate(tau_cmd, tau_J_d);
 
