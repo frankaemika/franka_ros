@@ -173,8 +173,7 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
 
   // Maximum torque difference with a sampling rate of 1 kHz. The maximum torque rate is
   // 1000 * (1 / sampling_time).
-  std::array<double, 7> tau_d_saturated =
-      saturateTorqueRate(tau_d_calculated, robot_state.tau_J_d, gravity);
+  std::array<double, 7> tau_d_saturated = saturateTorqueRate(tau_d_calculated, robot_state.tau_J_d);
 
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d_saturated[i]);
@@ -204,14 +203,11 @@ void JointImpedanceExampleController::update(const ros::Time& /*time*/,
 
 std::array<double, 7> JointImpedanceExampleController::saturateTorqueRate(
     const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 7>& gravity) {
+    const std::array<double, 7>& tau_J_d) {  // NOLINT (readability-identifier-naming)
   std::array<double, 7> tau_d_saturated{};
   for (size_t i = 0; i < 7; i++) {
-    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
-    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
-    tau_d_saturated[i] =
-        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, kDeltaTauMax), -kDeltaTauMax);
+    double difference = tau_d_calculated[i] - tau_J_d[i];
+    tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, kDeltaTauMax), -kDeltaTauMax);
   }
   return tau_d_saturated;
 }

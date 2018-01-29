@@ -33,8 +33,7 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   // Saturation
   std::array<double, 7> saturateTorqueRate(
       const std::array<double, 7>& tau_d_calculated,
-      const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
-      const std::array<double, 7>& gravity);
+      const std::array<double, 7>& tau_J_d);  // NOLINT (readability-identifier-naming)
 
   std::unique_ptr<franka_hw::FrankaCartesianPoseHandle> cartesian_pose_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
