@@ -5,8 +5,11 @@ float64[7] q
 float64[7] q_d
 float64[7] dq
 float64[7] dq_d
+float64[7] theta
+float64[7] dtheta
 float64[7] tau_J
 float64[7] dtau_J
+float64[7] tau_J_d
 float64[6] K_F_ext_hat_K
 float64[2] elbow
 float64[2] elbow_d

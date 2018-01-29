@@ -31,3 +31,6 @@ bool controller_torque_discontinuity
 bool start_elbow_sign_inconsistent
 bool communication_constraints_violation
 bool power_limit_violation
+bool joint_p2p_insufficient_torque_for_planning
+bool tau_j_range_violation
+bool instability_detected

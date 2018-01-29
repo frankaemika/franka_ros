@@ -17,11 +17,11 @@ node('docker') {
               projectName: "SWDEV/libfranka/${java.net.URLEncoder.encode(env.BRANCH_NAME, "UTF-8")}",
               selector: [$class: 'StatusBuildSelector', stable: false]])
       } catch (e) {
-        // Fall back to master branch.
+        // Fall back to develop branch.
         step([$class: 'CopyArtifact',
               filter: 'libfranka-*-amd64.tar.gz',
               fingerprintArtifacts: true,
-              projectName: "SWDEV/libfranka/master",
+              projectName: "SWDEV/libfranka/develop",
               selector: [$class: 'StatusBuildSelector', stable: false]])
       }
       sh '''

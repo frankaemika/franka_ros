@@ -120,6 +120,13 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
           error.communication_constraints_violation);
   message.power_limit_violation =
       static_cast<decltype(message.power_limit_violation)>(error.power_limit_violation);
+  message.joint_p2p_insufficient_torque_for_planning =
+      static_cast<decltype(message.joint_p2p_insufficient_torque_for_planning)>(
+          error.joint_p2p_insufficient_torque_for_planning);
+  message.tau_j_range_violation =
+      static_cast<decltype(message.tau_j_range_violation)>(error.tau_j_range_violation);
+  message.instability_detected =
+      static_cast<decltype(message.instability_detected)>(error.instability_detected);
   return message;
 }
 
@@ -255,6 +262,12 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dtau_J),
                   "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_J_d),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.theta),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dtheta),
+                  "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.joint_collision),
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.joint_contact),
@@ -268,6 +281,9 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.dq_d[i] = robot_state_.dq_d[i];
       publisher_franka_states_.msg_.tau_J[i] = robot_state_.tau_J[i];
       publisher_franka_states_.msg_.dtau_J[i] = robot_state_.dtau_J[i];
+      publisher_franka_states_.msg_.tau_J_d[i] = robot_state_.tau_J_d[i];
+      publisher_franka_states_.msg_.theta[i] = robot_state_.theta[i];
+      publisher_franka_states_.msg_.dtheta[i] = robot_state_.dtheta[i];
       publisher_franka_states_.msg_.joint_collision[i] = robot_state_.joint_collision[i];
       publisher_franka_states_.msg_.joint_contact[i] = robot_state_.joint_contact[i];
       publisher_franka_states_.msg_.tau_ext_hat_filtered[i] = robot_state_.tau_ext_hat_filtered[i];
