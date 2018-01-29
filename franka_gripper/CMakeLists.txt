@@ -24,11 +24,6 @@ add_action_files(
         Move.action
 )
 
-add_message_files(
-  DIRECTORY msg
-  FILES GraspEpsilon.msg
-)
-
 generate_messages(DEPENDENCIES actionlib_msgs)
 
 catkin_package(
@@ -45,7 +40,7 @@ catkin_package(
 )
 
 add_library(franka_gripper
-src/franka_gripper.cpp
+  src/franka_gripper.cpp
 )
 
 add_dependencies(franka_gripper
