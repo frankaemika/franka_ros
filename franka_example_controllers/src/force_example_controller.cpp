@@ -146,7 +146,7 @@ Eigen::Matrix<double, 7, 1> ForceExampleController::saturateTorqueRate(
     // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
     double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
     tau_d_saturated[i] =
-        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max_), -delta_tau_max_);
+        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, kDeltaTauMax), -kDeltaTauMax);
   }
   return tau_d_saturated;
 }

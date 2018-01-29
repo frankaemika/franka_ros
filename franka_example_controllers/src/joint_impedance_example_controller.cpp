@@ -15,8 +15,6 @@ namespace franka_example_controllers {
 bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
                                            ros::NodeHandle& node_handle) {
   std::string arm_id;
-  std::vector<std::string> joint_names;
-
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("JointImpedanceExampleController: Could not read parameter arm_id");
     return false;
@@ -40,6 +38,7 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
         << acceleration_time_);
   }
 
+  std::vector<std::string> joint_names;
   if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
     ROS_ERROR(
         "JointImpedanceExampleController: Invalid or no joint_names parameters provided, aborting "
@@ -212,7 +211,7 @@ std::array<double, 7> JointImpedanceExampleController::saturateTorqueRate(
     // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
     double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
     tau_d_saturated[i] =
-        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max_), -delta_tau_max_);
+        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, kDeltaTauMax), -kDeltaTauMax);
   }
   return tau_d_saturated;
 }

@@ -49,7 +49,7 @@ class ForceExampleController : public controller_interface::MultiInterfaceContro
   double filter_gain_{0.001};
   Eigen::Matrix<double, 7, 1> tau_ext_initial_;
   Eigen::Matrix<double, 7, 1> tau_error_;
-  const double delta_tau_max_{1.0};
+  static constexpr double kDeltaTauMax{1.0};
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>

@@ -40,7 +40,7 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
 
-  const double delta_tau_max_{1.0};
+  static constexpr double kDeltaTauMax{1.0};
   double radius_{0.1};
   double acceleration_time_{2.0};
   double vel_max_{0.05};
@@ -54,8 +54,8 @@ class JointImpedanceExampleController : public controller_interface::MultiInterf
   std::array<double, 16> initial_pose_;
 
   franka_hw::TriggerRate rate_trigger_{1.0};
+  std::array<double, 7> last_tau_d_{};
   realtime_tools::RealtimePublisher<JointTorqueComparison> torques_publisher_;
-  std::array<double, 7> last_tau_d_ = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
 };
 
 }  // namespace franka_example_controllers
