@@ -4,8 +4,8 @@
 
   * Added missing run-time dependencies to `franka_description` and `franka_control`
   * Added epsilon to grasp action
-  * Added `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal` and `I_total`
-    to the robot state
+  * Added `tau_J_d`, `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal`, `I_total`,
+    `theta` and `dtheta` to `franka::RobotState`
   * Updated and improved examples
   * Fixed includes for Eigen3 in `franka_example_controllers`
   * Fixed gripper state publishing in `franka_gripper_node`
