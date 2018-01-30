@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.1 - UNRELEASED
+
+Requires `libfranka` >= 0.2.0
+
+  * Added missing dependency to `franka_example_controllers`
+
 ## 0.2.0 - 2018-01-29
 
 Requires `libfranka` >= 0.2.0
