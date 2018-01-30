@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
 )
 
-find_package(Franka REQUIRED)
+find_package(Franka 0.2.0 REQUIRED)
 
 add_action_files(
   DIRECTORY action
