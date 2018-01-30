@@ -5,6 +5,7 @@
 Requires `libfranka` >= 0.2.0
 
   * Added missing dependency to `franka_example_controllers`
+  * Lowered rotational gains for Cartesian impedance example controller
 
 ## 0.2.0 - 2018-01-29
 
