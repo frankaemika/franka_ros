@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
+find_package(Franka 0.2.0 REQUIRED)
 
 add_message_files(FILES
   JointTorqueComparison.msg
@@ -33,6 +34,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
   CATKIN_DEPENDS controller_interface franka_hw pluginlib
+  DEPENDS Franka
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
@@ -56,7 +58,10 @@ add_dependencies(franka_example_controllers
   ${PROJECT_NAME}_gencfg
 )
 
-target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})
+target_link_libraries(franka_example_controllers
+  ${catkin_LIBRARIES}
+  Franka::Franka
+)
 
 ## Installation
 install(TARGETS franka_example_controllers
