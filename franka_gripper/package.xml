@@ -23,4 +23,6 @@
   <depend>actionlib_msgs</depend>
 
   <exec_depend>message_runtime</exec_depend>
+
+  <build_export_depend>message_runtime</build_export_depend>
 </package>

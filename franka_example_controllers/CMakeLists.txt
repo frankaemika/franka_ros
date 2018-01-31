@@ -33,9 +33,16 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
-  INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
-  CATKIN_DEPENDS controller_interface franka_hw pluginlib geometry_msgs message_runtime
+  CATKIN_DEPENDS
+    controller_interface
+    dynamic_reconfigure
+    franka_hw
+    geometry_msgs
+    message_runtime
+    pluginlib
+    realtime_tools
+    roscpp
   DEPENDS Franka
 )
 
@@ -70,9 +77,6 @@ install(TARGETS franka_example_controllers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
