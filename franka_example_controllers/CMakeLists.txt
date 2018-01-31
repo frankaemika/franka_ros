@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   franka_hw
   geometry_msgs
+  hardware_interface
   message_generation
   pluginlib
   realtime_tools
@@ -39,6 +40,7 @@ catkin_package(
     dynamic_reconfigure
     franka_hw
     geometry_msgs
+    hardware_interface
     message_runtime
     pluginlib
     realtime_tools
