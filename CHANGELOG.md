@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.2.2 - UNRELEASED
+
+Requires `libfranka` >= 0.2.0
+
+  * Catkin-related fixes for `franka_example_controllers`
+  * Added missing `<build_export_depend>` for `message_runtime`
+
 ## 0.2.1 - 2018-01-30
 
 Requires `libfranka` >= 0.2.0
