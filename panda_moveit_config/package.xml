@@ -15,6 +15,7 @@
 
   <depend>franka_description</depend>
 
+  <exec_depend>moveit_fake_controller_manager</exec_depend>
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>moveit_commander</exec_depend>
