@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.0 - UNRELEASED
+
+  * **BREAKING** Changed signatures in `franka_hw::FrankaModelHandle`
+
 ## 0.2.2 - 2018-01-31
 
 Requires `libfranka` >= 0.2.0
@@ -25,7 +29,6 @@ Requires `libfranka` >= 0.2.0
   * Updated and improved examples in `franka_example_controllers`
   * Fixed includes for Eigen3 in `franka_example_controllers`
   * Fixed gripper state publishing in `franka_gripper_node`
-  * **BREAKING** Changed signatures in `franka_hw::FrankaModelHandle`
 
 ## 0.1.2 - 2017-10-10
 
