@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
 
-find_package(Franka REQUIRED)
+find_package(Franka 0.2.0 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include

@@ -8,15 +8,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
   controller_interface
+  dynamic_reconfigure
   franka_hw
+  geometry_msgs
+  hardware_interface
+  message_generation
   pluginlib
   realtime_tools
   roscpp
-  message_generation
-  dynamic_reconfigure
+  rospy
 )
 
 find_package(Eigen3 REQUIRED)
+find_package(Franka 0.2.0 REQUIRED)
 
 add_message_files(FILES
   JointTorqueComparison.msg
@@ -30,9 +34,18 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
-  INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
-  CATKIN_DEPENDS controller_interface franka_hw pluginlib
+  CATKIN_DEPENDS
+    controller_interface
+    dynamic_reconfigure
+    franka_hw
+    geometry_msgs
+    hardware_interface
+    message_runtime
+    pluginlib
+    realtime_tools
+    roscpp
+  DEPENDS Franka
 )
 
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
@@ -56,16 +69,16 @@ add_dependencies(franka_example_controllers
   ${PROJECT_NAME}_gencfg
 )
 
-target_link_libraries(franka_example_controllers ${catkin_LIBRARIES})
+target_link_libraries(franka_example_controllers
+  ${catkin_LIBRARIES}
+  Franka::Franka
+)
 
 ## Installation
 install(TARGETS franka_example_controllers
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
@@ -75,6 +88,10 @@ install(DIRECTORY config
 )
 install(FILES franka_example_controllers_plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+catkin_install_python(
+  PROGRAMS scripts/interactive_marker.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 ## Tools

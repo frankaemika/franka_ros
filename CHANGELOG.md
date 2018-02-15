@@ -1,6 +1,20 @@
 # CHANGELOG
 
-## 0.2.0 - UNRELEASED
+## 0.2.2 - 2018-01-31
+
+Requires `libfranka` >= 0.2.0
+
+  * Catkin-related fixes for `franka_example_controllers`
+  * Added missing `<build_export_depend>` for `message_runtime`
+
+## 0.2.1 - 2018-01-30
+
+Requires `libfranka` >= 0.2.0
+
+  * Added missing dependency to `franka_example_controllers`
+  * Lowered rotational gains for Cartesian impedance example controller
+
+## 0.2.0 - 2018-01-29
 
 Requires `libfranka` >= 0.2.0
 
