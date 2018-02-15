@@ -33,12 +33,15 @@ add_dependencies(franka_hw
 )
 
 target_link_libraries(franka_hw
+  ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
-  Franka::Franka
 )
 
-target_include_directories(franka_hw PUBLIC
+target_include_directories(franka_hw SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_hw PUBLIC
   include
 )
 

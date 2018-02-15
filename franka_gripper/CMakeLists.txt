@@ -50,12 +50,15 @@ add_dependencies(franka_gripper
 )
 
 target_link_libraries(franka_gripper
-   ${catkin_LIBRARIES}
-   Franka::Franka
+  ${Franka_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
-target_include_directories(franka_gripper PUBLIC
+target_include_directories(franka_gripper SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_gripper PUBLIC
   include
 )
 
@@ -74,9 +77,8 @@ target_link_libraries(franka_gripper_node
    franka_gripper
 )
 
-target_include_directories(franka_gripper_node PUBLIC
+target_include_directories(franka_gripper_node SYSTEM PUBLIC
   ${catkin_INCLUDE_DIRS}
-  include
 )
 
 ## Installation

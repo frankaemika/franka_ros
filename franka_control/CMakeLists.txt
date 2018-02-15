@@ -68,12 +68,15 @@ add_dependencies(franka_state_controller
 )
 
 target_link_libraries(franka_state_controller
+  ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
-  Franka::Franka
 )
 
-target_include_directories(franka_state_controller PUBLIC
+target_include_directories(franka_state_controller SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_state_controller PUBLIC
   include
 )
 
@@ -88,12 +91,15 @@ add_dependencies(franka_control_services
 )
 
 target_link_libraries(franka_control_services
+  ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
-  Franka::Franka
 )
 
-target_include_directories(franka_control_services PUBLIC
+target_include_directories(franka_control_services SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_control_services PUBLIC
   include
 )
 
@@ -108,12 +114,13 @@ add_dependencies(franka_control_node
 )
 
 target_link_libraries(franka_control_node
-  ${catkin_LIBRARIES}
+  ${Franka_LIBRARIES}
   franka_control_services
-  Franka::Franka
+  ${catkin_LIBRARIES}
 )
 
-target_include_directories(franka_control_node PUBLIC
+target_include_directories(franka_control_node SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
