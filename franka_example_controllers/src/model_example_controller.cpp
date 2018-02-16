@@ -70,12 +70,9 @@ bool ModelExampleController::init(hardware_interface::RobotHW* robot_hw,
 void ModelExampleController::update(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   if (rate_trigger_()) {
     franka::RobotState robot_state = franka_state_handle_->getRobotState();
-    std::array<double, 49> mass =
-        model_handle_->getMass(robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
-    std::array<double, 7> coriolis = model_handle_->getCoriolis(
-        robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
-    std::array<double, 7> gravity =
-        model_handle_->getGravity(robot_state.m_total, robot_state.F_x_Ctotal);
+    std::array<double, 49> mass = model_handle_->getMass();
+    std::array<double, 7> coriolis = model_handle_->getCoriolis();
+    std::array<double, 7> gravity = model_handle_->getGravity();
     std::array<double, 16> pose = model_handle_->getPose(franka::Frame::kJoint4);
     std::array<double, 42> joint4_body_jacobian =
         model_handle_->getBodyJacobian(franka::Frame::kJoint4);

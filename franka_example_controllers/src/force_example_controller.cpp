@@ -88,8 +88,7 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
 
 void ForceExampleController::starting(const ros::Time& /*time*/) {
   franka::RobotState robot_state = state_handle_->getRobotState();
-  std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state, robot_state.m_total, robot_state.F_x_Ctotal);
+  std::array<double, 7> gravity_array = model_handle_->getGravity();
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
   // Bias correction for the current external torque
@@ -100,9 +99,8 @@ void ForceExampleController::starting(const ros::Time& /*time*/) {
 void ForceExampleController::update(const ros::Time& /*time*/, const ros::Duration& period) {
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 42> jacobian_array =
-      model_handle_->getZeroJacobian(franka::Frame::kEndEffector, robot_state);
-  std::array<double, 7> gravity_array =
-      model_handle_->getGravity(robot_state, robot_state.m_total, robot_state.F_x_Ctotal);
+      model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
+  std::array<double, 7> gravity_array = model_handle_->getGravity();
   Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_J_d(  // NOLINT (readability-identifier-naming)
