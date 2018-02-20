@@ -10,50 +10,39 @@
     </xacro:unless>
     <link name="${ns}_hand">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/hand.STL"/>
+          <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/hand_collision.STL"/>
+          <mesh filename="package://franka_description/meshes/collision/hand.stl"/>
         </geometry>
       </collision>
     </link>
     <link name="${ns}_leftfinger">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/leftfinger.STL"/>
+          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="package://franka_description/meshes/leftfinger_collision.STL"/>
+          <mesh filename="package://franka_description/meshes/collision/finger.stl"/>
         </geometry>
       </collision>
     </link>
     <link name="${ns}_rightfinger">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/rightfinger.STL"/>
+          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
-          <mesh filename="package://franka_description/meshes/rightfinger_collision.STL"/>
+          <mesh filename="package://franka_description/meshes/collision/finger.stl"/>
         </geometry>
       </collision>
     </link>
