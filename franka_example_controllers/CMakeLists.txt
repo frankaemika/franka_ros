@@ -48,8 +48,6 @@ catkin_package(
   DEPENDS Franka
 )
 
-include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIRS})
-
 add_library(franka_example_controllers
   src/cartesian_pose_example_controller.cpp
   src/cartesian_velocity_example_controller.cpp
@@ -69,9 +67,18 @@ add_dependencies(franka_example_controllers
   ${PROJECT_NAME}_gencfg
 )
 
-target_link_libraries(franka_example_controllers
+target_link_libraries(franka_example_controllers PUBLIC
+  ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
-  Franka::Franka
+)
+
+target_include_directories(franka_example_controllers SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_example_controllers PUBLIC
+  include
 )
 
 ## Installation

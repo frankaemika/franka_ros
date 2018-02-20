@@ -20,12 +20,13 @@ add_dependencies(franka_joint_state_publisher
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
 )
-target_link_libraries(franka_joint_state_publisher
-  ${catkin_LIBRARIES}
-  Franka::Franka
-)
-target_include_directories(franka_joint_state_publisher PUBLIC
+target_include_directories(franka_joint_state_publisher SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
+)
+target_link_libraries(franka_joint_state_publisher PUBLIC
+  ${Franka_LIBRARIES}
+  ${catkin_LIBRARIES}
 )
 
 ## Installation
