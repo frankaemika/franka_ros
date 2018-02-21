@@ -3,20 +3,28 @@
 <launch>
   <arg name="load_gripper" default="true" />
   <arg name="robot_ip" default="robot.franka.de" />
+  <arg name="publish_rate" default="30" />
 
   <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro" />
   <param if="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm_hand.urdf.xacro" />
 
-  <node name="franka_joint_state_publisher" pkg="franka_visualization" type="franka_joint_state_publisher" output="screen">
-    <rosparam command="load" file="$(find franka_visualization)/config/robot_read_settings.yaml" />
+  <node name="robot_joint_state_publisher" pkg="franka_visualization" type="robot_joint_state_publisher" output="screen">
+    <rosparam command="load" file="$(find franka_visualization)/config/robot_settings.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
+    <param name="publish_rate" value="$(arg publish_rate)" />
+  </node>
+
+  <node name="gripper_joint_state_publisher" pkg="franka_visualization" type="gripper_joint_state_publisher" output="screen" if="$(arg load_gripper)">
+    <rosparam command="load" file="$(find franka_visualization)/config/gripper_settings.yaml" />
+    <param name="robot_ip" value="$(arg robot_ip)" />
+    <param name="publish_rate" value="$(arg publish_rate)" />
   </node>
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
     <param if="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'" />
     <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm.urdf.xacro'" />
-    <rosparam  param="source_list">[franka_joint_state_publisher/joint_states] </rosparam>
-    <param  if="$(arg load_gripper)" name="publish_default_positions" value="true" />
+    <param name="rate" value="$(arg publish_rate)" />
+    <rosparam param="source_list">[franka_joint_state_publisher/joint_states, franka_gripper_state_publisher/joint_states]</rosparam>
   </node>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
