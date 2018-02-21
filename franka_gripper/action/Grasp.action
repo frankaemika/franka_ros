@@ -1,7 +1,7 @@
-float64 width    # [m]
+float64 width # [m]
 GraspEpsilon epsilon
-float64 speed    # [m/s]
-float64 force  # [N]
+float64 speed # [m/s]
+float64 force # [N]
 ---
 bool success
 string error

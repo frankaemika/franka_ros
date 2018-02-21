@@ -31,8 +31,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   if (!node_handle.getParam("joint_names", joint_names) || joint_names.size() != 7) {
     ROS_ERROR(
         "CartesianImpedanceExampleController: Invalid or no joint_names parameters provided, "
-        "aborting "
-        "controller init!");
+        "aborting controller init!");
     return false;
   }
 
