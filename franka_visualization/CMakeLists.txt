@@ -13,24 +13,28 @@ find_package(Franka 0.3.0 REQUIRED)
 
 catkin_package(CATKIN_DEPENDS sensor_msgs roscpp)
 
-add_executable(franka_joint_state_publisher
-  src/franka_joint_state_publisher.cpp
-)
-add_dependencies(franka_joint_state_publisher
-  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-  ${catkin_EXPORTED_TARGETS}
-)
-target_include_directories(franka_joint_state_publisher SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-)
-target_link_libraries(franka_joint_state_publisher PUBLIC
-  ${Franka_LIBRARIES}
-  ${catkin_LIBRARIES}
-)
+set(EXECUTABLES robot_joint_state_publisher gripper_joint_state_publisher)
+
+foreach(executable ${EXECUTABLES})
+  add_executable(${executable}
+    src/${executable}.cpp
+  )
+  add_dependencies(${executable}
+    ${${PROJECT_NAME}_EXPORTED_TARGETS}
+    ${catkin_EXPORTED_TARGETS}
+  )
+  target_include_directories(${executable} SYSTEM PUBLIC
+    ${Franka_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+  )
+  target_link_libraries(${executable} PUBLIC
+    ${Franka_LIBRARIES}
+    ${catkin_LIBRARIES}
+  )
+endforeach()
 
 ## Installation
-install(TARGETS franka_joint_state_publisher
+install(TARGETS ${EXECUTABLES}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -55,6 +59,6 @@ if(CLANG_TOOLS)
   add_format_target(franka_visualization FILES ${SOURCES} ${HEADERS})
   add_tidy_target(franka_visualization
     FILES ${SOURCES}
-    DEPENDS franka_joint_state_publisher
+    DEPENDS ${EXECUTABLES}
   )
 endif()

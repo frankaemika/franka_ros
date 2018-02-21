@@ -8,6 +8,7 @@ Requires `libfranka` >= 0.3.0
   * Added missing dependency to `panda_moveit_config`
   * Fixed linker errors when building with `-DFranka_DIR` while an older version of
     `ros-kinetic-libfranka` is installed
+  * Added gripper joint state publisher to `franka_visualization`
 
 ## 0.2.2 - 2018-01-31
 
