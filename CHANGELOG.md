@@ -5,6 +5,7 @@
 Requires `libfranka` >= 0.3.0
 
   * **BREAKING** Changed signatures in `franka_hw::FrankaModelHandle`
+  * **BREAKING** Added epsilon parameters to `franka_gripper/Grasp` action
   * Added missing dependency to `panda_moveit_config`
   * Fixed linker errors when building with `-DFranka_DIR` while an older version of
     `ros-kinetic-libfranka` is installed
