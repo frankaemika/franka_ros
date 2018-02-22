@@ -13,6 +13,6 @@
     <arg name="arm_id" value="$(arg arm_id)" />
   </include>
   <group ns="$(arg arm_id)">
-    <node name="move_to_start" pkg="panda_moveit_config" type="move_to_start.py" output="screen" required="true" />
+    <node name="move_to_start" pkg="franka_example_controllers" type="move_to_start.py" output="screen" required="true" />
   </group>
 </launch>

@@ -54,7 +54,7 @@ bool CartesianPoseExampleController::init(hardware_interface::RobotHW* robot_har
       if (std::abs(state_handle.getRobotState().q_d[i] - q_start[i]) > 0.1) {
         ROS_ERROR_STREAM(
             "CartesianPoseExampleController: Robot is not in the expected starting position for "
-            "running this example. Run `roslaunch panda_moveit_config move_to_start.launch "
+            "running this example. Run `roslaunch franka_example_controllers move_to_start.launch "
             "robot_ip:=<robot-ip> load_gripper:=<has-attached-gripper>` first.");
         return false;
       }
