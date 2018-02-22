@@ -10,35 +10,25 @@
     </xacro:unless>
     <link name="${arm_id}_link0">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link0.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link0.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link0_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link0.stl"/>
         </geometry>
       </collision>
     </link>
     <link name="${arm_id}_link1">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link1.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link1.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link1_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link1.stl"/>
         </geometry>
       </collision>
     </link>
@@ -52,24 +42,19 @@
     </joint>
     <link name="${arm_id}_link2">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link2.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link2.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link2_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link2.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint2" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
-      <origin rpy="-1.570796326794897 0 0" xyz="0 0 0"/>
+      <origin rpy="${-pi/2} 0 0" xyz="0 0 0"/>
       <parent link="${arm_id}_link1"/>
       <child link="${arm_id}_link2"/>
       <axis xyz="0 0 1"/>
@@ -77,24 +62,19 @@
     </joint>
     <link name="${arm_id}_link3">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link3.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link3.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link3_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link3.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint3" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-      <origin rpy="1.570796326794897 0 0" xyz="0 -0.316 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 -0.316 0"/>
       <parent link="${arm_id}_link2"/>
       <child link="${arm_id}_link3"/>
       <axis xyz="0 0 1"/>
@@ -102,24 +82,19 @@
     </joint>
     <link name="${arm_id}_link4">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link4.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link4.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link4_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link4.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint4" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="0.0175"/>
-      <origin rpy="1.570796326794897 0 0" xyz="0.0825 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0"/>
       <parent link="${arm_id}_link3"/>
       <child link="${arm_id}_link4"/>
       <axis xyz="0 0 1"/>
@@ -127,24 +102,19 @@
     </joint>
     <link name="${arm_id}_link5">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link5.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link5.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link5_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link5.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint5" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-      <origin rpy="-1.570796326794897 0 0" xyz="-0.0825 0.384 0"/>
+      <origin rpy="${-pi/2} 0 0" xyz="-0.0825 0.384 0"/>
       <parent link="${arm_id}_link4"/>
       <child link="${arm_id}_link5"/>
       <axis xyz="0 0 1"/>
@@ -152,24 +122,19 @@
     </joint>
     <link name="${arm_id}_link6">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link6.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link6.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link6_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link6.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint6" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
-      <origin rpy="1.570796326794897 0 0" xyz="0 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
       <parent link="${arm_id}_link5"/>
       <child link="${arm_id}_link6"/>
       <axis xyz="0 0 1"/>
@@ -177,24 +142,19 @@
     </joint>
     <link name="${arm_id}_link7">
       <visual>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link7.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/visual/link7.dae"/>
         </geometry>
-        <material name="">
-          <color rgba="1 1 1 1"/>
-        </material>
       </visual>
       <collision>
-        <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://${description_pkg}/meshes/link7_collision.STL"/>
+          <mesh filename="package://${description_pkg}/meshes/collision/link7.stl"/>
         </geometry>
       </collision>
     </link>
     <joint name="${arm_id}_joint7" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
-      <origin rpy="1.570796326794897 0 0" xyz="0.088 0 0"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.088 0 0"/>
       <parent link="${arm_id}_link6"/>
       <child link="${arm_id}_link7"/>
       <axis xyz="0 0 1"/>
