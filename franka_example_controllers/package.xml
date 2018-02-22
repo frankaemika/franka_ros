@@ -28,6 +28,7 @@
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>
 
+  <exec_depend>franka_control</exec_depend>
   <exec_depend>franka_description</exec_depend>
   <exec_depend>message_runtime</exec_depend>
   <exec_depend>rospy</exec_depend>

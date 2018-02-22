@@ -7,7 +7,7 @@ Requires `libfranka` >= 0.3.0
   * **BREAKING** Changed signatures in `franka_hw::FrankaModelHandle`
   * **BREAKING** Added epsilon parameters to `franka_gripper/Grasp` action
   * Added Collada meshes for Panda and Hand
-  * Added missing dependency to `panda_moveit_config`
+  * Added missing dependencies to `panda_moveit_config` and `franka_example_controllers`
   * Fixed linker errors when building with `-DFranka_DIR` while an older version of
     `ros-kinetic-libfranka` is installed
   * Added gripper joint state publisher to `franka_visualization`
