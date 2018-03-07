@@ -2,6 +2,10 @@
 
 ## 0.4.0 - UNRELEASED
 
+  * Changes in `panda_moveit_config`:
+    * Updated joint limits from URDF
+    * Removed `home` poses
+    * Fixed fake execution
   * Added `mimic` tag for gripper fingers to URDF
 
 ## 0.3.0 - 2018-02-22
