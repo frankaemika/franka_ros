@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.0 - UNRELEASED
+
+  * Removed default `robot_ip` from launchfiles
+
 ## 0.3.0 - 2018-02-22
 
 Requires `libfranka` >= 0.3.0

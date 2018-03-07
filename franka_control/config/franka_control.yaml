@@ -6,6 +6,4 @@ joint_names:
   - panda_joint5
   - panda_joint6
   - panda_joint7
-
 arm_id: panda
-robot_ip: 127.0.0.1
