@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.0 - UNRELEASED
+
+  * Added `mimic` tag for gripper fingers to URDF
+
 ## 0.3.0 - 2018-02-22
 
 Requires `libfranka` >= 0.3.0
