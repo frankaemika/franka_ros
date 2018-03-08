@@ -1,6 +1,10 @@
 <launch>
 
-  <include file="$(find panda_moveit_config)/launch/planning_context.launch" />
+  <arg name="load_gripper" default="true" />
+
+  <include file="$(find panda_moveit_config)/launch/planning_context.launch">
+    <arg name="load_gripper" value="$(arg load_gripper)" />
+  </include>
 
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />
@@ -27,7 +31,8 @@
   <!-- Trajectory Execution Functionality -->
   <include ns="move_group" file="$(find panda_moveit_config)/launch/trajectory_execution.launch.xml" if="$(arg allow_trajectory_execution)">
     <arg name="moveit_manage_controllers" value="true" />
-    <arg name="moveit_controller_manager" value="panda" unless="$(arg fake_execution)"/>
+    <arg name="moveit_controller_manager" value="panda" if="$(eval not arg('fake_execution') and not arg('load_gripper'))"/>
+    <arg name="moveit_controller_manager" value="panda_gripper" if="$(eval not arg('fake_execution') and arg('load_gripper'))"/>
     <arg name="moveit_controller_manager" value="fake" if="$(arg fake_execution)"/>
   </include>
 
