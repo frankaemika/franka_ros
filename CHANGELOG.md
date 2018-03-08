@@ -2,6 +2,8 @@
 
 ## 0.4.0 - UNRELEASED
 
+  * **BREAKING** Removed `arm_id` from launchfiles
+  * **BREAKING** Changed namespace of `franka_control` controller manager
   * Changes in `panda_moveit_config`:
     * Updated joint limits from URDF
     * Removed `home` poses
