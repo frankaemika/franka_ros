@@ -33,12 +33,17 @@ void gripperCommandExecuteCallback(
     double default_speed,
     actionlib::SimpleActionServer<control_msgs::GripperCommandAction>* action_server,
     const control_msgs::GripperCommandGoalConstPtr& goal) {
+  constexpr double kSamePositionThreshold = 1e-4;
+
   std::function<bool()> gripper_command_handler = [=, &gripper]() {
     franka::GripperState state = gripper.readOnce();
     if (goal->command.position > state.max_width || goal->command.position < 0.0) {
       ROS_ERROR_STREAM("GripperServer: Commanding out of range width! max_width = "
                        << state.max_width << " command = " << goal->command.position);
       return false;
+    }
+    if (std::abs(goal->command.position - state.width) < kSamePositionThreshold) {
+      return true;
     }
     if (goal->command.position >= state.width) {
       return gripper.move(goal->command.position, default_speed);
