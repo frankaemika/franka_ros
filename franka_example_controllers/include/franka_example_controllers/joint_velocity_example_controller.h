@@ -18,8 +18,7 @@ class JointVelocityExampleController : public controller_interface::MultiInterfa
                                            hardware_interface::VelocityJointInterface,
                                            franka_hw::FrankaStateInterface> {
  public:
-  bool init(hardware_interface::RobotHW* robot_hardware,
-            ros::NodeHandle& node_handle) override;
+  bool init(hardware_interface::RobotHW* robot_hardware, ros::NodeHandle& node_handle) override;
   void update(const ros::Time&, const ros::Duration& period) override;
   void starting(const ros::Time&) override;
   void stopping(const ros::Time&) override;
