@@ -13,8 +13,7 @@
 namespace franka_example_controllers {
 
 bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_hardware,
-                                          ros::NodeHandle& root_node_handle,
-                                          ros::NodeHandle& /* controller_node_handle */) {
+                                          ros::NodeHandle& node_handle) {
   velocity_joint_interface_ = robot_hardware->get<hardware_interface::VelocityJointInterface>();
   if (velocity_joint_interface_ == nullptr) {
     ROS_ERROR(
@@ -22,7 +21,7 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
     return false;
   }
   std::vector<std::string> joint_names;
-  if (!root_node_handle.getParam("joint_names", joint_names)) {
+  if (!node_handle.getParam("joint_names", joint_names)) {
     ROS_ERROR("JointVelocityExampleController: Could not parse joint names");
   }
   if (joint_names.size() != 7) {
@@ -41,12 +40,6 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
     }
   }
 
-  std::string arm_id;
-  if (!root_node_handle.getParam("arm_id", arm_id)) {
-    ROS_ERROR("JointVelocityExampleController: Could not get parameter arm_id");
-    return false;
-  }
-
   auto state_interface = robot_hardware->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
     ROS_ERROR("JointVelocityExampleController: Could not get state interface from hardware");
@@ -54,7 +47,7 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
   }
 
   try {
-    auto state_handle = state_interface->getHandle(arm_id + "_robot");
+    auto state_handle = state_interface->getHandle("panda_robot");
 
     std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     for (size_t i = 0; i < q_start.size(); i++) {

@@ -115,7 +115,7 @@ Visualization Manager:
       Show Axes: false
       Show Descriptions: true
       Show Visual Aids: false
-      Update Topic: /panda/equilibrium_pose_marker/update
+      Update Topic: /equilibrium_pose_marker/update
       Value: true
   Enabled: true
   Global Options:
