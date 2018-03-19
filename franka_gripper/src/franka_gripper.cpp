@@ -52,8 +52,8 @@ void gripperCommandExecuteCallback(
     if (target_width >= state.width) {
       return gripper.move(target_width, default_speed);
     }
-    return gripper.grasp(target_width, default_speed, goal->command.max_effort,
-                         grasp_epsilon.inner, grasp_epsilon.outer);
+    return gripper.grasp(target_width, default_speed, goal->command.max_effort, grasp_epsilon.inner,
+                         grasp_epsilon.outer);
   };
 
   try {
