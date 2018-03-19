@@ -12,7 +12,7 @@
     * Add `load_gripper` argument (default: `true`) to `panda_moveit.launch`
     * Conditionally load controllers/SRDFs based on `load_gripper`
     * Add gripper controller configuration (requires running `franka_gripper_node`)
-  * Added `mimic` tag for gripper fingers to URDF
+  * Added `mimic` tag for gripper fingers to URDF and fixed velocity limits
 
 ## 0.3.0 - 2018-02-22
 
