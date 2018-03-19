@@ -35,20 +35,24 @@ void gripperCommandExecuteCallback(
     const control_msgs::GripperCommandGoalConstPtr& goal) {
   constexpr double kSamePositionThreshold = 1e-4;
 
-  std::function<bool()> gripper_command_handler = [=, &gripper]() {
+  auto gripper_command_handler = [goal, grasp_epsilon, default_speed, &gripper]() {
+    // HACK: As one gripper finger is <mimic>, MoveIt!'s trajectory execution manager
+    // only sends us the width of one finger. Multiply by 2 to get the intended width.
+    double target_width = 2 * goal->command.position;
+
     franka::GripperState state = gripper.readOnce();
-    if (goal->command.position > state.max_width || goal->command.position < 0.0) {
+    if (target_width > state.max_width || target_width < 0.0) {
       ROS_ERROR_STREAM("GripperServer: Commanding out of range width! max_width = "
-                       << state.max_width << " command = " << goal->command.position);
+                       << state.max_width << " command = " << target_width);
       return false;
     }
-    if (std::abs(goal->command.position - state.width) < kSamePositionThreshold) {
+    if (std::abs(target_width - state.width) < kSamePositionThreshold) {
       return true;
     }
-    if (goal->command.position >= state.width) {
-      return gripper.move(goal->command.position, default_speed);
+    if (target_width >= state.width) {
+      return gripper.move(target_width, default_speed);
     }
-    return gripper.grasp(goal->command.position, default_speed, goal->command.max_effort,
+    return gripper.grasp(target_width, default_speed, goal->command.max_effort,
                          grasp_epsilon.inner, grasp_epsilon.outer);
   };
 

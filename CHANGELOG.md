@@ -4,6 +4,7 @@
 
   * **BREAKING** Removed `arm_id` from launchfiles
   * **BREAKING** Changed namespace of `franka_control` controller manager
+  * **BREAKING** Changed behavior of `gripper_action` for compatibility with MoveIt
   * Changes in `panda_moveit_config`:
     * Updated joint limits from URDF
     * Removed `home` poses

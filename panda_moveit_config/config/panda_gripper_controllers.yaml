@@ -13,7 +13,6 @@ controller_list:
   - name: franka_gripper
     action_ns: gripper_action
     type: GripperCommand
-    parallel: true
     joints:
       - panda_finger_joint1
       - panda_finger_joint2
