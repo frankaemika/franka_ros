@@ -18,9 +18,7 @@ class CartesianVelocityExampleController : public controller_interface::MultiInt
                                                franka_hw::FrankaVelocityCartesianInterface,
                                                franka_hw::FrankaStateInterface> {
  public:
-  bool init(hardware_interface::RobotHW* robot_hardware,
-            ros::NodeHandle& root_node_handle,
-            ros::NodeHandle& /* controller_node_handle */) override;
+  bool init(hardware_interface::RobotHW* robot_hardware, ros::NodeHandle& node_handle) override;
   void update(const ros::Time&, const ros::Duration& period) override;
   void starting(const ros::Time&) override;
   void stopping(const ros::Time&) override;
