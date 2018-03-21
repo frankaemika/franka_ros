@@ -18,8 +18,8 @@ pose_pub = None
 position_limits = [[-0.6, 0.6], [-0.6, 0.6], [0.05, 0.9]]
 
 
-def publisherCallback(msg, arm_id):
-    marker_pose.header.frame_id = arm_id + "_link0"
+def publisherCallback(msg, link_name):
+    marker_pose.header.frame_id = link_name
     marker_pose.header.stamp = rospy.Time(0)
     pose_pub.publish(marker_pose)
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     state_sub = rospy.Subscriber("franka_state_controller/franka_states",
                                  FrankaState, franka_state_callback)
     listener = tf.TransformListener()
-    arm_id = rospy.get_param("arm_id")
+    link_name = rospy.get_param("~link_name")
 
     # Get initial pose for the interactive marker
     while not initial_pose_found:
@@ -69,10 +69,10 @@ if __name__ == "__main__":
     state_sub.unregister()
 
     pose_pub = rospy.Publisher(
-        "/equilibrium_pose", PoseStamped, queue_size=10)
+        "equilibrium_pose", PoseStamped, queue_size=10)
     server = InteractiveMarkerServer("equilibrium_pose_marker")
     int_marker = InteractiveMarker()
-    int_marker.header.frame_id = arm_id + "_link0"
+    int_marker.header.frame_id = link_name
     int_marker.scale = 0.3
     int_marker.name = "equilibrium_pose"
     int_marker.description = ("Equilibrium Pose\nBE CAREFUL! "
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     int_marker.pose = marker_pose.pose
     # run pose publisher
     rospy.Timer(rospy.Duration(0.005),
-                lambda msg: publisherCallback(msg, arm_id))
+                lambda msg: publisherCallback(msg, link_name))
 
     # insert a box
     control = InteractiveMarkerControl()

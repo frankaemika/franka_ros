@@ -21,8 +21,6 @@
   </node>
 
   <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-    <param if="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'" />
-    <param unless="$(arg load_gripper)" name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm.urdf.xacro'" />
     <param name="rate" value="$(arg publish_rate)" />
     <rosparam param="source_list">[robot_joint_state_publisher/joint_states, gripper_joint_state_publisher/joint_states]</rosparam>
   </node>

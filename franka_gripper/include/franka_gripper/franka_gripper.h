@@ -33,6 +33,10 @@ bool updateGripperState(const franka::Gripper& gripper, franka::GripperState* st
  * Wraps the execution of a gripper command action to catch exceptions and
  * report results
  *
+ * @note
+ * For compatibility with current MoveIt! behavior, the given goal's command position is
+ * multiplied by a factor of 2 before being commanded to the gripper!
+ *
  * @param[in] gripper A pointer to a franka gripper
  * @param[in] default_speed The default speed for a gripper action
  * @param[in] grasp_epsilon The epsilon window of the grasp.
