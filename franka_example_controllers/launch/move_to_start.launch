@@ -1,18 +1,13 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_ip" default="robot.franka.de" />
-  <arg name="arm_id" default="panda" />
-  <arg name="load_gripper" default="true" />
 
   <include file="$(find franka_control)/launch/franka_control.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
-    <arg name="arm_id" value="$(arg arm_id)" />
-    <arg name="load_gripper" value="$(arg load_gripper)" />
+    <arg name="load_gripper" value="false" />
   </include>
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
-    <arg name="arm_id" value="$(arg arm_id)" />
+    <arg name="load_gripper" value="false" />
   </include>
-  <group ns="$(arg arm_id)">
-    <node name="move_to_start" pkg="franka_example_controllers" type="move_to_start.py" output="screen" required="true" />
-  </group>
+  <node name="move_to_start" pkg="franka_example_controllers" type="move_to_start.py" output="screen" required="true" />
 </launch>

@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.4.0 - UNRELEASED
+
+  * **BREAKING** Removed `arm_id` from launchfiles
+  * **BREAKING** Changed namespace of `franka_control` controller manager
+  * **BREAKING** Changed behavior of `gripper_action` for compatibility with MoveIt
+  * Changes in `panda_moveit_config`:
+    * Updated joint limits from URDF
+    * Removed `home` poses
+    * Fixed fake execution
+    * Add `load_gripper` argument (default: `true`) to `panda_moveit.launch`
+    * Conditionally load controllers/SRDFs based on `load_gripper`
+    * Add gripper controller configuration (requires running `franka_gripper_node`)
+  * Added `mimic` tag for gripper fingers to URDF and fixed velocity limits
+
 ## 0.3.0 - 2018-02-22
 
 Requires `libfranka` >= 0.3.0

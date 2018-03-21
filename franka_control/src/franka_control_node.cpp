@@ -30,7 +30,8 @@ class ServiceContainer {
 };
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "franka_hw");
+  ros::init(argc, argv, "franka_control_node");
+  ros::NodeHandle public_node_handle;
   ros::NodeHandle node_handle("~");
 
   std::vector<std::string> joint_names_vector;
@@ -42,9 +43,16 @@ int main(int argc, char** argv) {
   std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
 
   std::string robot_ip;
-  node_handle.getParam("robot_ip", robot_ip);
+  if (!node_handle.getParam("robot_ip", robot_ip)) {
+    ROS_ERROR("Invalid or no robot_ip parameter provided");
+    return 1;
+  }
+
   std::string arm_id;
-  node_handle.getParam("arm_id", arm_id);
+  if (!node_handle.getParam("arm_id", arm_id)) {
+    ROS_ERROR("Invalid or no arm_id parameter provided");
+    return 1;
+  }
   franka::Robot robot(robot_ip);
 
   // Set default collision behavior
@@ -87,6 +95,7 @@ int main(int argc, char** argv) {
           robot.automaticErrorRecovery();
           has_error = false;
           recovery_action_server.setSucceeded();
+          ROS_INFO("Recovered from error");
         } catch (const franka::Exception& ex) {
           recovery_action_server.setAborted(franka_control::ErrorRecoveryResult(), ex.what());
         }
@@ -94,12 +103,12 @@ int main(int argc, char** argv) {
       false);
 
   franka::Model model = robot.loadModel();
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, node_handle, model);
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, public_node_handle, model);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
 
-  controller_manager::ControllerManager control_manager(&franka_control, node_handle);
+  controller_manager::ControllerManager control_manager(&franka_control, public_node_handle);
 
   recovery_action_server.start();
 

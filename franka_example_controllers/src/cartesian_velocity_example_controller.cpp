@@ -15,10 +15,9 @@
 namespace franka_example_controllers {
 
 bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot_hardware,
-                                              ros::NodeHandle& root_node_handle,
-                                              ros::NodeHandle& /* controller_node_handle */) {
+                                              ros::NodeHandle& node_handle) {
   std::string arm_id;
-  if (!root_node_handle.getParam("arm_id", arm_id)) {
+  if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR("CartesianVelocityExampleController: Could not get parameter arm_id");
     return false;
   }

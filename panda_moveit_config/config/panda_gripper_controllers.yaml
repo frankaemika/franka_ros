@@ -1,5 +1,7 @@
 controller_list:
-  - name: fake_panda_arm_controller
+  - name: position_joint_trajectory_controller
+    action_ns: follow_joint_trajectory
+    type: FollowJointTrajectory
     joints:
       - panda_joint1
       - panda_joint2
@@ -8,10 +10,9 @@ controller_list:
       - panda_joint5
       - panda_joint6
       - panda_joint7
-  - name: fake_hand_controller
+  - name: franka_gripper
+    action_ns: gripper_action
+    type: GripperCommand
     joints:
       - panda_finger_joint1
       - panda_finger_joint2
-initial:
-  - group: panda_arm_hand
-    pose: ready

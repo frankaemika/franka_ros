@@ -13,8 +13,7 @@
 namespace franka_example_controllers {
 
 bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_hardware,
-                                          ros::NodeHandle& root_node_handle,
-                                          ros::NodeHandle& /* controller_node_handle */) {
+                                          ros::NodeHandle& node_handle) {
   position_joint_interface_ = robot_hardware->get<hardware_interface::PositionJointInterface>();
   if (position_joint_interface_ == nullptr) {
     ROS_ERROR(
@@ -22,7 +21,7 @@ bool JointPositionExampleController::init(hardware_interface::RobotHW* robot_har
     return false;
   }
   std::vector<std::string> joint_names;
-  if (!root_node_handle.getParam("joint_names", joint_names)) {
+  if (!node_handle.getParam("joint_names", joint_names)) {
     ROS_ERROR("JointPositionExampleController: Could not parse joint names");
   }
   if (joint_names.size() != 7) {

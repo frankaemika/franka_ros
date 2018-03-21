@@ -151,7 +151,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     ROS_ERROR("FrankaStateController: Could not get Franka state interface from hardware");
     return false;
   }
-  if (!root_node_handle.getParam("arm_id", arm_id_)) {
+  if (!controller_node_handle.getParam("arm_id", arm_id_)) {
     ROS_ERROR("FrankaStateController: Could not get parameter arm_id");
     return false;
   }
@@ -163,7 +163,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                     << publish_rate << " [Hz].");
   }
 
-  if (!root_node_handle.getParam("joint_names", joint_names_) ||
+  if (!controller_node_handle.getParam("joint_names", joint_names_) ||
       joint_names_.size() != robot_state_.q.size()) {
     ROS_ERROR(
         "FrankaStateController: Invalid or no joint_names parameters provided, aborting "
