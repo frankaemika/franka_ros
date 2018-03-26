@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.4.0 - UNRELEASED
+## 0.4.0 - 2018-03-26
+
+Requires `libfranka` >= 0.3.0
 
   * **BREAKING** Removed `arm_id` and default `robot_ip` from launchfiles
   * **BREAKING** Changed namespace of `franka_control` controller manager
