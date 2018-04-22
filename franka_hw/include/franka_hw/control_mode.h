@@ -3,6 +3,7 @@
 #pragma once
 
 #include <ostream>
+#include <vector>
 
 namespace franka_hw {
 
