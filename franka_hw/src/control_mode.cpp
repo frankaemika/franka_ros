@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <vector>
 
 namespace franka_hw {
 
