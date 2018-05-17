@@ -174,8 +174,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
     robot_state_ = robot_state;
-    bool controller_active = controller_active_;
-    if (ros_callback && !ros_callback(robot_state, time_step) || !controller_active) {
+    if (!controller_active_ || ros_callback && !ros_callback(robot_state, time_step)) {
       return franka::MotionFinished(command);
     }
     return command;
