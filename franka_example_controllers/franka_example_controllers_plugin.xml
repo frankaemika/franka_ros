@@ -19,6 +19,11 @@
       A controller that executes a short motion based on cartesian velocities to demonstrate correct usage
     </description>
   </class>
+  <class name="franka_example_controllers/ElbowExampleController" type="franka_example_controllers::ElbowExampleController" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a short motion based on cartesian poses and elbow to demonstrate correct usage
+    </description>
+  </class>
   <class name="franka_example_controllers/ModelExampleController" type="franka_example_controllers::ModelExampleController" base_class_type="controller_interface::ControllerBase">
     <description>
       A controller that evaluates and prints the dynamic model of Franka

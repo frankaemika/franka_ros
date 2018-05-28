@@ -21,17 +21,35 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
    *
    * @param[in] franka_state_handle Robot state handle.
    * @param[in] command A reference to the Cartesian pose command wrapped by this handle.
+   * @param[in] elbow A reference to the elbow wrapped by this handle.
    */
   FrankaCartesianPoseHandle(const FrankaStateHandle& franka_state_handle,
-                            std::array<double, 16>& command)
-      : FrankaStateHandle(franka_state_handle), command_(&command) {}
+                            std::array<double, 16>& command,
+                            std::array<double, 2>& elbow)
+      : FrankaStateHandle(franka_state_handle), command_(&command), elbow_(&elbow) {}
 
   /**
    * Sets the given command.
    *
    * @param[in] command Command to set.
+   * @param[in] elbow Elbow to set. Default none.
    */
-  void setCommand(const std::array<double, 16>& command) noexcept { *command_ = command; }
+  void setCommand(const std::array<double, 16>& command) noexcept {
+    *command_ = command;
+    *elbow_ = {};
+  }
+
+  /**
+   * Sets the given command.
+   *
+   * @param[in] command Command to set.
+   * @param[in] elbow Elbow to set.
+   */
+  void setCommand(const std::array<double, 16>& command,
+                  const std::array<double, 2>& elbow) noexcept {
+    *command_ = command;
+    *elbow_ = elbow;
+  }
 
   /**
    * Gets the current command.
@@ -42,6 +60,7 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
 
  private:
   std::array<double, 16>* command_;
+  std::array<double, 2>* elbow_;
 };
 
 /**
@@ -61,10 +80,12 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
   /**
    * @param[in] franka_state_handle Robot state handle.
    * @param[in] command A reference to the Cartesian velocity command wrapped by this handle.
+   * @param[in] elbow A reference to the elbow wrapped by this handle.
    */
   FrankaCartesianVelocityHandle(const FrankaStateHandle& franka_state_handle,
-                                std::array<double, 6>& command)
-      : FrankaStateHandle(franka_state_handle), command_(&command) {}
+                                std::array<double, 6>& command,
+                                std::array<double, 2>& elbow)
+      : FrankaStateHandle(franka_state_handle), command_(&command), elbow_(&elbow) {}
 
   /**
    * Sets the given command.
@@ -72,6 +93,18 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
    * @param[in] command Command to set.
    */
   void setCommand(std::array<double, 6>& command) noexcept { *command_ = command; }
+
+  /**
+   * Sets the given command.
+   *
+   * @param[in] command Command to set.
+   * @param[in] elbow Elbow to set.
+   */
+  void setCommand(const std::array<double, 6>& command,
+                  const std::array<double, 2>& elbow) noexcept {
+    *command_ = command;
+    *elbow_ = elbow;
+  }
 
   /**
    * Gets the current command.
@@ -82,6 +115,7 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
 
  private:
   std::array<double, 6>* command_;
+  std::array<double, 2>* elbow_;
 };
 
 /**
