@@ -32,7 +32,6 @@ class FrankaCartesianPoseHandle : public FrankaStateHandle {
    * Sets the given command.
    *
    * @param[in] command Command to set.
-   * @param[in] elbow Elbow to set. Default none.
    */
   void setCommand(const std::array<double, 16>& command) noexcept {
     *command_ = command;
@@ -92,7 +91,10 @@ class FrankaCartesianVelocityHandle : public FrankaStateHandle {
    *
    * @param[in] command Command to set.
    */
-  void setCommand(std::array<double, 6>& command) noexcept { *command_ = command; }
+  void setCommand(std::array<double, 6>& command) noexcept {
+    *command_ = command;
+    *elbow_ = {};
+  }
 
   /**
    * Sets the given command.
