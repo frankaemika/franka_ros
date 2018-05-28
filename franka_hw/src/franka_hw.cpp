@@ -100,11 +100,11 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
 
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
   franka_state_interface_.registerHandle(franka_state_handle);
-  FrankaCartesianPoseHandle franka_cartesian_pose_handle(franka_state_handle,
-                                                         pose_cartesian_command_.O_T_EE);
+  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+      franka_state_handle, pose_cartesian_command_.O_T_EE, pose_cartesian_command_.elbow);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
   FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-      franka_state_handle, velocity_cartesian_command_.O_dP_EE);
+      franka_state_handle, velocity_cartesian_command_.O_dP_EE, velocity_cartesian_command_.elbow);
   franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
 
   registerInterface(&franka_state_interface_);

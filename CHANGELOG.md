@@ -5,6 +5,7 @@
 Requires `libfranka` >= 0.3.0
 
   * Added some missing includes to `franka_hw`
+  * Allow elbow commanding in Cartesian pose and Cartesian velocity interface.
 
 ## 0.4.0 - 2018-03-26
 
