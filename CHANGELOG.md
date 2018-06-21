@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## 0.4.1 - UNRELEASED
+## 0.4.1 - 2018-06-21
 
 Requires `libfranka` >= 0.3.0
 
   * Added some missing includes to `franka_hw`
-  * Allow elbow commanding in Cartesian pose and Cartesian velocity interface.
+  * Add support for commanding elbow in Cartesian pose and Cartesian velocity interfaces
 
 ## 0.4.0 - 2018-03-26
 
