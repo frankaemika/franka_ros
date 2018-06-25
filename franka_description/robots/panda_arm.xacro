@@ -38,7 +38,7 @@
       <parent link="${arm_id}_link0"/>
       <child link="${arm_id}_link1"/>
       <axis xyz="0 0 1"/>
-      <limit effort="87" lower="-2.9671" upper="2.9671" velocity="2.3925"/>
+      <limit effort="87" lower="-2.9671" upper="2.9671" velocity="2.1750"/>
     </joint>
     <link name="${arm_id}_link2">
       <visual>
@@ -58,7 +58,7 @@
       <parent link="${arm_id}_link1"/>
       <child link="${arm_id}_link2"/>
       <axis xyz="0 0 1"/>
-      <limit effort="87" lower="-1.8326" upper="1.8326" velocity="2.3925"/>
+      <limit effort="87" lower="-1.8326" upper="1.8326" velocity="2.1750"/>
     </joint>
     <link name="${arm_id}_link3">
       <visual>
@@ -78,7 +78,7 @@
       <parent link="${arm_id}_link2"/>
       <child link="${arm_id}_link3"/>
       <axis xyz="0 0 1"/>
-      <limit effort="87" lower="-2.9671" upper="2.9671" velocity="2.3925"/>
+      <limit effort="87" lower="-2.9671" upper="2.9671" velocity="2.1750"/>
     </joint>
     <link name="${arm_id}_link4">
       <visual>
@@ -93,12 +93,12 @@
       </collision>
     </link>
     <joint name="${arm_id}_joint4" type="revolute">
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="0.0175"/>
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
       <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0"/>
       <parent link="${arm_id}_link3"/>
       <child link="${arm_id}_link4"/>
       <axis xyz="0 0 1"/>
-      <limit effort="87" lower="-3.1416" upper="0.0873" velocity="2.3925"/>
+      <limit effort="87" lower="-3.1416" upper="0.0" velocity="2.1750"/>
     </joint>
     <link name="${arm_id}_link5">
       <visual>
@@ -118,7 +118,7 @@
       <parent link="${arm_id}_link4"/>
       <child link="${arm_id}_link5"/>
       <axis xyz="0 0 1"/>
-      <limit effort="12" lower="-2.9671" upper="2.9671" velocity="2.8710"/>
+      <limit effort="12" lower="-2.9671" upper="2.9671" velocity="2.6100"/>
     </joint>
     <link name="${arm_id}_link6">
       <visual>
@@ -138,7 +138,7 @@
       <parent link="${arm_id}_link5"/>
       <child link="${arm_id}_link6"/>
       <axis xyz="0 0 1"/>
-      <limit effort="12" lower="-0.0873" upper="3.8223" velocity="2.8710"/>
+      <limit effort="12" lower="-0.0873" upper="3.8223" velocity="2.6100"/>
     </joint>
     <link name="${arm_id}_link7">
       <visual>
@@ -158,7 +158,7 @@
       <parent link="${arm_id}_link6"/>
       <child link="${arm_id}_link7"/>
       <axis xyz="0 0 1"/>
-      <limit effort="12" lower="-2.9671" upper="2.9671" velocity="2.8710"/>
+      <limit effort="12" lower="-2.9671" upper="2.9671" velocity="2.6100"/>
     </joint>
     <link name="${arm_id}_link8"/>
     <joint name="${arm_id}_joint8" type="fixed">
