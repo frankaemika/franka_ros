@@ -98,7 +98,7 @@
       <parent link="${arm_id}_link3"/>
       <child link="${arm_id}_link4"/>
       <axis xyz="0 0 1"/>
-      <limit effort="87" lower="-3.1416" upper="0.0873" velocity="2.1750"/>
+      <limit effort="87" lower="-3.1416" upper="0.0" velocity="2.1750"/>
     </joint>
     <link name="${arm_id}_link5">
       <visual>
