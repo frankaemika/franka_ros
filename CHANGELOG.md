@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.5.0 - 2018-06-28
+
+Requires `libfranka` >= 0.4.0
+
+  * **BREAKING** Updated URDF:
+    * Adjusted maximum joint velocity
+    * Updated axis 4 hard and soft limits
+
 ## 0.4.1 - 2018-06-21
 
 Requires `libfranka` >= 0.3.0
