@@ -16,9 +16,15 @@ constexpr double FrankaHW::kMaximumJointJerk;
 
 FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    const std::string& arm_id,
+                   franka::ControllerMode& internal_controller,
+                   const std::array<bool, 5>& limit_rate,
+                   const std::array<double, 5>& cutoff_freq,
                    const ros::NodeHandle& node_handle)
     : joint_names_(joint_names),
       arm_id_(arm_id),
+      internal_controller_(internal_controller),
+      limit_rate_(limit_rate),
+      cutoff_freq_(cutoff_freq),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -118,9 +124,12 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
 
 FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    const std::string& arm_id,
+                   franka::ControllerMode& internal_controller,
+                   const std::array<bool, 5>& limit_rate,
+                   const std::array<double, 5>& cutoff_freq,
                    const ros::NodeHandle& node_handle,
                    franka::Model& model)
-    : FrankaHW(joint_names, arm_id, node_handle) {
+    : FrankaHW(joint_names, arm_id, internal_controller, limit_rate, cutoff_freq, node_handle) {
   franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", model, robot_state_);
 
   franka_model_interface_.registerHandle(model_handle);
@@ -266,31 +275,31 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
     case ControlMode::JointTorque:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2));
+                                std::cref(effort_joint_command_), ros_callback, _1, _2), limit_rate_[4], cutoff_freq_[4]);
       };
       break;
     case ControlMode::JointPosition:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                                std::cref(position_joint_command_), ros_callback, _1, _2));
+                                std::cref(position_joint_command_), ros_callback, _1, _2), internal_controller_, limit_rate_[0], cutoff_freq_[0]);
       };
       break;
     case ControlMode::JointVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                                std::cref(velocity_joint_command_), ros_callback, _1, _2));
+                                std::cref(velocity_joint_command_), ros_callback, _1, _2), internal_controller_, limit_rate_[1], cutoff_freq_[1]);
       };
       break;
     case ControlMode::CartesianPose:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                                std::cref(pose_cartesian_command_), ros_callback, _1, _2));
+                                std::cref(pose_cartesian_command_), ros_callback, _1, _2), internal_controller_, limit_rate_[2], cutoff_freq_[2]);
       };
       break;
     case ControlMode::CartesianVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2));
+                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2), internal_controller_, limit_rate_[3], cutoff_freq_[3]);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointPosition):
@@ -298,7 +307,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                                std::cref(position_joint_command_), ros_callback, _1, _2));
+                                std::cref(position_joint_command_), ros_callback, _1, _2), limit_rate_[4], cutoff_freq_[4]);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointVelocity):
@@ -306,7 +315,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                                std::cref(velocity_joint_command_), ros_callback, _1, _2));
+                                std::cref(velocity_joint_command_), ros_callback, _1, _2), limit_rate_[4], cutoff_freq_[4]);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianPose):
@@ -314,7 +323,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                                std::cref(pose_cartesian_command_), ros_callback, _1, _2));
+                                std::cref(pose_cartesian_command_), ros_callback, _1, _2), limit_rate_[4], cutoff_freq_[4]);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
@@ -322,7 +331,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2));
+                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2), limit_rate_[4], cutoff_freq_[4]);
       };
       break;
     default:

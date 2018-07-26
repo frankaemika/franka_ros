@@ -48,10 +48,16 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
+   * @param[in] limit_rate An array of booleans indicating if the rate limiter should be used or not for each interface
+   * @param[in] internal_controller Internal controller to be used for control loops using only motion generation
+   * @param[in] cutoff_freq An array of doubles indicating the cutoff frequency for the lowpass applied in each interface
    * @param[in] node_handle A node handle to get parameters from.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
+           franka::ControllerMode& internal_controller,
+           const std::array<bool, 5>& limit_rate,
+           const std::array<double, 5>& cutoff_freq,
            const ros::NodeHandle& node_handle);
 
   /**
@@ -60,10 +66,16 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
    * @param[in] node_handle A node handle to get parameters from.
+   * @param[in] limit_rate An array of booleans indicating if the rate limiter should be used or not for each interface
+   * @param[in] internal_controller Internal controller to be used for control loops using only motion generation
+   * @param[in] cutoff_freq An array of doubles indicating the cutoff frequency for the lowpass applied in each interface
    * @param[in] model Robot model.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
+           franka::ControllerMode& internal_controller,
+           const std::array<bool, 5>& limit_rate,
+           const std::array<double, 5>& cutoff_freq,
            const ros::NodeHandle& node_handle,
            franka::Model& model);
 
@@ -197,6 +209,9 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   std::array<std::string, 7> joint_names_;
   const std::string arm_id_;
+  franka::ControllerMode internal_controller_;
+  std::array<bool, 5> limit_rate_;
+  std::array<double, 5> cutoff_freq_;
 
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
