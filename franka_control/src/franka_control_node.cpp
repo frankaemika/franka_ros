@@ -95,12 +95,6 @@ int main(int argc, char** argv) {
       {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
       {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-  robot.setCollisionBehavior(
-      {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}}, {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-      {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}}, {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-      {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}}, {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-      {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}}, {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}});
-
   std::atomic_bool has_error(false);
 
   using std::placeholders::_1;
@@ -142,7 +136,8 @@ int main(int argc, char** argv) {
       false);
 
   franka::Model model = robot.loadModel();
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting, cutoff_freq, public_node_handle, model);
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting,
+                                     cutoff_freq, public_node_handle, model);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
