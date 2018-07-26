@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::vector<bool> cutoff_freq_vector;
+  std::vector<double> cutoff_freq_vector;
   if (!node_handle.getParam("cutoff_freq", cutoff_freq_vector) || cutoff_freq_vector.size() != 5) {
     ROS_ERROR("Invalid or no cutoff_freq parameters provided");
     return 1;
