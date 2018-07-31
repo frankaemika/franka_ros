@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
   } else if (internal_controller_name == "cartesian_impedance") {
     internal_controller = franka::ControllerMode::kCartesianImpedance;
   } else {
-    ROS_ERROR("Invalide internal_controller parameter provided");
+    ROS_ERROR("Invalid internal_controller parameter provided");
     return 1;
   }
 
