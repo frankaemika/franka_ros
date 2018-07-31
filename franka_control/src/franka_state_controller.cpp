@@ -140,6 +140,7 @@ FrankaStateController::FrankaStateController()
       publisher_transforms_(),
       publisher_franka_states_(),
       publisher_joint_states_(),
+      publisher_joint_states_desired_(),
       publisher_external_wrench_(),
       trigger_publish_(30.0) {}
 
@@ -182,6 +183,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   publisher_transforms_.init(root_node_handle, "/tf", 1);
   publisher_franka_states_.init(controller_node_handle, "franka_states", 1);
   publisher_joint_states_.init(controller_node_handle, "joint_states", 1);
+  publisher_joint_states_desired_.init(controller_node_handle, "joint_states_desired", 1);
   publisher_external_wrench_.init(controller_node_handle, "F_ext", 1);
 
   {
@@ -191,6 +193,14 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
     publisher_joint_states_.msg_.velocity.resize(robot_state_.dq.size());
     publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
+  }
+  {
+    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> > lock(
+        publisher_joint_states_desired_);
+    publisher_joint_states_desired_.msg_.name.resize(joint_names_.size());
+    publisher_joint_states_desired_.msg_.position.resize(robot_state_.q_d.size());
+    publisher_joint_states_desired_.msg_.velocity.resize(robot_state_.dq_d.size());
+    publisher_joint_states_desired_.msg_.effort.resize(robot_state_.tau_J_d.size());
   }
   {
     std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> > lock(
@@ -351,6 +361,21 @@ void FrankaStateController::publishJointStates(const ros::Time& time) {
     publisher_joint_states_.msg_.header.stamp = time;
     publisher_joint_states_.msg_.header.seq = sequence_number_;
     publisher_joint_states_.unlockAndPublish();
+  }
+  if (publisher_joint_states_desired_.trylock()) {
+    static_assert(sizeof(robot_state_.q_d) == sizeof(robot_state_.dq_d),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q_d) == sizeof(robot_state_.tau_J_d),
+                  "Robot state joint members do not have same size");
+    for (size_t i = 0; i < robot_state_.q_d.size(); i++) {
+      publisher_joint_states_desired_.msg_.name[i] = joint_names_[i];
+      publisher_joint_states_desired_.msg_.position[i] = robot_state_.q_d[i];
+      publisher_joint_states_desired_.msg_.velocity[i] = robot_state_.dq_d[i];
+      publisher_joint_states_desired_.msg_.effort[i] = robot_state_.tau_J_d[i];
+    }
+    publisher_joint_states_desired_.msg_.header.stamp = time;
+    publisher_joint_states_desired_.msg_.header.seq = sequence_number_;
+    publisher_joint_states_desired_.unlockAndPublish();
   }
 }
 
