@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.6.0 - UNRELEASED
+
+Requires `libfranka` >= 0.6.0
+
+  * Fixed joint velocity and acceleration limits for MoveIt
+  * Fixed limits in `franka_hw`
+
 ## 0.5.0 - 2018-06-28
 
 Requires `libfranka` >= 0.4.0
