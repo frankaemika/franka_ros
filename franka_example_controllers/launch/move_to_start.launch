@@ -5,7 +5,6 @@
   <include file="$(find franka_control)/launch/franka_control.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
     <arg name="load_gripper" value="false" />
-    <arg name="publish_desired_values" value="true" />
   </include>
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
     <arg name="load_gripper" value="false" />

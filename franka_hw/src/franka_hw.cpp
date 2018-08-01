@@ -29,7 +29,7 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
       pose_cartesian_command_(
           {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
-  for (size_t i = 0; i < joint_names_.size(); ++i) {
+  for (size_t i = 0; i < joint_names_.size(); i++) {
     hardware_interface::JointStateHandle joint_handle_q_d(
         joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq_d[i], &robot_state_.tau_J[i]);
 
@@ -59,8 +59,8 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
       joint_limits_interface::SoftJointLimits soft_limits;
       joint_limits_interface::JointLimits joint_limits;
 
-      for (auto joint_name : joint_names_) {
-        int joint_index(std::stoi(joint_name.substr(joint_name.size() - 1)) - 1);
+      for (size_t i = 0; i < joint_names_.size(); i++) {
+        const std::string& joint_name = joint_names_[i];
         auto urdf_joint = urdf_model.getJoint(joint_name);
         if (!urdf_joint) {
           ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name << " from urdf");
@@ -74,9 +74,9 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
 
         if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
           if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
-            joint_limits.max_acceleration = franka::kMaxJointAcceleration[joint_index];
+            joint_limits.max_acceleration = franka::kMaxJointAcceleration[i];
             joint_limits.has_acceleration_limits = true;
-            joint_limits.max_jerk = franka::kMaxJointJerk[joint_index];
+            joint_limits.max_jerk = franka::kMaxJointJerk[i];
             joint_limits.has_jerk_limits = true;
             joint_limits_interface::PositionJointSoftLimitsHandle position_limit_handle(
                 position_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
