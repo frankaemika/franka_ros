@@ -21,7 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_msgs
 )
 
-find_package(Franka 0.4.0 REQUIRED)
+find_package(Franka 0.5.0 REQUIRED)
 
 add_service_files(FILES
   SetCartesianImpedance.srv

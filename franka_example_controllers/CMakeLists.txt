@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(Franka 0.3.0 REQUIRED)
+find_package(Franka 0.5.0 REQUIRED)
 
 add_message_files(FILES
   JointTorqueComparison.msg

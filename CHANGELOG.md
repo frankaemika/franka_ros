@@ -2,7 +2,7 @@
 
 ## 0.6.0 - UNRELEASED
 
-Requires `libfranka` >= 0.6.0
+Requires `libfranka` >= 0.5.0
 
   * **BREAKING** Updated joint limits in URDF
   * **BREAKING** Fixed velocity, acceleration and jerk limits in `franka_hw`
