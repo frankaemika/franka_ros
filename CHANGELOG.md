@@ -6,6 +6,7 @@ Requires `libfranka` >= 0.5.0
 
   * **BREAKING** Updated joint limits in URDF
   * **BREAKING** Fixed velocity, acceleration and jerk limits in `franka_hw`
+  * **BREAKING** Start `franka_gripper_node` when giving `load_gripper:=true` to `franka_control.launch`
   * Allow to configure rate limiting, filtering and internal controller in `franka_control_node`
   * **BREAKING** Enabled limiting and low-pass filtering by default (`franka_control_node.yaml`)
   * Publish desired joint state in `/joint_state_desired`

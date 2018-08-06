@@ -2,20 +2,16 @@
 <launch>
   <arg name="robot_ip" />
   <arg name="load_gripper" default="true" />
+  <arg name="launch_rviz" default="true" />
 
   <include file="$(find franka_control)/launch/franka_control.launch" >
     <arg name="robot_ip" value="$(arg robot_ip)" />
     <arg name="load_gripper" value="$(arg load_gripper)" />
   </include>
 
-  <include if="$(arg load_gripper)" file="$(find franka_gripper)/launch/franka_gripper.launch" >
-    <arg name="robot_ip" value="$(arg robot_ip)" />
-  </include>
-
   <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
     <arg name="load_gripper" value="$(arg load_gripper)" />
   </include>
 
-  <include file="$(find panda_moveit_config)/launch/moveit_rviz.launch">
-  </include>
+  <include file="$(find panda_moveit_config)/launch/moveit_rviz.launch" if="$(arg launch_rviz)" />
 </launch>
