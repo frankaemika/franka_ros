@@ -8,6 +8,7 @@ Requires `libfranka` >= 0.5.0
   * **BREAKING** Fixed velocity, acceleration and jerk limits in `franka_hw`
   * **BREAKING** Start `franka_gripper_node` when giving `load_gripper:=true` to `franka_control.launch`
   * Allow to configure rate limiting, filtering and internal controller in `franka_control_node`
+  * **BREAKING** `FrankaHW::FrankaHW` takes additional parameters.
   * **BREAKING** Enabled limiting and low-pass filtering by default (`franka_control_node.yaml`)
   * Publish desired joint state in `/joint_state_desired`
   * Removed `effort_joint_trajectory_controller` from `default_controllers.yaml`
