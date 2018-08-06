@@ -13,11 +13,12 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>libfranka</depend>
   <depend>controller_interface</depend>
   <depend>hardware_interface</depend>
   <depend>joint_limits_interface</depend>
+  <depend>libfranka</depend>
   <depend>roscpp</depend>
+  <depend>urdf</depend>
 
   <test_depend>franka_description</test_depend>
   <test_depend>gtest</test_depend>

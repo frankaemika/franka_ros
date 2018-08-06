@@ -6,7 +6,6 @@
 
 #include <franka/rate_limiting.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
-#include <urdf/model.h>
 
 #include "resource_helpers.h"
 
@@ -14,15 +13,15 @@ namespace franka_hw {
 
 FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    const std::string& arm_id,
-                   franka::ControllerMode internal_controller,
-                   const std::array<bool, 5>& limit_rate,
-                   const std::array<double, 5>& cutoff_freq,
-                   const ros::NodeHandle& node_handle)
+                   franka::ControllerMode& internal_controller,
+                   const bool& limit_rate,
+                   const double& cutoff_frequency,
+                   const urdf::Model& urdf_model)
     : joint_names_(joint_names),
       arm_id_(arm_id),
       internal_controller_(internal_controller),
       limit_rate_(limit_rate),
-      cutoff_freq_(cutoff_freq),
+      cutoff_frequency_(cutoff_frequency),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -51,56 +50,47 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
     effort_joint_interface_.registerHandle(effort_joint_handle);
   }
 
-  if (node_handle.hasParam("robot_description")) {
-    urdf::Model urdf_model;
-    if (!urdf_model.initParamWithNodeHandle("robot_description", node_handle)) {
-      ROS_ERROR("FrankaHW: Could not initialize urdf model from robot_description");
-    } else {
-      joint_limits_interface::SoftJointLimits soft_limits;
-      joint_limits_interface::JointLimits joint_limits;
+  joint_limits_interface::SoftJointLimits soft_limits;
+  joint_limits_interface::JointLimits joint_limits;
 
-      for (size_t i = 0; i < joint_names_.size(); i++) {
-        const std::string& joint_name = joint_names_[i];
-        auto urdf_joint = urdf_model.getJoint(joint_name);
-        if (!urdf_joint) {
-          ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name << " from urdf");
-        }
-        if (!urdf_joint->safety) {
-          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
-        }
-        if (!urdf_joint->limits) {
-          ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
-        }
-
-        if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
-          if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
-            joint_limits.max_acceleration = franka::kMaxJointAcceleration[i];
-            joint_limits.has_acceleration_limits = true;
-            joint_limits.max_jerk = franka::kMaxJointJerk[i];
-            joint_limits.has_jerk_limits = true;
-            joint_limits_interface::PositionJointSoftLimitsHandle position_limit_handle(
-                position_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-            position_joint_limit_interface_.registerHandle(position_limit_handle);
-
-            joint_limits_interface::VelocityJointSoftLimitsHandle velocity_limit_handle(
-                velocity_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-            velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
-
-            joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
-                effort_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-            effort_joint_limit_interface_.registerHandle(effort_limit_handle);
-          } else {
-            ROS_ERROR_STREAM("FrankaHW: Could not parse joint limit for joint "
-                             << joint_name << " for joint limit interfaces");
-          }
-        } else {
-          ROS_ERROR_STREAM("FrankaHW: Could not parse soft joint limit for joint "
-                           << joint_name << " for joint limit interfaces");
-        }
-      }
+  for (size_t i = 0; i < joint_names_.size(); i++) {
+    const std::string& joint_name = joint_names_[i];
+    auto urdf_joint = urdf_model.getJoint(joint_name);
+    if (!urdf_joint) {
+      ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name << " from urdf");
     }
-  } else {
-    ROS_WARN("FrankaHW: No parameter robot_description found to set joint limits!");
+    if (!urdf_joint->safety) {
+      ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
+    }
+    if (!urdf_joint->limits) {
+      ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
+    }
+
+    if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
+      if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
+        joint_limits.max_acceleration = franka::kMaxJointAcceleration[i];
+        joint_limits.has_acceleration_limits = true;
+        joint_limits.max_jerk = franka::kMaxJointJerk[i];
+        joint_limits.has_jerk_limits = true;
+        joint_limits_interface::PositionJointSoftLimitsHandle position_limit_handle(
+            position_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
+        position_joint_limit_interface_.registerHandle(position_limit_handle);
+
+        joint_limits_interface::VelocityJointSoftLimitsHandle velocity_limit_handle(
+            velocity_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
+        velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
+
+        joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
+            effort_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
+        effort_joint_limit_interface_.registerHandle(effort_limit_handle);
+      } else {
+        ROS_ERROR_STREAM("FrankaHW: Could not parse joint limit for joint "
+                         << joint_name << " for joint limit interfaces");
+      }
+    } else {
+      ROS_ERROR_STREAM("FrankaHW: Could not parse soft joint limit for joint "
+                       << joint_name << " for joint limit interfaces");
+    }
   }
 
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
@@ -123,12 +113,12 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
 
 FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    const std::string& arm_id,
-                   franka::ControllerMode internal_controller,
-                   const std::array<bool, 5>& limit_rate,
-                   const std::array<double, 5>& cutoff_freq,
-                   const ros::NodeHandle& node_handle,
+                   franka::ControllerMode& internal_controller,
+                   const bool& limit_rate,
+                   const double& cutoff_frequency,
+                   const urdf::Model& urdf_model,
                    franka::Model& model)
-    : FrankaHW(joint_names, arm_id, internal_controller, limit_rate, cutoff_freq, node_handle) {
+    : FrankaHW(joint_names, arm_id, internal_controller, limit_rate, cutoff_frequency, urdf_model) {
   franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", model, robot_state_);
 
   franka_model_interface_.registerHandle(model_handle);
@@ -275,35 +265,35 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      limit_rate_[4], cutoff_freq_[4]);
+                      limit_rate_, cutoff_frequency_);
       };
       break;
     case ControlMode::JointPosition:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                                 std::cref(position_joint_command_), ros_callback, _1, _2),
-                      internal_controller_, limit_rate_[0], cutoff_freq_[0]);
+                      internal_controller_, limit_rate_, cutoff_frequency_);
       };
       break;
     case ControlMode::JointVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                                 std::cref(velocity_joint_command_), ros_callback, _1, _2),
-                      internal_controller_, limit_rate_[1], cutoff_freq_[1]);
+                      internal_controller_, limit_rate_, cutoff_frequency_);
       };
       break;
     case ControlMode::CartesianPose:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                                 std::cref(pose_cartesian_command_), ros_callback, _1, _2),
-                      internal_controller_, limit_rate_[2], cutoff_freq_[2]);
+                      internal_controller_, limit_rate_, cutoff_frequency_);
       };
       break;
     case ControlMode::CartesianVelocity:
       run_function_ = [this](franka::Robot& robot, Callback ros_callback) {
         robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
                                 std::cref(velocity_cartesian_command_), ros_callback, _1, _2),
-                      internal_controller_, limit_rate_[3], cutoff_freq_[3]);
+                      internal_controller_, limit_rate_, cutoff_frequency_);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointPosition):
@@ -312,7 +302,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
                                 std::cref(position_joint_command_), ros_callback, _1, _2),
-                      limit_rate_[4], cutoff_freq_[4]);
+                      limit_rate_, cutoff_frequency_);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::JointVelocity):
@@ -321,7 +311,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
                                 std::cref(velocity_joint_command_), ros_callback, _1, _2),
-                      limit_rate_[4], cutoff_freq_[4]);
+                      limit_rate_, cutoff_frequency_);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianPose):
@@ -330,7 +320,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
                                 std::cref(pose_cartesian_command_), ros_callback, _1, _2),
-                      limit_rate_[4], cutoff_freq_[4]);
+                      limit_rate_, cutoff_frequency_);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
@@ -339,7 +329,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                                 std::cref(effort_joint_command_), ros_callback, _1, _2),
                       std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
                                 std::cref(velocity_cartesian_command_), ros_callback, _1, _2),
-                      limit_rate_[4], cutoff_freq_[4]);
+                      limit_rate_, cutoff_frequency_);
       };
       break;
     default:
@@ -349,6 +339,10 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
 
   if (current_control_mode_ != requested_control_mode) {
     ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to " << requested_control_mode);
+    ROS_INFO_STREAM_COND(requested_control_mode != ControlMode::None,
+                         "Used parameters: "
+                             << "limit_rate=" << limit_rate_
+                             << ", cutoff_frequency=" << cutoff_frequency_);
     current_control_mode_ = requested_control_mode;
 
     controller_active_ = false;

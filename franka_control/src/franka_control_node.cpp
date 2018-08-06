@@ -40,15 +40,18 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::vector<bool> limit_rate_vector;
-  if (!node_handle.getParam("rate_limiting", limit_rate_vector) || limit_rate_vector.size() != 5) {
-    ROS_ERROR("Invalid or no rate_limiting parameters provided");
+  std::array<std::string, 7> joint_names;
+  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
+
+  bool rate_limiting;
+  if (!node_handle.getParamCached("rate_limiting", rate_limiting)) {
+    ROS_ERROR("Invalid or no rate_limiting parameter provided");
     return 1;
   }
 
-  std::vector<double> cutoff_freq_vector;
-  if (!node_handle.getParam("cutoff_freq", cutoff_freq_vector) || cutoff_freq_vector.size() != 5) {
-    ROS_ERROR("Invalid or no cutoff_freq parameters provided");
+  double cutoff_frequency;
+  if (!node_handle.getParamCached("cutoff_frequency", cutoff_frequency)) {
+    ROS_ERROR("Invalid or no cutoff_frequency parameter provided");
     return 1;
   }
 
@@ -59,19 +62,18 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::array<std::string, 7> joint_names;
-  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
-  std::array<bool, 5> rate_limiting;
-  std::copy(limit_rate_vector.cbegin(), limit_rate_vector.cend(), rate_limiting.begin());
-  std::array<double, 5> cutoff_freq;
-  std::copy(cutoff_freq_vector.cbegin(), cutoff_freq_vector.cend(), cutoff_freq.begin());
-
   if (internal_controller_name == "joint_impedance") {
     internal_controller = franka::ControllerMode::kJointImpedance;
   } else if (internal_controller_name == "cartesian_impedance") {
     internal_controller = franka::ControllerMode::kCartesianImpedance;
   } else {
     ROS_ERROR("Invalid internal_controller parameter provided");
+    return 1;
+  }
+
+  urdf::Model urdf_model;
+  if (!urdf_model.initParamWithNodeHandle("robot_description", public_node_handle)) {
+    ROS_ERROR("Could not initialize URDF model from robot_description");
     return 1;
   }
 
@@ -137,7 +139,7 @@ int main(int argc, char** argv) {
 
   franka::Model model = robot.loadModel();
   franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting,
-                                     cutoff_freq, public_node_handle, model);
+                                     cutoff_frequency, urdf_model, model);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
@@ -156,6 +158,10 @@ int main(int argc, char** argv) {
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
       franka_control.update(robot.readOnce());
+
+      // Update parameters for possible controller switch
+      node_handle.getParamCached("rate_limiting", rate_limiting);
+      node_handle.getParamCached("cutoff_frequency", cutoff_frequency);
 
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);
