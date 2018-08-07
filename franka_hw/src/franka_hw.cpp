@@ -252,8 +252,8 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
   ControlMode stop_control_mode = getControlMode(arm_id_, stop_arm_claim_map);
 
   ControlMode requested_control_mode = current_control_mode_;
-  requested_control_mode |= start_control_mode;
   requested_control_mode &= ~stop_control_mode;
+  requested_control_mode |= start_control_mode;
 
   using std::placeholders::_1;
   using std::placeholders::_2;
