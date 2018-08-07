@@ -36,7 +36,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @param[in] urdf_model A URDF model to initialize joint limits from.
    * @param[in] get_limit_rate Getter that should return true if the rate limiter
    * should be used, false otherwise. Defaults to true.
-   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the lowpass filter.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the low-pass filter.
    * Defaults to franka::kDefaultCutoffFrequency.
    * @param[in] get_internal_controller Getter for an internal controller to
    * be used for control loops using only motion generation. Defaults to joint impedance.
@@ -59,7 +59,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @param[in] model Robot model.
    * @param[in] get_limit_rate Getter that should return true if the rate limiter
    * should be used, false otherwise. Defaults to true.
-   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the lowpass filter.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the low-pass filter.
    * Defaults to franka::kDefaultCutoffFrequency.
    * @param[in] get_internal_controller Getter for an internal controller to
    * be used for control loops using only motion generation. Defaults to joint impedance.
