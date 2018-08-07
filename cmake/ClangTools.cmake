@@ -46,7 +46,7 @@ function(add_tidy_target _target)
   cmake_parse_arguments(ARG "" "" "FILES;DEPENDS" ${ARGN})
 
   add_custom_target(tidy-${_target}
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${ARG_FILES}
+    COMMAND ${CLANG_TIDY_PROG} -fix -p=${CMAKE_BINARY_DIR} ${ARG_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
     DEPENDS ${ARG_DEPENDS}
     COMMENT "Running clang-tidy for ${_target}"
