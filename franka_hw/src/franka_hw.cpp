@@ -71,12 +71,15 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
     auto urdf_joint = urdf_model.getJoint(joint_name);
     if (!urdf_joint) {
       ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name << " from urdf");
+      continue;
     }
     if (!urdf_joint->safety) {
       ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
+      continue;
     }
     if (!urdf_joint->limits) {
       ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
+      continue;
     }
 
     if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
