@@ -3,6 +3,7 @@
 #include <franka_example_controllers/elbow_example_controller.h>
 
 #include <cmath>
+#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -29,8 +30,8 @@ bool ElbowExampleController::init(hardware_interface::RobotHW* robot_hardware,
   }
 
   try {
-    cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
-        cartesian_pose_interface_->getHandle(arm_id + "_robot")));
+    cartesian_pose_handle_ = std::make_unique<franka_hw::FrankaCartesianPoseHandle>(
+        cartesian_pose_interface_->getHandle(arm_id + "_robot"));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM("ElbowExampleController: Exception getting Cartesian handle: " << e.what());
     return false;

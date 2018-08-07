@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <ostream>
+#include <utility>
 
 #include <franka/rate_limiting.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
@@ -32,9 +33,9 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
                    std::function<franka::ControllerMode()> get_internal_controller)
     : joint_names_(joint_names),
       arm_id_(arm_id),
-      get_internal_controller_(get_internal_controller),
-      get_limit_rate_(get_limit_rate),
-      get_cutoff_frequency_(get_cutoff_frequency),
+      get_internal_controller_(std::move(get_internal_controller)),
+      get_limit_rate_(std::move(get_limit_rate)),
+      get_cutoff_frequency_(std::move(get_cutoff_frequency)),
       position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -137,9 +138,9 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
     : FrankaHW(joint_names,
                arm_id,
                urdf_model,
-               get_limit_rate,
-               get_cutoff_frequency,
-               get_internal_controller) {
+               std::move(get_limit_rate),
+               std::move(get_cutoff_frequency),
+               std::move(get_internal_controller)) {
   franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", model, robot_state_);
 
   franka_model_interface_.registerHandle(model_handle);
@@ -155,8 +156,9 @@ bool FrankaHW::controllerActive() const noexcept {
   return controller_active_;
 }
 
-void FrankaHW::control(franka::Robot& robot,
-                       std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback) {
+void FrankaHW::control(
+    franka::Robot& robot,
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) {
   if (!controller_active_) {
     return;
   }
@@ -195,7 +197,7 @@ bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerIn
     uint8_t other_claims = 0;
     if (map_it->second.size() == 2) {
       for (auto& claimed_by : map_it->second) {
-        if (claimed_by[2].compare("hardware_interface::EffortJointInterface") == 0) {
+        if (claimed_by[2] == "hardware_interface::EffortJointInterface") {
           torque_claims++;
         } else {
           other_claims++;

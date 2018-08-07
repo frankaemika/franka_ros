@@ -26,7 +26,7 @@ class FrankaStateController
   /**
    * Creates an instance of a FrankaStateController.
    */
-  FrankaStateController();
+  FrankaStateController() = default;
 
   /**
    * Initializes the controller with interfaces and publishers.
@@ -55,8 +55,8 @@ class FrankaStateController
 
   std::string arm_id_;
 
-  franka_hw::FrankaStateInterface* franka_state_interface_;
-  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
+  franka_hw::FrankaStateInterface* franka_state_interface_{};
+  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_{};
 
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_msgs::FrankaState> publisher_franka_states_;

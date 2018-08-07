@@ -89,29 +89,37 @@ int main(int argc, char** argv) {
 
   std::atomic_bool has_error(false);
 
-  using std::placeholders::_1;
-  using std::placeholders::_2;
   ServiceContainer services;
   services
       .advertiseService<franka_control::SetJointImpedance>(
           node_handle, "set_joint_impedance",
-          std::bind(franka_control::setJointImpedance, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setJointImpedance(robot, req, res);
+          })
       .advertiseService<franka_control::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
-          std::bind(franka_control::setCartesianImpedance, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setCartesianImpedance(robot, req, res);
+          })
       .advertiseService<franka_control::SetEEFrame>(
           node_handle, "set_EE_frame",
-          std::bind(franka_control::setEEFrame, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) { return franka_control::setEEFrame(robot, req, res); })
       .advertiseService<franka_control::SetKFrame>(
-          node_handle, "set_K_frame", std::bind(franka_control::setKFrame, std::ref(robot), _1, _2))
+          node_handle, "set_K_frame",
+          [&robot](auto&& req, auto&& res) { return franka_control::setKFrame(robot, req, res); })
       .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
-          std::bind(franka_control::setForceTorqueCollisionBehavior, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setForceTorqueCollisionBehavior(robot, req, res);
+          })
       .advertiseService<franka_control::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
-          std::bind(franka_control::setFullCollisionBehavior, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setFullCollisionBehavior(robot, req, res);
+          })
       .advertiseService<franka_control::SetLoad>(
-          node_handle, "set_load", std::bind(franka_control::setLoad, std::ref(robot), _1, _2));
+          node_handle, "set_load",
+          [&robot](auto&& req, auto&& res) { return franka_control::setLoad(robot, req, res); });
 
   actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> recovery_action_server(
       node_handle, "error_recovery",

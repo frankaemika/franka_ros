@@ -3,6 +3,7 @@
 #include <franka_example_controllers/joint_impedance_example_controller.h>
 
 #include <cmath>
+#include <memory>
 
 #include <controller_interface/controller_base.h>
 #include <pluginlib/class_list_macros.h>
@@ -72,16 +73,15 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
                     << coriolis_factor_);
   }
 
-  franka_hw::FrankaModelInterface* model_interface =
-      robot_hw->get<franka_hw::FrankaModelInterface>();
+  auto* model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
-    model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id + "_model")));
+    model_handle_ = std::make_unique<franka_hw::FrankaModelHandle>(
+        model_interface->getHandle(arm_id + "_model"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Exception getting model handle from interface: "
@@ -89,16 +89,15 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
     return false;
   }
 
-  franka_hw::FrankaPoseCartesianInterface* cartesian_pose_interface =
-      robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
+  auto* cartesian_pose_interface = robot_hw->get<franka_hw::FrankaPoseCartesianInterface>();
   if (cartesian_pose_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting cartesian pose interface from hardware");
     return false;
   }
   try {
-    cartesian_pose_handle_.reset(new franka_hw::FrankaCartesianPoseHandle(
-        cartesian_pose_interface->getHandle(arm_id + "_robot")));
+    cartesian_pose_handle_ = std::make_unique<franka_hw::FrankaCartesianPoseHandle>(
+        cartesian_pose_interface->getHandle(arm_id + "_robot"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Exception getting cartesian pose handle from interface: "
@@ -106,8 +105,7 @@ bool JointImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw
     return false;
   }
 
-  hardware_interface::EffortJointInterface* effort_joint_interface =
-      robot_hw->get<hardware_interface::EffortJointInterface>();
+  auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
     ROS_ERROR_STREAM(
         "JointImpedanceExampleController: Error getting effort joint interface from hardware");

@@ -3,6 +3,7 @@
 #include <franka_example_controllers/force_example_controller.h>
 
 #include <cmath>
+#include <memory>
 
 #include <controller_interface/controller_base.h>
 #include <pluginlib/class_list_macros.h>
@@ -30,38 +31,35 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
     return false;
   }
 
-  franka_hw::FrankaModelInterface* model_interface =
-      robot_hw->get<franka_hw::FrankaModelInterface>();
+  auto* model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
     ROS_ERROR_STREAM("ForceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
-    model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id + "_model")));
+    model_handle_ = std::make_unique<franka_hw::FrankaModelHandle>(
+        model_interface->getHandle(arm_id + "_model"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "ForceExampleController: Exception getting model handle from interface: " << ex.what());
     return false;
   }
 
-  franka_hw::FrankaStateInterface* state_interface =
-      robot_hw->get<franka_hw::FrankaStateInterface>();
+  auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
     ROS_ERROR_STREAM("ForceExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
-    state_handle_.reset(
-        new franka_hw::FrankaStateHandle(state_interface->getHandle(arm_id + "_robot")));
+    state_handle_ = std::make_unique<franka_hw::FrankaStateHandle>(
+        state_interface->getHandle(arm_id + "_robot"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "ForceExampleController: Exception getting state handle from interface: " << ex.what());
     return false;
   }
 
-  hardware_interface::EffortJointInterface* effort_joint_interface =
-      robot_hw->get<hardware_interface::EffortJointInterface>();
+  auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
     ROS_ERROR_STREAM("ForceExampleController: Error getting effort joint interface from hardware");
     return false;
@@ -77,9 +75,10 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
 
   dynamic_reconfigure_desired_mass_param_node_ =
       ros::NodeHandle("dynamic_reconfigure_desired_mass_param_node");
-  dynamic_server_desired_mass_param_.reset(
-      new dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>(
-          dynamic_reconfigure_desired_mass_param_node_));
+  dynamic_server_desired_mass_param_ = std::make_unique<
+      dynamic_reconfigure::Server<franka_example_controllers::desired_mass_paramConfig>>(
+
+      dynamic_reconfigure_desired_mass_param_node_);
   dynamic_server_desired_mass_param_->setCallback(
       boost::bind(&ForceExampleController::desiredMassParamCallback, this, _1, _2));
 
@@ -89,8 +88,8 @@ bool ForceExampleController::init(hardware_interface::RobotHW* robot_hw,
 void ForceExampleController::starting(const ros::Time& /*time*/) {
   franka::RobotState robot_state = state_handle_->getRobotState();
   std::array<double, 7> gravity_array = model_handle_->getGravity();
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_measured(robot_state.tau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> gravity(gravity_array.data());
   // Bias correction for the current external torque
   tau_ext_initial_ = tau_measured - gravity;
   tau_error_.setZero();
@@ -101,11 +100,11 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
   std::array<double, 7> gravity_array = model_handle_->getGravity();
-  Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_measured(robot_state.tau_J.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_J_d(  // NOLINT (readability-identifier-naming)
+  Eigen::Map<Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_measured(robot_state.tau_J.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_J_d(  // NOLINT (readability-identifier-naming)
       robot_state.tau_J_d.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > gravity(gravity_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> gravity(gravity_array.data());
 
   Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_cmd(7), tau_ext(7);
   desired_force_torque.setZero();

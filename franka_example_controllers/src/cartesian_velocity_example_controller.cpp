@@ -4,6 +4,7 @@
 
 #include <array>
 #include <cmath>
+#include <memory>
 #include <string>
 
 #include <controller_interface/controller_base.h>
@@ -31,8 +32,8 @@ bool CartesianVelocityExampleController::init(hardware_interface::RobotHW* robot
     return false;
   }
   try {
-    velocity_cartesian_handle_.reset(new franka_hw::FrankaCartesianVelocityHandle(
-        velocity_cartesian_interface_->getHandle(arm_id + "_robot")));
+    velocity_cartesian_handle_ = std::make_unique<franka_hw::FrankaCartesianVelocityHandle>(
+        velocity_cartesian_interface_->getHandle(arm_id + "_robot"));
   } catch (const hardware_interface::HardwareInterfaceException& e) {
     ROS_ERROR_STREAM(
         "CartesianVelocityExampleController: Exception getting Cartesian handle: " << e.what());

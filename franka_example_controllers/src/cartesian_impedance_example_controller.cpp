@@ -3,6 +3,7 @@
 #include <franka_example_controllers/cartesian_impedance_example_controller.h>
 
 #include <cmath>
+#include <memory>
 
 #include <controller_interface/controller_base.h>
 #include <franka/robot_state.h>
@@ -35,16 +36,15 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     return false;
   }
 
-  franka_hw::FrankaModelInterface* model_interface =
-      robot_hw->get<franka_hw::FrankaModelInterface>();
+  auto* model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
     ROS_ERROR_STREAM(
         "CartesianImpedanceExampleController: Error getting model interface from hardware");
     return false;
   }
   try {
-    model_handle_.reset(
-        new franka_hw::FrankaModelHandle(model_interface->getHandle(arm_id + "_model")));
+    model_handle_ = std::make_unique<franka_hw::FrankaModelHandle>(
+        model_interface->getHandle(arm_id + "_model"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "CartesianImpedanceExampleController: Exception getting model handle from interface: "
@@ -52,16 +52,15 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     return false;
   }
 
-  franka_hw::FrankaStateInterface* state_interface =
-      robot_hw->get<franka_hw::FrankaStateInterface>();
+  auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
     ROS_ERROR_STREAM(
         "CartesianImpedanceExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
-    state_handle_.reset(
-        new franka_hw::FrankaStateHandle(state_interface->getHandle(arm_id + "_robot")));
+    state_handle_ = std::make_unique<franka_hw::FrankaStateHandle>(
+        state_interface->getHandle(arm_id + "_robot"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
         "CartesianImpedanceExampleController: Exception getting state handle from interface: "
@@ -69,8 +68,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
     return false;
   }
 
-  hardware_interface::EffortJointInterface* effort_joint_interface =
-      robot_hw->get<hardware_interface::EffortJointInterface>();
+  auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
   if (effort_joint_interface == nullptr) {
     ROS_ERROR_STREAM(
         "CartesianImpedanceExampleController: Error getting effort joint interface from hardware");
@@ -89,9 +87,10 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   dynamic_reconfigure_compliance_param_node_ =
       ros::NodeHandle("dynamic_reconfigure_compliance_param_node");
 
-  dynamic_server_compliance_param_.reset(
-      new dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>(
-          dynamic_reconfigure_compliance_param_node_));
+  dynamic_server_compliance_param_ = std::make_unique<
+      dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>(
+
+      dynamic_reconfigure_compliance_param_node_);
   dynamic_server_compliance_param_->setCallback(
       boost::bind(&CartesianImpedanceExampleController::complianceParamCallback, this, _1, _2));
 
@@ -114,9 +113,9 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
   std::array<double, 42> jacobian_array =
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
   // convert to eigen
-  Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > dq_initial(initial_state.dq.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > q_initial(initial_state.q.data());
+  Eigen::Map<Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> dq_initial(initial_state.dq.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> q_initial(initial_state.q.data());
   Eigen::Affine3d initial_transform(Eigen::Matrix4d::Map(initial_state.O_T_EE.data()));
 
   // set equilibrium point to current state
@@ -138,11 +137,11 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
 
   // convert to Eigen
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > coriolis(coriolis_array.data());
-  Eigen::Map<Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
-  Eigen::Map<Eigen::Matrix<double, 7, 1> > tau_J_d(  // NOLINT (readability-identifier-naming)
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> coriolis(coriolis_array.data());
+  Eigen::Map<Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> q(robot_state.q.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> dq(robot_state.dq.data());
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_J_d(  // NOLINT (readability-identifier-naming)
       robot_state.tau_J_d.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
