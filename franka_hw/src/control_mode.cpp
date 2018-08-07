@@ -15,19 +15,19 @@ std::ostream& operator<<(std::ostream& ostream, ControlMode mode) {
   } else {
     std::vector<std::string> names;
     if ((mode & ControlMode::JointTorque) != ControlMode::None) {
-      names.emplace_back("JointTorque");
+      names.emplace_back("joint_torque");
     }
     if ((mode & ControlMode::JointPosition) != ControlMode::None) {
-      names.emplace_back("JointPosition");
+      names.emplace_back("joint_position");
     }
     if ((mode & ControlMode::JointVelocity) != ControlMode::None) {
-      names.emplace_back("JointVelocity");
+      names.emplace_back("joint_velocity");
     }
     if ((mode & ControlMode::CartesianVelocity) != ControlMode::None) {
-      names.emplace_back("CartesianVelocity");
+      names.emplace_back("cartesian_velocity");
     }
     if ((mode & ControlMode::CartesianPose) != ControlMode::None) {
-      names.emplace_back("CartesianPose");
+      names.emplace_back("cartesian_pose");
     }
     std::copy(names.cbegin(), names.cend() - 1, std::ostream_iterator<std::string>(ostream, ", "));
     ostream << names.back();

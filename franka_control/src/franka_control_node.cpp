@@ -55,19 +55,9 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  franka::ControllerMode internal_controller;
-  std::string internal_controller_name;
-  if (!node_handle.getParam("internal_controller", internal_controller_name)) {
+  std::string internal_controller;
+  if (!node_handle.getParam("internal_controller", internal_controller)) {
     ROS_ERROR("No internal_controller parameter provided");
-    return 1;
-  }
-
-  if (internal_controller_name == "joint_impedance") {
-    internal_controller = franka::ControllerMode::kJointImpedance;
-  } else if (internal_controller_name == "cartesian_impedance") {
-    internal_controller = franka::ControllerMode::kCartesianImpedance;
-  } else {
-    ROS_ERROR("Invalid internal_controller parameter provided");
     return 1;
   }
 
@@ -138,8 +128,31 @@ int main(int argc, char** argv) {
       false);
 
   franka::Model model = robot.loadModel();
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting,
-                                     cutoff_frequency, urdf_model, model);
+  auto get_rate_limiting = [&]() {
+    node_handle.getParamCached("rate_limiting", rate_limiting);
+    return rate_limiting;
+  };
+  auto get_internal_controller = [&]() {
+    node_handle.getParamCached("internal_controller", internal_controller);
+
+    franka::ControllerMode controller_mode;
+    if (internal_controller == "joint_impedance") {
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    } else if (internal_controller == "cartesian_impedance") {
+      controller_mode = franka::ControllerMode::kCartesianImpedance;
+    } else {
+      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    }
+
+    return controller_mode;
+  };
+  auto get_cutoff_frequency = [&]() {
+    node_handle.getParamCached("cutoff_frequency", cutoff_frequency);
+    return cutoff_frequency;
+  };
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, urdf_model, model, get_rate_limiting,
+                                     get_cutoff_frequency, get_internal_controller);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
@@ -158,10 +171,6 @@ int main(int argc, char** argv) {
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
       franka_control.update(robot.readOnce());
-
-      // Update parameters for possible controller switch
-      node_handle.getParamCached("rate_limiting", rate_limiting);
-      node_handle.getParamCached("cutoff_frequency", cutoff_frequency);
 
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);

@@ -33,38 +33,46 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
-   * @param[in] internal_controller Internal controller to be used for control loops using only
-   * motion generation
-   * @param[in] limit_rate True if the rate limiter should be used, false otherwise
-   * @param[in] cutoff_frequency Cutoff frequency for the lowpass filter
    * @param[in] urdf_model A URDF model to initialize joint limits from.
+   * @param[in] get_limit_rate Getter that should return true if the rate limiter
+   * should be used, false otherwise. Defaults to true.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the lowpass filter.
+   * Defaults to franka::kDefaultCutoffFrequency.
+   * @param[in] get_internal_controller Getter for an internal controller to
+   * be used for control loops using only motion generation. Defaults to joint impedance.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode& internal_controller,
-           const bool& limit_rate,
-           const double& cutoff_frequency,
-           const urdf::Model& urdf_model);
+           const urdf::Model& urdf_model,
+           std::function<bool()> get_limit_rate = []() { return true; },
+           std::function<double()> get_cutoff_frequency =
+               []() { return franka::kDefaultCutoffFrequency; },
+           std::function<franka::ControllerMode()> get_internal_controller =
+               []() { return franka::ControllerMode::kJointImpedance; });
 
   /**
    * Creates an instance of FrankaHW that provides a model interface.
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
-   * @param[in] internal_controller Internal controller to be used for control loops using only
-   * motion generation
-   * @param[in] limit_rate True if the rate limiter should be used, false otherwise
-   * @param[in] cutoff_frequency Cutoff frequency for the lowpass filter
    * @param[in] urdf_model A URDF model to initialize joint limits from.
    * @param[in] model Robot model.
+   * @param[in] get_limit_rate Getter that should return true if the rate limiter
+   * should be used, false otherwise. Defaults to true.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the lowpass filter.
+   * Defaults to franka::kDefaultCutoffFrequency.
+   * @param[in] get_internal_controller Getter for an internal controller to
+   * be used for control loops using only motion generation. Defaults to joint impedance.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode& internal_controller,
-           const bool& limit_rate,
-           const double& cutoff_frequency,
            const urdf::Model& urdf_model,
-           franka::Model& model);
+           franka::Model& model,
+           std::function<bool()> get_limit_rate = []() { return true; },
+           std::function<double()> get_cutoff_frequency =
+               []() { return franka::kDefaultCutoffFrequency; },
+           std::function<franka::ControllerMode()> get_internal_controller =
+               []() { return franka::ControllerMode::kJointImpedance; });
 
   ~FrankaHW() override = default;
 
@@ -196,9 +204,9 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   std::array<std::string, 7> joint_names_;
   const std::string arm_id_;
-  franka::ControllerMode internal_controller_;
-  const bool& limit_rate_;
-  const double& cutoff_frequency_;
+  std::function<franka::ControllerMode()> get_internal_controller_;
+  std::function<bool()> get_limit_rate_;
+  std::function<double()> get_cutoff_frequency_;
 
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
