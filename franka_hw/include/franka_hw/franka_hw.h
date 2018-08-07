@@ -44,7 +44,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode& internal_controller,
+           franka::ControllerMode internal_controller,
            const std::array<bool, 5>& limit_rate,
            const std::array<double, 5>& cutoff_freq,
            const ros::NodeHandle& node_handle);
@@ -65,7 +65,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode& internal_controller,
+           franka::ControllerMode internal_controller,
            const std::array<bool, 5>& limit_rate,
            const std::array<double, 5>& cutoff_freq,
            const ros::NodeHandle& node_handle,
