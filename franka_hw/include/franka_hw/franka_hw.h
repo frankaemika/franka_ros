@@ -129,13 +129,13 @@ class FrankaHW : public hardware_interface::RobotHW {
                 const std::list<hardware_interface::ControllerInfo>&) override;
 
   /**
-  * Prepares switching between controllers (not real-time capable).
-  *
-  * @param[in] start_list Controllers requested to be started.
-  * @param[in] stop_list Controllers requested to be stopped.
-  *
-  * @return True if the preparation has been successful, false otherwise.
-  */
+   * Prepares switching between controllers (not real-time capable).
+   *
+   * @param[in] start_list Controllers requested to be started.
+   * @param[in] stop_list Controllers requested to be stopped.
+   *
+   * @return True if the preparation has been successful, false otherwise.
+   */
   bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 

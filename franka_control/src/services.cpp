@@ -40,7 +40,7 @@ void setKFrame(franka::Robot& robot,
 void setForceTorqueCollisionBehavior(franka::Robot& robot,
                                      const SetForceTorqueCollisionBehavior::Request& req,
                                      SetForceTorqueCollisionBehavior::Response& /* res */
-                                     ) {
+) {
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
             req.lower_torque_thresholds_nominal.cend(), lower_torque_thresholds_nominal.begin());

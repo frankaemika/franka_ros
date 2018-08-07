@@ -40,11 +40,11 @@ class FrankaStateController
             ros::NodeHandle& controller_node_handle) override;
 
   /**
-  * Reads the current robot state from the franka_hw::FrankaStateInterface and publishes it.
-  *
-  * @param[in] time Current ROS time.
-  * @param[in] period Time since the last update.
-  */
+   * Reads the current robot state from the franka_hw::FrankaStateInterface and publishes it.
+   *
+   * @param[in] time Current ROS time.
+   * @param[in] period Time since the last update.
+   */
   void update(const ros::Time& time, const ros::Duration& period) override;
 
  private:
