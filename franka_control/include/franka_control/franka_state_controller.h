@@ -61,6 +61,7 @@ class FrankaStateController
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_msgs::FrankaState> publisher_franka_states_;
   realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher_joint_states_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState> publisher_joint_states_desired_;
   realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> publisher_external_wrench_;
   franka_hw::TriggerRate trigger_publish_;
   franka::RobotState robot_state_;

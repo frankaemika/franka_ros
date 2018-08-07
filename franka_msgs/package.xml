@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_msgs</name>
-  <version>0.5.0</version>
+  <version>0.6.0</version>
   <description>franka_msgs provides messages specific to Franka Emika research robots</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>

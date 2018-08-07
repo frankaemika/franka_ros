@@ -7,3 +7,11 @@ joint_names:
   - panda_joint6
   - panda_joint7
 arm_id: panda
+# Rate limiter activation flag for each interface [true|false]
+# [Joint position, Joint velocity, Cartesian Pose, Cartesian Velocity, Torque]
+rate_limiting: [true, true, true, true, true]
+# Cutoff frequency of the lowpass filter for each interface. Set to >= 1000 to deactivate.
+# [Joint position, Joint velocity, Cartesian Pose, Cartesian Velocity, Torque]
+cutoff_freq: [100, 100, 100, 100, 100]
+# Internal controller for motion generators [joint_impedance|cartesian_impedance]
+internal_controller: joint_impedance

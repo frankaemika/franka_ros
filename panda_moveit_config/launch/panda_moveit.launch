@@ -1,7 +1,5 @@
 <?xml version="1.0" ?>
 <launch>
-  <!-- Valid values: "position", "effort" -->
-  <arg name="controller" default="position" />
   <arg name="load_gripper" default="true" />
 
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="position_joint_trajectory_controller"/>

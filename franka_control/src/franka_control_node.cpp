@@ -39,8 +39,41 @@ int main(int argc, char** argv) {
     ROS_ERROR("Invalid or no joint_names parameters provided");
     return 1;
   }
+
+  std::vector<bool> limit_rate_vector;
+  if (!node_handle.getParam("rate_limiting", limit_rate_vector) || limit_rate_vector.size() != 5) {
+    ROS_ERROR("Invalid or no rate_limiting parameters provided");
+    return 1;
+  }
+
+  std::vector<double> cutoff_freq_vector;
+  if (!node_handle.getParam("cutoff_freq", cutoff_freq_vector) || cutoff_freq_vector.size() != 5) {
+    ROS_ERROR("Invalid or no cutoff_freq parameters provided");
+    return 1;
+  }
+
+  franka::ControllerMode internal_controller;
+  std::string internal_controller_name;
+  if (!node_handle.getParam("internal_controller", internal_controller_name)) {
+    ROS_ERROR("No internal_controller parameter provided");
+    return 1;
+  }
+
   std::array<std::string, 7> joint_names;
   std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
+  std::array<bool, 5> rate_limiting;
+  std::copy(limit_rate_vector.cbegin(), limit_rate_vector.cend(), rate_limiting.begin());
+  std::array<double, 5> cutoff_freq;
+  std::copy(cutoff_freq_vector.cbegin(), cutoff_freq_vector.cend(), cutoff_freq.begin());
+
+  if (internal_controller_name == "joint_impedance") {
+    internal_controller = franka::ControllerMode::kJointImpedance;
+  } else if (internal_controller_name == "cartesian_impedance") {
+    internal_controller = franka::ControllerMode::kCartesianImpedance;
+  } else {
+    ROS_ERROR("Invalid internal_controller parameter provided");
+    return 1;
+  }
 
   std::string robot_ip;
   if (!node_handle.getParam("robot_ip", robot_ip)) {
@@ -103,7 +136,8 @@ int main(int argc, char** argv) {
       false);
 
   franka::Model model = robot.loadModel();
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, public_node_handle, model);
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting,
+                                     cutoff_freq, public_node_handle, model);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
