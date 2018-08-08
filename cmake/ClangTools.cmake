@@ -1,11 +1,11 @@
 include(CMakeParseArguments)
 
-find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
+find_program(CLANG_FORMAT_PROG clang-format-5.0 DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG AND NOT TARGET format)
   add_custom_target(format)
   add_custom_target(check-format)
 endif()
-find_program(CLANG_TIDY_PROG clang-tidy DOC "'clang-tidy' executable")
+find_program(CLANG_TIDY_PROG clang-tidy-5.0 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG AND NOT TARGET tidy)
   if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
     message(WARNING "Invoke Catkin/CMake with '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'
@@ -46,7 +46,7 @@ function(add_tidy_target _target)
   cmake_parse_arguments(ARG "" "" "FILES;DEPENDS" ${ARGN})
 
   add_custom_target(tidy-${_target}
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${ARG_FILES}
+    COMMAND ${CLANG_TIDY_PROG} -fix -p=${CMAKE_BINARY_DIR} ${ARG_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
     DEPENDS ${ARG_DEPENDS}
     COMMENT "Running clang-tidy for ${_target}"

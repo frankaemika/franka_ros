@@ -3,6 +3,7 @@
 #include <franka_control/franka_state_controller.h>
 
 #include <cmath>
+#include <memory>
 #include <mutex>
 #include <string>
 
@@ -134,16 +135,6 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
 
 namespace franka_control {
 
-FrankaStateController::FrankaStateController()
-    : franka_state_interface_(nullptr),
-      franka_state_handle_(nullptr),
-      publisher_transforms_(),
-      publisher_franka_states_(),
-      publisher_joint_states_(),
-      publisher_joint_states_desired_(),
-      publisher_external_wrench_(),
-      trigger_publish_(30.0) {}
-
 bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                                  ros::NodeHandle& root_node_handle,
                                  ros::NodeHandle& controller_node_handle) {
@@ -157,12 +148,11 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     return false;
   }
   double publish_rate(30.0);
-  if (controller_node_handle.getParam("publish_rate", publish_rate)) {
-    trigger_publish_ = franka_hw::TriggerRate(publish_rate);
-  } else {
+  if (!controller_node_handle.getParam("publish_rate", publish_rate)) {
     ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default "
                     << publish_rate << " [Hz].");
   }
+  trigger_publish_ = franka_hw::TriggerRate(publish_rate);
 
   if (!controller_node_handle.getParam("joint_names", joint_names_) ||
       joint_names_.size() != robot_state_.q.size()) {
@@ -173,8 +163,8 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   }
 
   try {
-    franka_state_handle_.reset(
-        new franka_hw::FrankaStateHandle(franka_state_interface_->getHandle(arm_id_ + "_robot")));
+    franka_state_handle_ = std::make_unique<franka_hw::FrankaStateHandle>(
+        franka_state_interface_->getHandle(arm_id_ + "_robot"));
   } catch (const hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM("FrankaStateController: Exception getting franka state handle: " << ex.what());
     return false;

@@ -6,6 +6,10 @@
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm_hand.urdf.xacro'" if="$(arg load_gripper)" />
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_description)/robots/panda_arm.urdf.xacro'" unless="$(arg load_gripper)" />
 
+  <include file="$(find franka_gripper)/launch/franka_gripper.launch" if="$(arg load_gripper)">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+  </include>
+
   <node name="franka_control" pkg="franka_control" type="franka_control_node" output="screen" required="true">
     <rosparam command="load" file="$(find franka_control)/config/franka_control_node.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />

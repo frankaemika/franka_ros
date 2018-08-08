@@ -84,46 +84,56 @@ int main(int argc, char** argv) {
 
   franka::Gripper gripper(robot_ip);
 
-  std::function<bool(const HomingGoalConstPtr&)> homing_handler =
-      std::bind(homing, std::cref(gripper), std::placeholders::_1);
-  std::function<bool(const StopGoalConstPtr&)> stop_handler =
-      std::bind(stop, std::cref(gripper), std::placeholders::_1);
-  std::function<bool(const GraspGoalConstPtr&)> grasp_handler =
-      std::bind(grasp, std::cref(gripper), std::placeholders::_1);
-  std::function<bool(const MoveGoalConstPtr&)> move_handler =
-      std::bind(move, std::cref(gripper), std::placeholders::_1);
+  auto homing_handler = [&gripper](auto&& goal) { return homing(gripper, goal); };
+  auto stop_handler = [&gripper](auto&& goal) { return stop(gripper, goal); };
+  auto grasp_handler = [&gripper](auto&& goal) { return grasp(gripper, goal); };
+  auto move_handler = [&gripper](auto&& goal) { return move(gripper, goal); };
 
-  SimpleActionServer<HomingAction> homing_action_server_(
+  SimpleActionServer<HomingAction> homing_action_server(
       node_handle, "homing",
-      std::bind(handleErrors<HomingAction, HomingGoalConstPtr, HomingResult>,
-                &homing_action_server_, homing_handler, std::placeholders::_1),
+      [=, &homing_action_server](auto&& goal) {
+        return handleErrors<franka_gripper::HomingAction, franka_gripper::HomingGoalConstPtr,
+                            franka_gripper::HomingResult>(&homing_action_server, homing_handler,
+                                                          goal);
+      },
       false);
 
-  SimpleActionServer<StopAction> stop_action_server_(
-      node_handle, "stop", std::bind(handleErrors<StopAction, StopGoalConstPtr, StopResult>,
-                                     &stop_action_server_, stop_handler, std::placeholders::_1),
+  SimpleActionServer<StopAction> stop_action_server(
+      node_handle, "stop",
+      [=, &stop_action_server](auto&& goal) {
+        return handleErrors<franka_gripper::StopAction, franka_gripper::StopGoalConstPtr,
+                            franka_gripper::StopResult>(&stop_action_server, stop_handler, goal);
+      },
       false);
 
-  SimpleActionServer<MoveAction> move_action_server_(
-      node_handle, "move", std::bind(handleErrors<MoveAction, MoveGoalConstPtr, MoveResult>,
-                                     &move_action_server_, move_handler, std::placeholders::_1),
+  SimpleActionServer<MoveAction> move_action_server(
+      node_handle, "move",
+      [=, &move_action_server](auto&& goal) {
+        return handleErrors<franka_gripper::MoveAction, franka_gripper::MoveGoalConstPtr,
+                            franka_gripper::MoveResult>(&move_action_server, move_handler, goal);
+      },
       false);
 
-  SimpleActionServer<GraspAction> grasp_action_server_(
-      node_handle, "grasp", std::bind(handleErrors<GraspAction, GraspGoalConstPtr, GraspResult>,
-                                      &grasp_action_server_, grasp_handler, std::placeholders::_1),
+  SimpleActionServer<GraspAction> grasp_action_server(
+      node_handle, "grasp",
+      [=, &grasp_action_server](auto&& goal) {
+        return handleErrors<franka_gripper::GraspAction, franka_gripper::GraspGoalConstPtr,
+                            franka_gripper::GraspResult>(&grasp_action_server, grasp_handler, goal);
+      },
       false);
 
   SimpleActionServer<GripperCommandAction> gripper_command_action_server(
       node_handle, "gripper_action",
-      std::bind(&gripperCommandExecuteCallback, std::cref(gripper), default_grasp_epsilon,
-                default_speed, &gripper_command_action_server, std::placeholders::_1),
+      [=, &gripper, &gripper_command_action_server](auto&& goal) {
+        return gripperCommandExecuteCallback(gripper, default_grasp_epsilon, default_speed,
+                                             &gripper_command_action_server, goal);
+      },
       false);
 
-  homing_action_server_.start();
-  stop_action_server_.start();
-  move_action_server_.start();
-  grasp_action_server_.start();
+  homing_action_server.start();
+  stop_action_server.start();
+  move_action_server.start();
+  grasp_action_server.start();
   gripper_command_action_server.start();
 
   double publish_rate(30.0);

@@ -40,38 +40,30 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  std::vector<bool> limit_rate_vector;
-  if (!node_handle.getParam("rate_limiting", limit_rate_vector) || limit_rate_vector.size() != 5) {
-    ROS_ERROR("Invalid or no rate_limiting parameters provided");
+  std::array<std::string, 7> joint_names;
+  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
+
+  bool rate_limiting;
+  if (!node_handle.getParamCached("rate_limiting", rate_limiting)) {
+    ROS_ERROR("Invalid or no rate_limiting parameter provided");
     return 1;
   }
 
-  std::vector<double> cutoff_freq_vector;
-  if (!node_handle.getParam("cutoff_freq", cutoff_freq_vector) || cutoff_freq_vector.size() != 5) {
-    ROS_ERROR("Invalid or no cutoff_freq parameters provided");
+  double cutoff_frequency;
+  if (!node_handle.getParamCached("cutoff_frequency", cutoff_frequency)) {
+    ROS_ERROR("Invalid or no cutoff_frequency parameter provided");
     return 1;
   }
 
-  franka::ControllerMode internal_controller;
-  std::string internal_controller_name;
-  if (!node_handle.getParam("internal_controller", internal_controller_name)) {
+  std::string internal_controller;
+  if (!node_handle.getParam("internal_controller", internal_controller)) {
     ROS_ERROR("No internal_controller parameter provided");
     return 1;
   }
 
-  std::array<std::string, 7> joint_names;
-  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
-  std::array<bool, 5> rate_limiting;
-  std::copy(limit_rate_vector.cbegin(), limit_rate_vector.cend(), rate_limiting.begin());
-  std::array<double, 5> cutoff_freq;
-  std::copy(cutoff_freq_vector.cbegin(), cutoff_freq_vector.cend(), cutoff_freq.begin());
-
-  if (internal_controller_name == "joint_impedance") {
-    internal_controller = franka::ControllerMode::kJointImpedance;
-  } else if (internal_controller_name == "cartesian_impedance") {
-    internal_controller = franka::ControllerMode::kCartesianImpedance;
-  } else {
-    ROS_ERROR("Invalid internal_controller parameter provided");
+  urdf::Model urdf_model;
+  if (!urdf_model.initParamWithNodeHandle("robot_description", public_node_handle)) {
+    ROS_ERROR("Could not initialize URDF model from robot_description");
     return 1;
   }
 
@@ -97,29 +89,37 @@ int main(int argc, char** argv) {
 
   std::atomic_bool has_error(false);
 
-  using std::placeholders::_1;
-  using std::placeholders::_2;
   ServiceContainer services;
   services
       .advertiseService<franka_control::SetJointImpedance>(
           node_handle, "set_joint_impedance",
-          std::bind(franka_control::setJointImpedance, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setJointImpedance(robot, req, res);
+          })
       .advertiseService<franka_control::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
-          std::bind(franka_control::setCartesianImpedance, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setCartesianImpedance(robot, req, res);
+          })
       .advertiseService<franka_control::SetEEFrame>(
           node_handle, "set_EE_frame",
-          std::bind(franka_control::setEEFrame, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) { return franka_control::setEEFrame(robot, req, res); })
       .advertiseService<franka_control::SetKFrame>(
-          node_handle, "set_K_frame", std::bind(franka_control::setKFrame, std::ref(robot), _1, _2))
+          node_handle, "set_K_frame",
+          [&robot](auto&& req, auto&& res) { return franka_control::setKFrame(robot, req, res); })
       .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
-          std::bind(franka_control::setForceTorqueCollisionBehavior, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setForceTorqueCollisionBehavior(robot, req, res);
+          })
       .advertiseService<franka_control::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
-          std::bind(franka_control::setFullCollisionBehavior, std::ref(robot), _1, _2))
+          [&robot](auto&& req, auto&& res) {
+            return franka_control::setFullCollisionBehavior(robot, req, res);
+          })
       .advertiseService<franka_control::SetLoad>(
-          node_handle, "set_load", std::bind(franka_control::setLoad, std::ref(robot), _1, _2));
+          node_handle, "set_load",
+          [&robot](auto&& req, auto&& res) { return franka_control::setLoad(robot, req, res); });
 
   actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> recovery_action_server(
       node_handle, "error_recovery",
@@ -136,8 +136,31 @@ int main(int argc, char** argv) {
       false);
 
   franka::Model model = robot.loadModel();
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, internal_controller, rate_limiting,
-                                     cutoff_freq, public_node_handle, model);
+  auto get_rate_limiting = [&]() {
+    node_handle.getParamCached("rate_limiting", rate_limiting);
+    return rate_limiting;
+  };
+  auto get_internal_controller = [&]() {
+    node_handle.getParamCached("internal_controller", internal_controller);
+
+    franka::ControllerMode controller_mode;
+    if (internal_controller == "joint_impedance") {
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    } else if (internal_controller == "cartesian_impedance") {
+      controller_mode = franka::ControllerMode::kCartesianImpedance;
+    } else {
+      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    }
+
+    return controller_mode;
+  };
+  auto get_cutoff_frequency = [&]() {
+    node_handle.getParamCached("cutoff_frequency", cutoff_frequency);
+    return cutoff_frequency;
+  };
+  franka_hw::FrankaHW franka_control(joint_names, arm_id, urdf_model, model, get_rate_limiting,
+                                     get_cutoff_frequency, get_internal_controller);
 
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());

@@ -70,7 +70,7 @@ hardware_interface::ControllerInfo newInfo(
 class ControllerConflict :
         public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- ControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, franka::ControllerMode::kJointImpedance, {}, {}, ros::NodeHandle())) {}
+ ControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, urdf::Model())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }
@@ -84,7 +84,7 @@ public:
 class NoControllerConflict : public
         ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
 public:
- NoControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, franka::ControllerMode::kJointImpedance, {}, {}, ros::NodeHandle())) {}
+ NoControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, urdf::Model())) {}
  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
      return robot_->checkForConflict(info_list);
  }

@@ -4,15 +4,18 @@
 
 Requires `libfranka` >= 0.5.0
 
-  * **BREAKING** Updated joint limits in URDF
-  * **BREAKING** Fixed velocity, acceleration and jerk limits in `franka_hw`
-  * Allow to configure rate limiting, filtering and internal controller in `franka_control_node`
-  * **BREAKING** Enabled limiting and low-pass filtering by default (`franka_control_node.yaml`)
-  * Publish desired joint state in `/joint_state_desired`
-  * Removed `effort_joint_trajectory_controller` from `default_controllers.yaml`
-  * **BREAKING** Fixes for MoveIt:
+  * **BREAKING** Fixes for MoveIt, improving robot performance:
     * Fixed joint velocity and acceleration limits in `joint_limits.yaml`
     * Use desired joint state for move group
+  * **BREAKING** Updated joint limits in URDF
+  * **BREAKING** Fixed velocity, acceleration and jerk limits in `franka_hw`
+  * **BREAKING** Start `franka_gripper_node` when giving `load_gripper:=true` to `franka_control.launch`
+  * Allow to configure rate limiting, filtering and internal controller in `franka_control_node`
+  * **BREAKING** `FrankaHW::FrankaHW` takes additional parameters.
+  * **BREAKING** Enabled rate limiting and low-pass filtering by default (`franka_control_node.yaml`)
+  * Publish desired joint state in `/joint_state_desired`
+  * Removed `effort_joint_trajectory_controller` from `default_controllers.yaml`
+  * Fixed a bug when switching between controllers using the same `libfranka` interface
 
 ## 0.5.0 - 2018-06-28
 

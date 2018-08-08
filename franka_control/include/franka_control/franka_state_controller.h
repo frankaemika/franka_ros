@@ -26,7 +26,7 @@ class FrankaStateController
   /**
    * Creates an instance of a FrankaStateController.
    */
-  FrankaStateController();
+  FrankaStateController() = default;
 
   /**
    * Initializes the controller with interfaces and publishers.
@@ -40,11 +40,11 @@ class FrankaStateController
             ros::NodeHandle& controller_node_handle) override;
 
   /**
-  * Reads the current robot state from the franka_hw::FrankaStateInterface and publishes it.
-  *
-  * @param[in] time Current ROS time.
-  * @param[in] period Time since the last update.
-  */
+   * Reads the current robot state from the franka_hw::FrankaStateInterface and publishes it.
+   *
+   * @param[in] time Current ROS time.
+   * @param[in] period Time since the last update.
+   */
   void update(const ros::Time& time, const ros::Duration& period) override;
 
  private:
@@ -55,8 +55,8 @@ class FrankaStateController
 
   std::string arm_id_;
 
-  franka_hw::FrankaStateInterface* franka_state_interface_;
-  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_;
+  franka_hw::FrankaStateInterface* franka_state_interface_{};
+  std::unique_ptr<franka_hw::FrankaStateHandle> franka_state_handle_{};
 
   realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> publisher_transforms_;
   realtime_tools::RealtimePublisher<franka_msgs::FrankaState> publisher_franka_states_;

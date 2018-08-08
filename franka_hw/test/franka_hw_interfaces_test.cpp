@@ -23,7 +23,7 @@ extern std::array<std::string, 7> joint_names;
 namespace franka_hw {
 
 TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
-  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, arm_id, franka::ControllerMode::kJointImpedance, {}, {}, ros::NodeHandle()));
+  std::unique_ptr<FrankaHW> robotptr(new FrankaHW(joint_names, arm_id, urdf::Model()));
   hardware_interface::JointStateInterface* js_interface =
       robotptr->get<hardware_interface::JointStateInterface>();
   hardware_interface::PositionJointInterface* pj_interface =
@@ -73,7 +73,10 @@ TEST(FrankaHWTests, InterfacesWorkForReadAndCommand) {
 }
 
 TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
-  std::unique_ptr<FrankaHW> robot_ptr(new FrankaHW(joint_names, arm_id, franka::ControllerMode::kJointImpedance, {}, {}, ros::NodeHandle()));
+  urdf::Model urdf_model;
+  ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description"));
+
+  std::unique_ptr<FrankaHW> robot_ptr(new FrankaHW(joint_names, arm_id, urdf_model));
 
   hardware_interface::PositionJointInterface* pj_interface =
       robot_ptr->get<hardware_interface::PositionJointInterface>();
@@ -85,8 +88,6 @@ TEST(FrankaHWTests, JointLimitInterfacesEnforceLimitsOnCommands) {
   ASSERT_NE(nullptr, vj_interface);
   ASSERT_NE(nullptr, ej_interface);
 
-  urdf::Model urdf_model;
-  ASSERT_TRUE(urdf_model.initParamWithNodeHandle("robot_description", ros::NodeHandle()));
   std::vector<joint_limits_interface::JointLimits> joint_limits(7);
   std::vector<hardware_interface::JointHandle> position_handles(7);
   std::vector<hardware_interface::JointHandle> velocity_handles(7);

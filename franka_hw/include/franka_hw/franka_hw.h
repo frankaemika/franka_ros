@@ -11,17 +11,16 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
-#include <hardware_interface/joint_command_interface.h>
-#include <hardware_interface/joint_state_interface.h>
-#include <hardware_interface/robot_hw.h>
-#include <joint_limits_interface/joint_limits_interface.h>
-#include <ros/node_handle.h>
-#include <ros/time.h>
-
 #include <franka_hw/control_mode.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <hardware_interface/joint_command_interface.h>
+#include <hardware_interface/joint_state_interface.h>
+#include <hardware_interface/robot_hw.h>
+#include <joint_limits_interface/joint_limits_interface.h>
+#include <ros/time.h>
+#include <urdf/model.h>
 
 namespace franka_hw {
 
@@ -34,42 +33,46 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
-   * @param[in] limit_rate An array of booleans indicating if the rate limiter should be used or not
-   * for each interface
-   * @param[in] internal_controller Internal controller to be used for control loops using only
-   * motion generation
-   * @param[in] cutoff_freq An array of doubles indicating the cutoff frequency for the lowpass
-   * applied in each interface
-   * @param[in] node_handle A node handle to get parameters from.
+   * @param[in] urdf_model A URDF model to initialize joint limits from.
+   * @param[in] get_limit_rate Getter that should return true if the rate limiter
+   * should be used, false otherwise. Defaults to true.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the low-pass filter.
+   * Defaults to franka::kDefaultCutoffFrequency.
+   * @param[in] get_internal_controller Getter for an internal controller to
+   * be used for control loops using only motion generation. Defaults to joint impedance.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode internal_controller,
-           const std::array<bool, 5>& limit_rate,
-           const std::array<double, 5>& cutoff_freq,
-           const ros::NodeHandle& node_handle);
+           const urdf::Model& urdf_model,
+           std::function<bool()> get_limit_rate = []() { return true; },
+           std::function<double()> get_cutoff_frequency =
+               []() { return franka::kDefaultCutoffFrequency; },
+           std::function<franka::ControllerMode()> get_internal_controller =
+               []() { return franka::ControllerMode::kJointImpedance; });
 
   /**
    * Creates an instance of FrankaHW that provides a model interface.
    *
    * @param[in] joint_names An array of joint names being controlled.
    * @param[in] arm_id Unique identifier for the robot being controlled.
-   * @param[in] node_handle A node handle to get parameters from.
-   * @param[in] limit_rate An array of booleans indicating if the rate limiter should be used or not
-   * for each interface
-   * @param[in] internal_controller Internal controller to be used for control loops using only
-   * motion generation
-   * @param[in] cutoff_freq An array of doubles indicating the cutoff frequency for the lowpass
-   * applied in each interface
+   * @param[in] urdf_model A URDF model to initialize joint limits from.
    * @param[in] model Robot model.
+   * @param[in] get_limit_rate Getter that should return true if the rate limiter
+   * should be used, false otherwise. Defaults to true.
+   * @param[in] get_cutoff_frequency Getter for cutoff frequency for the low-pass filter.
+   * Defaults to franka::kDefaultCutoffFrequency.
+   * @param[in] get_internal_controller Getter for an internal controller to
+   * be used for control loops using only motion generation. Defaults to joint impedance.
    */
   FrankaHW(const std::array<std::string, 7>& joint_names,
            const std::string& arm_id,
-           franka::ControllerMode internal_controller,
-           const std::array<bool, 5>& limit_rate,
-           const std::array<double, 5>& cutoff_freq,
-           const ros::NodeHandle& node_handle,
-           franka::Model& model);
+           const urdf::Model& urdf_model,
+           franka::Model& model,
+           std::function<bool()> get_limit_rate = []() { return true; },
+           std::function<double()> get_cutoff_frequency =
+               []() { return franka::kDefaultCutoffFrequency; },
+           std::function<franka::ControllerMode()> get_internal_controller =
+               []() { return franka::ControllerMode::kJointImpedance; });
 
   ~FrankaHW() override = default;
 
@@ -90,7 +93,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
   void control(franka::Robot& robot,
-               std::function<bool(const ros::Time&, const ros::Duration&)> ros_callback);
+               const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback);
 
   /**
    * Updates the controller interfaces from the given robot state.
@@ -126,13 +129,13 @@ class FrankaHW : public hardware_interface::RobotHW {
                 const std::list<hardware_interface::ControllerInfo>&) override;
 
   /**
-  * Prepares switching between controllers (not real-time capable).
-  *
-  * @param[in] start_list Controllers requested to be started.
-  * @param[in] stop_list Controllers requested to be stopped.
-  *
-  * @return True if the preparation has been successful, false otherwise.
-  */
+   * Prepares switching between controllers (not real-time capable).
+   *
+   * @param[in] start_list Controllers requested to be started.
+   * @param[in] stop_list Controllers requested to be stopped.
+   *
+   * @return True if the preparation has been successful, false otherwise.
+   */
   bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
@@ -178,7 +181,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
     robot_state_ = robot_state;
-    if (!controller_active_ || ros_callback && !ros_callback(robot_state, time_step)) {
+    if (!controller_active_ || (ros_callback && !ros_callback(robot_state, time_step))) {
       return franka::MotionFinished(command);
     }
     return command;
@@ -201,9 +204,9 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   std::array<std::string, 7> joint_names_;
   const std::string arm_id_;
-  franka::ControllerMode internal_controller_;
-  std::array<bool, 5> limit_rate_;
-  std::array<double, 5> cutoff_freq_;
+  std::function<franka::ControllerMode()> get_internal_controller_;
+  std::function<bool()> get_limit_rate_;
+  std::function<double()> get_cutoff_frequency_;
 
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
