@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.7.0 - UNRELEASED
+
+Requires `libfranka` >= 0.5.0
+
+  * Moved `panda_moveit_config` to `ros-planning`.
+
 ## 0.6.0 - 2018-08-08
 
 Requires `libfranka` >= 0.5.0
