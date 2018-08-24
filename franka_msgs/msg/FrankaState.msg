@@ -31,5 +31,13 @@ float64[16] O_T_EE_d
 float64[16] F_T_EE
 float64[16] EE_T_K
 float64 time
+uint8 ROBOT_MODE_OTHER=0
+uint8 ROBOT_MODE_IDLE=1
+uint8 ROBOT_MODE_MOVE=2
+uint8 ROBOT_MODE_GUIDING=3
+uint8 ROBOT_MODE_REFLEX=4
+uint8 ROBOT_MODE_USER_STOPPED=5
+uint8 ROBOT_MODE_AUTOMATIC_ERROR_RECOVERY=6
+uint8 robot_mode
 franka_msgs/Errors current_errors
 franka_msgs/Errors last_motion_errors

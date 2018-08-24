@@ -330,6 +330,38 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     publisher_franka_states_.msg_.last_motion_errors =
         errorsToMessage(robot_state_.last_motion_errors);
 
+    switch (robot_state_.robot_mode) {
+      case franka::RobotMode::kOther:
+        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_OTHER;
+        break;
+
+      case franka::RobotMode::kIdle:
+        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_IDLE;
+        break;
+
+      case franka::RobotMode::kMove:
+        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_MOVE;
+        break;
+
+      case franka::RobotMode::kGuiding:
+        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_GUIDING;
+        break;
+
+      case franka::RobotMode::kReflex:
+        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_REFLEX;
+        break;
+
+      case franka::RobotMode::kUserStopped:
+        publisher_franka_states_.msg_.robot_mode =
+            franka_msgs::FrankaState::ROBOT_MODE_USER_STOPPED;
+        break;
+
+      case franka::RobotMode::kAutomaticErrorRecovery:
+        publisher_franka_states_.msg_.robot_mode =
+            franka_msgs::FrankaState::ROBOT_MODE_AUTOMATIC_ERROR_RECOVERY;
+        break;
+    }
+
     publisher_franka_states_.msg_.header.seq = sequence_number_;
     publisher_franka_states_.msg_.header.stamp = time;
     publisher_franka_states_.unlockAndPublish();
