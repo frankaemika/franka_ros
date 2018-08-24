@@ -366,7 +366,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
 
   if (current_control_mode_ != requested_control_mode) {
     ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
-                    << requested_control_mode << "with parameters "
+                    << requested_control_mode << " with parameters "
                     << "limit_rate=" << limit_rate << ", cutoff_frequency=" << cutoff_frequency
                     << ", internal_controller=" << internal_controller);
     current_control_mode_ = requested_control_mode;
