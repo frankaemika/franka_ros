@@ -352,11 +352,13 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
         break;
 
       case franka::RobotMode::kUserStopped:
-        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_USER_STOPPED;
+        publisher_franka_states_.msg_.robot_mode =
+            franka_msgs::FrankaState::ROBOT_MODE_USER_STOPPED;
         break;
 
       case franka::RobotMode::kAutomaticErrorRecovery:
-        publisher_franka_states_.msg_.robot_mode = franka_msgs::FrankaState::ROBOT_MODE_AUTOMATIC_ERROR_RECOVERY;
+        publisher_franka_states_.msg_.robot_mode =
+            franka_msgs::FrankaState::ROBOT_MODE_AUTOMATIC_ERROR_RECOVERY;
         break;
     }
 
