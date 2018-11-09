@@ -307,7 +307,6 @@
       <origin rpy="0 0 0" xyz="0 0 0.107"/>
       <parent link="${arm_id}_link7"/>
       <child link="${arm_id}_link8"/>
-      <axis xyz="0 0 0"/>
     </joint>
   </xacro:macro>
 </robot>
