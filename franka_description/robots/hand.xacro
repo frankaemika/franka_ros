@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
-  <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' ">
+  <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' safety_distance:='0'">
     <xacro:unless value="${connected_to == ''}">
       <joint name="${ns}_hand_joint" type="fixed">
         <parent link="${connected_to}"/>
@@ -17,37 +17,37 @@
       <collision>
         <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
         <geometry>
-          <cylinder radius="0.04" length="0.1" />
+          <cylinder radius="${0.04+safety_distance}" length="0.1" />
         </geometry>
       </collision>
       <collision>
         <origin xyz="0 -0.05 0.04" rpy="0 0 0"/>
         <geometry>
-          <sphere radius="0.04" />
+          <sphere radius="${0.04+safety_distance}"  />
         </geometry>
       </collision>
       <collision>
         <origin xyz="0 0.05 0.04" rpy="0 0 0"/>
         <geometry>
-          <sphere radius="0.04" />
+          <sphere radius="${0.04+safety_distance}"  />
         </geometry>
       </collision>
       <collision>
         <origin xyz="0 0 0.1" rpy="0 ${pi/2} ${pi/2}"/>
         <geometry>
-          <cylinder radius="0.02" length="0.1" />
+          <cylinder radius="${0.02+safety_distance}" length="0.1" />
         </geometry>
       </collision>
       <collision>
         <origin xyz="0 -0.05 0.1" rpy="0 0 0"/>
         <geometry>
-          <sphere radius="0.02" />
+          <sphere radius="${0.02+safety_distance}"  />
         </geometry>
       </collision>
       <collision>
         <origin xyz="0 0.05 0.1" rpy="0 0 0"/>
         <geometry>
-          <sphere radius="0.02" />
+          <sphere radius="${0.02+safety_distance}"  />
         </geometry>
       </collision>
     </link>
