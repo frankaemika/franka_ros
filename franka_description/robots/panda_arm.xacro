@@ -285,7 +285,7 @@
     </joint>
     <link name="${arm_id}_link8">
       <collision>
-        <origin xyz="0.0424 0.0424 -0.0250" rpy="${-pi/4} ${pi/2} 0"/>
+        <origin xyz="0.0424 0.0424 -0.0250" rpy="${pi} ${pi/2} ${pi/2}"/>
         <geometry>
           <cylinder radius="0.03" length="0.01" />
         </geometry>
