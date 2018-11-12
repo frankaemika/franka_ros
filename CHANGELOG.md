@@ -6,7 +6,7 @@ Requires `libfranka` >= 0.5.0
 
   * Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config)
   * Publish `robot_mode` in `franka_state_controller`
-
+  * Added support for ROS Melodic Morenia.
 ## 0.6.0 - 2018-08-08
 
 Requires `libfranka` >= 0.5.0

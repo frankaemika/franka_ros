@@ -1,6 +1,7 @@
 #!groovy
 
-node('docker') {
+def get_stages(ubuntu_version, ros_distribution){
+  node('docker') {
   step([$class: 'StashNotifier'])
 
   try {
@@ -30,10 +31,11 @@ node('docker') {
       '''
     }
 
-    docker.build('franka_ros-ci-worker', 'src/franka_ros/.ci').inside {
+    docker.build("franka_ros-ci-worker:${ubuntu_version}", "-f src/franka_ros/.ci/Dockerfile.${ubuntu_version} .ci").inside {
       withEnv(["CMAKE_PREFIX_PATH+=${env.WORKSPACE}/dist/libfranka/lib/cmake/Franka",
                "ROS_HOME=${env.WORKSPACE}/ros-home"]) {
         stage('Build & Lint (Debug)') {
+          sh ". /opt/ros/${ros_distribution}/setup.sh"
           sh 'src/franka_ros/.ci/debug.sh'
           junit 'build-debug/test_results/**/*.xml'
         }
@@ -48,3 +50,11 @@ node('docker') {
     step([$class: 'StashNotifier'])
   }
 }
+
+}
+
+
+parallel(
+  'xenial': get_stages('xenial, kinetic'),
+  'bionic': get_stages('bionic, melodic'),
+)
