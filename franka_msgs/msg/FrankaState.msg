@@ -5,6 +5,7 @@ float64[7] q
 float64[7] q_d
 float64[7] dq
 float64[7] dq_d
+float64[7] ddq_d
 float64[7] theta
 float64[7] dtheta
 float64[7] tau_J
@@ -13,9 +14,15 @@ float64[7] tau_J_d
 float64[6] K_F_ext_hat_K
 float64[2] elbow
 float64[2] elbow_d
+float64[2] elbow_c
+float64[2] delbow_c
+float64[2] ddelbow_c
 float64[7] joint_collision
 float64[7] joint_contact
 float64[6] O_F_ext_hat_K
+float64[6] O_dP_EE_d
+float64[6] O_dP_EE_c
+float64[6] O_ddP_EE_c
 float64[7] tau_ext_hat_filtered
 float64 m_ee
 float64[3] F_x_Cee
@@ -28,9 +35,11 @@ float64[3] F_x_Ctotal
 float64[9] I_total
 float64[16] O_T_EE
 float64[16] O_T_EE_d
+float64[16] O_T_EE_c
 float64[16] F_T_EE
 float64[16] EE_T_K
 float64 time
+float64 control_command_success_rate
 uint8 ROBOT_MODE_OTHER=0
 uint8 ROBOT_MODE_IDLE=1
 uint8 ROBOT_MODE_MOVE=2
