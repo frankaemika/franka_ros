@@ -257,9 +257,9 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     static_assert(sizeof(robot_state_.O_dP_EE_d) == sizeof(robot_state_.O_ddP_EE_c),
                   "Robot state end effector twist in base frame members do not have same size");
     for (size_t i = 0; i < robot_state_.cartesian_collision.size(); i++) {
-        publisher_franka_states_.msg_.O_dP_EE_d[i] = robot_state_.O_dP_EE_d[i];
-        publisher_franka_states_.msg_.O_dP_EE_c[i] = robot_state_.O_dP_EE_c[i];
-        publisher_franka_states_.msg_.O_ddP_EE_c[i] = robot_state_.O_ddP_EE_c[i];
+      publisher_franka_states_.msg_.O_dP_EE_d[i] = robot_state_.O_dP_EE_d[i];
+      publisher_franka_states_.msg_.O_dP_EE_c[i] = robot_state_.O_dP_EE_c[i];
+      publisher_franka_states_.msg_.O_ddP_EE_c[i] = robot_state_.O_ddP_EE_c[i];
     }
 
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.q_d),
@@ -352,7 +352,8 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     }
 
     publisher_franka_states_.msg_.time = robot_state_.time.toSec();
-    publisher_franka_states_.msg_.control_command_success_rate = robot_state_.control_command_success_rate;
+    publisher_franka_states_.msg_.control_command_success_rate =
+        robot_state_.control_command_success_rate;
     publisher_franka_states_.msg_.current_errors = errorsToMessage(robot_state_.current_errors);
     publisher_franka_states_.msg_.last_motion_errors =
         errorsToMessage(robot_state_.last_motion_errors);
