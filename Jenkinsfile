@@ -55,7 +55,6 @@ def get_stages(ros_distribution){
 
 }
 
-
 parallel(
   'kinetic': get_stages('kinetic'),
   'melodic': get_stages('melodic'),
