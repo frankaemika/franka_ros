@@ -6,6 +6,8 @@ Requires `libfranka` >= 0.5.0
 
   * Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config)
   * Publish `robot_mode` in `franka_state_controller`
+  * Update collision volumes
+  * URDF: Remove invalid `axis` for `joint8`
 
 ## 0.6.0 - 2018-08-08
 
