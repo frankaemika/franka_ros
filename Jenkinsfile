@@ -35,7 +35,7 @@ def get_stages(ros_distribution, ubuntu_version) {
                    "-f src/franka_ros/.ci/Dockerfile.${ros_distribution} src/franka_ros/.ci").inside {
         withEnv(["CMAKE_PREFIX_PATH+=${env.WORKSPACE}/dist/libfranka/lib/cmake/Franka",
                  "ROS_HOME=${env.WORKSPACE}/ros-home"]) {
-          stage('Build & Lint (Debug)') {
+          stage("${ros_distribution}: Build & Lint (Debug)") {
             sh """
               . /opt/ros/${ros_distribution}/setup.sh
               src/franka_ros/.ci/debug.sh
