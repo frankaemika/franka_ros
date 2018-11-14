@@ -37,24 +37,24 @@ void handleErrors(actionlib::SimpleActionServer<T_action>* server,
 
 using actionlib::SimpleActionServer;
 using control_msgs::GripperCommandAction;
+using franka_gripper::grasp;
 using franka_gripper::GraspAction;
 using franka_gripper::GraspEpsilon;
 using franka_gripper::GraspGoalConstPtr;
 using franka_gripper::GraspResult;
+using franka_gripper::gripperCommandExecuteCallback;
+using franka_gripper::homing;
 using franka_gripper::HomingAction;
 using franka_gripper::HomingGoalConstPtr;
 using franka_gripper::HomingResult;
+using franka_gripper::move;
 using franka_gripper::MoveAction;
 using franka_gripper::MoveGoalConstPtr;
 using franka_gripper::MoveResult;
+using franka_gripper::stop;
 using franka_gripper::StopAction;
 using franka_gripper::StopGoalConstPtr;
 using franka_gripper::StopResult;
-using franka_gripper::grasp;
-using franka_gripper::gripperCommandExecuteCallback;
-using franka_gripper::homing;
-using franka_gripper::move;
-using franka_gripper::stop;
 using franka_gripper::updateGripperState;
 
 int main(int argc, char** argv) {

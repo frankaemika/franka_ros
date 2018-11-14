@@ -1,0 +1,7 @@
+FROM osrf/ros:melodic-desktop-bionic
+RUN apt-get update && apt-get install -y \
+    clang-6.0 \
+    clang-format-6.0 \
+    clang-tidy-6.0 \
+    ros-melodic-ros-control \
+    && rm -rf /var/lib/apt/lists/*
