@@ -8,6 +8,7 @@ Requires `libfranka` >= 0.5.0
   * Publish `robot_mode` in `franka_state_controller`
   * Update collision volumes
   * URDF: Remove invalid `axis` for `joint8`
+  * Added support for ROS Melodic Morenia.
 
 ## 0.6.0 - 2018-08-08
 
