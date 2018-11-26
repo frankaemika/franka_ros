@@ -9,6 +9,7 @@ Requires `libfranka` >= 0.5.0
   * Update collision volumes
   * URDF: Remove invalid `axis` for `joint8`
   * Added support for ROS Melodic Morenia.
+  * Cartesian impedance example controller: Interpolate desired orientations with slerp and change orientation error to quaternion
 
 ## 0.6.0 - 2018-08-08
 
