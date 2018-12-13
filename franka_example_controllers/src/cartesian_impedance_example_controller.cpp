@@ -157,8 +157,10 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     orientation.coeffs() << -orientation.coeffs();
   }
   // "difference" quaternion
-  Eigen::Quaterniond error_quaternion(orientation * orientation_d_.inverse());
+  Eigen::Quaterniond error_quaternion(orientation.inverse() * orientation_d_);
   error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
+  // Transform to base frame
+  error.tail(3) << -transform.linear() * error.tail(3);
 
   // compute control
   // allocate variables
