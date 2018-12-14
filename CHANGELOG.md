@@ -4,12 +4,13 @@
 
 Requires `libfranka` >= 0.5.0
 
-  * Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config)
-  * Publish `robot_mode` in `franka_state_controller`
-  * Update collision volumes
-  * URDF: Remove invalid `axis` for `joint8`
+  * Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config).
+  * Publish `robot_mode` in `franka_state_controller`.
+  * Update collision volumes.
+  * URDF: Remove invalid `axis` for `joint8`.
   * Added support for ROS Melodic Morenia.
-  * Cartesian impedance example controller: Interpolate desired orientations with slerp and change orientation error to quaternion
+  * Cartesian impedance example controller: Interpolate desired orientations with slerp and change orientation error to quaternion.
+  * Raised minimum CMake version to 3.4 to match `libfranka`.
 
 ## 0.6.0 - 2018-08-08
 
