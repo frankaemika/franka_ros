@@ -22,6 +22,7 @@ std::ostream& operator<<(std::ostream& ostream, franka::ControllerMode mode) {
   } else {
     ostream << "<unknown>";
   }
+  return ostream;
 }
 }  // anonymous namespace
 
