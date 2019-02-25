@@ -182,11 +182,6 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   void resetError();
 
   /**
-   * Resets the limit interfaces.
-   */
-  void reset();
-
-  /**
    * Returns whether the controller needs to be reset.
    */
   bool controllerNeedsReset();
@@ -207,10 +202,6 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
     libfranka_cmd_mutex_.lock();
     T current_cmd = command;
     libfranka_cmd_mutex_.unlock();
-
-    if (time_step.toSec() == 0.0) {
-      reset();
-    }
 
     if (has_error_ || !controller_active_) {
       return franka::MotionFinished(current_cmd);

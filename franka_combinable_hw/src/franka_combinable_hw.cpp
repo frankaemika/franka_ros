@@ -443,7 +443,6 @@ bool FrankaCombinableHW::checkForConflict(const std::list<hardware_interface::Co
 void FrankaCombinableHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* start_list */,
                         const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
   if (current_control_mode_ != ControlMode::None) {
-    reset();
     controller_active_ = true;
   }
 }
@@ -557,15 +556,8 @@ void FrankaCombinableHW::write(const ros::Time&,  // NOLINT (readability-identif
   enforceLimits(period);
   libfranka_cmd_mutex_.lock();
   ros_cmd_mutex_.lock();
-  // print
   effort_joint_command_libfranka_.tau_J =
       saturateTorqueRate(effort_joint_command_ros_.tau_J, robot_state_libfranka_.tau_J_d);
-  // TODO(jaeh_ch): Can this print harm the rt-loop?
-  ROS_DEBUG("effort joint command = [%f, %f, %f, %f, %f, %f, %f]",
-            effort_joint_command_libfranka_.tau_J[0], effort_joint_command_libfranka_.tau_J[1],
-            effort_joint_command_libfranka_.tau_J[2], effort_joint_command_libfranka_.tau_J[3],
-            effort_joint_command_libfranka_.tau_J[4], effort_joint_command_libfranka_.tau_J[5],
-            effort_joint_command_libfranka_.tau_J[6]);
   pose_cartesian_command_libfranka_ = pose_cartesian_command_ros_;
   velocity_cartesian_command_libfranka_ = velocity_cartesian_command_ros_;
   ros_cmd_mutex_.unlock();
@@ -609,11 +601,6 @@ void FrankaCombinableHW::resetError() {
   }
   has_error_ = false;
   publishErrorState(has_error_);
-}
-
-void FrankaCombinableHW::reset() {
-    // TODO(jaeh_ch): Remove this method?
-    // position_joint_limit_interface_.reset();
 }
 
 bool FrankaCombinableHW::controllerNeedsReset() {
