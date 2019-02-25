@@ -1,12 +1,12 @@
 // Copyright (c) 2018 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
-#include <ros/ros.h>
 #include <controller_manager/controller_manager.h>
 #include <franka_combinable_hw/combined_franka_hw.h>
+#include <ros/ros.h>
 
-#include <stdexcept>
 #include <sched.h>
+#include <stdexcept>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_combined_control_node");
@@ -14,13 +14,15 @@ int main(int argc, char** argv) {
   // set current control_loop thread to read-time
   const int kThreadPriority = sched_get_priority_max(SCHED_FIFO);
   if (kThreadPriority == -1) {
-    ROS_ERROR("franka_combined_control_node: unable to get maximum possible thread priority: %s", std::strerror(errno));
+    ROS_ERROR("franka_combined_control_node: unable to get maximum possible thread priority: %s",
+              std::strerror(errno));
     return 1;
   }
   sched_param thread_param{};
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
-    ROS_ERROR("franka_combined_control_node: unable to set realtime scheduling: %s", std::strerror(errno));
+    ROS_ERROR("franka_combined_control_node: unable to set realtime scheduling: %s",
+              std::strerror(errno));
     return 1;
   }
 
@@ -32,8 +34,9 @@ int main(int argc, char** argv) {
   bool init_success = hw.init(nh, nh);
 
   if (!init_success) {
-    throw std::runtime_error("franka_combined_control_node:: Initialization of"
-                             "CombinedFrankaHW(franka_dual) failed!");
+    throw std::runtime_error(
+        "franka_combined_control_node:: Initialization of"
+        "CombinedFrankaHW(franka_dual) failed!");
     return 1;
   }
 

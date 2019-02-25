@@ -10,7 +10,6 @@
 #include <franka/rate_limiting.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
 
-
 namespace franka_hw {
 
 namespace {

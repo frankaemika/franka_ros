@@ -3,26 +3,25 @@
 
 #include <franka/exception.h>
 #include <franka_combinable_hw/franka_combinable_hw.h>
-#include <franka_hw/franka_state_interface.h>
+#include <franka_control/ErrorRecoveryAction.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
+#include <franka_hw/franka_state_interface.h>
 #include <franka_hw/resource_helpers.h>
-#include <franka_control/ErrorRecoveryAction.h>
 
 #include <pluginlib/class_list_macros.h>
 
 #include <cstdint>
 #include <exception>
 
-#include <joint_limits_interface/joint_limits_urdf.h>
 #include <hardware_interface/hardware_interface.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 #include <std_msgs/Bool.h>
 
-
 using franka_control::ErrorRecoveryResult;
-using franka_hw::ResourceWithClaimsMap;
-using franka_hw::getResourceMap;
 using franka_hw::ArmClaimedMap;
+using franka_hw::getResourceMap;
+using franka_hw::ResourceWithClaimsMap;
 
 namespace franka_combinable_hw {
 
@@ -72,7 +71,8 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
 
   if (!robot_hw_nh.getParam("joint_limit_warning_threshold", arm_id_)) {
     ROS_INFO(
-        "FrankaCombinableHW: no parameter joint_limit_warning_threshold is found, using default value %f",
+        "FrankaCombinableHW: no parameter joint_limit_warning_threshold is found, using default "
+        "value %f",
         joint_limit_warning_threshold_);
   }
 
@@ -103,7 +103,8 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
       for (const auto& joint_name : joint_names_) {
         auto urdf_joint = urdf_model_.getJoint(joint_name);
         if (!urdf_joint) {
-          ROS_ERROR_STREAM("FrankaCombinableHW: Could not get joint " << joint_name << " from urdf");
+          ROS_ERROR_STREAM("FrankaCombinableHW: Could not get joint " << joint_name
+                                                                      << " from urdf");
         }
         if (!urdf_joint->safety) {
           ROS_ERROR_STREAM("FrankaCombinableHW: Joint " << joint_name << " has no safety");
@@ -137,13 +138,12 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
 
   franka_hw::FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_ros_);
   franka_state_interface_.registerHandle(franka_state_handle);
-  franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(franka_state_handle,
-                                                         pose_cartesian_command_ros_.O_T_EE,
-                                                         pose_cartesian_command_ros_.elbow);
+  franka_hw::FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+      franka_state_handle, pose_cartesian_command_ros_.O_T_EE, pose_cartesian_command_ros_.elbow);
   franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
-  franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(franka_state_handle,
-                                                         velocity_cartesian_command_ros_.O_dP_EE,
-                                                         velocity_cartesian_command_ros_.elbow);
+  franka_hw::FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
+      franka_state_handle, velocity_cartesian_command_ros_.O_dP_EE,
+      velocity_cartesian_command_ros_.elbow);
   franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
 
   registerInterface(&franka_state_interface_);
@@ -297,26 +297,26 @@ void FrankaCombinableHW::controlLoop() {
 
 void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_handle) {
   services_
-      .advertiseService<franka_control::SetJointImpedance>(node_handle, "set_joint_impedance",
-                                                      [this](auto&& req, auto&& res) {
-                                                        return franka_control::setJointImpedance(
-                                                            *(this->robot_), req, res);
-                                                      })
-      .advertiseService<franka_control::SetCartesianImpedance>(node_handle, "set_cartesian_impedance",
-                                                          [this](auto&& req, auto&& res) {
-                                                            return franka_control::setCartesianImpedance(
-                                                                *(this->robot_), req, res);
-                                                          })
+      .advertiseService<franka_control::SetJointImpedance>(
+          node_handle, "set_joint_impedance",
+          [this](auto&& req, auto&& res) {
+            return franka_control::setJointImpedance(*(this->robot_), req, res);
+          })
+      .advertiseService<franka_control::SetCartesianImpedance>(
+          node_handle, "set_cartesian_impedance",
+          [this](auto&& req, auto&& res) {
+            return franka_control::setCartesianImpedance(*(this->robot_), req, res);
+          })
       .advertiseService<franka_control::SetEEFrame>(node_handle, "set_EE_frame",
-                                               [this](auto&& req, auto&& res) {
-                                                 return franka_control::setEEFrame(*(this->robot_), req,
-                                                                              res);
-                                               })
+                                                    [this](auto&& req, auto&& res) {
+                                                      return franka_control::setEEFrame(
+                                                          *(this->robot_), req, res);
+                                                    })
       .advertiseService<franka_control::SetKFrame>(node_handle, "set_K_frame",
-                                              [this](auto&& req, auto&& res) {
-                                                return franka_control::setKFrame(*(this->robot_), req,
-                                                                            res);
-                                              })
+                                                   [this](auto&& req, auto&& res) {
+                                                     return franka_control::setKFrame(
+                                                         *(this->robot_), req, res);
+                                                   })
       .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
           [this](auto&& req, auto&& res) {
@@ -328,11 +328,12 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
             return franka_control::setFullCollisionBehavior(*(this->robot_), req, res);
           })
       .advertiseService<franka_control::SetLoad>(
-          node_handle, "set_load",
-          [this](auto&& req, auto&& res) { return franka_control::setLoad(*(this->robot_), req, res); });
+          node_handle, "set_load", [this](auto&& req, auto&& res) {
+            return franka_control::setLoad(*(this->robot_), req, res);
+          });
 
   recovery_action_server_ =
-      std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> >(
+      std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>(
           node_handle, "error_recovery",
           [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
             try {
@@ -365,7 +366,8 @@ void FrankaCombinableHW::enforceLimits(const ros::Duration& period) {
   }
 }
 
-bool FrankaCombinableHW::checkForConflict(const std::list<hardware_interface::ControllerInfo>& info) const {
+bool FrankaCombinableHW::checkForConflict(
+    const std::list<hardware_interface::ControllerInfo>& info) const {
   ResourceWithClaimsMap resource_map = getResourceMap(info);
   // check for conflicts in single resources: no triple claims,
   // for 2 claims it must be one torque and one non-torque claim
@@ -402,13 +404,14 @@ bool FrankaCombinableHW::checkForConflict(const std::list<hardware_interface::Co
 
   // check for any claim to joint_position or joint velocity interface which are not supported
   if (arm_claim_map.find(arm_id_) != arm_claim_map.end()) {
-      if (arm_claim_map[arm_id_].joint_position_claims +
-              arm_claim_map[arm_id_].joint_velocity_claims > 0) {
-          ROS_ERROR_STREAM("FrankaCombinableHW: Invalid claim joint position or velocity interface."
-                           << "Note: joint position and joint velocity interfaces are not supported"
-                           << " in FrankaCombinableHW. Arm:"     << arm_id_ << ". Conflict!");
-          return true;
-      }
+    if (arm_claim_map[arm_id_].joint_position_claims +
+            arm_claim_map[arm_id_].joint_velocity_claims >
+        0) {
+      ROS_ERROR_STREAM("FrankaCombinableHW: Invalid claim joint position or velocity interface."
+                       << "Note: joint position and joint velocity interfaces are not supported"
+                       << " in FrankaCombinableHW. Arm:" << arm_id_ << ". Conflict!");
+      return true;
+    }
   }
 
   // check for conflicts between joint and cartesian level for each arm.
@@ -440,16 +443,18 @@ bool FrankaCombinableHW::checkForConflict(const std::list<hardware_interface::Co
 }
 
 // doSwitch runs on the main realtime thread
-void FrankaCombinableHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* start_list */,
-                        const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
+void FrankaCombinableHW::doSwitch(
+    const std::list<hardware_interface::ControllerInfo>& /* start_list */,
+    const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
   if (current_control_mode_ != ControlMode::None) {
     controller_active_ = true;
   }
 }
 
 // prepareSwitch runs on the background message handling thread
-bool FrankaCombinableHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
-                             const std::list<hardware_interface::ControllerInfo>& stop_list) {
+bool FrankaCombinableHW::prepareSwitch(
+    const std::list<hardware_interface::ControllerInfo>& start_list,
+    const std::list<hardware_interface::ControllerInfo>& stop_list) {
   ResourceWithClaimsMap start_resource_map = getResourceMap(start_list);
   ArmClaimedMap start_arm_claim_map;
   if (!getArmClaimedMap(start_resource_map, start_arm_claim_map)) {
@@ -514,8 +519,8 @@ bool FrankaCombinableHW::prepareSwitch(const std::list<hardware_interface::Contr
       run_function_ = [this](franka::Robot& robot) {
         robot.control(std::bind(&FrankaCombinableHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_libfranka_), _1, _2),
-                      std::bind(&FrankaCombinableHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_libfranka_), _1, _2),
+                      std::bind(&FrankaCombinableHW::controlCallback<franka::CartesianVelocities>,
+                                this, std::cref(velocity_cartesian_command_libfranka_), _1, _2),
                       limit_rate_);
       };
       break;
@@ -525,7 +530,8 @@ bool FrankaCombinableHW::prepareSwitch(const std::list<hardware_interface::Contr
   }
 
   if (current_control_mode_ != requested_control_mode) {
-    ROS_INFO_STREAM("FrankaCombinableHW: Prepared switching controllers to " << requested_control_mode);
+    ROS_INFO_STREAM("FrankaCombinableHW: Prepared switching controllers to "
+                    << requested_control_mode);
     current_control_mode_ = requested_control_mode;
 
     controller_active_ = false;
@@ -535,7 +541,7 @@ bool FrankaCombinableHW::prepareSwitch(const std::list<hardware_interface::Contr
 }
 
 void FrankaCombinableHW::read(const ros::Time&,        // NOLINT (readability-identifier-naming)
-                    const ros::Duration&) {  // NOLINT [readability-named-parameter]
+                              const ros::Duration&) {  // NOLINT [readability-named-parameter]
   controller_needs_reset_ = error_recovered_;
   ros_state_mutex_.lock();
   libfranka_state_mutex_.lock();
@@ -545,7 +551,7 @@ void FrankaCombinableHW::read(const ros::Time&,        // NOLINT (readability-id
 }
 
 void FrankaCombinableHW::write(const ros::Time&,  // NOLINT (readability-identifier-naming)
-                     const ros::Duration& period) {
+                               const ros::Duration& period) {
   // if flag `controlller_needs_reset_` was updated, then controller_manager. update(...,
   // reset_controller) must
   // have been executed to reset the controller.

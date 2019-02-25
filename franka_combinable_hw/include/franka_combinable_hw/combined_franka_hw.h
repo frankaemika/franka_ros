@@ -6,12 +6,11 @@
 #include <franka_combinable_hw/franka_combinable_hw.h>
 #include <franka_control/ErrorRecoveryAction.h>
 
-#include <ros/time.h>
-#include <ros/node_handle.h>
 #include <actionlib/server/simple_action_server.h>
+#include <ros/node_handle.h>
+#include <ros/time.h>
 
 #include <memory>
-
 
 namespace franka_combinable_hw {
 

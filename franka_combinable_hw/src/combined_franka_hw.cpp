@@ -3,12 +3,12 @@
 #include <franka_combinable_hw/franka_combinable_hw.h>
 
 #include <franka_combinable_hw/combined_franka_hw.h>
-#include <franka_hw/franka_hw.h>
 #include <franka_control/ErrorRecoveryAction.h>
+#include <franka_hw/franka_hw.h>
 
 #include <actionlib/server/simple_action_server.h>
-#include <ros/time.h>
 #include <ros/node_handle.h>
+#include <ros/time.h>
 
 #include <algorithm>
 #include <memory>
@@ -21,17 +21,19 @@ bool CombinedFrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
   bool success = CombinedRobotHW::init(root_nh, robot_hw_nh);
   // Error recovery server for all FrankaHWs
   dual_recovery_action_server_ =
-      std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> >(
+      std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>(
           robot_hw_nh, "error_recovery",
           [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
             try {
               is_recovering_ = true;
               for (const auto& robot_hw : robot_hw_list_) {
-                auto* franka_combinable_hw_ptr = dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
+                auto* franka_combinable_hw_ptr =
+                    dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
                 if (franka_combinable_hw_ptr != nullptr) {
                   franka_combinable_hw_ptr->resetError();
                 } else {
-                  ROS_ERROR("CombinedFrankaHW: dynamic_cast from RobotHW to FrankaCombinableHW failed.");
+                  ROS_ERROR(
+                      "CombinedFrankaHW: dynamic_cast from RobotHW to FrankaCombinableHW failed.");
                   is_recovering_ = false;
                   dual_recovery_action_server_->setAborted(
                       franka_control::ErrorRecoveryResult(),
@@ -43,7 +45,8 @@ bool CombinedFrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
               dual_recovery_action_server_->setSucceeded();
             } catch (const franka::Exception& ex) {
               is_recovering_ = false;
-              dual_recovery_action_server_->setAborted(franka_control::ErrorRecoveryResult(), ex.what());
+              dual_recovery_action_server_->setAborted(franka_control::ErrorRecoveryResult(),
+                                                       ex.what());
             }
           },
           false);
@@ -61,7 +64,8 @@ bool CombinedFrankaHW::controllerNeedsReset() {
   // Check if any of the RobotHW object needs a controller reset
   bool controller_reset = false;
   for (const auto& robot_hw : robot_hw_list_) {
-    auto* franka_combinable_hw_ptr = dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
+    auto* franka_combinable_hw_ptr =
+        dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
     if (franka_combinable_hw_ptr != nullptr) {
       controller_reset = controller_reset || franka_combinable_hw_ptr->controllerNeedsReset();
     } else {
@@ -80,10 +84,12 @@ void CombinedFrankaHW::handleError() {
 }
 
 bool CombinedFrankaHW::hasError() {
-  // TODO(qu_zh): save FrankaCombinableHW vector instead of RobotHW, if dynamic_cast is too expensive
+  // TODO(qu_zh): save FrankaCombinableHW vector instead of RobotHW, if dynamic_cast is too
+  // expensive
   bool has_error = false;
   for (const auto& robot_hw : robot_hw_list_) {
-    auto* franka_combinable_hw_ptr = dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
+    auto* franka_combinable_hw_ptr =
+        dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
     if (franka_combinable_hw_ptr != nullptr) {
       has_error = has_error || franka_combinable_hw_ptr->hasError();
     } else {
@@ -97,7 +103,8 @@ bool CombinedFrankaHW::hasError() {
 void CombinedFrankaHW::triggerError() {
   // Trigger error state of all RobotHW objects.
   for (const auto& robot_hw : robot_hw_list_) {
-    auto* franka_combinable_hw_ptr = dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
+    auto* franka_combinable_hw_ptr =
+        dynamic_cast<franka_combinable_hw::FrankaCombinableHW*>(robot_hw.get());
     if (franka_combinable_hw_ptr != nullptr) {
       franka_combinable_hw_ptr->triggerError();
     } else {
