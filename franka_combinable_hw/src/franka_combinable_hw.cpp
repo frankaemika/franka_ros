@@ -6,6 +6,7 @@
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
+#include <franka_hw/resource_helpers.h>
 #include <franka_control/ErrorRecoveryAction.h>
 
 #include <pluginlib/class_list_macros.h>
@@ -17,9 +18,11 @@
 #include <hardware_interface/hardware_interface.h>
 #include <std_msgs/Bool.h>
 
-#include "resource_helpers.h"
 
 using franka_control::ErrorRecoveryResult;
+using franka_hw::ResourceWithClaimsMap;
+using franka_hw::getResourceMap;
+using franka_hw::ArmClaimedMap;
 
 namespace franka_combinable_hw {
 

@@ -38,7 +38,6 @@ catkin_package(
 
 add_library(franka_combinable_hw
   src/franka_combinable_hw.cpp
-  src/resource_helpers.cpp
   src/combined_franka_hw.cpp
 )
 
