@@ -16,6 +16,8 @@
 #include <franka_control/SetKFrame.h>
 #include <franka_control/SetLoad.h>
 
+#include <vector>
+
 namespace franka_control {
 
 template <typename T>
@@ -37,6 +39,19 @@ ros::ServiceServer advertiseService(
         return true;
       });
 }
+
+class ServiceContainer {
+ public:
+  template <typename T, typename... TArgs>
+  ServiceContainer& advertiseService(TArgs&&... args) {
+    ros::ServiceServer server = franka_control::advertiseService<T>(std::forward<TArgs>(args)...);
+    services_.push_back(server);
+    return *this;
+  }
+
+ private:
+  std::vector<ros::ServiceServer> services_;
+};
 
 void setCartesianImpedance(franka::Robot& robot,
                            const SetCartesianImpedance::Request& req,
