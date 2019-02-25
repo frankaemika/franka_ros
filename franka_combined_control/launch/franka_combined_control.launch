@@ -2,13 +2,12 @@
 <launch>
 
   <!-- The path to a robot description (xacro) file to control -->
-  <arg name="robot" />
+  <arg name="robot" default="$(find franka_description)/robots/dual_panda_example.urdf.xacro" />
   
   <!-- Additional XACRO args. Be sure to escape colons and equal signs
        with backslashes, because XACRO use same syntax as roslaunch:
+       roslaunch <pkg> <launchfile> robot:=path/to/urdf.xacro args:="foo\:\=bar other\:\=true"  -->
 
-       roslaunch <pkg> <launchfile> robot:=path/to/urdf.xacro args:="foo\:\=bar other\:\=true"
-  -->
   <arg name="args" default="" />
 
   <arg name="robot_id" default="panda_dual" />
