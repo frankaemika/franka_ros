@@ -135,11 +135,7 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
 
 namespace franka_control {
 
-FrankaStateController::FrankaStateController()
-    : franka_state_interface_(nullptr),
-      franka_state_handle_(nullptr),
-
-      trigger_publish_(30.0) {}
+FrankaStateController::FrankaStateController() : trigger_publish_(30.0) {}
 
 bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                                  ros::NodeHandle& root_node_handle,
