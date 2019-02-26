@@ -482,7 +482,6 @@ void FrankaCombinableHW::doSwitch(
   if (current_control_mode_ != ControlMode::None) {
     controller_active_ = true;
   }
-  // TODO (jaeh_ch): else controller_active_ = false?
 }
 
 // prepareSwitch runs on the background message handling thread
