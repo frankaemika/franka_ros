@@ -17,7 +17,7 @@ namespace franka_combinable_hw {
 class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
  public:
   /**
-   * Creates an instance of CombinedFrankaHW
+   * Creates an instance of CombinedFrankaHW.
    *
    */
   FrankaCombinedHW();
@@ -29,22 +29,24 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
    * non-realtime thread.
    *
    * @param[in] root_nh A NodeHandle in the root of the caller namespace.
-   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW
+   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW.
    * should read its configuration.
-   * @return True if initialization was successful
+   * @return True if initialization was successful.
    */
   virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
   /**
    * Reads data from the robot HW
    *
-   * @param[in] time The current time
-   * @param[in] period The time passed since the last call to \ref read
+   * @param[in] time The current time.
+   * @param[in] period The time passed since the last call to \ref read.
    */
   virtual void read(const ros::Time& time, const ros::Duration& period) override;
 
   /**
-   * Returns whether the controller needs to be reset.
+   * Checks whether the controller needs to be reset.
+   *
+   * @return True if the controllers needs to be reset, false otherwise.
    */
   bool controllerNeedsReset();
 
