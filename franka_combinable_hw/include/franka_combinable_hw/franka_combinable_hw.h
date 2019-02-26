@@ -51,7 +51,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   static constexpr double kMaximumJointJerk{4000.0};
 
   /**
-   * Creates an instance of FrankaCombinableHW
+   * Creates an instance of FrankaCombinableHW.
    *
    */
   FrankaCombinableHW();
@@ -87,7 +87,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
    * If no controller is active, the function immediately exits. When running a controller,
    * the function only exits when ros_callback returns false.
    *
-   * @param[in] robot Robot instance.
+   * @param[in] robot  A libfranka Robot instance.
    *
    * @throw franka::ControlException if an error related to torque control or motion generation
    * occurred.
@@ -112,8 +112,8 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   bool controllerActive() const noexcept;
 
   /**
-   * Checks whether a requested controller can be run, based on the resources
-   * and interfaces it claims.
+   * Checks whether a requested controller can be run, based on the resources and interfaces it
+   * claims.
    *
    * @param[in] info Controllers to be running at the same time.
    *
@@ -139,18 +139,18 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
                      const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
-   * Reads data from the franka robot
+   * Reads data from the franka robot.
    *
-   * \param time The current time
-   * \param period The time passed since the last call to \ref read
+   * @param[in] time The current time.
+   * @param[in] period The time passed since the last call to \ref read.
    */
   void read(const ros::Time& time, const ros::Duration& period) override;
 
   /**
-   * Writes data to the franka robot
+   * Writes data to the franka robot.
    *
-   * \param time The current time
-   * \param period The time passed since the last call to \ref write
+   * @param[in] time The current time.
+   * @param[in] period The time passed since the last call to \ref write.
    */
   void write(const ros::Time& time, const ros::Duration& period) override;
 
