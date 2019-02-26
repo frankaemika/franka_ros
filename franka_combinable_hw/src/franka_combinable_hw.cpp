@@ -48,7 +48,7 @@ FrankaCombinableHW::FrankaCombinableHW()
     : joint_names_(joint_names),
       arm_id_(arm_id),
 */
-bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+bool FrankaCombinableHW::initDisconnected(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (initialized_) {
     ROS_ERROR("FrankaCombinableHW: Cannot be initialized twice.");
     return false;
@@ -77,11 +77,6 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
   }
 
   for (size_t i = 0; i < joint_names_.size(); ++i) {
-    // TODO(jaeh_ch): why do we have to versions of the joint_handles?
-    hardware_interface::JointStateHandle joint_handle_q_d(joint_names_[i], &robot_state_ros_.q_d[i],
-                                                          &robot_state_ros_.dq_d[i],
-                                                          &robot_state_ros_.tau_J[i]);
-
     hardware_interface::JointStateHandle joint_handle_q(joint_names_[i], &robot_state_ros_.q[i],
                                                         &robot_state_ros_.dq[i],
                                                         &robot_state_ros_.tau_J[i]);
@@ -152,7 +147,33 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
   registerInterface(&franka_pose_cartesian_interface_);
   registerInterface(&franka_velocity_cartesian_interface_);
 
-  // Initialize franka::Robot, register model interface and start control loop
+  // Setup error state publisher
+  has_error_pub_ = robot_hw_nh.advertise<std_msgs::Bool>("has_error", 1, true);
+  publishErrorState(has_error_);
+
+  // Setup ROS services and action server
+  setupServicesAndActionServers(robot_hw_nh);
+
+  initialized_ = true;
+  return true;
+}
+
+/*
+ * Data from ROS parameter server:
+ *  1. const std::array<std::string, 7>& joint_names
+ *  2. const std::string& arm_id
+ *
+    : joint_names_(joint_names),
+      arm_id_(arm_id),
+*/
+bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+  // Initialize ROS-interfaces
+  if (not initDisconnected(root_nh, robot_hw_nh)) {
+    ROS_ERROR("FrankaCombinableHW: Failed to initialize interfaces.");
+    return false;
+  }
+
+  // Initialize and connect to franka::Robot, register model interface and start control loop
   try {
     if (!initRobot(robot_hw_nh)) {
       ROS_ERROR("FrankaCombinableHW: Failed to initialize libfranka robot.");
@@ -163,14 +184,6 @@ bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
     return false;
   }
 
-  // Setup error state publisher
-  has_error_pub_ = robot_hw_nh.advertise<std_msgs::Bool>("has_error", 1, true);
-  publishErrorState(has_error_);
-
-  // Setup ROS services and action server TODO: root_nh or robot_hw_nh
-  setupServicesAndActionServers(robot_hw_nh);
-
-  initialized_ = true;
   return true;
 }
 
@@ -210,24 +223,30 @@ void FrankaCombinableHW::checkJointLimits() {
   // Check joint limits and print warning if any joint is close to limit
   std::string joint_limits_warning;
   for (const auto& k_joint_name : joint_names_) {
-    // TODO(jaeh_ch): add check if that fails?
-    auto joint_handle = joint_state_interface_.getHandle(k_joint_name);
-    auto urdf_joint = urdf_model_.getJoint(k_joint_name);
-    joint_limits_interface::JointLimits joint_limits;
-    if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
-      double joint_lower = joint_limits.min_position;
-      double joint_upper = joint_limits.max_position;
-      double joint_position = joint_handle.getPosition();
-      double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
-      if (dist < joint_limit_warning_threshold_) {
-        joint_limits_warning += "\n\t" + k_joint_name + ": " + std::to_string(dist * 180 / 3.14) +
-                                " degrees to joint limits (limits: [" +
-                                std::to_string(joint_lower) + ", " + std::to_string(joint_upper) +
-                                "]" + " q: " + std::to_string(joint_position) + ") ";
+    try {
+      auto joint_handle = joint_state_interface_.getHandle(k_joint_name);
+      auto urdf_joint = urdf_model_.getJoint(k_joint_name);
+      joint_limits_interface::JointLimits joint_limits;
+      if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
+        double joint_lower = joint_limits.min_position;
+        double joint_upper = joint_limits.max_position;
+        double joint_position = joint_handle.getPosition();
+        double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
+        if (dist < joint_limit_warning_threshold_) {
+          joint_limits_warning += "\n\t" + k_joint_name + ": " + std::to_string(dist * 180 / 3.14) +
+                                  " degrees to joint limits (limits: [" +
+                                  std::to_string(joint_lower) + ", " + std::to_string(joint_upper) +
+                                  "]" + " q: " + std::to_string(joint_position) + ") ";
+        }
+      } else {
+        ROS_ERROR_STREAM_ONCE("FrankaCombinableHW: Could not parse joint limit for joint "
+                              << k_joint_name << " for joint limit interfaces");
       }
-    } else {
-      ROS_ERROR_STREAM_ONCE("FrankaCombinableHW: Could not parse joint limit for joint "
-                            << k_joint_name << " for joint limit interfaces");
+    } catch (const hardware_interface::HardwareInterfaceException& ex) {
+      ROS_ERROR_STREAM_ONCE("FrankaCombinableHW: Could not get joint handle " << k_joint_name
+                                                                              << " .\n"
+                                                                              << ex.what());
+      return;
     }
   }
 

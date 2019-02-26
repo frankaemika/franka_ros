@@ -51,19 +51,31 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   static constexpr double kMaximumJointJerk{4000.0};
 
   /**
-   * Creates an instance of FrankaHW
+   * Creates an instance of FrankaCombinableHW
    *
    */
   FrankaCombinableHW();
 
   /**
-   * Creates an instance of FrankaCombinableHW that provides a model interface.
+   * Initializes the FrankaCombinableHW class as far as possible without connecting to a robot. This
+   * includes setting up state, limit and command interfaces, publishers, services and actions.
+   * Note: This method is mainly for testing purposes. Use the init method to control real hardware.
    *
    * @param[in] root_nh A NodeHandle in the root of the caller namespace.
-   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW
+   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW.
+   * @return True if the disconnected initialization was successful, false otherwise.
+   */
+  bool initDisconnected(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
+
+  /**
+   * Initializes the FrankaCombinableHW with model, state, limit and command interfaces and connects
+   * to a panda robot via an IP provided via the parameter server.
+   *
+   * @param[in] root_nh A NodeHandle in the root of the caller namespace.
+   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW.
    * should read its configuration.
    *
-   * @return True if initialization was successful
+   * @return True if initialization was successful, false otherwise.
    */
   bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
