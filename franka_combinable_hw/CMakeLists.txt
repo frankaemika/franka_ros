@@ -76,14 +76,6 @@ if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
 
-# TODO
-#install(FILES franka_hw_plugin.xml
-#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-#)
-#if(CATKIN_ENABLE_TESTING)
-#  add_subdirectory(test)
-#endif()
-
 ## Tools
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
   RESULT_VARIABLE CLANG_TOOLS
