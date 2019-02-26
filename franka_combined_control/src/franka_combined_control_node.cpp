@@ -1,8 +1,8 @@
-// Copyright (c) 2018 Franka Emika GmbH
+// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
 #include <controller_manager/controller_manager.h>
-#include <franka_combinable_hw/combined_franka_hw.h>
+#include <franka_combinable_hw/franka_combined_hw.h>
 #include <ros/ros.h>
 
 #include <sched.h>
@@ -30,13 +30,13 @@ int main(int argc, char** argv) {
   spinner.start();
 
   ros::NodeHandle nh("~");
-  franka_combinable_hw::CombinedFrankaHW hw;
+  franka_combinable_hw::FrankaCombinedHW hw;
   bool init_success = hw.init(nh, nh);
 
   if (!init_success) {
     throw std::runtime_error(
         "franka_combined_control_node:: Initialization of"
-        "CombinedFrankaHW(franka_dual) failed!");
+        "FrankaCombinedHW(franka_dual) failed!");
     return 1;
   }
 

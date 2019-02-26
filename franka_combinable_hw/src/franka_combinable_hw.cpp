@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2017 Franka Emika GmbH
+﻿// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
 #include <franka/exception.h>
@@ -48,7 +48,7 @@ FrankaCombinableHW::FrankaCombinableHW()
     : joint_names_(joint_names),
       arm_id_(arm_id),
 */
-bool FrankaCombinableHW::initDisconnected(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (initialized_) {
     ROS_ERROR("FrankaCombinableHW: Cannot be initialized twice.");
     return false;
@@ -168,7 +168,7 @@ bool FrankaCombinableHW::initDisconnected(ros::NodeHandle& root_nh, ros::NodeHan
 */
 bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   // Initialize ROS-interfaces
-  if (not initDisconnected(root_nh, robot_hw_nh)) {
+  if (not initROSInterfaces(root_nh, robot_hw_nh)) {
     ROS_ERROR("FrankaCombinableHW: Failed to initialize interfaces.");
     return false;
   }
@@ -406,7 +406,7 @@ bool FrankaCombinableHW::checkForConflict(
           other_claims++;
         }
       }
-      if (torque_claims != 1) {
+      if (torque_claims == 0) {
         ROS_ERROR_STREAM("FrankaCombinableHW: Resource "
                          << map_it->first
                          << " is claimed with two non-compatible interfaces. Conflict!");
@@ -417,7 +417,7 @@ bool FrankaCombinableHW::checkForConflict(
 
   ArmClaimedMap arm_claim_map;
   if (!getArmClaimedMap(resource_map, arm_claim_map)) {
-    ROS_ERROR_STREAM("FrankaCombinableHW: Unknown interface claimed. Conflict!");
+    ROS_ERROR("FrankaCombinableHW: Unknown interface claimed. Conflict!");
     return true;
   }
 
@@ -429,6 +429,20 @@ bool FrankaCombinableHW::checkForConflict(
       ROS_ERROR_STREAM("FrankaCombinableHW: Invalid claim joint position or velocity interface."
                        << "Note: joint position and joint velocity interfaces are not supported"
                        << " in FrankaCombinableHW. Arm:" << arm_id_ << ". Conflict!");
+      return true;
+    }
+  }
+
+  // check for any claim to cartesian interfaces without torque interface
+  if (arm_claim_map.find(arm_id_) != arm_claim_map.end()) {
+    if (arm_claim_map[arm_id_].cartesian_velocity_claims +
+                arm_claim_map[arm_id_].cartesian_pose_claims >
+            0 &&
+        arm_claim_map[arm_id_].joint_torque_claims == 0) {
+      ROS_ERROR_STREAM(
+          "FrankaCombinableHW: Invalid claim cartesian interface without joint torque"
+          " interface. Arm:"
+          << arm_id_ << ". Conflict!");
       return true;
     }
   }
@@ -468,6 +482,7 @@ void FrankaCombinableHW::doSwitch(
   if (current_control_mode_ != ControlMode::None) {
     controller_active_ = true;
   }
+  // TODO (jaeh_ch): else controller_active_ = false?
 }
 
 // prepareSwitch runs on the background message handling thread

@@ -38,7 +38,7 @@ catkin_package(
 
 add_library(franka_combinable_hw
   src/franka_combinable_hw.cpp
-  src/combined_franka_hw.cpp
+  src/franka_combined_hw.cpp
 )
 
 add_dependencies(franka_combinable_hw
@@ -71,6 +71,10 @@ install(TARGETS franka_combinable_hw
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
 
 # TODO
 #install(FILES franka_hw_plugin.xml

@@ -15,7 +15,7 @@
   <arg name="robot_right_ip" default="robot_right.franka.de" />
 
   <node name="$(arg robot_id)" pkg="franka_combined_control" type="franka_combined_control_node" output="screen" required="true" >
-    <rosparam command="load" file="$(find franka_combined_control)/config/franka_combined_control.yaml" />
+    <rosparam command="load" file="$(find franka_combined_control)/config/franka_combined_control_node.yaml" />
     <param name="panda_left/robot_ip" value="$(arg robot_left_ip)" />
     <param name="panda_right/robot_ip" value="$(arg robot_right_ip)" />
     <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
@@ -27,7 +27,7 @@
     <node name="state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
       args="panda_left_state_controller panda_right_state_controller"/>
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-    <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
+      <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
       <rosparam param="source_list">[panda_left_state_controller/joint_states,
         panda_right_state_controller/joint_states,
         panda_left_gripper_node/joint_states,
