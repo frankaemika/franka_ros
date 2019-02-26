@@ -59,7 +59,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
   RESULT_VARIABLE CLANG_TOOLS
 )
 if(CLANG_TOOLS)
-  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/franka_combined_control_node.cpp)
   add_format_target(franka_combined_control FILES ${SOURCES})
   add_tidy_target(franka_combined_control
     FILES ${SOURCES}
