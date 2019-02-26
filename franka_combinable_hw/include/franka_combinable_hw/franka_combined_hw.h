@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
@@ -14,15 +14,15 @@
 
 namespace franka_combinable_hw {
 
-class CombinedFrankaHW : public combined_robot_hw::CombinedRobotHW {
+class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
  public:
   /**
    * Creates an instance of CombinedFrankaHW
    *
    */
-  CombinedFrankaHW();
+  FrankaCombinedHW();
 
-  ~CombinedFrankaHW() {}
+  ~FrankaCombinedHW() {}
 
   /**
    * The init function is called to initialize the CombinedFrankaHW from a

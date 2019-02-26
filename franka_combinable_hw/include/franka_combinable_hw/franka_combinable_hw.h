@@ -65,7 +65,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
    * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW.
    * @return True if the disconnected initialization was successful, false otherwise.
    */
-  bool initDisconnected(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
+  bool initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
 
   /**
    * Initializes the FrankaCombinableHW with model, state, limit and command interfaces and connects
@@ -98,12 +98,9 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   void control(franka::Robot& robot);
 
   /**
-   * Updates the controller interfaces from the given robot state.
+   * Updates the robot state in the controller interfaces from the given robot state.
    *
    * @param[in] robot_state Current robot state.
-   *
-   * @throw franka::InvalidOperationException if a conflicting operation is already running.
-   * @throw franka::NetworkException if the connection is lost.
    */
   void update(const franka::RobotState& robot_state);
 
