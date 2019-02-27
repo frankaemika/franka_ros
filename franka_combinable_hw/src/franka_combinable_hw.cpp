@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
 #include <franka/exception.h>
+#include <franka/rate_limiting.h>
 #include <franka_combinable_hw/franka_combinable_hw.h>
 #include <franka_control/ErrorRecoveryAction.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
@@ -24,9 +25,6 @@ using franka_hw::getResourceMap;
 using franka_hw::ResourceWithClaimsMap;
 
 namespace franka_combinable_hw {
-
-constexpr double FrankaCombinableHW::kMaximumJointAcceleration;
-constexpr double FrankaCombinableHW::kMaximumJointJerk;
 
 FrankaCombinableHW::FrankaCombinableHW()
     : effort_joint_command_libfranka_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
@@ -96,6 +94,7 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
       joint_limits_interface::JointLimits joint_limits;
 
       for (const auto& joint_name : joint_names_) {
+        int joint_index(std::stoi(joint_name.substr(joint_name.size() - 1)) - 1);
         auto urdf_joint = urdf_model_.getJoint(joint_name);
         if (!urdf_joint) {
           ROS_ERROR_STREAM("FrankaCombinableHW: Could not get joint " << joint_name
@@ -110,9 +109,9 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
 
         if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
           if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
-            joint_limits.max_acceleration = kMaximumJointAcceleration;
+            joint_limits.max_acceleration = franka::kMaxJointAcceleration[joint_index];
             joint_limits.has_acceleration_limits = true;
-            joint_limits.max_jerk = kMaximumJointJerk;
+            joint_limits.max_jerk = franka::kMaxJointJerk[joint_index];
             joint_limits.has_jerk_limits = true;
             joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
                 effort_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
