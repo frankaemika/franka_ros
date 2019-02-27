@@ -22,7 +22,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
    */
   FrankaCombinedHW();
 
-  ~FrankaCombinedHW() {}
+  ~FrankaCombinedHW() override = default;  // NOLINT (clang-analyzer-optin.cplusplus.VirtualCall)
 
   /**
    * The init function is called to initialize the CombinedFrankaHW from a
