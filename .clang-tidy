@@ -1,4 +1,4 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,-clang-diagnostic-deprecated-declarations,-modernize-pass-by-value,-clang-diagnostic-reinterpret-base-class,-clang-diagnostic-return-type,-clang-diagnostic-switch'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-optin.cplusplus.VirtualCall,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,-clang-diagnostic-deprecated-declarations,-modernize-pass-by-value,-clang-diagnostic-reinterpret-base-class,-clang-diagnostic-return-type,-clang-diagnostic-switch'
 HeaderFilterRegex: '^franka_.*'
 CheckOptions:
 # Classes, structs, ...
