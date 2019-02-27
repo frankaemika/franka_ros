@@ -37,20 +37,6 @@ namespace franka_combinable_hw {
 class FrankaCombinableHW : public hardware_interface::RobotHW {
  public:
   /**
-   * Maximum allowed joint acceleration.
-   *
-   * Used to limit commanded joint positions, velocities, and torques.
-   */
-  static constexpr double kMaximumJointAcceleration{1.0};
-
-  /**
-   * Maximum allowed joint jerk.
-   *
-   * Used to limit commanded joint positions, velocities, and torques.
-   */
-  static constexpr double kMaximumJointJerk{4000.0};
-
-  /**
    * Creates an instance of FrankaCombinableHW.
    *
    */
