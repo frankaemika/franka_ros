@@ -45,7 +45,8 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   /**
    * Initializes the FrankaCombinableHW class as far as possible without connecting to a robot. This
    * includes setting up state, limit and command interfaces, publishers, services and actions.
-   * Note: This method is mainly for testing purposes. Use the init method to control real hardware.
+   * Note: This method is mainly for testing purposes. Use the \ref init() method to control real
+   * hardware.
    *
    * @param[in] root_nh A NodeHandle in the root of the caller namespace.
    * @param[in] robot_hw_nh A NodeHandle in the namespace from which the RobotHW.

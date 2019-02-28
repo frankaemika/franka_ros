@@ -6,7 +6,7 @@
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
 
-  <url type="website">http://wiki.ros.org/franka_dual_control</url>
+  <url type="website">http://wiki.ros.org/franka_combined_control</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
   <author>Franka Emika GmbH</author>

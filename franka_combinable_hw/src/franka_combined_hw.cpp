@@ -20,7 +20,7 @@ FrankaCombinedHW::FrankaCombinedHW() = default;
 bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   bool success = CombinedRobotHW::init(root_nh, robot_hw_nh);
   // Error recovery server for all FrankaHWs
-  dual_recovery_action_server_ =
+  combined_recovery_action_server_ =
       std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>(
           robot_hw_nh, "error_recovery",
           [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
@@ -35,22 +35,22 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
                   ROS_ERROR(
                       "FrankaCombinedHW: dynamic_cast from RobotHW to FrankaCombinableHW failed.");
                   is_recovering_ = false;
-                  dual_recovery_action_server_->setAborted(
+                  combined_recovery_action_server_->setAborted(
                       franka_control::ErrorRecoveryResult(),
                       "dynamic_cast from RobotHW to FrankaCombinableHW failed");
                   return;
                 }
               }
               is_recovering_ = false;
-              dual_recovery_action_server_->setSucceeded();
+              combined_recovery_action_server_->setSucceeded();
             } catch (const franka::Exception& ex) {
               is_recovering_ = false;
-              dual_recovery_action_server_->setAborted(franka_control::ErrorRecoveryResult(),
-                                                       ex.what());
+              combined_recovery_action_server_->setAborted(franka_control::ErrorRecoveryResult(),
+                                                           ex.what());
             }
           },
           false);
-  dual_recovery_action_server_->start();
+  combined_recovery_action_server_->start();
   return success;
 }
 

@@ -52,7 +52,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
 
  protected:
   std::unique_ptr<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>
-      dual_recovery_action_server_;
+      combined_recovery_action_server_;
 
  private:
   void handleError();
