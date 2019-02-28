@@ -35,8 +35,7 @@ int main(int argc, char** argv) {
 
   if (!init_success) {
     throw std::runtime_error(
-        "franka_combined_control_node:: Initialization of"
-        "FrankaCombinedHW(franka_dual) failed!");
+        "franka_combined_control_node:: Initialization of FrankaCombinedHW failed!");
     return 1;
   }
 
