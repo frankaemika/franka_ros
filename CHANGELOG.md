@@ -4,8 +4,9 @@
 
 Requires `libfranka` >= 0.5.0
 
+  * `franka_description` : Added an example urdf with two panda arms.
   * `franka_combinable_hw`: Added this package to support torque-controlling multiple robots from one controller.
-  * `franka_combined_control`: Added this package
+  * `franka_combined_control`: Added this package which contains a control node that can run multiple instances of `FrankaCombinableHW`.
   * `franka_control`:
     - Publish `robot_mode` in `franka_state_controller`.
   * `franka_description`
