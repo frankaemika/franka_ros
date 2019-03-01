@@ -71,6 +71,9 @@ install(TARGETS franka_combinable_hw
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
+install(FILES franka_combinable_hw_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
 
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
