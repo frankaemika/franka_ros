@@ -10,6 +10,19 @@
         <origin rpy="${rpy}" xyz="${xyz}"/>
       </joint>
     </xacro:unless>
+
+    <!-- for simulation -->
+    <link name="world" />
+
+    <joint name="robot_to_world" type="fixed">
+      <parent link="world" />
+      <child link="${arm_id}_link0" />
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+    </joint>
+
+    <xacro:property name="joint_damping" value="1.0"/>
+    <!-- end for simulation -->
+
     <link name="${arm_id}_link0">
       <visual>
         <geometry>
@@ -34,6 +47,14 @@
           <sphere radius="${0.06+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="3.06" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <link name="${arm_id}_link1">
       <visual>
@@ -59,6 +80,14 @@
           <sphere radius="${0.06+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="2.34" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint1" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -67,6 +96,10 @@
       <child link="${arm_id}_link1"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link2">
       <visual>
@@ -92,6 +125,14 @@
           <sphere radius="${0.06+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="2.36" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint2" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
@@ -100,6 +141,10 @@
       <child link="${arm_id}_link2"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link3">
       <visual>
@@ -125,6 +170,14 @@
           <sphere radius="${0.06+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="2.38" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint3" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -133,6 +186,10 @@
       <child link="${arm_id}_link3"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link4">
       <visual>
@@ -158,6 +215,14 @@
           <sphere radius="${0.06+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="2.43" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint4" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
@@ -166,6 +231,10 @@
       <child link="${arm_id}_link4"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link5">
       <visual>
@@ -209,7 +278,13 @@
           <sphere radius="${0.025+safety_distance}" />
         </geometry>
       </collision>
-
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="3.5" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint5" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -218,6 +293,10 @@
       <child link="${arm_id}_link5"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link6">
       <visual>
@@ -243,6 +322,14 @@
           <sphere radius="${0.05+safety_distance}" />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="1.47" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint6" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
@@ -251,6 +338,10 @@
       <child link="${arm_id}_link6"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link7">
       <visual>
@@ -276,6 +367,14 @@
           <sphere radius="${0.04+safety_distance}"  />
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.45" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint7" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -284,6 +383,10 @@
       <child link="${arm_id}_link7"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+
+      <!-- for simulation -->
+      <dynamics damping="${joint_damping}"/>
+      <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link8">
       <collision>
@@ -304,6 +407,13 @@
           <sphere radius="${0.03+safety_distance}"  />
         </geometry>
       </collision>
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.0" />
+        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${arm_id}_joint8" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.107"/>

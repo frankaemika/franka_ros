@@ -3,5 +3,18 @@
   <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro"/>
   <xacro:include filename="$(find franka_description)/robots/hand.xacro"/>
   <xacro:panda_arm safety_distance="0.03"/>
+
+  <!-- for simulation -->
+  <xacro:include filename="$(find franka_description)/robots/panda.gazebo.xacro"/>
+  <xacro:include filename="$(find franka_description)/robots/panda.transmission.xacro"/>
+  <!-- end for simulation -->
+
+  <xacro:panda_arm />
   <xacro:hand ns="panda" rpy="0 0 ${-pi/4}" connected_to="panda_link8" safety_distance="0.03"/>
+
+  <!-- for simulation -->
+  <xacro:arg name="robot_name" default="panda"/>
+  <xacro:panda_gazebo robot_name="$(arg robot_name)" />
+  <xacro:panda_transmission robot_name="$(arg robot_name)" />
+  <!-- end for simulation -->
 </robot>
