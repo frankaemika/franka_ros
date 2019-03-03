@@ -19,6 +19,14 @@
           <mesh filename="package://franka_description/meshes/collision/hand.stl"/>
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.68" />
+        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <link name="${ns}_leftfinger">
       <visual>
@@ -31,6 +39,14 @@
           <mesh filename="package://franka_description/meshes/collision/finger.stl"/>
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.01" />
+        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <link name="${ns}_rightfinger">
       <visual>
@@ -45,6 +61,14 @@
           <mesh filename="package://franka_description/meshes/collision/finger.stl"/>
         </geometry>
       </collision>
+
+      <!-- for simulation -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.01" />
+        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+      </inertial>
+      <!-- end for simulation -->
     </link>
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
