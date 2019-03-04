@@ -44,14 +44,11 @@ add_library(franka_combinable_hw
 add_dependencies(franka_combinable_hw
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
-  franka_hw
 )
 
 target_link_libraries(franka_combinable_hw
   ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
-  franka_control_services
-  franka_hw
 )
 
 target_include_directories(franka_combinable_hw SYSTEM PUBLIC
