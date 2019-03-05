@@ -15,10 +15,10 @@
 #include <ros/time.h>
 #include <Eigen/Dense>
 
-#include <geometry_msgs/PoseStamped.h>
 #include <franka_combined_example_controllers/dual_arm_compliance_paramConfig.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <geometry_msgs/PoseStamped.h>
 
 namespace franka_combined_example_controllers {
 
@@ -71,17 +71,18 @@ class DualArmCartesianImpedanceExampleController
   void startingArm(FrankaDataContainer& arm_data);
 
   // Dynamic reconfigure
-  std::unique_ptr<
-      dynamic_reconfigure::Server<franka_combined_example_controllers::dual_arm_compliance_paramConfig>>
+  std::unique_ptr<dynamic_reconfigure::Server<
+      franka_combined_example_controllers::dual_arm_compliance_paramConfig>>
       dynamic_server_compliance_param_;
   ros::NodeHandle dynamic_reconfigure_compliance_param_node_;
-  void complianceParamCallback(franka_combined_example_controllers::dual_arm_compliance_paramConfig& config,
-                               uint32_t level);
+  void complianceParamCallback(
+      franka_combined_example_controllers::dual_arm_compliance_paramConfig& config,
+      uint32_t level);
 
   // Target pose subscriber
   ros::Subscriber sub_target_pose_left_;
   ros::Subscriber sub_target_pose_right_;
-  void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg,
+  void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg,
                           const std::string& arm_id);
 };
 
