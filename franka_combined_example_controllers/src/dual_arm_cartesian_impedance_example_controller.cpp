@@ -3,15 +3,15 @@
 #include <franka_combined_example_controllers/dual_arm_cartesian_impedance_example_controller.h>
 
 #include <cmath>
-#include <memory>
 #include <functional>
+#include <memory>
 
 #include <controller_interface/controller_base.h>
-#include <geometry_msgs/PoseStamped.h>
 #include <franka/robot_state.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <pluginlib/class_list_macros.h>
-#include <ros/transport_hints.h>
 #include <ros/ros.h>
+#include <ros/transport_hints.h>
 
 #include "pseudo_inversion.h"
 
@@ -109,22 +109,16 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
     return false;
   }
 
-  boost::function<void (const geometry_msgs::PoseStamped::ConstPtr&)> cb_left =
-          boost::bind(&DualArmCartesianImpedanceExampleController::targetPoseCallback,
-                       this,
-                       _1,
-                       left_arm_id_);
+  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_left = boost::bind(
+      &DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1, left_arm_id_);
 
   ros::SubscribeOptions ops_left;
   ops_left.init(left_arm_id_ + "/target_pose", 1, cb_left);
   ops_left.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
   sub_target_pose_left_ = node_handle.subscribe(ops_left);
 
-  boost::function<void (const geometry_msgs::PoseStamped::ConstPtr&)> cb_right =
-          boost::bind(&DualArmCartesianImpedanceExampleController::targetPoseCallback,
-                       this,
-                       _1,
-                       right_arm_id_);
+  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_right = boost::bind(
+      &DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1, right_arm_id_);
   ros::SubscribeOptions ops_right;
   ops_right.init(right_arm_id_ + "/target_pose", 1, cb_right);
   ops_right.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
@@ -146,8 +140,8 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
   dynamic_reconfigure_compliance_param_node_ =
       ros::NodeHandle("dynamic_reconfigure_compliance_param_node");
 
-  dynamic_server_compliance_param_ = std::make_unique<
-      dynamic_reconfigure::Server<franka_combined_example_controllers::dual_arm_compliance_paramConfig>>(
+  dynamic_server_compliance_param_ = std::make_unique<dynamic_reconfigure::Server<
+      franka_combined_example_controllers::dual_arm_compliance_paramConfig>>(
 
       dynamic_reconfigure_compliance_param_node_);
   dynamic_server_compliance_param_->setCallback(boost::bind(
@@ -292,11 +286,9 @@ void DualArmCartesianImpedanceExampleController::complianceParamCallback(
   left_arm_data.cartesian_damping_target_.setIdentity();
 
   left_arm_data.cartesian_damping_target_.topLeftCorner(3, 3)
-      << 2 * sqrt(config.left_translational_stiffness) *
-             Eigen::Matrix3d::Identity();
+      << 2 * sqrt(config.left_translational_stiffness) * Eigen::Matrix3d::Identity();
   left_arm_data.cartesian_damping_target_.bottomRightCorner(3, 3)
-      << 2 * sqrt(config.left_rotational_stiffness) *
-             Eigen::Matrix3d::Identity();
+      << 2 * sqrt(config.left_rotational_stiffness) * Eigen::Matrix3d::Identity();
   left_arm_data.nullspace_stiffness_target_ = config.left_nullspace_stiffness;
 
   auto& right_arm_data = arms_data_.at(right_arm_id_);
@@ -308,42 +300,40 @@ void DualArmCartesianImpedanceExampleController::complianceParamCallback(
   right_arm_data.cartesian_damping_target_.setIdentity();
 
   right_arm_data.cartesian_damping_target_.topLeftCorner(3, 3)
-      << 2 * sqrt(config.right_translational_stiffness) *
-             Eigen::Matrix3d::Identity();
+      << 2 * sqrt(config.right_translational_stiffness) * Eigen::Matrix3d::Identity();
   right_arm_data.cartesian_damping_target_.bottomRightCorner(3, 3)
-      << 2 * sqrt(config.right_rotational_stiffness) *
-             Eigen::Matrix3d::Identity();
+      << 2 * sqrt(config.right_rotational_stiffness) * Eigen::Matrix3d::Identity();
   right_arm_data.nullspace_stiffness_target_ = config.right_nullspace_stiffness;
 }
 
 void DualArmCartesianImpedanceExampleController::targetPoseCallback(
-        const geometry_msgs::PoseStamped::ConstPtr& msg,
-        const std::string& arm_id) {
+    const geometry_msgs::PoseStamped::ConstPtr& msg,
+    const std::string& arm_id) {
   try {
-        if (msg->header.frame_id != arm_id + "_link0") {
-            ROS_ERROR_STREAM("DualArmCartesianImpedanceExampleController: Got pose target with invalid"
-                      " frame_id " << msg->header.frame_id << ". Expected " << arm_id + "_link0");
-            return;
-        }
+    if (msg->header.frame_id != arm_id + "_link0") {
+      ROS_ERROR_STREAM(
+          "DualArmCartesianImpedanceExampleController: Got pose target with invalid"
+          " frame_id "
+          << msg->header.frame_id << ". Expected " << arm_id + "_link0");
+      return;
+    }
 
     auto& arm_data = arms_data_.at(arm_id);
-    arm_data.position_d_target_ << msg->pose.position.x,
-        msg->pose.position.y, msg->pose.position.z;
+    arm_data.position_d_target_ << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
     Eigen::Quaterniond last_orientation_d_target(arm_data.orientation_d_target_);
-    arm_data.orientation_d_target_.coeffs() << msg->pose.orientation.x,
-        msg->pose.orientation.y, msg->pose.orientation.z,
-        msg->pose.orientation.w;
+    arm_data.orientation_d_target_.coeffs() << msg->pose.orientation.x, msg->pose.orientation.y,
+        msg->pose.orientation.z, msg->pose.orientation.w;
     if (last_orientation_d_target.coeffs().dot(arm_data.orientation_d_target_.coeffs()) < 0.0) {
       arm_data.orientation_d_target_.coeffs() << -arm_data.orientation_d_target_.coeffs();
     }
   } catch (std::out_of_range& ex) {
-    ROS_ERROR_STREAM(
-        "DualArmCartesianImpedanceExampleController: Exception setting target pose for"
-        << arm_id << ex.what());
+    ROS_ERROR_STREAM("DualArmCartesianImpedanceExampleController: Exception setting target pose for"
+                     << arm_id << ex.what());
   }
 }
 
 }  // namespace franka_combined_example_controllers
 
-PLUGINLIB_EXPORT_CLASS(franka_combined_example_controllers::DualArmCartesianImpedanceExampleController,
-                       controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(
+    franka_combined_example_controllers::DualArmCartesianImpedanceExampleController,
+    controller_interface::ControllerBase)
