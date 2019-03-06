@@ -135,8 +135,6 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
 
 namespace franka_control {
 
-FrankaStateController::FrankaStateController() : trigger_publish_(30.0) {}
-
 bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
                                  ros::NodeHandle& root_node_handle,
                                  ros::NodeHandle& controller_node_handle) {
@@ -150,12 +148,11 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     return false;
   }
   double publish_rate(30.0);
-  if (controller_node_handle.getParam("publish_rate", publish_rate)) {
-    trigger_publish_ = franka_hw::TriggerRate(publish_rate);
-  } else {
+  if (not controller_node_handle.getParam("publish_rate", publish_rate)) {
     ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default "
                     << publish_rate << " [Hz].");
   }
+  trigger_publish_ = franka_hw::TriggerRate(publish_rate);
 
   if (!controller_node_handle.getParam("joint_names", joint_names_) ||
       joint_names_.size() != robot_state_.q.size()) {

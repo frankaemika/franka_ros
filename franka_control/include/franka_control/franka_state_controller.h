@@ -26,7 +26,7 @@ class FrankaStateController
   /**
    * Creates an instance of a FrankaStateController.
    */
-  FrankaStateController();
+  FrankaStateController() = default;
 
   /**
    * Initializes the controller with interfaces and publishers.
