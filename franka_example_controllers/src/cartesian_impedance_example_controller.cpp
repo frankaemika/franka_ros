@@ -10,7 +10,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 
-#include "pseudo_inversion.h"
+#include <franka_example_controllers/pseudo_inversion.h>
 
 namespace franka_example_controllers {
 
