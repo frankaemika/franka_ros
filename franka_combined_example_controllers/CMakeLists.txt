@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   controller_interface
   dynamic_reconfigure
   franka_combinable_hw
+  franka_example_controllers
   franka_hw
   geometry_msgs
   hardware_interface
@@ -33,6 +34,7 @@ catkin_package(
     controller_interface
     dynamic_reconfigure
     franka_combinable_hw
+    franka_example_controllers
     franka_hw
     geometry_msgs
     hardware_interface

@@ -13,7 +13,7 @@
 #include <ros/ros.h>
 #include <ros/transport_hints.h>
 
-#include "pseudo_inversion.h"
+#include <franka_example_controllers/pseudo_inversion.h>
 
 namespace franka_combined_example_controllers {
 
@@ -229,7 +229,7 @@ void DualArmCartesianImpedanceExampleController::updateArm(FrankaDataContainer& 
   // pseudoinverse for nullspace handling
   // kinematic pseuoinverse
   Eigen::MatrixXd jacobian_transpose_pinv;
-  pseudoInverse(jacobian.transpose(), jacobian_transpose_pinv);
+  franka_example_controllers::pseudoInverse(jacobian.transpose(), jacobian_transpose_pinv);
 
   // Cartesian PD control with damping ratio = 1
   tau_task << jacobian.transpose() * (-arm_data.cartesian_stiffness_ * error -
