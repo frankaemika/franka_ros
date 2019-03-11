@@ -84,8 +84,6 @@ void FrankaCombinedHW::handleError() {
 }
 
 bool FrankaCombinedHW::hasError() {
-  // TODO(qu_zh): save FrankaCombinableHW vector instead of RobotHW, if dynamic_cast is too
-  // expensive
   bool has_error = false;
   for (const auto& robot_hw : robot_hw_list_) {
     auto* franka_combinable_hw_ptr =
