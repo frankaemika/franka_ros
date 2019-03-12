@@ -37,14 +37,14 @@ struct FrankaDataContainer {
   const double delta_tau_max_{1.0};          // [Nm/ms] Maximum difference in joint-torque per
                                              // timestep. Used to saturated torque rates to ensure
                                              // feasible commands.
-  Eigen::Matrix<double, 6, 6> cartesian_stiffness_;           // To track the target pose.
-  Eigen::Matrix<double, 6, 6> cartesian_stiffness_target_;    // Unfiltered raw value.
-  Eigen::Matrix<double, 6, 6> cartesian_damping_;             // To damp cartesian motions.
-  Eigen::Matrix<double, 6, 6> cartesian_damping_target_;      // Unfiltered raw value.
-  Eigen::Matrix<double, 7, 1> q_d_nullspace_;                 // Target joint pose for nullspace
-                                                              // motion. For now we track the
-                                                              // initial joint pose.
-  Eigen::Vector3d position_d_;               // Target position of the endeffector.
+  Eigen::Matrix<double, 6, 6> cartesian_stiffness_;         // To track the target pose.
+  Eigen::Matrix<double, 6, 6> cartesian_stiffness_target_;  // Unfiltered raw value.
+  Eigen::Matrix<double, 6, 6> cartesian_damping_;           // To damp cartesian motions.
+  Eigen::Matrix<double, 6, 6> cartesian_damping_target_;    // Unfiltered raw value.
+  Eigen::Matrix<double, 7, 1> q_d_nullspace_;               // Target joint pose for nullspace
+                                                            // motion. For now we track the
+                                                            // initial joint pose.
+  Eigen::Vector3d position_d_;                              // Target position of the endeffector.
   Eigen::Quaterniond orientation_d_;         // Target orientation of the endeffector.
   Eigen::Vector3d position_d_target_;        // Unfiltered raw value.
   Eigen::Quaterniond orientation_d_target_;  // Unfiltered raw value.
@@ -59,7 +59,6 @@ class DualArmCartesianImpedanceExampleController
           hardware_interface::EffortJointInterface,
           franka_hw::FrankaStateInterface> {
  public:
-
   /**
    * Initializes the controller class to be ready to run.
    *

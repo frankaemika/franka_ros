@@ -17,9 +17,10 @@
 
 namespace franka_combined_example_controllers {
 
-bool DualArmCartesianImpedanceExampleController::initArm(hardware_interface::RobotHW* robot_hw,
-                                                         const std::string &arm_id,
-                                                         const std::vector<std::string> &joint_names) {
+bool DualArmCartesianImpedanceExampleController::initArm(
+    hardware_interface::RobotHW* robot_hw,
+    const std::string& arm_id,
+    const std::vector<std::string>& joint_names) {
   FrankaDataContainer arm_data;
   auto* model_interface = robot_hw->get<franka_hw::FrankaModelInterface>();
   if (model_interface == nullptr) {
