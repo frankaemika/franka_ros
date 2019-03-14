@@ -21,8 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(Eigen3 REQUIRED)
 find_package(Franka 0.3.0 REQUIRED)
 
-generate_messages(DEPENDENCIES actionlib_msgs geometry_msgs)
-
 generate_dynamic_reconfigure_options(
   cfg/dual_arm_compliance_param.cfg
 )
