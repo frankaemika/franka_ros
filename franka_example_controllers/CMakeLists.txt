@@ -34,6 +34,7 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
+  INCLUDE_DIRS include
   LIBRARIES franka_example_controllers
   CATKIN_DEPENDS
     controller_interface
