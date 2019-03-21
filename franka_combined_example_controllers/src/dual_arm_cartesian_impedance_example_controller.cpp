@@ -83,6 +83,8 @@ bool DualArmCartesianImpedanceExampleController::initArm(
   arm_data.cartesian_damping_.setZero();
 
   arms_data_.emplace(std::make_pair(arm_id, std::move(arm_data)));
+
+  return true;
 }
 
 bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotHW* robot_hw,
