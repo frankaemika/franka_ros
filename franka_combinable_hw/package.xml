@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_combinable_hw</name>
-  <version>0.3.0</version>
+  <version>0.7.0</version>
   <description>franka_combinable_hw provides hardware interfaces for using multiple Panda robots with ros_control</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>

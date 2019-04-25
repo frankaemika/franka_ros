@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_combined_example_controllers</name>
-  <version>0.0.0</version>
+  <version>0.7.0</version>
   <description>The franka_combined_example_controllers package</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -14,7 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>eigen</build_depend>
- 
+
   <depend>controller_interface</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>franka_combinable_hw</depend>
@@ -28,7 +28,7 @@
 
   <exec_depend>franka_combined_control</exec_depend>
   <exec_depend>rospy</exec_depend>
-  
+
   <export>
     <controller_interface plugin="${prefix}/franka_combined_example_controllers_plugin.xml"/>
   </export>
