@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_combined_control</name>
-  <version>0.3.0</version>
+  <version>0.7.0</version>
   <description>franka_combined_control provides a hardware node to control multiple Panda robots.</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>

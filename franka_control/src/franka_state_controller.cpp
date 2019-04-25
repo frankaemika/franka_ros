@@ -148,7 +148,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     return false;
   }
   double publish_rate(30.0);
-  if (not controller_node_handle.getParam("publish_rate", publish_rate)) {
+  if (!controller_node_handle.getParam("publish_rate", publish_rate)) {
     ROS_INFO_STREAM("FrankaStateController: Did not find publish_rate. Using default "
                     << publish_rate << " [Hz].");
   }

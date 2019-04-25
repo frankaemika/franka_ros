@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.4)
 project(franka_combinable_hw)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
   actionlib
@@ -17,11 +18,11 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
 )
 
-find_package(Franka 0.3.0 REQUIRED)
+find_package(Franka 0.5.0 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES franka_combinable_hw combined_robot_hw 
+  LIBRARIES franka_combinable_hw combined_robot_hw
   CATKIN_DEPENDS
     actionlib
     combined_robot_hw

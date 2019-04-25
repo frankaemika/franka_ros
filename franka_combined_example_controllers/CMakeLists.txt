@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.4)
 project(franka_combined_example_controllers)
 
-set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(Franka 0.3.0 REQUIRED)
+find_package(Franka 0.5.0 REQUIRED)
 
 generate_dynamic_reconfigure_options(
   cfg/dual_arm_compliance_param.cfg
@@ -38,6 +38,7 @@ catkin_package(
     hardware_interface
     pluginlib
     roscpp
+  DEPENDS Franka
 )
 
 add_library(franka_combined_example_controllers
@@ -54,7 +55,7 @@ target_include_directories(franka_combined_example_controllers SYSTEM PUBLIC
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_dependencies(franka_combined_example_controllers     
+add_dependencies(franka_combined_example_controllers
   ${${PROJECT_NAME}_EXPORTED_TARGETS}
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg
