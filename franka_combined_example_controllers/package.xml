@@ -23,8 +23,12 @@
   <depend>geometry_msgs</depend>
   <depend>hardware_interface</depend>
   <depend>pluginlib</depend>
+  <depend>tf</depend>
+  <depend>tf_conversions</depend>
   <depend>libfranka</depend>
   <depend>roscpp</depend>
+
+
 
   <exec_depend>franka_combined_control</exec_depend>
   <exec_depend>rospy</exec_depend>

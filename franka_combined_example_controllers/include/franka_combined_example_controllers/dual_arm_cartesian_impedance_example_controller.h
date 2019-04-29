@@ -87,6 +87,11 @@ class DualArmCartesianImpedanceExampleController
   std::string left_arm_id_;   // Name of the left arm, retreived from the parameter server.
   std::string right_arm_id_;  // Name of the right arm, retreived from the parameter server.
 
+  // Transformation between base frames of the robots.
+  Eigen::Affine3d Ol_T_Or_;  // NOLINT (readability-identifier-naming)
+  // Target transformation between the two endeffectors.
+  Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
+
   /**
    * Saturates torque commands to ensure feasibility.
    *
@@ -145,16 +150,14 @@ class DualArmCartesianImpedanceExampleController
 
   // Target pose subscriber
   ros::Subscriber sub_target_pose_left_;
-  ros::Subscriber sub_target_pose_right_;
+  // ros::Subscriber sub_target_pose_right_;
 
   /**
    * Callback method that handles updates of the target poses.
    *
    * @param[in] msg New target pose.
-   * @param[in] arm_id Name of the arm referenced by the target pose.
    */
-  void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg,
-                          const std::string& arm_id);
+  void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 };
 
 }  // namespace franka_combined_example_controllers

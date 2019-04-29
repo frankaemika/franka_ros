@@ -42,11 +42,13 @@ int main(int argc, char** argv) {
   controller_manager::ControllerManager cm(&hw, nh);
 
   ros::Duration period(0.001);
+  ros::Rate rate(period);
+
   while (ros::ok()) {
+    rate.sleep();
     hw.read(ros::Time::now(), period);
     cm.update(ros::Time::now(), period, hw.controllerNeedsReset());
     hw.write(ros::Time::now(), period);
-    period.sleep();
   }
 
   return 0;
