@@ -150,7 +150,6 @@ class DualArmCartesianImpedanceExampleController
 
   // Target pose subscriber
   ros::Subscriber sub_target_pose_left_;
-  // ros::Subscriber sub_target_pose_right_;
 
   /**
    * Callback method that handles updates of the target poses.
