@@ -12,6 +12,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <ros/transport_hints.h>
+#include <tf/transform_listener.h>
+#include <tf_conversions/tf_eigen.h>
 
 #include <franka_example_controllers/pseudo_inversion.h>
 
@@ -112,20 +114,13 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
     return false;
   }
 
-  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_left = boost::bind(
-      &DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1, left_arm_id_);
+  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_left =
+      boost::bind(&DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1);
 
   ros::SubscribeOptions ops_left;
   ops_left.init(left_arm_id_ + "/target_pose", 1, cb_left);
   ops_left.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
   sub_target_pose_left_ = node_handle.subscribe(ops_left);
-
-  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_right = boost::bind(
-      &DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1, right_arm_id_);
-  ros::SubscribeOptions ops_right;
-  ops_right.init(right_arm_id_ + "/target_pose", 1, cb_right);
-  ops_right.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
-  sub_target_pose_right_ = node_handle.subscribe(ops_right);
 
   std::vector<std::string> right_joint_names;
   if (!node_handle.getParam("right/joint_names", right_joint_names) ||
@@ -149,6 +144,27 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
       dynamic_reconfigure_compliance_param_node_);
   dynamic_server_compliance_param_->setCallback(boost::bind(
       &DualArmCartesianImpedanceExampleController::complianceParamCallback, this, _1, _2));
+
+  // Get the transformation from right_O_frame to left_O_frame
+  tf::StampedTransform transform;
+  tf::TransformListener listener;
+  try {
+    if (listener.waitForTransform(left_arm_id_ + "_link0", right_arm_id_ + "_link0", ros::Time(0),
+                                  ros::Duration(4.0))) {
+      listener.lookupTransform(left_arm_id_ + "_link0", right_arm_id_ + "_link0", ros::Time(0),
+                               transform);
+    } else {
+      ROS_ERROR(
+          "DualArmCartesianImpedanceExampleController: Failed to read transform from %s to %s. "
+          "Aborting init!",
+          (right_arm_id_ + "_link0").c_str(), (left_arm_id_ + "_link0").c_str());
+      return false;
+    }
+  } catch (tf::TransformException& ex) {
+    ROS_ERROR("DualArmCartesianImpedanceExampleController: %s", ex.what());
+    return false;
+  }
+  tf::transformTFToEigen(transform, Ol_T_Or_);  // NOLINT (readability-identifier-naming)
 
   return left_success && right_success;
 }
@@ -180,6 +196,15 @@ void DualArmCartesianImpedanceExampleController::starting(const ros::Time& /*tim
   for (auto& arm_data : arms_data_) {
     startingArm(arm_data.second);
   }
+  franka::RobotState robot_state_right =
+      arms_data_.at(right_arm_id_).state_handle_->getRobotState();
+  franka::RobotState robot_state_left = arms_data_.at(left_arm_id_).state_handle_->getRobotState();
+  Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(
+      robot_state_left.O_T_EE.data()));  // NOLINT (readability-identifier-naming)
+  Eigen::Affine3d Or_T_EEr(Eigen::Matrix4d::Map(
+      robot_state_right.O_T_EE.data()));  // NOLINT (readability-identifier-naming)
+  EEr_T_EEl_ =
+      Or_T_EEr.inverse() * Ol_T_Or_.inverse() * Ol_T_EEl;  // NOLINT (readability-identifier-naming)
 }
 
 void DualArmCartesianImpedanceExampleController::update(const ros::Time& /*time*/,
@@ -310,28 +335,50 @@ void DualArmCartesianImpedanceExampleController::complianceParamCallback(
 }
 
 void DualArmCartesianImpedanceExampleController::targetPoseCallback(
-    const geometry_msgs::PoseStamped::ConstPtr& msg,
-    const std::string& arm_id) {
+    const geometry_msgs::PoseStamped::ConstPtr& msg) {
   try {
-    if (msg->header.frame_id != arm_id + "_link0") {
+    if (msg->header.frame_id != left_arm_id_ + "_link0") {
       ROS_ERROR_STREAM(
           "DualArmCartesianImpedanceExampleController: Got pose target with invalid"
           " frame_id "
-          << msg->header.frame_id << ". Expected " << arm_id + "_link0");
+          << msg->header.frame_id << ". Expected " << left_arm_id_ + "_link0");
       return;
     }
 
-    auto& arm_data = arms_data_.at(arm_id);
-    arm_data.position_d_target_ << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
-    Eigen::Quaterniond last_orientation_d_target(arm_data.orientation_d_target_);
-    arm_data.orientation_d_target_.coeffs() << msg->pose.orientation.x, msg->pose.orientation.y,
-        msg->pose.orientation.z, msg->pose.orientation.w;
-    if (last_orientation_d_target.coeffs().dot(arm_data.orientation_d_target_.coeffs()) < 0.0) {
-      arm_data.orientation_d_target_.coeffs() << -arm_data.orientation_d_target_.coeffs();
+    // Set target for the left robot.
+    auto& left_arm_data = arms_data_.at(left_arm_id_);
+    left_arm_data.position_d_target_ << msg->pose.position.x, msg->pose.position.y,
+        msg->pose.position.z;
+    Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
+    left_arm_data.orientation_d_target_.coeffs() << msg->pose.orientation.x,
+        msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w;
+    if (last_orientation_d_target.coeffs().dot(left_arm_data.orientation_d_target_.coeffs()) <
+        0.0) {
+      left_arm_data.orientation_d_target_.coeffs() << -left_arm_data.orientation_d_target_.coeffs();
     }
+
+    // Compute target for the right endeffector given the static desired transform from left to
+    // right endeffector.
+    Eigen::Affine3d Ol_T_EEl_d;  // NOLINT (readability-identifier-naming)
+    Ol_T_EEl_d.fromPositionOrientationScale(left_arm_data.position_d_target_,
+                                            left_arm_data.orientation_d_target_,
+                                            Eigen::Vector3d(1.0, 1.0, 1.0));
+    Eigen::Affine3d Or_T_EEr_d = Ol_T_Or_.inverse() * Ol_T_EEl_d *
+                                 EEr_T_EEl_.inverse();  // NOLINT (readability-identifier-naming)
+    auto& right_arm_data = arms_data_.at(right_arm_id_);
+    right_arm_data.position_d_target_ =
+        Or_T_EEr_d.translation();  // NOLINT (readability-identifier-naming)
+    last_orientation_d_target = Eigen::Quaterniond(right_arm_data.orientation_d_target_);
+    right_arm_data.orientation_d_target_ =
+        Or_T_EEr_d.linear();  // NOLINT (readability-identifier-naming)
+    if (last_orientation_d_target.coeffs().dot(right_arm_data.orientation_d_target_.coeffs()) <
+        0.0) {
+      right_arm_data.orientation_d_target_.coeffs()
+          << -right_arm_data.orientation_d_target_.coeffs();
+    }
+
   } catch (std::out_of_range& ex) {
-    ROS_ERROR_STREAM("DualArmCartesianImpedanceExampleController: Exception setting target pose for"
-                     << arm_id << ex.what());
+    ROS_ERROR_STREAM("DualArmCartesianImpedanceExampleController: Exception setting target poses.");
   }
 }
 

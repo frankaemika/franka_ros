@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   franka_hw
   geometry_msgs
   hardware_interface
+  tf
+  tf_conversions
   pluginlib
   roscpp
 )
@@ -35,7 +37,8 @@ catkin_package(
     franka_example_controllers
     franka_hw
     geometry_msgs
-    hardware_interface
+    tf
+    tf_conversions  hardware_interface
     pluginlib
     roscpp
   DEPENDS Franka
