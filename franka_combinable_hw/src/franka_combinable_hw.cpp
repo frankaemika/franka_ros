@@ -36,7 +36,8 @@ FrankaCombinableHW::FrankaCombinableHW()
           {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       has_error_(false),
-      error_recovered_(false) {}
+      error_recovered_(false),
+      read_write_sleep_time_(400) {}
 
 /*
  * Data from ROS parameter server:
@@ -56,6 +57,19 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
   if (!robot_hw_nh.getParam("arm_id", arm_id_)) {
     ROS_ERROR("FrankaCombinableHW: no parameter arm_id is found.");
     return false;
+  }
+
+  double read_write_sleep_time(0.0004);
+  if (robot_hw_nh.getParam("read_write_sleep_time", read_write_sleep_time)) {
+    if (read_write_sleep_time < 0.0007 && read_write_sleep_time > 0.0) {
+      read_write_sleep_time_ =
+          std::chrono::microseconds(static_cast<size_t>(read_write_sleep_time * 1e6));
+    } else {
+      ROS_WARN(
+          "FrankaCombinableHW: Got invalid read_write_sleep_time. Must be in [0.0; 0.0007] "
+          "seconds. Defaulting to %lu.",
+          read_write_sleep_time_.count());
+    }
   }
 
   std::vector<std::string> joint_names;
