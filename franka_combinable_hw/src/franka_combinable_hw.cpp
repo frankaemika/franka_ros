@@ -37,7 +37,7 @@ FrankaCombinableHW::FrankaCombinableHW()
       velocity_cartesian_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       has_error_(false),
       error_recovered_(false),
-      read_write_sleep_time_(400) {}
+      read_write_sleep_time_(200) {}
 
 /*
  * Data from ROS parameter server:
@@ -59,9 +59,9 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
     return false;
   }
 
-  double read_write_sleep_time(0.0004);
+  double read_write_sleep_time(0.0002);
   if (robot_hw_nh.getParam("read_write_sleep_time", read_write_sleep_time)) {
-    if (read_write_sleep_time < 0.0007 && read_write_sleep_time > 0.0) {
+    if (read_write_sleep_time < 0.0003 && read_write_sleep_time > 0.0) {
       read_write_sleep_time_ =
           std::chrono::microseconds(static_cast<size_t>(read_write_sleep_time * 1e6));
     } else {
