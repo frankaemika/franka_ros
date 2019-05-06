@@ -59,9 +59,9 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
     return false;
   }
 
-  double read_write_sleep_time(0.0002);
+  double read_write_sleep_time(0.0001);
   if (robot_hw_nh.getParam("read_write_sleep_time", read_write_sleep_time)) {
-    if (read_write_sleep_time < 0.0003 && read_write_sleep_time > 0.0) {
+    if (read_write_sleep_time < 0.00015 && read_write_sleep_time >= 0.0) {
       read_write_sleep_time_ =
           std::chrono::microseconds(static_cast<size_t>(read_write_sleep_time * 1e6));
     } else {
@@ -606,14 +606,14 @@ void FrankaCombinableHW::write(const ros::Time&,  // NOLINT (readability-identif
     error_recovered_ = false;
   }
   enforceLimits(period);
-  libfranka_cmd_mutex_.lock();
   ros_cmd_mutex_.lock();
+  libfranka_cmd_mutex_.lock();
   effort_joint_command_libfranka_.tau_J =
       saturateTorqueRate(effort_joint_command_ros_.tau_J, robot_state_libfranka_.tau_J_d);
   pose_cartesian_command_libfranka_ = pose_cartesian_command_ros_;
   velocity_cartesian_command_libfranka_ = velocity_cartesian_command_ros_;
-  ros_cmd_mutex_.unlock();
   libfranka_cmd_mutex_.unlock();
+  ros_cmd_mutex_.unlock();
 }
 
 std::array<double, 7> FrankaCombinableHW::saturateTorqueRate(

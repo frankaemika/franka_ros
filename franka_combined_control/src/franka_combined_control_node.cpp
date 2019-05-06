@@ -11,21 +11,6 @@
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_combined_control_node");
 
-  // set current control_loop thread to read-time
-  const int kThreadPriority = sched_get_priority_max(SCHED_FIFO);
-  if (kThreadPriority == -1) {
-    ROS_ERROR("franka_combined_control_node: unable to get maximum possible thread priority: %s",
-              std::strerror(errno));
-    return 1;
-  }
-  sched_param thread_param{};
-  thread_param.sched_priority = kThreadPriority;
-  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
-    ROS_ERROR("franka_combined_control_node: unable to set realtime scheduling: %s",
-              std::strerror(errno));
-    return 1;
-  }
-
   ros::AsyncSpinner spinner(4);
   spinner.start();
 
@@ -43,6 +28,21 @@ int main(int argc, char** argv) {
 
   ros::Duration period(0.001);
   ros::Rate rate(period);
+
+  // set current control_loop thread to real-time
+  const int kThreadPriority = sched_get_priority_max(SCHED_FIFO);
+  if (kThreadPriority == -1) {
+    ROS_ERROR("franka_combined_control_node: unable to get maximum possible thread priority: %s",
+              std::strerror(errno));
+    return 1;
+  }
+  sched_param thread_param{};
+  thread_param.sched_priority = kThreadPriority;
+  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
+    ROS_ERROR("franka_combined_control_node: unable to set realtime scheduling: %s",
+              std::strerror(errno));
+    return 1;
+  }
 
   while (ros::ok()) {
     rate.sleep();
