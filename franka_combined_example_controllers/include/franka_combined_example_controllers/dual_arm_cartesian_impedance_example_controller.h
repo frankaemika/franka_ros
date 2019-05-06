@@ -22,37 +22,43 @@
 
 namespace franka_combined_example_controllers {
 
-/// This container holds all data and parameters used to control one panda arm with a Cartesian
-/// impedance control law tracking a desired target pose.
+/**
+ * This container holds all data and parameters used to control one panda arm with a Cartesian
+ * impedance control law tracking a desired target pose.
+ */
 struct FrankaDataContainer {
-  std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;  // To read to complete robot state.
-  std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;  // To have access to e.g. jacobians.
-  std::vector<hardware_interface::JointHandle> joint_handles_;  // To command joint torques.
-  double filter_params_{0.005};              // [-] PT1-Filter constant to smooth target values set
-                                             // by dynamic reconfigure servers (stiffness/damping)
-                                             // or interactive markers for the target poses.
-  double nullspace_stiffness_{20.0};         // [Nm/rad] To track the initial joint configuration in
-                                             // the nullspace of the Cartesian motion.
-  double nullspace_stiffness_target_{20.0};  // [Nm/rad] Unfiltered raw value.
-  const double delta_tau_max_{1.0};          // [Nm/ms] Maximum difference in joint-torque per
-                                             // timestep. Used to saturated torque rates to ensure
-                                             // feasible commands.
-  Eigen::Matrix<double, 6, 6> cartesian_stiffness_;         // To track the target pose.
-  Eigen::Matrix<double, 6, 6> cartesian_stiffness_target_;  // Unfiltered raw value.
-  Eigen::Matrix<double, 6, 6> cartesian_damping_;           // To damp cartesian motions.
-  Eigen::Matrix<double, 6, 6> cartesian_damping_target_;    // Unfiltered raw value.
-  Eigen::Matrix<double, 7, 1> q_d_nullspace_;               // Target joint pose for nullspace
-                                                            // motion. For now we track the
-                                                            // initial joint pose.
-  Eigen::Vector3d position_d_;                              // Target position of the endeffector.
-  Eigen::Quaterniond orientation_d_;         // Target orientation of the endeffector.
-  Eigen::Vector3d position_d_target_;        // Unfiltered raw value.
-  Eigen::Quaterniond orientation_d_target_;  // Unfiltered raw value.
+  std::unique_ptr<franka_hw::FrankaStateHandle>
+      state_handle_;  ///< To read to complete robot state.
+  std::unique_ptr<franka_hw::FrankaModelHandle>
+      model_handle_;  ///< To have access to e.g. jacobians.
+  std::vector<hardware_interface::JointHandle> joint_handles_;  ///< To command joint torques.
+  double filter_params_{0.005};       ///< [-] PT1-Filter constant to smooth target values set
+                                      ///< by dynamic reconfigure servers (stiffness/damping)
+                                      ///< or interactive markers for the target poses.
+  double nullspace_stiffness_{20.0};  ///< [Nm/rad] To track the initial joint configuration in
+                                      ///< the nullspace of the Cartesian motion.
+  double nullspace_stiffness_target_{20.0};  ///< [Nm/rad] Unfiltered raw value.
+  const double delta_tau_max_{1.0};          ///< [Nm/ms] Maximum difference in joint-torque per
+                                             ///< timestep. Used to saturated torque rates to ensure
+                                             ///< feasible commands.
+  Eigen::Matrix<double, 6, 6> cartesian_stiffness_;         ///< To track the target pose.
+  Eigen::Matrix<double, 6, 6> cartesian_stiffness_target_;  ///< Unfiltered raw value.
+  Eigen::Matrix<double, 6, 6> cartesian_damping_;           ///< To damp cartesian motions.
+  Eigen::Matrix<double, 6, 6> cartesian_damping_target_;    ///< Unfiltered raw value.
+  Eigen::Matrix<double, 7, 1> q_d_nullspace_;               ///< Target joint pose for nullspace
+                                                            ///< motion. For now we track the
+                                                            ///< initial joint pose.
+  Eigen::Vector3d position_d_;                              ///< Target position of the endeffector.
+  Eigen::Quaterniond orientation_d_;         ///< Target orientation of the endeffector.
+  Eigen::Vector3d position_d_target_;        ///< Unfiltered raw value.
+  Eigen::Quaterniond orientation_d_target_;  ///< Unfiltered raw value.
 };
 
-/// Controller class for ros_control that renders two decoupled Cartesian impedances for the
-/// tracking of two target poses for the two endeffectors. The controller can be reparameterized at
-/// runtime via dynamic reconfigure servers.
+/**
+ * Controller class for ros_control that renders two decoupled Cartesian impedances for the
+ * tracking of two target poses for the two endeffectors. The controller can be reparameterized at
+ * runtime via dynamic reconfigure servers.
+ */
 class DualArmCartesianImpedanceExampleController
     : public controller_interface::MultiInterfaceController<
           franka_hw::FrankaModelInterface,
@@ -83,13 +89,14 @@ class DualArmCartesianImpedanceExampleController
   void update(const ros::Time&, const ros::Duration& period) override;
 
  private:
-  std::map<std::string, FrankaDataContainer> arms_data_;  // Holds all relevant data for both arms.
-  std::string left_arm_id_;   // Name of the left arm, retreived from the parameter server.
-  std::string right_arm_id_;  // Name of the right arm, retreived from the parameter server.
+  std::map<std::string, FrankaDataContainer>
+      arms_data_;             ///< Holds all relevant data for both arms.
+  std::string left_arm_id_;   ///< Name of the left arm, retreived from the parameter server.
+  std::string right_arm_id_;  ///< Name of the right arm, retreived from the parameter server.
 
-  // Transformation between base frames of the robots.
+  ///< Transformation between base frames of the robots.
   Eigen::Affine3d Ol_T_Or_;  // NOLINT (readability-identifier-naming)
-  // Target transformation between the two endeffectors.
+  ///< Target transformation between the two endeffectors.
   Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
 
   /**
@@ -131,12 +138,12 @@ class DualArmCartesianImpedanceExampleController
    */
   void startingArm(FrankaDataContainer& arm_data);
 
-  // Dynamic reconfigure server
+  ///< Dynamic reconfigure server
   std::unique_ptr<dynamic_reconfigure::Server<
       franka_combined_example_controllers::dual_arm_compliance_paramConfig>>
       dynamic_server_compliance_param_;
 
-  // Nodehandle for the dynamic reconfigure namespace
+  ///< Nodehandle for the dynamic reconfigure namespace
   ros::NodeHandle dynamic_reconfigure_compliance_param_node_;
 
   /**
@@ -148,7 +155,7 @@ class DualArmCartesianImpedanceExampleController
       franka_combined_example_controllers::dual_arm_compliance_paramConfig& config,
       uint32_t /*level*/);
 
-  // Target pose subscriber
+  ///< Target pose subscriber
   ros::Subscriber sub_target_pose_left_;
 
   /**

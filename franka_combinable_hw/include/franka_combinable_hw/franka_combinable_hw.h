@@ -4,6 +4,7 @@
 
 #include <array>
 #include <atomic>
+#include <chrono>
 #include <exception>
 #include <functional>
 #include <string>
@@ -195,6 +196,9 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
     robot_state_libfranka_ = robot_state;
     libfranka_state_mutex_.unlock();
 
+    // Sleep a bit to give the controller a chance to compute the command to the new robot state.
+    std::this_thread::sleep_for(read_write_sleep_time_);
+
     libfranka_cmd_mutex_.lock();
     T current_cmd = command;
     libfranka_cmd_mutex_.unlock();
@@ -260,6 +264,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   std::atomic_bool controller_active_{false};
   ControlMode current_control_mode_ = ControlMode::None;
   double joint_limit_warning_threshold_{10 * 3.14 / 180};
+  std::chrono::microseconds read_write_sleep_time_;
 
   std::unique_ptr<std::thread> control_loop_thread_;
 
