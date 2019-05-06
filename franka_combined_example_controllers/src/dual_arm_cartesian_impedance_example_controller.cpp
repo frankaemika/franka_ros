@@ -199,10 +199,10 @@ void DualArmCartesianImpedanceExampleController::starting(const ros::Time& /*tim
   franka::RobotState robot_state_right =
       arms_data_.at(right_arm_id_).state_handle_->getRobotState();
   franka::RobotState robot_state_left = arms_data_.at(left_arm_id_).state_handle_->getRobotState();
-  Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(
-      robot_state_left.O_T_EE.data()));  // NOLINT (readability-identifier-naming)
-  Eigen::Affine3d Or_T_EEr(Eigen::Matrix4d::Map(
-      robot_state_right.O_T_EE.data()));  // NOLINT (readability-identifier-naming)
+  Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(  // NOLINT (readability-identifier-naming)
+      robot_state_left.O_T_EE.data()));           // NOLINT (readability-identifier-naming)
+  Eigen::Affine3d Or_T_EEr(Eigen::Matrix4d::Map(  // NOLINT (readability-identifier-naming)
+      robot_state_right.O_T_EE.data()));          // NOLINT (readability-identifier-naming)
   EEr_T_EEl_ =
       Or_T_EEr.inverse() * Ol_T_Or_.inverse() * Ol_T_EEl;  // NOLINT (readability-identifier-naming)
 }
@@ -363,7 +363,8 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
     Ol_T_EEl_d.fromPositionOrientationScale(left_arm_data.position_d_target_,
                                             left_arm_data.orientation_d_target_,
                                             Eigen::Vector3d(1.0, 1.0, 1.0));
-    Eigen::Affine3d Or_T_EEr_d = Ol_T_Or_.inverse() * Ol_T_EEl_d *
+    Eigen::Affine3d Or_T_EEr_d = Ol_T_Or_.inverse()     // NOLINT (readability-identifier-naming)
+                                 * Ol_T_EEl_d *         // NOLINT (readability-identifier-naming)
                                  EEr_T_EEl_.inverse();  // NOLINT (readability-identifier-naming)
     auto& right_arm_data = arms_data_.at(right_arm_id_);
     right_arm_data.position_d_target_ =
