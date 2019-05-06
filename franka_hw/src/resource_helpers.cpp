@@ -136,4 +136,68 @@ ControlMode getControlMode(const std::string& arm_id, ArmClaimedMap& arm_claim_m
   return control_mode;
 }
 
+bool hasConflictingMultiClaim(const ResourceWithClaimsMap& resource_map) {
+  for (const auto& resource : resource_map) {
+    if (resource.second.size() > 2) {
+      ROS_ERROR_STREAM("FrankaHW: Resource "
+                       << resource.first << " claimed with more than two interfaces. Conflict!");
+      return true;
+    }
+    uint8_t torque_claims = 0;
+    uint8_t other_claims = 0;
+    if (resource.second.size() == 2) {
+      for (const auto& claimed_by : resource.second) {
+        if (claimed_by.at(2) == "hardware_interface::EffortJointInterface") {
+          torque_claims++;
+        } else {
+          other_claims++;
+        }
+      }
+      if (torque_claims != 1) {
+        ROS_ERROR_STREAM("FrankaHW: Resource "
+                         << resource.first
+                         << " is claimed with two non-compatible interfaces. Conflict!");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool hasConflictingJointAndCartesianClaim(const ArmClaimedMap& arm_claim_map,
+                                          const std::string& arm_id) {
+  // check for conflicts between joint and cartesian level for each arm.
+  if (arm_claim_map.find(arm_id) != arm_claim_map.end()) {
+    if ((arm_claim_map.at(arm_id).cartesian_velocity_claims +
+                 arm_claim_map.at(arm_id).cartesian_pose_claims >
+             0 &&
+         arm_claim_map.at(arm_id).joint_position_claims +
+                 arm_claim_map.at(arm_id).joint_velocity_claims >
+             0)) {
+      ROS_ERROR_STREAM("FrankaHW: Invalid claims on joint AND cartesian level on arm "
+                       << arm_id << ". Conflict!");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool partiallyClaimsArmJoints(const ArmClaimedMap& arm_claim_map, const std::string& arm_id) {
+  // Valid claims are torque claims on joint level in combination with either
+  // 7 non-torque claims on joint_level or one claim on cartesian level.
+  if (arm_claim_map.find(arm_id) != arm_claim_map.end()) {
+    if ((arm_claim_map.at(arm_id).joint_position_claims > 0 &&
+         arm_claim_map.at(arm_id).joint_position_claims != 7) ||
+        (arm_claim_map.at(arm_id).joint_velocity_claims > 0 &&
+         arm_claim_map.at(arm_id).joint_velocity_claims != 7) ||
+        (arm_claim_map.at(arm_id).joint_torque_claims > 0 &&
+         arm_claim_map.at(arm_id).joint_torque_claims != 7)) {
+      ROS_ERROR_STREAM("FrankaHW: Non-consistent claims on the joints of "
+                       << arm_id << ". Not supported. Conflict!");
+      return true;
+    }
+  }
+  return false;
+}
+
 }  // namespace franka_hw
