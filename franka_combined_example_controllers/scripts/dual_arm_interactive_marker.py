@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-""" This simple script creates an interactive marker for changing desired object frame pose of
-    dual-panda coupling controller. It features also resetting the marker to current "middle pose"
-    of left and right endeffectors.
+""" This simple script creates an interactive marker for changing desired centering pose of
+    two the dual_panda_cartesian_impedance_example_controller. It features also resetting the
+    marker to current centering pose between the left and the right endeffector.
 """
 
 import rospy
@@ -17,7 +17,7 @@ from std_msgs.msg import Bool
 
 marker_pose = PoseStamped()
 
-object_frame_ready = False
+centering_frame_ready = False
 
 has_error = False
 left_has_error = False
@@ -46,7 +46,7 @@ def make_sphere(scale=0.3):
 
 def publish_target_pose():
     """
-    This function publishes desired object frame pose which the controller will subscribe to.
+    This function publishes desired centering pose which the controller will subscribe to.
     :return: None
     """
     marker_pose.header.stamp = rospy.Time(0)
@@ -75,16 +75,16 @@ def right_has_error_callback(msg):
     has_error = left_has_error or right_has_error
 
 
-def object_frame_pose_callback(msg):
+def centering_pose_callback(msg):
     """
-    This callback function sets the marker pose to the object frame pose from a subscribed topic.
+    This callback function sets the marker pose to the current centering pose from a subscribed topic.
     :return: None
     """
-    global object_frame_ready
+    global centering_frame_ready
     global marker_pose
 
     marker_pose = msg
-    object_frame_ready = True
+    centering_frame_ready = True
 
 
 def reset_marker_pose_blocking():
@@ -93,20 +93,20 @@ def reset_marker_pose_blocking():
     :return: None
     """
 
-    global object_frame_ready
+    global centering_frame_ready
     global marker_pose
 
-    object_frame_ready = False
+    centering_frame_ready = False
 
-    object_frame_pose_sub = rospy.Subscriber(
+    centering_frame_pose_sub = rospy.Subscriber(
         "dual_arm_cartesian_impedance_example_controller/centering_frame",
-        PoseStamped, object_frame_pose_callback)
+        PoseStamped, centering_pose_callback)
 
     # Get initial pose for the interactive marker
-    while not object_frame_ready:
+    while not centering_frame_ready:
         rospy.sleep(0.1)
 
-    object_frame_pose_sub.unregister()
+    centering_frame_pose_sub.unregister()
 
 
 def process_feedback(feedback):
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     # Set marker pose to be the current "middle pose" of both EEs
     reset_marker_pose_blocking()
 
-    # Initialize publisher for publishing desired object frame pose
+    # Initialize publisher for publishing desired centering pose
     pose_pub = rospy.Publisher(
         "dual_arm_cartesian_impedance_example_controller/centering_frame_target_pose",
         PoseStamped,
