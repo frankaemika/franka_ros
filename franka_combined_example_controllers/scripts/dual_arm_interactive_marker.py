@@ -164,11 +164,11 @@ if __name__ == "__main__":
     int_marker.name = "centering_frame_pose"
     int_marker.description = ("Target centering pose\n"
                               "BE CAREFUL! \n"
-                              "If you move the target \n"
-                              "marker both robots will follow \n"
-                              "it as the center between the two \n "
-                              "endeffectors.\n"
-                              "Be aware of potential collisions!")
+                              "If you move the target marker\n"
+                              "both robots will follow it \n"
+                              "as the center between the two\n"
+                              "endeffectors. Be aware of\n"
+                              "potential collisions!")
     int_marker.pose = marker_pose.pose
 
     # insert a box
