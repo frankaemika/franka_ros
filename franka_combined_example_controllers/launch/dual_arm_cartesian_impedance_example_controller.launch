@@ -3,8 +3,8 @@
   <arg name="robot_id" default="panda_dual" />
   <arg name="robot_left_ip" default="robot_left.franka.de" />
   <arg name="robot_right_ip" default="robot_right.franka.de" />
-  <arg name="rviz" default="false" />
-  <arg name="rqt" default="false" />
+  <arg name="rviz" default="true" />
+  <arg name="rqt" default="true" />
 
   <include file="$(find franka_combined_control)/launch/franka_combined_control.launch" >
     <arg name="robot_id" value="$(arg robot_id)" />
