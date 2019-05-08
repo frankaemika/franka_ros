@@ -7,15 +7,16 @@
 #include <memory>
 
 #include <controller_interface/controller_base.h>
+#include <eigen_conversions/eigen_msg.h>
 #include <franka/robot_state.h>
+#include <franka_example_controllers/pseudo_inversion.h>
+#include <franka_hw/trigger_rate.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <ros/transport_hints.h>
 #include <tf/transform_listener.h>
 #include <tf_conversions/tf_eigen.h>
-
-#include <franka_example_controllers/pseudo_inversion.h>
 
 namespace franka_combined_example_controllers {
 
@@ -166,6 +167,10 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
   }
   tf::transformTFToEigen(transform, Ol_T_Or_);  // NOLINT (readability-identifier-naming)
 
+  // Setup publisher for the centering frame.
+  publish_rate_ = franka_hw::TriggerRate(30.0);
+  center_frame_pub_.init(node_handle, "centering_frame", 1, true);
+
   return left_success && right_success;
 }
 
@@ -205,12 +210,19 @@ void DualArmCartesianImpedanceExampleController::starting(const ros::Time& /*tim
       robot_state_right.O_T_EE.data()));          // NOLINT (readability-identifier-naming)
   EEr_T_EEl_ =
       Or_T_EEr.inverse() * Ol_T_Or_.inverse() * Ol_T_EEl;  // NOLINT (readability-identifier-naming)
+  EEl_T_C_.setIdentity();
+  Eigen::Vector3d EEr_r_EEr_EEl =
+      EEr_T_EEl_.translation();  // NOLINT (readability-identifier-naming)
+  EEl_T_C_.translation() = -0.5 * EEr_T_EEl_.inverse().rotation() * EEr_r_EEr_EEl;
 }
 
 void DualArmCartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                                         const ros::Duration& /*period*/) {
   for (auto& arm_data : arms_data_) {
     updateArm(arm_data.second);
+  }
+  if (publish_rate_()) {
+    publishCenteringPose();
   }
 }
 
@@ -380,6 +392,19 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
 
   } catch (std::out_of_range& ex) {
     ROS_ERROR_STREAM("DualArmCartesianImpedanceExampleController: Exception setting target poses.");
+  }
+}
+
+void DualArmCartesianImpedanceExampleController::publishCenteringPose() {
+  if (center_frame_pub_.trylock()) {
+    franka::RobotState robot_state_left =
+        arms_data_.at(left_arm_id_).state_handle_->getRobotState();
+    Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(
+        robot_state_left.O_T_EE.data()));          // NOLINT (readability-identifier-naming)
+    Eigen::Affine3d Ol_T_C = Ol_T_EEl * EEl_T_C_;  // NOLINT (readability-identifier-naming)
+    tf::poseEigenToMsg(Ol_T_C, center_frame_pub_.msg_.pose);
+    center_frame_pub_.msg_.header.frame_id = left_arm_id_ + "_link0";
+    center_frame_pub_.unlockAndPublish();
   }
 }
 

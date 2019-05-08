@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   controller_interface
   dynamic_reconfigure
+  eigen_conversions
   franka_combinable_hw
   franka_example_controllers
   franka_hw
@@ -17,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf_conversions
   pluginlib
+  realtime_tools
   roscpp
 )
 
@@ -33,6 +35,7 @@ catkin_package(
   CATKIN_DEPENDS
     controller_interface
     dynamic_reconfigure
+    eigen_conversions
     franka_combinable_hw
     franka_example_controllers
     franka_hw
@@ -41,6 +44,7 @@ catkin_package(
     tf_conversions  hardware_interface
     pluginlib
     roscpp
+    realtime_tools
   DEPENDS Franka
 )
 
