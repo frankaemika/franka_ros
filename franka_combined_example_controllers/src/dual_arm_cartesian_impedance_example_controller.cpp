@@ -115,13 +115,13 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
     return false;
   }
 
-  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> cb_left =
+  boost::function<void(const geometry_msgs::PoseStamped::ConstPtr&)> callback =
       boost::bind(&DualArmCartesianImpedanceExampleController::targetPoseCallback, this, _1);
 
-  ros::SubscribeOptions ops_left;
-  ops_left.init(left_arm_id_ + "/target_pose", 1, cb_left);
-  ops_left.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
-  sub_target_pose_left_ = node_handle.subscribe(ops_left);
+  ros::SubscribeOptions subscribe_options;
+  subscribe_options.init("centering_frame_target_pose", 1, callback);
+  subscribe_options.transport_hints = ros::TransportHints().reliable().tcpNoDelay();
+  sub_target_pose_left_ = node_handle.subscribe(subscribe_options);
 
   std::vector<std::string> right_joint_names;
   if (!node_handle.getParam("right/joint_names", right_joint_names) ||
@@ -359,22 +359,21 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
 
     // Set target for the left robot.
     auto& left_arm_data = arms_data_.at(left_arm_id_);
-    left_arm_data.position_d_target_ << msg->pose.position.x, msg->pose.position.y,
-        msg->pose.position.z;
+    Eigen::Affine3d Ol_T_C;  // NOLINT (readability-identifier-naming)
+    tf::poseMsgToEigen(msg->pose, Ol_T_C);
+    Eigen::Affine3d Ol_T_EEl_d =
+        Ol_T_C * EEl_T_C_.inverse();  // NOLINT (readability-identifier-naming)
+    left_arm_data.position_d_target_ = Ol_T_EEl_d.translation();
     Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
-    left_arm_data.orientation_d_target_.coeffs() << msg->pose.orientation.x,
-        msg->pose.orientation.y, msg->pose.orientation.z, msg->pose.orientation.w;
-    if (last_orientation_d_target.coeffs().dot(left_arm_data.orientation_d_target_.coeffs()) <
-        0.0) {
-      left_arm_data.orientation_d_target_.coeffs() << -left_arm_data.orientation_d_target_.coeffs();
+    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.linear());
+    if (last_orientation_d_target.coeffs().dot(new_orientation_target.coeffs()) < 0.0) {
+      new_orientation_target.coeffs() << -new_orientation_target.coeffs();
     }
+    Ol_T_EEl_d.linear() = new_orientation_target.matrix();
+    left_arm_data.orientation_d_target_ = Ol_T_EEl_d.linear();
 
     // Compute target for the right endeffector given the static desired transform from left to
     // right endeffector.
-    Eigen::Affine3d Ol_T_EEl_d;  // NOLINT (readability-identifier-naming)
-    Ol_T_EEl_d.fromPositionOrientationScale(left_arm_data.position_d_target_,
-                                            left_arm_data.orientation_d_target_,
-                                            Eigen::Vector3d(1.0, 1.0, 1.0));
     Eigen::Affine3d Or_T_EEr_d = Ol_T_Or_.inverse()     // NOLINT (readability-identifier-naming)
                                  * Ol_T_EEl_d *         // NOLINT (readability-identifier-naming)
                                  EEr_T_EEl_.inverse();  // NOLINT (readability-identifier-naming)
