@@ -211,8 +211,8 @@ void DualArmCartesianImpedanceExampleController::starting(const ros::Time& /*tim
   EEr_T_EEl_ =
       Or_T_EEr.inverse() * Ol_T_Or_.inverse() * Ol_T_EEl;  // NOLINT (readability-identifier-naming)
   EEl_T_C_.setIdentity();
-  Eigen::Vector3d EEr_r_EEr_EEl =
-      EEr_T_EEl_.translation();  // NOLINT (readability-identifier-naming)
+  Eigen::Vector3d EEr_r_EEr_EEl =  // NOLINT (readability-identifier-naming)
+      EEr_T_EEl_.translation();    // NOLINT (readability-identifier-naming)
   EEl_T_C_.translation() = -0.5 * EEr_T_EEl_.inverse().rotation() * EEr_r_EEr_EEl;
 }
 
@@ -361,7 +361,7 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
     auto& left_arm_data = arms_data_.at(left_arm_id_);
     Eigen::Affine3d Ol_T_C;  // NOLINT (readability-identifier-naming)
     tf::poseMsgToEigen(msg->pose, Ol_T_C);
-    Eigen::Affine3d Ol_T_EEl_d =
+    Eigen::Affine3d Ol_T_EEl_d =      // NOLINT (readability-identifier-naming)
         Ol_T_C * EEl_T_C_.inverse();  // NOLINT (readability-identifier-naming)
     left_arm_data.position_d_target_ = Ol_T_EEl_d.translation();
     Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
@@ -398,9 +398,9 @@ void DualArmCartesianImpedanceExampleController::publishCenteringPose() {
   if (center_frame_pub_.trylock()) {
     franka::RobotState robot_state_left =
         arms_data_.at(left_arm_id_).state_handle_->getRobotState();
-    Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(
-        robot_state_left.O_T_EE.data()));          // NOLINT (readability-identifier-naming)
-    Eigen::Affine3d Ol_T_C = Ol_T_EEl * EEl_T_C_;  // NOLINT (readability-identifier-naming)
+    Eigen::Affine3d Ol_T_EEl(Eigen::Matrix4d::Map(  // NOLINT (readability-identifier-naming)
+        robot_state_left.O_T_EE.data()));           // NOLINT (readability-identifier-naming)
+    Eigen::Affine3d Ol_T_C = Ol_T_EEl * EEl_T_C_;   // NOLINT (readability-identifier-naming)
     tf::poseEigenToMsg(Ol_T_C, center_frame_pub_.msg_.pose);
     center_frame_pub_.msg_.header.frame_id = left_arm_id_ + "_link0";
     center_frame_pub_.unlockAndPublish();
