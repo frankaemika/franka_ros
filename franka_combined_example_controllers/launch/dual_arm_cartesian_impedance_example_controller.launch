@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="robot_id" default="panda_dual" />
+  <arg name="robot_left_ip" default="robot_left.franka.de" />
+  <arg name="robot_right_ip" default="robot_right.franka.de" />
+  <arg name="rviz" default="true" />
+  <arg name="rqt" default="true" />
+
+  <include file="$(find franka_combined_control)/launch/franka_combined_control.launch" >
+    <arg name="robot_id" value="$(arg robot_id)" />
+    <arg name="robot_left_ip" value="$(arg robot_left_ip)" />
+    <arg name="robot_right_ip" value="$(arg robot_right_ip)" />
+  </include>
+
+  <group ns="$(arg robot_id)">
+    <rosparam command="load" file="$(find franka_combined_example_controllers)/config/franka_combined_example_controllers.yaml" />
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="dual_arm_cartesian_impedance_example_controller"/>
+    <node name="interactive_marker_left" pkg="franka_combined_example_controllers" type="dual_arm_interactive_marker.py"
+      args="--right_arm_id panda_right --left_arm_id panda_left" required="false" output="screen" />
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(arg rqt)"/>
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_combined_example_controllers)/launch/rviz/franka_dual_description_with_marker.rviz" if="$(arg rviz)"/>
+  </group>
+</launch>

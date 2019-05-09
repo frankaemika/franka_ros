@@ -16,18 +16,7 @@
 #include <franka_control/ErrorRecoveryAction.h>
 #include <franka_control/services.h>
 
-class ServiceContainer {
- public:
-  template <typename T, typename... TArgs>
-  ServiceContainer& advertiseService(TArgs&&... args) {
-    ros::ServiceServer server = franka_control::advertiseService<T>(std::forward<TArgs>(args)...);
-    services_.push_back(server);
-    return *this;
-  }
-
- private:
-  std::vector<ros::ServiceServer> services_;
-};
+using franka_control::ServiceContainer;
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_control_node");

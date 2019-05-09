@@ -31,6 +31,7 @@ float64[16] O_T_EE_d
 float64[16] F_T_EE
 float64[16] EE_T_K
 float64 time
+float64 control_command_success_rate
 uint8 ROBOT_MODE_OTHER=0
 uint8 ROBOT_MODE_IDLE=1
 uint8 ROBOT_MODE_MOVE=2

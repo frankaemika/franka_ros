@@ -1,0 +1,27 @@
+robot_hardware:
+  - panda_left
+  - panda_right
+panda_left:
+  type: franka_combinable_hw/FrankaCombinableHW
+  arm_id: panda_left
+  joint_names:
+    - panda_left_joint1
+    - panda_left_joint2
+    - panda_left_joint3
+    - panda_left_joint4
+    - panda_left_joint5
+    - panda_left_joint6
+    - panda_left_joint7
+  read_write_sleep_time: 0.0001
+panda_right:
+  type: franka_combinable_hw/FrankaCombinableHW
+  arm_id: panda_right
+  joint_names:
+    - panda_right_joint1
+    - panda_right_joint2
+    - panda_right_joint3
+    - panda_right_joint4
+    - panda_right_joint5
+    - panda_right_joint6
+    - panda_right_joint7
+  read_write_sleep_time: 0.0001
