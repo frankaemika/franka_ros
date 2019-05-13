@@ -28,9 +28,6 @@
       args="panda_left_state_controller panda_right_state_controller"/>
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
       <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
-      <param name="publish_default_positions"  value="False" />
-      <param name="publish_default_velocities" value="False" />
-      <param name="publish_default_efforts"    value="False" />
       <rosparam param="source_list">[panda_left_state_controller/joint_states,
         panda_right_state_controller/joint_states,
         panda_left/franka_gripper/joint_states,
