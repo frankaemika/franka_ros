@@ -223,7 +223,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
                     franka::Duration time_step) {
     if (commandHasNaN(command)) {
       ROS_ERROR("FrankaCombinableHW: Got NaN value in command!");
-      throw franka::CommandException("Got NaN value in Command");
+      throw franka::CommandException("Got NaN value in command");
     }
 
     checkJointLimits();
