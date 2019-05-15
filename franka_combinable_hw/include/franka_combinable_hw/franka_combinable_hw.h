@@ -10,7 +10,9 @@
 #include <thread>
 
 #include <actionlib/server/simple_action_server.h>
+#include <franka/control_types.h>
 #include <franka/duration.h>
+#include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
@@ -182,13 +184,48 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
    */
   bool controllerNeedsReset();
 
+  /**
+   * Returns whether the torque command contains NaN values.
+   *
+   * @param[in] command The torque commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::Torques& command);
+
+  /**
+   * Returns whether the Cartesian pose command contains NaN values.
+   *
+   * @param[in] command The Cartesian pose commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::CartesianPose& command);
+
+  /**
+   * Returns whether the Cartesian velocity command contains NaN values.
+   *
+   * @param[in] command The Cartesian velocity commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::CartesianVelocities& command);
+
  private:
-  using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
+  template <size_t size>
+  static bool arrayHasNaN(const std::array<double, size> array) {
+    return std::any_of(array.begin(), array.end(), [](const double& e) { return std::isnan(e); });
+  }
 
   template <typename T>
   T controlCallback(const T& command,
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
+    if (commandHasNaN(command)) {
+      ROS_ERROR("FrankaCombinableHW: Got NaN value in command!");
+      throw franka::CommandException("Got NaN value in Command");
+    }
+
     checkJointLimits();
 
     libfranka_state_mutex_.lock();
