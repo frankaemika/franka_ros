@@ -4,14 +4,15 @@
 
 #include <array>
 #include <atomic>
-#include <chrono>
 #include <exception>
 #include <functional>
 #include <string>
 #include <thread>
 
 #include <actionlib/server/simple_action_server.h>
+#include <franka/control_types.h>
 #include <franka/duration.h>
+#include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
@@ -183,21 +184,53 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
    */
   bool controllerNeedsReset();
 
+  /**
+   * Returns whether the torque command contains NaN values.
+   *
+   * @param[in] command The torque commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::Torques& command);
+
+  /**
+   * Returns whether the Cartesian pose command contains NaN values.
+   *
+   * @param[in] command The Cartesian pose commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::CartesianPose& command);
+
+  /**
+   * Returns whether the Cartesian velocity command contains NaN values.
+   *
+   * @param[in] command The Cartesian velocity commmand to check.
+   *
+   * @return true if the command contains NaN, false otherwise.
+   */
+  static bool commandHasNaN(const franka::CartesianVelocities& command);
+
  private:
-  using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
+  template <size_t size>
+  static bool arrayHasNaN(const std::array<double, size> array) {
+    return std::any_of(array.begin(), array.end(), [](const double& e) { return std::isnan(e); });
+  }
 
   template <typename T>
   T controlCallback(const T& command,
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
+    if (commandHasNaN(command)) {
+      ROS_ERROR("FrankaCombinableHW: Got NaN value in command!");
+      throw franka::CommandException("Got NaN value in command");
+    }
+
     checkJointLimits();
 
     libfranka_state_mutex_.lock();
     robot_state_libfranka_ = robot_state;
     libfranka_state_mutex_.unlock();
-
-    // Sleep a bit to give the controller a chance to compute the command to the new robot state.
-    std::this_thread::sleep_for(read_write_sleep_time_);
 
     libfranka_cmd_mutex_.lock();
     T current_cmd = command;
@@ -264,7 +297,6 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
   std::atomic_bool controller_active_{false};
   ControlMode current_control_mode_ = ControlMode::None;
   double joint_limit_warning_threshold_{10 * 3.14 / 180};
-  std::chrono::microseconds read_write_sleep_time_;
 
   std::unique_ptr<std::thread> control_loop_thread_;
 
