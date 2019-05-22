@@ -245,18 +245,15 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
                   "Robot state Cartesian members do not have same size");
     static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_F_ext_hat_K),
                   "Robot state Cartesian members do not have same size");
-    for (size_t i = 0; i < robot_state_.cartesian_collision.size(); i++) {
-      publisher_franka_states_.msg_.cartesian_collision[i] = robot_state_.cartesian_collision[i];
-      publisher_franka_states_.msg_.cartesian_contact[i] = robot_state_.cartesian_contact[i];
-      publisher_franka_states_.msg_.K_F_ext_hat_K[i] = robot_state_.K_F_ext_hat_K[i];
-      publisher_franka_states_.msg_.O_F_ext_hat_K[i] = robot_state_.O_F_ext_hat_K[i];
-    }
-
     static_assert(sizeof(robot_state_.O_dP_EE_d) == sizeof(robot_state_.O_dP_EE_c),
                   "Robot state end effector twist in base frame members do not have same size");
     static_assert(sizeof(robot_state_.O_dP_EE_d) == sizeof(robot_state_.O_ddP_EE_c),
                   "Robot state end effector twist in base frame members do not have same size");
     for (size_t i = 0; i < robot_state_.cartesian_collision.size(); i++) {
+      publisher_franka_states_.msg_.cartesian_collision[i] = robot_state_.cartesian_collision[i];
+      publisher_franka_states_.msg_.cartesian_contact[i] = robot_state_.cartesian_contact[i];
+      publisher_franka_states_.msg_.K_F_ext_hat_K[i] = robot_state_.K_F_ext_hat_K[i];
+      publisher_franka_states_.msg_.O_F_ext_hat_K[i] = robot_state_.O_F_ext_hat_K[i];
       publisher_franka_states_.msg_.O_dP_EE_d[i] = robot_state_.O_dP_EE_d[i];
       publisher_franka_states_.msg_.O_dP_EE_c[i] = robot_state_.O_dP_EE_c[i];
       publisher_franka_states_.msg_.O_ddP_EE_c[i] = robot_state_.O_ddP_EE_c[i];
@@ -302,18 +299,17 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.tau_ext_hat_filtered[i] = robot_state_.tau_ext_hat_filtered[i];
     }
 
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.elbow_d),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.elbow_c),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.delbow_c),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.ddelbow_c),
+                  "Robot state elbow configuration members do not have same size");
+
     for (size_t i = 0; i < robot_state_.elbow.size(); i++) {
       publisher_franka_states_.msg_.elbow[i] = robot_state_.elbow[i];
-    }
-
-    static_assert(sizeof(robot_state_.elbow_d) == sizeof(robot_state_.elbow_c),
-                  "Robot state elbow configuration members do not have same size");
-    static_assert(sizeof(robot_state_.elbow_d) == sizeof(robot_state_.delbow_c),
-                  "Robot state elbow configuration members do not have same size");
-    static_assert(sizeof(robot_state_.elbow_d) == sizeof(robot_state_.ddelbow_c),
-                  "Robot state elbow configuration members do not have same size");
-
-    for (size_t i = 0; i < robot_state_.elbow_d.size(); i++) {
       publisher_franka_states_.msg_.elbow_d[i] = robot_state_.elbow_d[i];
       publisher_franka_states_.msg_.elbow_c[i] = robot_state_.elbow_c[i];
       publisher_franka_states_.msg_.delbow_c[i] = robot_state_.delbow_c[i];
