@@ -177,7 +177,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   publisher_external_wrench_.init(controller_node_handle, "F_ext", 1);
 
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> > lock(
+    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState>> lock(
         publisher_joint_states_);
     publisher_joint_states_.msg_.name.resize(joint_names_.size());
     publisher_joint_states_.msg_.position.resize(robot_state_.q.size());
@@ -185,7 +185,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     publisher_joint_states_.msg_.effort.resize(robot_state_.tau_J.size());
   }
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState> > lock(
+    std::lock_guard<realtime_tools::RealtimePublisher<sensor_msgs::JointState>> lock(
         publisher_joint_states_desired_);
     publisher_joint_states_desired_.msg_.name.resize(joint_names_.size());
     publisher_joint_states_desired_.msg_.position.resize(robot_state_.q_d.size());
@@ -193,7 +193,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     publisher_joint_states_desired_.msg_.effort.resize(robot_state_.tau_J_d.size());
   }
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage> > lock(
+    std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>> lock(
         publisher_transforms_);
     publisher_transforms_.msg_.transforms.resize(2);
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
@@ -212,7 +212,7 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
     publisher_transforms_.msg_.transforms[1] = transform_message;
   }
   {
-    std::lock_guard<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped> > lock(
+    std::lock_guard<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>> lock(
         publisher_external_wrench_);
     publisher_external_wrench_.msg_.header.frame_id = arm_id_ + "_K";
     publisher_external_wrench_.msg_.wrench.force.x = 0.0;

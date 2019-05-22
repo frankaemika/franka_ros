@@ -1,3 +1,4 @@
 BasedOnStyle: Chromium
+Standard: Cpp11
 SortIncludes: true
 ColumnLimit: 100

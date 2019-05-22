@@ -4,6 +4,11 @@ language: none
 services:
   - docker
 
+matrix:
+  include:
+    - env: CI_ROS=kinetic
+    - env: CI_ROS=melodic
+
 before_script:
   - mkdir -p ~/workspace/catkin_ws/src
   - |
@@ -14,7 +19,7 @@ before_script:
     git submodule update --init --recursive
   - |
     cd ~/workspace
-    docker build -t worker $TRAVIS_BUILD_DIR/.ci
+    docker build -t worker -f $TRAVIS_BUILD_DIR/.ci/Dockerfile.$CI_ROS $TRAVIS_BUILD_DIR/.ci
     ln -sf $TRAVIS_BUILD_DIR catkin_ws/src/franka_ros
 
 script:
