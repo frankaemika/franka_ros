@@ -245,11 +245,20 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
                   "Robot state Cartesian members do not have same size");
     static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_F_ext_hat_K),
                   "Robot state Cartesian members do not have same size");
+    static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_dP_EE_d),
+                  "Robot state Cartesian members do not have same size");
+    static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_dP_EE_c),
+                  "Robot state Cartesian members do not have same size");
+    static_assert(sizeof(robot_state_.cartesian_collision) == sizeof(robot_state_.O_ddP_EE_c),
+                  "Robot state Cartesian members do not have same size");
     for (size_t i = 0; i < robot_state_.cartesian_collision.size(); i++) {
       publisher_franka_states_.msg_.cartesian_collision[i] = robot_state_.cartesian_collision[i];
       publisher_franka_states_.msg_.cartesian_contact[i] = robot_state_.cartesian_contact[i];
       publisher_franka_states_.msg_.K_F_ext_hat_K[i] = robot_state_.K_F_ext_hat_K[i];
       publisher_franka_states_.msg_.O_F_ext_hat_K[i] = robot_state_.O_F_ext_hat_K[i];
+      publisher_franka_states_.msg_.O_dP_EE_d[i] = robot_state_.O_dP_EE_d[i];
+      publisher_franka_states_.msg_.O_dP_EE_c[i] = robot_state_.O_dP_EE_c[i];
+      publisher_franka_states_.msg_.O_ddP_EE_c[i] = robot_state_.O_ddP_EE_c[i];
     }
 
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.q_d),
@@ -257,6 +266,8 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq),
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.dq_d),
+                  "Robot state joint members do not have same size");
+    static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.ddq_d),
                   "Robot state joint members do not have same size");
     static_assert(sizeof(robot_state_.q) == sizeof(robot_state_.tau_J),
                   "Robot state joint members do not have same size");
@@ -279,6 +290,7 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.q_d[i] = robot_state_.q_d[i];
       publisher_franka_states_.msg_.dq[i] = robot_state_.dq[i];
       publisher_franka_states_.msg_.dq_d[i] = robot_state_.dq_d[i];
+      publisher_franka_states_.msg_.ddq_d[i] = robot_state_.ddq_d[i];
       publisher_franka_states_.msg_.tau_J[i] = robot_state_.tau_J[i];
       publisher_franka_states_.msg_.dtau_J[i] = robot_state_.dtau_J[i];
       publisher_franka_states_.msg_.tau_J_d[i] = robot_state_.tau_J_d[i];
@@ -289,12 +301,21 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.tau_ext_hat_filtered[i] = robot_state_.tau_ext_hat_filtered[i];
     }
 
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.elbow_d),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.elbow_c),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.delbow_c),
+                  "Robot state elbow configuration members do not have same size");
+    static_assert(sizeof(robot_state_.elbow) == sizeof(robot_state_.ddelbow_c),
+                  "Robot state elbow configuration members do not have same size");
+
     for (size_t i = 0; i < robot_state_.elbow.size(); i++) {
       publisher_franka_states_.msg_.elbow[i] = robot_state_.elbow[i];
-    }
-
-    for (size_t i = 0; i < robot_state_.elbow_d.size(); i++) {
       publisher_franka_states_.msg_.elbow_d[i] = robot_state_.elbow_d[i];
+      publisher_franka_states_.msg_.elbow_c[i] = robot_state_.elbow_c[i];
+      publisher_franka_states_.msg_.delbow_c[i] = robot_state_.delbow_c[i];
+      publisher_franka_states_.msg_.ddelbow_c[i] = robot_state_.ddelbow_c[i];
     }
 
     static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.F_T_EE),
@@ -303,11 +324,14 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
                   "Robot state transforms do not have same size");
     static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.O_T_EE_d),
                   "Robot state transforms do not have same size");
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.O_T_EE_c),
+                  "Robot state transforms do not have same size");
     for (size_t i = 0; i < robot_state_.O_T_EE.size(); i++) {
       publisher_franka_states_.msg_.O_T_EE[i] = robot_state_.O_T_EE[i];
       publisher_franka_states_.msg_.F_T_EE[i] = robot_state_.F_T_EE[i];
       publisher_franka_states_.msg_.EE_T_K[i] = robot_state_.EE_T_K[i];
       publisher_franka_states_.msg_.O_T_EE_d[i] = robot_state_.O_T_EE_d[i];
+      publisher_franka_states_.msg_.O_T_EE_c[i] = robot_state_.O_T_EE_c[i];
     }
     publisher_franka_states_.msg_.m_ee = robot_state_.m_ee;
     publisher_franka_states_.msg_.m_load = robot_state_.m_load;
@@ -326,6 +350,8 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     }
 
     publisher_franka_states_.msg_.time = robot_state_.time.toSec();
+    publisher_franka_states_.msg_.control_command_success_rate =
+        robot_state_.control_command_success_rate;
     publisher_franka_states_.msg_.current_errors = errorsToMessage(robot_state_.current_errors);
     publisher_franka_states_.msg_.last_motion_errors =
         errorsToMessage(robot_state_.last_motion_errors);

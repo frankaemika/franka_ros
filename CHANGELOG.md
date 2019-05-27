@@ -5,7 +5,7 @@
 Requires `libfranka` >= 0.5.0
 
   * `franka_control`:
-    - Publish `robot_mode` in `franka_state_controller`.
+    - Publish whole `libfranka` `franka::RobotState` in `franka_state_controller`.
   * `franka_description`
     - **BREAKING** Updated collision volumes.
     - Removed invalid `axis` for `joint8`.
