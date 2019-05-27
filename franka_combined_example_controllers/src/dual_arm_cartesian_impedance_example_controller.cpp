@@ -235,7 +235,6 @@ void DualArmCartesianImpedanceExampleController::updateArm(FrankaDataContainer& 
       arm_data.model_handle_->getZeroJacobian(franka::Frame::kEndEffector);
 
   // convert to Eigen
-  Eigen::Map<Eigen::Matrix<double, 7, 7>> inertia(inertia_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1>> coriolis(coriolis_array.data());
   Eigen::Map<Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1>> q(robot_state.q.data());
