@@ -31,7 +31,7 @@ function(add_format_target _target)
   add_dependencies(format format-${_target})
 
   add_custom_target(check-format-${_target}
-    COMMAND scripts/format-check.sh ${CLANG_FORMAT_PROG} -output-replacements-xml ${ARG_FILES}
+    COMMAND ${CLANG_FORMAT_PROG} -output-replacements-xml ${ARG_FILES} | grep "<replacement " > /dev/null && exit 1 || exit 0
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
     COMMENT "Checking ${_target} code formatting with clang-format"
     VERBATIM
@@ -55,7 +55,7 @@ function(add_tidy_target _target)
   add_dependencies(tidy tidy-${_target})
 
   add_custom_target(check-tidy-${_target}
-  COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${ARG_FILES}
+  COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${ARG_FILES} | grep . && exit 1 || exit 0
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/..
     DEPENDS ${ARG_DEPENDS}
     COMMENT "Running clang-tidy for ${_target}"
