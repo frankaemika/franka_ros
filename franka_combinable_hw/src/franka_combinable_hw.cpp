@@ -1,6 +1,7 @@
 ﻿// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/rate_limiting.h>
 #include <franka_combinable_hw/franka_combinable_hw.h>
@@ -606,14 +607,14 @@ void FrankaCombinableHW::write(const ros::Time&,  // NOLINT (readability-identif
     error_recovered_ = false;
   }
   enforceLimits(period);
-  libfranka_cmd_mutex_.lock();
   ros_cmd_mutex_.lock();
+  libfranka_cmd_mutex_.lock();
   effort_joint_command_libfranka_.tau_J =
       saturateTorqueRate(effort_joint_command_ros_.tau_J, robot_state_libfranka_.tau_J_d);
   pose_cartesian_command_libfranka_ = pose_cartesian_command_ros_;
   velocity_cartesian_command_libfranka_ = velocity_cartesian_command_ros_;
-  ros_cmd_mutex_.unlock();
   libfranka_cmd_mutex_.unlock();
+  ros_cmd_mutex_.unlock();
 }
 
 std::array<double, 7> FrankaCombinableHW::saturateTorqueRate(
@@ -657,6 +658,18 @@ void FrankaCombinableHW::resetError() {
 
 bool FrankaCombinableHW::controllerNeedsReset() {
   return controller_needs_reset_;
+}
+
+bool FrankaCombinableHW::commandHasNaN(const franka::Torques& command) {
+  return arrayHasNaN(command.tau_J);
+}
+
+bool FrankaCombinableHW::commandHasNaN(const franka::CartesianPose& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_T_EE);
+}
+
+bool FrankaCombinableHW::commandHasNaN(const franka::CartesianVelocities& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_dP_EE);
 }
 
 }  // namespace franka_combinable_hw

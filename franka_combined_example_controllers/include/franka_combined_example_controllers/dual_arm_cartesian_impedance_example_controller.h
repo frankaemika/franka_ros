@@ -11,6 +11,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <realtime_tools/realtime_publisher.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
 #include <Eigen/Dense>
@@ -18,7 +19,7 @@
 #include <franka_combined_example_controllers/dual_arm_compliance_paramConfig.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
-#include <geometry_msgs/PoseStamped.h>
+#include <franka_hw/trigger_rate.h>
 
 namespace franka_combined_example_controllers {
 
@@ -99,6 +100,14 @@ class DualArmCartesianImpedanceExampleController
   ///< Target transformation between the two endeffectors.
   Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
 
+  ///< Transformation from the centering frame to the left endeffector.
+  Eigen::Affine3d EEl_T_C_;
+
+  ///< Publisher for the centering tracking frame of the coordinated motion.
+  realtime_tools::RealtimePublisher<geometry_msgs::PoseStamped> center_frame_pub_;
+  ///< Rate to trigger publishing the current pose of the centering frame.
+  franka_hw::TriggerRate publish_rate_;
+
   /**
    * Saturates torque commands to ensure feasibility.
    *
@@ -164,6 +173,11 @@ class DualArmCartesianImpedanceExampleController
    * @param[in] msg New target pose.
    */
   void targetPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
+
+  /**
+   * Publishes a Pose Stamped for visualization of the current centering pose.
+   */
+  void publishCenteringPose();
 };
 
 }  // namespace franka_combined_example_controllers
