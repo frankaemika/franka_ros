@@ -77,21 +77,10 @@ FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       pose_cartesian_command_(
           {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
-      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
-  setupJointStateInterface(robot_state_);
-  setupJointCommandInterface(position_joint_command_, robot_state_);
-  setupJointCommandInterface(velocity_joint_command_, robot_state_);
-  setupJointCommandInterface(effort_joint_command_);
-  setupLimitInterface<joint_limits_interface::PositionJointSoftLimitsHandle>(
-      urdf_model, position_joint_limit_interface_, position_joint_interface_);
-  setupLimitInterface<joint_limits_interface::VelocityJointSoftLimitsHandle>(
-      urdf_model, velocity_joint_limit_interface_, velocity_joint_interface_);
-  setupLimitInterface<joint_limits_interface::EffortJointSoftLimitsHandle>(
-      urdf_model, effort_joint_limit_interface_, effort_joint_interface_);
-
-  setupFrankaStateInterface(robot_state_);
-  setupFrankaCartesianPoseInterface(pose_cartesian_command_);
-  setupFrankaCartesianVelocityInterface(velocity_cartesian_command_);
+      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      urdf_model_(urdf_model) {
+  init(joint_names, arm_id, urdf_model, get_limit_rate, get_cutoff_frequency,
+       get_internal_controller);
 }
 
 FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
@@ -224,6 +213,39 @@ std::array<double, 7> FrankaHW::getJointEffortCommand() const noexcept {
 
 void FrankaHW::reset() {
   position_joint_limit_interface_.reset();
+}
+
+void FrankaHW::checkJointLimits() {
+  std::string joint_limits_warning;
+  for (const auto& k_joint_name : joint_names_) {
+    try {
+      auto joint_handle = joint_state_interface_.getHandle(k_joint_name);
+      auto urdf_joint = urdf_model_.getJoint(k_joint_name);
+      joint_limits_interface::JointLimits joint_limits;
+      if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
+        double joint_lower = joint_limits.min_position;
+        double joint_upper = joint_limits.max_position;
+        double joint_position = joint_handle.getPosition();
+        double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
+        if (dist < joint_limit_warning_threshold_) {
+          joint_limits_warning += "\n\t" + k_joint_name + ": " + std::to_string(dist * 180 / 3.14) +
+                                  " degrees to joint limits (limits: [" +
+                                  std::to_string(joint_lower) + ", " + std::to_string(joint_upper) +
+                                  "]" + " q: " + std::to_string(joint_position) + ") ";
+        }
+      } else {
+        ROS_ERROR_STREAM_ONCE("FrankaHW: Could not parse joint limit for joint "
+                              << k_joint_name << " for joint limit interfaces");
+      }
+    } catch (const hardware_interface::HardwareInterfaceException& ex) {
+      ROS_ERROR_STREAM_ONCE("FrankaHW: Could not get joint handle " << k_joint_name << " .\n"
+                                                                    << ex.what());
+      return;
+    }
+  }
+  if (!joint_limits_warning.empty()) {
+    ROS_WARN_THROTTLE(5, "FrankaHW: %s", joint_limits_warning.c_str());
+  }
 }
 
 void FrankaHW::setupJointStateInterface(RobotState& robot_state) {
@@ -381,6 +403,27 @@ bool FrankaHW::setRunFunction(const ControlMode& requested_control_mode,
       return false;
   }
   return true;
+}
+
+void FrankaHW::init(const std::array<std::string, 7>& joint_names,
+                    const std::string& arm_id,
+                    const urdf::Model& urdf_model,
+                    std::function<bool()> get_limit_rate,
+                    std::function<double()> get_cutoff_frequency,
+                    std::function<franka::ControllerMode()> get_internal_controller) {
+  setupJointStateInterface(robot_state_);
+  setupJointCommandInterface(position_joint_command_, robot_state_);
+  setupJointCommandInterface(velocity_joint_command_, robot_state_);
+  setupJointCommandInterface(effort_joint_command_);
+  setupLimitInterface<joint_limits_interface::PositionJointSoftLimitsHandle>(
+      urdf_model, position_joint_limit_interface_, position_joint_interface_);
+  setupLimitInterface<joint_limits_interface::VelocityJointSoftLimitsHandle>(
+      urdf_model, velocity_joint_limit_interface_, velocity_joint_interface_);
+  setupLimitInterface<joint_limits_interface::EffortJointSoftLimitsHandle>(
+      urdf_model, effort_joint_limit_interface_, effort_joint_interface_);
+  setupFrankaStateInterface(robot_state_);
+  setupFrankaCartesianPoseInterface(pose_cartesian_command_);
+  setupFrankaCartesianVelocityInterface(velocity_cartesian_command_);
 }
 
 }  // namespace franka_hw
