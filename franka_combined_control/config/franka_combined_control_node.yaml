@@ -12,7 +12,6 @@ panda_left:
     - panda_left_joint5
     - panda_left_joint6
     - panda_left_joint7
-  read_write_sleep_time: 0.0004
 panda_right:
   type: franka_combinable_hw/FrankaCombinableHW
   arm_id: panda_right
@@ -24,4 +23,3 @@ panda_right:
     - panda_right_joint5
     - panda_right_joint6
     - panda_right_joint7
-  read_write_sleep_time: 0.0004
