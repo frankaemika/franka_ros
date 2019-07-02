@@ -10,7 +10,6 @@
 #include <ostream>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
