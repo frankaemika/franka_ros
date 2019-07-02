@@ -185,10 +185,11 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   virtual void checkJointLimits();
 
- private:
+ protected:
+  using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
   template <typename T>
   T controlCallback(const T& command,
-                    std::function<bool(const franka::RobotState&, franka::Duration)> ros_callback,
+                    Callback ros_callback,
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
     robot_state_ = robot_state;
@@ -294,9 +295,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_;
   franka::CartesianVelocities velocity_cartesian_command_;
 
-  std::function<void(franka::Robot&,
-                     std::function<bool(const franka::RobotState&, franka::Duration)>)>
-      run_function_;
+  std::function<void(franka::Robot&, Callback)> run_function_;
 
   urdf::Model urdf_model_;
   double joint_limit_warning_threshold_{0.1};
