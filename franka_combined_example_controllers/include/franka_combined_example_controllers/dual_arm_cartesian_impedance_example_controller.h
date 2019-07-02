@@ -99,7 +99,6 @@ class DualArmCartesianImpedanceExampleController
   Eigen::Affine3d Ol_T_Or_;  // NOLINT (readability-identifier-naming)
   ///< Target transformation between the two endeffectors.
   Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
-
   ///< Transformation from the centering frame to the left endeffector.
   Eigen::Affine3d EEl_T_C_;
 
