@@ -272,14 +272,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                               const double cutoff_frequency,
                               const franka::ControllerMode internal_controller);
 
-  virtual void init(const std::array<std::string, 7>& joint_names,
-                    const std::string& arm_id,
-                    const urdf::Model& urdf_model,
-                    std::function<bool()> get_limit_rate = []() { return true; },
-                    std::function<double()> get_cutoff_frequency =
-                        []() { return franka::kDefaultCutoffFrequency; },
-                    std::function<franka::ControllerMode()> get_internal_controller =
-                        []() { return franka::ControllerMode::kJointImpedance; });
+  virtual void init();
 
   hardware_interface::JointStateInterface joint_state_interface_{};
   FrankaStateInterface franka_state_interface_{};

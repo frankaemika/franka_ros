@@ -74,8 +74,7 @@ FrankaHW::FrankaHW(const array<string, 7>& joint_names,
           {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
       velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       urdf_model_(urdf_model) {
-  init(joint_names, arm_id, urdf_model, get_limit_rate, get_cutoff_frequency,
-       get_internal_controller);
+  init();
 }
 
 FrankaHW::FrankaHW(const array<string, 7>& joint_names,
@@ -363,12 +362,7 @@ bool FrankaHW::setRunFunction(const ControlMode& requested_control_mode,
   return true;
 }
 
-void FrankaHW::init(const array<string, 7>& joint_names,
-                    const string& arm_id,
-                    const urdf::Model& urdf_model,
-                    function<bool()> get_limit_rate,
-                    function<double()> get_cutoff_frequency,
-                    function<franka::ControllerMode()> get_internal_controller) {
+void FrankaHW::init() {
   setupJointStateInterface(robot_state_);
   setupJointCommandInterface(position_joint_command_.q, robot_state_, true,
                              position_joint_interface_);
@@ -376,11 +370,11 @@ void FrankaHW::init(const array<string, 7>& joint_names,
                              velocity_joint_interface_);
   setupJointCommandInterface(effort_joint_command_.tau_J, robot_state_, false,
                              effort_joint_interface_);
-  setupLimitInterface<PositionJointSoftLimitsHandle>(urdf_model, position_joint_limit_interface_,
+  setupLimitInterface<PositionJointSoftLimitsHandle>(urdf_model_, position_joint_limit_interface_,
                                                      position_joint_interface_);
-  setupLimitInterface<VelocityJointSoftLimitsHandle>(urdf_model, velocity_joint_limit_interface_,
+  setupLimitInterface<VelocityJointSoftLimitsHandle>(urdf_model_, velocity_joint_limit_interface_,
                                                      velocity_joint_interface_);
-  setupLimitInterface<EffortJointSoftLimitsHandle>(urdf_model, effort_joint_limit_interface_,
+  setupLimitInterface<EffortJointSoftLimitsHandle>(urdf_model_, effort_joint_limit_interface_,
                                                    effort_joint_interface_);
   setupFrankaStateInterface(robot_state_);
   setupFrankaCartesianPoseInterface(pose_cartesian_command_);
