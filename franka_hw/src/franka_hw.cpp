@@ -11,6 +11,7 @@
 #include <string>
 #include <utility>
 
+#include <franka/control_types.h>
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
@@ -26,7 +27,6 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using franka::RobotState;
 using franka::Robot;
-using hardware_interface::ControllerInfo;
 using franka::Torques;
 using franka::JointPositions;
 using franka::JointVelocities;
@@ -35,6 +35,7 @@ using franka::CartesianVelocities;
 using hardware_interface::JointStateHandle;
 using hardware_interface::JointHandle;
 using hardware_interface::HardwareInterfaceException;
+using hardware_interface::ControllerInfo;
 using joint_limits_interface::PositionJointSoftLimitsHandle;
 using joint_limits_interface::VelocityJointSoftLimitsHandle;
 using joint_limits_interface::EffortJointSoftLimitsHandle;
@@ -241,42 +242,29 @@ void FrankaHW::checkJointLimits() {
 
 void FrankaHW::setupJointStateInterface(RobotState& robot_state) {
   for (size_t i = 0; i < joint_names_.size(); i++) {
-    JointStateHandle joint_handle_q(joint_names_[i], &robot_state_.q[i], &robot_state_.dq[i],
-                                    &robot_state_.tau_J[i]);
+    JointStateHandle joint_handle_q(joint_names_[i], &robot_state.q[i], &robot_state.dq[i],
+                                    &robot_state.tau_J[i]);
     joint_state_interface_.registerHandle(joint_handle_q);
   }
   registerInterface(&joint_state_interface_);
 }
 
-void FrankaHW::setupJointCommandInterface(JointPositions& position_joint_command,
-                                          RobotState& robot_state) {
+void FrankaHW::setupJointCommandInterface(std::array<double, 7>& command,
+                                          franka::RobotState& state,
+                                          const bool use_q_d,
+                                          hardware_interface::JointCommandInterface& interface) {
   for (size_t i = 0; i < joint_names_.size(); i++) {
-    JointStateHandle joint_handle_q_d(joint_names_[i], &robot_state.q_d[i], &robot_state.dq_d[i],
-                                      &robot_state.tau_J[i]);
-    JointHandle position_joint_handle(joint_handle_q_d, &position_joint_command.q[i]);
-    position_joint_interface_.registerHandle(position_joint_handle);
+    JointStateHandle state_handle;
+    if (use_q_d) {
+      state_handle =
+          JointStateHandle(joint_names_[i], &state.q_d[i], &state.dq_d[i], &state.tau_J[i]);
+    } else {
+      state_handle = JointStateHandle(joint_names_[i], &state.q[i], &state.dq[i], &state.tau_J[i]);
+    }
+    JointHandle joint_handle(state_handle, &command[i]);
+    interface.registerHandle(joint_handle);
   }
-  registerInterface(&position_joint_interface_);
-}
-
-void FrankaHW::setupJointCommandInterface(JointVelocities& velocity_joint_command,
-                                          RobotState& robot_state) {
-  for (size_t i = 0; i < joint_names_.size(); i++) {
-    JointStateHandle joint_handle_q_d(joint_names_[i], &robot_state.q_d[i], &robot_state.dq_d[i],
-                                      &robot_state.tau_J[i]);
-    JointHandle velocity_joint_handle(joint_handle_q_d, &velocity_joint_command.dq[i]);
-    velocity_joint_interface_.registerHandle(velocity_joint_handle);
-  }
-  registerInterface(&velocity_joint_interface_);
-}
-
-void FrankaHW::setupJointCommandInterface(Torques& effort_joint_command) {
-  for (size_t i = 0; i < joint_names_.size(); i++) {
-    JointHandle effort_joint_handle(joint_state_interface_.getHandle(joint_names_[i]),
-                                    &effort_joint_command.tau_J[i]);
-    effort_joint_interface_.registerHandle(effort_joint_handle);
-  }
-  registerInterface(&effort_joint_interface_);
+  registerInterface(&interface);
 }
 
 void FrankaHW::setupFrankaStateInterface(RobotState& robot_state) {
@@ -400,9 +388,14 @@ void FrankaHW::init(const array<string, 7>& joint_names,
                     function<double()> get_cutoff_frequency,
                     function<franka::ControllerMode()> get_internal_controller) {
   setupJointStateInterface(robot_state_);
-  setupJointCommandInterface(position_joint_command_, robot_state_);
-  setupJointCommandInterface(velocity_joint_command_, robot_state_);
-  setupJointCommandInterface(effort_joint_command_);
+
+  setupJointCommandInterface(position_joint_command_.q, robot_state_, true,
+                             position_joint_interface_);
+  setupJointCommandInterface(velocity_joint_command_.dq, robot_state_, true,
+                             velocity_joint_interface_);
+  setupJointCommandInterface(effort_joint_command_.tau_J, robot_state_, false,
+                             effort_joint_interface_);
+
   setupLimitInterface<PositionJointSoftLimitsHandle>(urdf_model, position_joint_limit_interface_,
                                                      position_joint_interface_);
   setupLimitInterface<VelocityJointSoftLimitsHandle>(urdf_model, velocity_joint_limit_interface_,

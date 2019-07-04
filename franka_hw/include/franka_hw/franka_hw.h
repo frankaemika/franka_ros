@@ -238,13 +238,10 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   virtual void setupJointStateInterface(franka::RobotState& robot_state);
 
-  virtual void setupJointCommandInterface(franka::JointPositions& position_joint_command,
-                                          franka::RobotState& robot_state);
-
-  virtual void setupJointCommandInterface(franka::JointVelocities& velocity_joint_command,
-                                          franka::RobotState& robot_state);
-
-  virtual void setupJointCommandInterface(franka::Torques& effort_joint_command);
+  virtual void setupJointCommandInterface(std::array<double, 7>& command,
+                                          franka::RobotState& robot_state,
+                                          const bool use_q_d,
+                                          hardware_interface::JointCommandInterface& interface);
 
   virtual void setupFrankaStateInterface(franka::RobotState& robot_state);
 
