@@ -238,10 +238,25 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   virtual void setupJointStateInterface(franka::RobotState& robot_state);
 
-  virtual void setupJointCommandInterface(std::array<double, 7>& command,
-                                          franka::RobotState& robot_state,
-                                          const bool use_q_d,
-                                          hardware_interface::JointCommandInterface& interface);
+  template <typename T>
+  void setupJointCommandInterface(std::array<double, 7>& command,
+                                  franka::RobotState& state,
+                                  const bool use_q_d,
+                                  T& interface) {
+    for (size_t i = 0; i < joint_names_.size(); i++) {
+      hardware_interface::JointStateHandle state_handle;
+      if (use_q_d) {
+        state_handle = hardware_interface::JointStateHandle(joint_names_[i], &state.q_d[i],
+                                                            &state.dq_d[i], &state.tau_J[i]);
+      } else {
+        state_handle = hardware_interface::JointStateHandle(joint_names_[i], &state.q[i],
+                                                            &state.dq[i], &state.tau_J[i]);
+      }
+      hardware_interface::JointHandle joint_handle(state_handle, &command[i]);
+      interface.registerHandle(joint_handle);
+    }
+    registerInterface(&interface);
+  }
 
   virtual void setupFrankaStateInterface(franka::RobotState& robot_state);
 

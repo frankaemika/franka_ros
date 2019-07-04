@@ -249,24 +249,6 @@ void FrankaHW::setupJointStateInterface(RobotState& robot_state) {
   registerInterface(&joint_state_interface_);
 }
 
-void FrankaHW::setupJointCommandInterface(std::array<double, 7>& command,
-                                          franka::RobotState& state,
-                                          const bool use_q_d,
-                                          hardware_interface::JointCommandInterface& interface) {
-  for (size_t i = 0; i < joint_names_.size(); i++) {
-    JointStateHandle state_handle;
-    if (use_q_d) {
-      state_handle =
-          JointStateHandle(joint_names_[i], &state.q_d[i], &state.dq_d[i], &state.tau_J[i]);
-    } else {
-      state_handle = JointStateHandle(joint_names_[i], &state.q[i], &state.dq[i], &state.tau_J[i]);
-    }
-    JointHandle joint_handle(state_handle, &command[i]);
-    interface.registerHandle(joint_handle);
-  }
-  registerInterface(&interface);
-}
-
 void FrankaHW::setupFrankaStateInterface(RobotState& robot_state) {
   FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
   franka_state_interface_.registerHandle(franka_state_handle);
@@ -388,14 +370,12 @@ void FrankaHW::init(const array<string, 7>& joint_names,
                     function<double()> get_cutoff_frequency,
                     function<franka::ControllerMode()> get_internal_controller) {
   setupJointStateInterface(robot_state_);
-
   setupJointCommandInterface(position_joint_command_.q, robot_state_, true,
                              position_joint_interface_);
   setupJointCommandInterface(velocity_joint_command_.dq, robot_state_, true,
                              velocity_joint_interface_);
   setupJointCommandInterface(effort_joint_command_.tau_J, robot_state_, false,
                              effort_joint_interface_);
-
   setupLimitInterface<PositionJointSoftLimitsHandle>(urdf_model, position_joint_limit_interface_,
                                                      position_joint_interface_);
   setupLimitInterface<VelocityJointSoftLimitsHandle>(urdf_model, velocity_joint_limit_interface_,
