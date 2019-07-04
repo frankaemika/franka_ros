@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& ostream, franka::ControllerMode mode) {
   return ostream;
 }
 
-std::string to_string_with_precision(const double value, const size_t precision = 6) {
+std::string toStringWithPrecision(const double value, const size_t precision = 6) {
   std::ostringstream out;
   out.precision(precision);
   out << std::fixed << value;
@@ -205,10 +205,10 @@ void FrankaHW::checkJointLimits() {
         double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
         if (dist < joint_limit_warning_threshold_) {
           joint_limits_warning +=
-              "\n\t" + k_joint_name + ": " + to_string_with_precision(dist * 180 / M_PI) +
-              " degrees to joint limits (limits: [" + to_string_with_precision(joint_lower) + ", " +
-              to_string_with_precision(joint_upper) + "]" +
-              " q: " + to_string_with_precision(joint_position) + ") ";
+              "\n\t" + k_joint_name + ": " + toStringWithPrecision(dist * 180 / M_PI) +
+              " degrees to joint limits (limits: [" + toStringWithPrecision(joint_lower) + ", " +
+              toStringWithPrecision(joint_upper) + "]" +
+              " q: " + toStringWithPrecision(joint_position) + ") ";
         }
       } else {
         ROS_ERROR_STREAM_ONCE("FrankaHW: Could not parse joint limit for joint "
@@ -235,7 +235,7 @@ void FrankaHW::setupJointStateInterface(franka::RobotState& robot_state) {
 }
 
 void FrankaHW::setupFrankaStateInterface(franka::RobotState& robot_state) {
-  FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
+  FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state);
   franka_state_interface_.registerHandle(franka_state_handle);
   registerInterface(&franka_state_interface_);
 }
