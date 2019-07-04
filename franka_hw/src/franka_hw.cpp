@@ -8,6 +8,7 @@
 #include <functional>
 #include <list>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -19,7 +20,6 @@
 namespace franka_hw {
 
 using std::string;
-using std::to_string;
 using std::function;
 using std::array;
 using std::list;
@@ -54,6 +54,14 @@ std::ostream& operator<<(std::ostream& ostream, franka::ControllerMode mode) {
   }
   return ostream;
 }
+
+std::string to_string_with_precision(const double value, const size_t precision = 6) {
+  std::ostringstream out;
+  out.precision(precision);
+  out << std::fixed << value;
+  return out.str();
+}
+
 }  // anonymous namespace
 
 FrankaHW::FrankaHW(const array<string, 7>& joint_names,
@@ -219,10 +227,11 @@ void FrankaHW::checkJointLimits() {
         double joint_position = joint_handle.getPosition();
         double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
         if (dist < joint_limit_warning_threshold_) {
-          joint_limits_warning += "\n\t" + k_joint_name + ": " + to_string(dist * 180 / 3.14) +
-                                  " degrees to joint limits (limits: [" + to_string(joint_lower) +
-                                  ", " + to_string(joint_upper) + "]" +
-                                  " q: " + to_string(joint_position) + ") ";
+          joint_limits_warning +=
+              "\n\t" + k_joint_name + ": " + to_string_with_precision(dist * 180 / M_PI) +
+              " degrees to joint limits (limits: [" + to_string_with_precision(joint_lower) + ", " +
+              to_string_with_precision(joint_upper) + "]" +
+              " q: " + to_string_with_precision(joint_position) + ") ";
         }
       } else {
         ROS_ERROR_STREAM_ONCE("FrankaHW: Could not parse joint limit for joint "
