@@ -24,6 +24,7 @@ catkin_package(
 add_library(franka_hw
   src/control_mode.cpp
   src/franka_hw.cpp
+  src/franka_combinable_hw.cpp
   src/resource_helpers.cpp
   src/trigger_rate.cpp
 )
