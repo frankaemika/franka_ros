@@ -47,7 +47,8 @@ FrankaHW::FrankaHW()
       effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
       pose_cartesian_command_(
           {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
-      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {}
+      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      initialized_(false) {}
 
 bool FrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (initialized_) {

@@ -276,7 +276,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;
   std::string robot_ip_;
-  bool initialized_;
+  bool initialized_{false};
 
   std::function<franka::ControllerMode()> get_internal_controller_;
   std::function<bool()> get_limit_rate_;

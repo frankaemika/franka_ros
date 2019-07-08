@@ -26,7 +26,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle node_handle("~");
 
   franka_hw::FrankaHW franka_control;
-  franka_control.init(public_node_handle, node_handle);
+  if (!franka_control.init(public_node_handle, node_handle)) {
+    ROS_ERROR("franka_control_node: Failed to initialize FrankaHW class. Shutting down!");
+    return 1;
+  }
 
   franka::Robot& robot = franka_control.robot();
 
