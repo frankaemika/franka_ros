@@ -68,7 +68,7 @@ bool FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHa
     return false;
   }
 
-  if (!robot_hw_nh.getParam("joint_limit_warning_threshold", arm_id_)) {
+  if (!robot_hw_nh.getParam("joint_limit_warning_threshold", joint_limit_warning_threshold_)) {
     ROS_INFO(
         "FrankaCombinableHW: no parameter joint_limit_warning_threshold is found, using default "
         "value %f",

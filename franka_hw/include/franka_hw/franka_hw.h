@@ -155,6 +155,22 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   virtual void checkJointLimits();
 
+  /**
+   * Reads data from the franka robot.
+   *
+   * @param[in] time The current time.
+   * @param[in] period The time passed since the last call to \ref read.
+   */
+  void read(const ros::Time& time, const ros::Duration& period) override;
+
+  /**
+   * Writes data to the franka robot.
+   *
+   * @param[in] time The current time.
+   * @param[in] period The time passed since the last call to \ref write.
+   */
+  void write(const ros::Time& time, const ros::Duration& period) override;
+
   /** TODO
    */
   franka::Robot& robot();
@@ -172,10 +188,16 @@ class FrankaHW : public hardware_interface::RobotHW {
                     Callback ros_callback,
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
-    robot_state_ = robot_state;
+    robot_state_libfranka_ = robot_state;
+    ros::Time now = ros::Time::now();
+    read(now, ros::Duration(time_step.toSec()));
+
     if (!controller_active_ || (ros_callback && !ros_callback(robot_state, time_step))) {
       return franka::MotionFinished(command);
     }
+
+    write(now, ros::Duration(time_step.toSec()));
+
     return command;
   }
 
@@ -270,6 +292,26 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_{};
 
   franka::RobotState robot_state_{};
+
+  std::mutex libfranka_state_mutex_;
+  std::mutex ros_state_mutex_;
+  franka::RobotState robot_state_libfranka_{};
+  franka::RobotState robot_state_ros_{};
+
+  std::mutex libfranka_cmd_mutex_;
+  franka::JointPositions position_joint_command_libfranka_;
+  franka::JointVelocities velocity_joint_command_libfranka_;
+  franka::Torques effort_joint_command_libfranka_;
+  franka::CartesianPose pose_cartesian_command_libfranka_;
+  franka::CartesianVelocities velocity_cartesian_command_libfranka_;
+
+  std::mutex ros_cmd_mutex_;
+  franka::JointPositions position_joint_command_ros_;
+  franka::JointVelocities velocity_joint_command_ros_;
+  franka::Torques effort_joint_command_ros_;
+  franka::CartesianPose pose_cartesian_command_ros_;
+  franka::CartesianVelocities velocity_cartesian_command_ros_;
+
   std::unique_ptr<franka::Robot> robot_;
   std::unique_ptr<franka::Model> model_;
 
@@ -281,12 +323,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::function<franka::ControllerMode()> get_internal_controller_;
   std::function<bool()> get_limit_rate_;
   std::function<double()> get_cutoff_frequency_;
-
-  franka::JointPositions position_joint_command_;
-  franka::JointVelocities velocity_joint_command_;
-  franka::Torques effort_joint_command_;
-  franka::CartesianPose pose_cartesian_command_;
-  franka::CartesianVelocities velocity_cartesian_command_;
 
   std::function<void(franka::Robot&, Callback)> run_function_;
 

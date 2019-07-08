@@ -6,5 +6,17 @@
 
 namespace franka_hw {
 
-class FrankaCombinableHW : public FrankaHW {};
+class FrankaCombinableHW : public FrankaHW {
+  /**
+   * Creates an instance of FrankaCombinableHW.
+   *
+   */
+  FrankaCombinableHW();
+
+  // FrankaHW::initParameters ()
+  // FrankaHW::init()
+
+  void initROSInterfaces() override;
+};
+
 }  // namespace franka_hw
