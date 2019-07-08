@@ -59,12 +59,9 @@ bool FrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
     ROS_ERROR("FrankaHW: Failed to parse all required parameters.");
     return false;
   }
-
-  node_handle_ = std::make_unique<ros::NodeHandle>(robot_hw_nh);
-
   initRobot();
-
   initROSInterfaces();
+  setupParameterCallbacks(robot_hw_nh);
 
   initialized_ = true;
   return true;
@@ -198,15 +195,16 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
   requested_control_mode &= ~stop_control_mode;
   requested_control_mode |= start_control_mode;
 
-  if (!setRunFunction(requested_control_mode, getRateLimiting(), getCutoffFrequency(),
-                      getInternalController())) {
+  if (!setRunFunction(requested_control_mode, get_limit_rate_(), get_cutoff_frequency_(),
+                      get_internal_controller_())) {
     return false;
   }
   if (current_control_mode_ != requested_control_mode) {
     ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
                     << requested_control_mode << " with parameters "
-                    << "limit_rate=" << getRateLimiting() << ", cutoff_frequency="
-                    << getCutoffFrequency() << ", internal_controller=" << getInternalController());
+                    << "limit_rate=" << get_limit_rate_()
+                    << ", cutoff_frequency=" << get_cutoff_frequency_()
+                    << ", internal_controller=" << get_internal_controller_());
     current_control_mode_ = requested_control_mode;
     controller_active_ = false;
   }
@@ -271,24 +269,6 @@ franka::Robot& FrankaHW::robot() {
     throw std::logic_error(error_message);
   }
   return *robot_;
-}
-
-franka::ControllerMode FrankaHW::getInternalController() {
-  std::string internal_controller_string;
-  node_handle_->getParamCached("internal_controller", internal_controller_string);
-  return stringToControllerMode(internal_controller_string);
-}
-
-double FrankaHW::getCutoffFrequency() {
-  double cutoff_frequency;
-  node_handle_->getParamCached("cutoff_frequency", cutoff_frequency);
-  return cutoff_frequency;
-}
-
-bool FrankaHW::getRateLimiting() {
-  bool rate_limiting;
-  node_handle_->getParamCached("rate_limiting", rate_limiting);
-  return rate_limiting;
 }
 
 void FrankaHW::setupJointStateInterface(franka::RobotState& robot_state) {
@@ -429,11 +409,11 @@ void FrankaHW::initROSInterfaces() {
   setupJointCommandInterface(effort_joint_command_.tau_J, robot_state_, false,
                              effort_joint_interface_);
   setupLimitInterface<joint_limits_interface::PositionJointSoftLimitsHandle>(
-      urdf_model_, position_joint_limit_interface_, position_joint_interface_);
+      position_joint_limit_interface_, position_joint_interface_);
   setupLimitInterface<joint_limits_interface::VelocityJointSoftLimitsHandle>(
-      urdf_model_, velocity_joint_limit_interface_, velocity_joint_interface_);
+      velocity_joint_limit_interface_, velocity_joint_interface_);
   setupLimitInterface<joint_limits_interface::EffortJointSoftLimitsHandle>(
-      urdf_model_, effort_joint_limit_interface_, effort_joint_interface_);
+      effort_joint_limit_interface_, effort_joint_interface_);
   setupFrankaStateInterface(robot_state_);
   setupFrankaCartesianPoseInterface(pose_cartesian_command_);
   setupFrankaCartesianVelocityInterface(velocity_cartesian_command_);
@@ -446,17 +426,33 @@ void FrankaHW::initRobot() {
   update(robot_->readOnce());
 }
 
-franka::ControllerMode FrankaHW::stringToControllerMode(const std::string& mode_string) {
-  franka::ControllerMode controller_mode;
-  if (mode_string == "joint_impedance") {
-    controller_mode = franka::ControllerMode::kJointImpedance;
-  } else if (mode_string == "cartesian_impedance") {
-    controller_mode = franka::ControllerMode::kCartesianImpedance;
-  } else {
-    ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
-    controller_mode = franka::ControllerMode::kJointImpedance;
-  }
-  return controller_mode;
+void FrankaHW::setupParameterCallbacks(ros::NodeHandle& robot_hw_nh) {
+  get_limit_rate_ = [robot_hw_nh]() {
+    bool rate_limiting;
+    robot_hw_nh.getParamCached("rate_limiting", rate_limiting);
+    return rate_limiting;
+  };
+
+  get_internal_controller_ = [robot_hw_nh]() {
+    std::string internal_controller;
+    robot_hw_nh.getParamCached("internal_controller", internal_controller);
+    franka::ControllerMode controller_mode;
+    if (internal_controller == "joint_impedance") {
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    } else if (internal_controller == "cartesian_impedance") {
+      controller_mode = franka::ControllerMode::kCartesianImpedance;
+    } else {
+      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    }
+    return controller_mode;
+  };
+
+  get_cutoff_frequency_ = [robot_hw_nh]() {
+    double cutoff_frequency;
+    robot_hw_nh.getParamCached("cutoff_frequency", cutoff_frequency);
+    return cutoff_frequency;
+  };
 }
 
 }  // namespace franka_hw

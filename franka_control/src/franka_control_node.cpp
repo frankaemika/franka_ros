@@ -20,54 +20,15 @@ using franka_control::ServiceContainer;
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_control_node");
+
+  // TODO hw node_handle + root_node_handle
   ros::NodeHandle public_node_handle;
   ros::NodeHandle node_handle("~");
 
-  std::vector<std::string> joint_names_vector;
-  if (!node_handle.getParam("joint_names", joint_names_vector) || joint_names_vector.size() != 7) {
-    ROS_ERROR("Invalid or no joint_names parameters provided");
-    return 1;
-  }
+  franka_hw::FrankaHW franka_control;
+  franka_control.init(public_node_handle, node_handle);
 
-  std::array<std::string, 7> joint_names;
-  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names.begin());
-
-  bool rate_limiting;
-  if (!node_handle.getParamCached("rate_limiting", rate_limiting)) {
-    ROS_ERROR("Invalid or no rate_limiting parameter provided");
-    return 1;
-  }
-
-  double cutoff_frequency;
-  if (!node_handle.getParamCached("cutoff_frequency", cutoff_frequency)) {
-    ROS_ERROR("Invalid or no cutoff_frequency parameter provided");
-    return 1;
-  }
-
-  std::string internal_controller;
-  if (!node_handle.getParam("internal_controller", internal_controller)) {
-    ROS_ERROR("No internal_controller parameter provided");
-    return 1;
-  }
-
-  urdf::Model urdf_model;
-  if (!urdf_model.initParamWithNodeHandle("robot_description", public_node_handle)) {
-    ROS_ERROR("Could not initialize URDF model from robot_description");
-    return 1;
-  }
-
-  std::string robot_ip;
-  if (!node_handle.getParam("robot_ip", robot_ip)) {
-    ROS_ERROR("Invalid or no robot_ip parameter provided");
-    return 1;
-  }
-
-  std::string arm_id;
-  if (!node_handle.getParam("arm_id", arm_id)) {
-    ROS_ERROR("Invalid or no arm_id parameter provided");
-    return 1;
-  }
-  franka::Robot robot(robot_ip);
+  franka::Robot& robot = franka_control.robot();
 
   // Set default collision behavior
   robot.setCollisionBehavior(
@@ -124,33 +85,6 @@ int main(int argc, char** argv) {
       },
       false);
 
-  franka::Model model = robot.loadModel();
-  auto get_rate_limiting = [&]() {
-    node_handle.getParamCached("rate_limiting", rate_limiting);
-    return rate_limiting;
-  };
-  auto get_internal_controller = [&]() {
-    node_handle.getParamCached("internal_controller", internal_controller);
-
-    franka::ControllerMode controller_mode;
-    if (internal_controller == "joint_impedance") {
-      controller_mode = franka::ControllerMode::kJointImpedance;
-    } else if (internal_controller == "cartesian_impedance") {
-      controller_mode = franka::ControllerMode::kCartesianImpedance;
-    } else {
-      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
-      controller_mode = franka::ControllerMode::kJointImpedance;
-    }
-
-    return controller_mode;
-  };
-  auto get_cutoff_frequency = [&]() {
-    node_handle.getParamCached("cutoff_frequency", cutoff_frequency);
-    return cutoff_frequency;
-  };
-  franka_hw::FrankaHW franka_control(joint_names, arm_id, urdf_model, model, get_rate_limiting,
-                                     get_cutoff_frequency, get_internal_controller);
-
   // Initialize robot state before loading any controller
   franka_control.update(robot.readOnce());
 
@@ -181,7 +115,7 @@ int main(int argc, char** argv) {
 
     try {
       // Run control loop. Will exit if the controller is switched.
-      franka_control.control(robot, [&](const ros::Time& now, const ros::Duration& period) {
+      franka_control.control([&](const ros::Time& now, const ros::Duration& period) {
         if (period.toSec() == 0.0) {
           // Reset controllers before starting a motion
           control_manager.update(now, period, true);

@@ -47,14 +47,10 @@ class FrankaHW : public hardware_interface::RobotHW {
    * Initializes the Parameterization of the FrankaHW class from the ROS parameter server and
    * sets up interfaces for ros_control.
    *  TODO(jaeh_ch): explain with parameters required from parameter server
-
-   * @param[in] root_nh A NodeHandle in the root of the caller namespace.
-   * @param[in] robot_hw_nh A NodeHandle in the namespace from which the class should read its
-   configuration.
    *
    * @return True if initialization was successful, false otherwise.
    */
-  virtual bool initROSInterfaces(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
+  virtual void initROSInterfaces();
 
   /**
    * Runs the currently active controller in a realtime loop.
@@ -259,12 +255,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   virtual void initRobot();
 
-  virtual void initROSInterfaces();
-
-  franka::ControllerMode stringToControllerMode(const std::string& mode_string);
-  std::unique_ptr<ros::NodeHandle> node_handle_;
-
-  franka::ControllerMode internal_controller_;
+  virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   hardware_interface::JointStateInterface joint_state_interface_{};
   FrankaStateInterface franka_state_interface_{};
@@ -285,9 +276,11 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;
   std::string robot_ip_;
-  //  std::function<franka::ControllerMode()> get_internal_controller_;
-  // std::function<bool()> get_limit_rate_;
-  // std::function<double()> get_cutoff_frequency_;
+  bool initialized_;
+
+  std::function<franka::ControllerMode()> get_internal_controller_;
+  std::function<bool()> get_limit_rate_;
+  std::function<double()> get_cutoff_frequency_;
 
   franka::JointPositions position_joint_command_;
   franka::JointVelocities velocity_joint_command_;
