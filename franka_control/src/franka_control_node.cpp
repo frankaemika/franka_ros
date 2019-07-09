@@ -11,12 +11,11 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/services.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 #include <ros/ros.h>
 
-#include <franka_control/ErrorRecoveryAction.h>
-#include <franka_control/services.h>
-
-using franka_control::ServiceContainer;
+using franka_hw::ServiceContainer;
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_control_node");
@@ -43,47 +42,18 @@ int main(int argc, char** argv) {
   std::atomic_bool has_error(false);
 
   ServiceContainer services;
-  services
-      .advertiseService<franka_control::SetJointImpedance>(
-          node_handle, "set_joint_impedance",
-          [&robot](auto&& req, auto&& res) {
-            return franka_control::setJointImpedance(robot, req, res);
-          })
-      .advertiseService<franka_control::SetCartesianImpedance>(
-          node_handle, "set_cartesian_impedance",
-          [&robot](auto&& req, auto&& res) {
-            return franka_control::setCartesianImpedance(robot, req, res);
-          })
-      .advertiseService<franka_control::SetEEFrame>(
-          node_handle, "set_EE_frame",
-          [&robot](auto&& req, auto&& res) { return franka_control::setEEFrame(robot, req, res); })
-      .advertiseService<franka_control::SetKFrame>(
-          node_handle, "set_K_frame",
-          [&robot](auto&& req, auto&& res) { return franka_control::setKFrame(robot, req, res); })
-      .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
-          node_handle, "set_force_torque_collision_behavior",
-          [&robot](auto&& req, auto&& res) {
-            return franka_control::setForceTorqueCollisionBehavior(robot, req, res);
-          })
-      .advertiseService<franka_control::SetFullCollisionBehavior>(
-          node_handle, "set_full_collision_behavior",
-          [&robot](auto&& req, auto&& res) {
-            return franka_control::setFullCollisionBehavior(robot, req, res);
-          })
-      .advertiseService<franka_control::SetLoad>(
-          node_handle, "set_load",
-          [&robot](auto&& req, auto&& res) { return franka_control::setLoad(robot, req, res); });
+  franka_hw::setupServices(robot, node_handle, services);
 
-  actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction> recovery_action_server(
+  actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction> recovery_action_server(
       node_handle, "error_recovery",
-      [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
+      [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
         try {
           robot.automaticErrorRecovery();
           has_error = false;
           recovery_action_server.setSucceeded();
           ROS_INFO("Recovered from error");
         } catch (const franka::Exception& ex) {
-          recovery_action_server.setAborted(franka_control::ErrorRecoveryResult(), ex.what());
+          recovery_action_server.setAborted(franka_msgs::ErrorRecoveryResult(), ex.what());
         }
       },
       false);

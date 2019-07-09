@@ -40,4 +40,6 @@ bool hasConflictingJointAndCartesianClaim(const ArmClaimedMap& arm_claim_map,
 
 bool partiallyClaimsArmJoints(const ArmClaimedMap& arm_claim_map, const std::string& arm_id);
 
+bool hasTrajectoryClaim(const ArmClaimedMap& arm_claim_map, const std::string& arm_id);
+
 }  // namespace franka_hw

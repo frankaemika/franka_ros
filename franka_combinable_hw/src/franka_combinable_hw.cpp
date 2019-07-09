@@ -5,11 +5,11 @@
 #include <franka/exception.h>
 #include <franka/rate_limiting.h>
 #include <franka_combinable_hw/franka_combinable_hw.h>
-#include <franka_control/ErrorRecoveryAction.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/resource_helpers.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 
 #include <pluginlib/class_list_macros.h>
 
@@ -20,7 +20,7 @@
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <std_msgs/Bool.h>
 
-using franka_control::ErrorRecoveryResult;
+using franka_msgs::ErrorRecoveryResult;
 using franka_hw::ArmClaimedMap;
 using franka_hw::getResourceMap;
 using franka_hw::ResourceWithClaimsMap;
@@ -316,45 +316,44 @@ void FrankaCombinableHW::controlLoop() {
 
 void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_handle) {
   services_
-      .advertiseService<franka_control::SetJointImpedance>(
-          node_handle, "set_joint_impedance",
-          [this](auto&& req, auto&& res) {
-            return franka_control::setJointImpedance(*(this->robot_), req, res);
-          })
-      .advertiseService<franka_control::SetCartesianImpedance>(
+      .advertiseService<franka_msgs::SetJointImpedance>(node_handle, "set_joint_impedance",
+                                                        [this](auto&& req, auto&& res) {
+                                                          return franka_hw::setJointImpedance(
+                                                              *(this->robot_), req, res);
+                                                        })
+      .advertiseService<franka_msgs::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
           [this](auto&& req, auto&& res) {
-            return franka_control::setCartesianImpedance(*(this->robot_), req, res);
+            return franka_hw::setCartesianImpedance(*(this->robot_), req, res);
           })
-      .advertiseService<franka_control::SetEEFrame>(node_handle, "set_EE_frame",
-                                                    [this](auto&& req, auto&& res) {
-                                                      return franka_control::setEEFrame(
-                                                          *(this->robot_), req, res);
-                                                    })
-      .advertiseService<franka_control::SetKFrame>(node_handle, "set_K_frame",
-                                                   [this](auto&& req, auto&& res) {
-                                                     return franka_control::setKFrame(
-                                                         *(this->robot_), req, res);
-                                                   })
-      .advertiseService<franka_control::SetForceTorqueCollisionBehavior>(
+      .advertiseService<franka_msgs::SetEEFrame>(node_handle, "set_EE_frame",
+                                                 [this](auto&& req, auto&& res) {
+                                                   return franka_hw::setEEFrame(*(this->robot_),
+                                                                                req, res);
+                                                 })
+      .advertiseService<franka_msgs::SetKFrame>(node_handle, "set_K_frame",
+                                                [this](auto&& req, auto&& res) {
+                                                  return franka_hw::setKFrame(*(this->robot_), req,
+                                                                              res);
+                                                })
+      .advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
           [this](auto&& req, auto&& res) {
-            return franka_control::setForceTorqueCollisionBehavior(*(this->robot_), req, res);
+            return franka_hw::setForceTorqueCollisionBehavior(*(this->robot_), req, res);
           })
-      .advertiseService<franka_control::SetFullCollisionBehavior>(
+      .advertiseService<franka_msgs::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
           [this](auto&& req, auto&& res) {
-            return franka_control::setFullCollisionBehavior(*(this->robot_), req, res);
+            return franka_hw::setFullCollisionBehavior(*(this->robot_), req, res);
           })
-      .advertiseService<franka_control::SetLoad>(
-          node_handle, "set_load", [this](auto&& req, auto&& res) {
-            return franka_control::setLoad(*(this->robot_), req, res);
-          });
+      .advertiseService<franka_msgs::SetLoad>(
+          node_handle, "set_load",
+          [this](auto&& req, auto&& res) { return franka_hw::setLoad(*(this->robot_), req, res); });
 
   recovery_action_server_ =
-      std::make_unique<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>(
+      std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
           node_handle, "error_recovery",
-          [&](const franka_control::ErrorRecoveryGoalConstPtr&) {
+          [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
             try {
               robot_->automaticErrorRecovery();
               // error recovered => reset controller

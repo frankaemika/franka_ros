@@ -4,6 +4,7 @@
 
 #include <array>
 #include <atomic>
+#include <exception>
 #include <functional>
 #include <list>
 #include <string>
@@ -50,7 +51,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    *
    * @return True if initialization was successful, false otherwise.
    */
-  virtual void initROSInterfaces();
+  virtual void initROSInterfaces(ros::NodeHandle& robot_hw_nh);
 
   /**
    * Runs the currently active controller in a realtime loop.
@@ -181,7 +182,18 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   bool getRateLimiting();
 
+  static bool commandHasNaN(const franka::Torques& command);
+  static bool commandHasNaN(const franka::JointPositions& command);
+  static bool commandHasNaN(const franka::JointVelocities& command);
+  static bool commandHasNaN(const franka::CartesianPose& command);
+  static bool commandHasNaN(const franka::CartesianVelocities& command);
+
  protected:
+  template <size_t size>
+  static bool arrayHasNaN(const std::array<double, size> array) {
+    return std::any_of(array.begin(), array.end(), [](const double& e) { return std::isnan(e); });
+  }
+
   using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
   template <typename T>
   T controlCallback(const T& command,
@@ -197,6 +209,11 @@ class FrankaHW : public hardware_interface::RobotHW {
     }
 
     write(now, ros::Duration(time_step.toSec()));
+    if (commandHasNaN(command)) {
+      std::string error_message = "FrankaHW::controlCallback: Got NaN command!";
+      ROS_FATAL("%s", error_message.c_str());
+      throw std::invalid_argument(error_message);
+    }
 
     return command;
   }
@@ -291,8 +308,6 @@ class FrankaHW : public hardware_interface::RobotHW {
   joint_limits_interface::VelocityJointSoftLimitsInterface velocity_joint_limit_interface_{};
   joint_limits_interface::EffortJointSoftLimitsInterface effort_joint_limit_interface_{};
 
-  franka::RobotState robot_state_{};
-
   std::mutex libfranka_state_mutex_;
   std::mutex ros_state_mutex_;
   franka::RobotState robot_state_libfranka_{};
@@ -318,19 +333,17 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;
   std::string robot_ip_;
+  urdf::Model urdf_model_;
+  double joint_limit_warning_threshold_{0.1};
+
   bool initialized_{false};
+  std::atomic_bool controller_active_{false};
+  ControlMode current_control_mode_ = ControlMode::None;
 
   std::function<franka::ControllerMode()> get_internal_controller_;
   std::function<bool()> get_limit_rate_;
   std::function<double()> get_cutoff_frequency_;
-
   std::function<void(franka::Robot&, Callback)> run_function_;
-
-  urdf::Model urdf_model_;
-  double joint_limit_warning_threshold_{0.1};
-
-  std::atomic_bool controller_active_{false};
-  ControlMode current_control_mode_ = ControlMode::None;
 };
 
 }  // namespace franka_hw

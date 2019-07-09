@@ -3,7 +3,7 @@
 #pragma once
 
 #include <combined_robot_hw/combined_robot_hw.h>
-#include <franka_combinable_hw/franka_combinable_hw.h>
+#include <franka_hw/franka_combinable_hw.h>
 #include <franka_msgs/ErrorRecoveryAction.h>
 
 #include <actionlib/server/simple_action_server.h>
@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace franka_combinable_hw {
+namespace franka_hw {
 
 class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
  public:

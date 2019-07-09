@@ -73,7 +73,7 @@ bool FrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
     ROS_ERROR("FrankaHW: Failed to initialize libfranka robot. %s", error.what());
     return false;
   }
-  initROSInterfaces();
+  initROSInterfaces(robot_hw_nh);
   setupParameterCallbacks(robot_hw_nh);
 
   initialized_ = true;
@@ -150,7 +150,7 @@ void FrankaHW::control(
     return;
   }
 
-  franka::Duration last_time = robot_state_.time;
+  franka::Duration last_time = robot_state_ros_.time;
 
   run_function_(*robot_, [this, ros_callback, &last_time](const franka::RobotState& robot_state,
                                                           franka::Duration time_step) {
@@ -442,7 +442,7 @@ bool FrankaHW::setRunFunction(const ControlMode& requested_control_mode,
   return true;
 }
 
-void FrankaHW::initROSInterfaces() {
+void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
   setupJointStateInterface(robot_state_ros_);
   setupJointCommandInterface(position_joint_command_ros_.q, robot_state_ros_, true,
                              position_joint_interface_);
@@ -495,6 +495,26 @@ void FrankaHW::setupParameterCallbacks(ros::NodeHandle& robot_hw_nh) {
     robot_hw_nh.getParamCached("cutoff_frequency", cutoff_frequency);
     return cutoff_frequency;
   };
+}
+
+bool FrankaHW::commandHasNaN(const franka::Torques& command) {
+  return arrayHasNaN(command.tau_J);
+}
+
+bool FrankaHW::commandHasNaN(const franka::JointPositions& command) {
+  return arrayHasNaN(command.q);
+}
+
+bool FrankaHW::commandHasNaN(const franka::JointVelocities& command) {
+  return arrayHasNaN(command.dq);
+}
+
+bool FrankaHW::commandHasNaN(const franka::CartesianPose& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_T_EE);
+}
+
+bool FrankaHW::commandHasNaN(const franka::CartesianVelocities& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_dP_EE);
 }
 
 }  // namespace franka_hw

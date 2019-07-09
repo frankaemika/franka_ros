@@ -200,4 +200,17 @@ bool partiallyClaimsArmJoints(const ArmClaimedMap& arm_claim_map, const std::str
   return false;
 }
 
+bool hasTrajectoryClaim(const ArmClaimedMap& arm_claim_map, const std::string& arm_id) {
+  if (arm_claim_map.find(arm_id) != arm_claim_map.end()) {
+    if (arm_claim_map.at(arm_id).joint_position_claims +
+            arm_claim_map.at(arm_id).joint_velocity_claims +
+            arm_claim_map.at(arm_id).cartesian_velocity_claims +
+            arm_claim_map.at(arm_id).cartesian_pose_claims >
+        0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }  // namespace franka_hw

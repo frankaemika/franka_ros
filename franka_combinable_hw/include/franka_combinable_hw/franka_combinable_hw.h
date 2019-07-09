@@ -24,14 +24,14 @@
 #include <ros/time.h>
 #include <urdf/model.h>
 
-#include <franka_control/ErrorRecoveryAction.h>
-#include <franka_control/services.h>
 #include <franka_hw/control_mode.h>
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <franka_hw/services.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 
-using franka_control::ServiceContainer;
+using franka_hw::ServiceContainer;
 using franka_hw::ControlMode;
 
 namespace franka_combinable_hw {
@@ -302,7 +302,7 @@ class FrankaCombinableHW : public hardware_interface::RobotHW {
 
   ros::Publisher has_error_pub_;
   ServiceContainer services_;
-  std::unique_ptr<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>
+  std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
       recovery_action_server_;
 
   std::atomic<bool> has_error_;
