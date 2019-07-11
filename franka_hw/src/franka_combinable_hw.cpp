@@ -1,6 +1,7 @@
 
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits_interface.h>
+#include <pluginlib/class_list_macros.h>
 #include <std_msgs/Bool.h>
 
 #include <franka_hw/franka_combinable_hw.h>
@@ -227,3 +228,5 @@ bool FrankaCombinableHW::setRunFunction(const ControlMode& requested_control_mod
 }
 
 }  // namespace franka_hw
+
+PLUGINLIB_EXPORT_CLASS(franka_hw::FrankaCombinableHW, hardware_interface::RobotHW)

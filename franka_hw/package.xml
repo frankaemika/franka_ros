@@ -30,4 +30,8 @@
   <test_depend>franka_description</test_depend>
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
+
+  <export>
+      <hardware_interface plugin="${prefix}/franka_combinable_hw_plugin.xml"/>
+  </export>
 </package>

@@ -20,34 +20,35 @@ catkin_package(
     roscpp
 )
 
-add_executable(franka_combined_control_node
-    src/franka_combined_control_node.cpp
-)
 
-add_dependencies(franka_combined_control_node
-    ${catkin_EXPORTED_TARGETS}
-)
+#add_executable(franka_combined_control_node
+#    src/franka_combined_control_node.cpp
+#)
 
-target_link_libraries(franka_combined_control_node
-  ${catkin_LIBRARIES}
-)
+#add_dependencies(franka_combined_control_node
+#    ${catkin_EXPORTED_TARGETS}
+#)
 
-target_include_directories(franka_combined_control_node SYSTEM PUBLIC
-  ${catkin_INCLUDE_DIRS}
-)
+#target_link_libraries(franka_combined_control_node
+#  ${catkin_LIBRARIES}
+#)
+
+#target_include_directories(franka_combined_control_node SYSTEM PUBLIC
+#  ${catkin_INCLUDE_DIRS}
+#)
 
 ## Installation
-install(TARGETS franka_combined_control_node
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-install(DIRECTORY config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(TARGETS franka_combined_control_node
+#  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+#  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#)
+#install(DIRECTORY launch
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
+#install(DIRECTORY config
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
 
 ## Tools
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
@@ -58,6 +59,6 @@ if(CLANG_TOOLS)
   add_format_target(franka_combined_control FILES ${SOURCES})
   add_tidy_target(franka_combined_control
     FILES ${SOURCES}
-    DEPENDS franka_combined_control_node
+    DEPENDS #franka_combined_control_node
   )
 endif()
