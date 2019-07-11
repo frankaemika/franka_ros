@@ -201,7 +201,7 @@ class FrankaHW : public hardware_interface::RobotHW {
                     const franka::RobotState& robot_state,
                     franka::Duration time_step) {
     robot_state_libfranka_ = robot_state;
-    ros::Time now = ros::Time::now();
+    ros::Time now = ros::Time(0);
     read(now, ros::Duration(time_step.toSec()));
 
     if (!controller_active_ || (ros_callback && !ros_callback(robot_state, time_step))) {

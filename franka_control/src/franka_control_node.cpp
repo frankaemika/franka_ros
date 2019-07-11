@@ -70,13 +70,13 @@ int main(int argc, char** argv) {
   spinner.start();
 
   while (ros::ok()) {
-    ros::Time last_time = ros::Time::now();
+    ros::Time last_time = ros::Time(0);
 
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
       franka_control.update(robot.readOnce());
 
-      ros::Time now = ros::Time::now();
+      ros::Time now = ros::Time(0);
       control_manager.update(now, now - last_time);
       franka_control.checkJointLimits();
       last_time = now;

@@ -59,7 +59,7 @@ FrankaHW::FrankaHW()
 
 bool FrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   if (initialized_) {
-    ROS_ERROR("FrankaCombinableHW: Cannot be initialized twice.");
+    ROS_ERROR("FrankaHW: Cannot be initialized twice.");
     return false;
   }
 
@@ -121,9 +121,9 @@ bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
     return false;
   }
 
-  if (!robot_hw_nh.getParam("joint_limit_warning_threshold", arm_id_)) {
+  if (!robot_hw_nh.getParam("joint_limit_warning_threshold", joint_limit_warning_threshold_)) {
     ROS_INFO(
-        "FrankaCombinableHW: no parameter joint_limit_warning_threshold is found, using default "
+        "No parameter joint_limit_warning_threshold is found, using default "
         "value %f",
         joint_limit_warning_threshold_);
   }
@@ -157,7 +157,7 @@ void FrankaHW::control(
     if (last_time != robot_state.time) {
       last_time = robot_state.time;
 
-      return ros_callback(ros::Time::now(), ros::Duration(time_step.toSec()));
+      return ros_callback(ros::Time(0), ros::Duration(time_step.toSec()));
     }
     return true;
   });
