@@ -213,6 +213,9 @@ bool FrankaCombinableHW::setRunFunction(const ControlMode& requested_control_mod
                                         const franka::ControllerMode internal_controller) {
   using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
 
+  if (requested_control_mode == ControlMode::None) {
+    return true;
+  }
   if (requested_control_mode == ControlMode::JointTorque) {
     run_function_ = [this, limit_rate](franka::Robot& robot, Callback /*callback*/) {
       robot.control(std::bind(&FrankaCombinableHW::libfrankaUpdateCallback<franka::Torques>, this,
