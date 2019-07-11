@@ -71,7 +71,7 @@ class FrankaCombinableHW : public FrankaHW {
                             franka::Duration time_step) {
     if (commandHasNaN(command)) {
       std::string error_message = "FrankaCombinableHW: Got NaN value in command!";
-      ROS_FATAL("%s", error_message);
+      ROS_FATAL("%s", error_message.c_str());
       throw std::invalid_argument(error_message);
     }
     checkJointLimits();
