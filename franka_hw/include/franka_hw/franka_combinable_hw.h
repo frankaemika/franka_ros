@@ -26,27 +26,15 @@ class FrankaCombinableHW : public FrankaHW {
    *
    */
   FrankaCombinableHW();
-
-  // FrankaHW::initParameters ()
-  // FrankaHW::init()
-
   void initROSInterfaces(ros::NodeHandle& robot_hw_nh) override;
   void initRobot() override;
 
   void publishErrorState(const bool error);
-  // FrankaH::read()
-  // FrankaH::write()
-  // void FrankaHW::checkJointLimits() {
-  // FrankaHW::update(robot_state)
-  // FrankaHW::controllerActive();
   void controlLoop();
   void setupServicesAndActionServers(ros::NodeHandle& node_handle);
   void control(
       const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) override;
-  // FrankaHW::enforceLimits
   bool checkForConflict(const std::list<hardware_interface::ControllerInfo>& info) const override;
-  // FrankaHW::doSwitch
-  // FrankaHW::PrepareSwitch
 
   void read(const ros::Time&,                // NOLINT (readability-identifier-naming)
             const ros::Duration&) override;  // NOLINT [readability-named-parameter]
@@ -56,13 +44,11 @@ class FrankaCombinableHW : public FrankaHW {
   static std::array<double, 7> saturateTorqueRate(const std::array<double, 7>& tau_d_calculated,
                                                   const std::array<double, 7>& tau_J_d);
 
-  // FrankaHW::getJointEffortCommand
-  std::string getArmID();  // move into FrankaHW ??
+  std::string getArmID();
   void triggerError();
   bool hasError();
   void resetError();
   bool controllerNeedsReset();
-  // FrankaHW::CommandHasNaN methods
 
  private:
   template <typename T>
@@ -87,22 +73,11 @@ class FrankaCombinableHW : public FrankaHW {
     return current_cmd;
   }
 
-  // FrankaHW::setupLimitInterface
-  // FrankaHW::setupJointStateInterface
-  // FrankaHW::setupCommandInterface
-  // FrankaHW::setupFrankaStateInterface(franka::RobotState& robot_state);
-  // setup other interfaces ...
   bool setRunFunction(const ControlMode& requested_control_mode,
                       const bool limit_rate,
                       const double cutoff_frequency,
                       const franka::ControllerMode internal_controller) override;
-  // FrankaHW::setupParameterCallbacks
-  // all interfaces from FrankaHW
-  // all mutexes and data containers for commands and states
 
-  // robot
-  // model
-  // runfunction but with Callback !!
   std::unique_ptr<std::thread> control_loop_thread_;
   ServiceContainer services_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>

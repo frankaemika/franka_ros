@@ -12,6 +12,15 @@ panda_left:
     - panda_left_joint5
     - panda_left_joint6
     - panda_left_joint7
+  # Configures when to start printing warnings when approaching joint limits.
+  joint_limit_warning_threshold: 0.1 # [rad]
+  # Activate rate limiter? [true|false]
+  rate_limiting: true
+  # Cutoff frequency of the low-pass filter. Set to >= 1000 to deactivate.
+  cutoff_frequency: 100
+  # Internal controller for motion generators [joint_impedance|cartesian_impedance]
+  internal_controller: joint_impedance
+
 panda_right:
   type: franka_hw/FrankaCombinableHW
   arm_id: panda_right
@@ -23,3 +32,11 @@ panda_right:
     - panda_right_joint5
     - panda_right_joint6
     - panda_right_joint7
+  # Configures when to start printing warnings when approaching joint limits.
+  joint_limit_warning_threshold: 0.1 # [rad]
+  # Activate rate limiter? [true|false]
+  rate_limiting: true
+  # Cutoff frequency of the low-pass filter. Set to >= 1000 to deactivate.
+  cutoff_frequency: 100
+  # Internal controller for motion generators [joint_impedance|cartesian_impedance]
+  internal_controller: joint_impedance
