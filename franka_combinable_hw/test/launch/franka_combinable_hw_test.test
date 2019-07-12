@@ -1,7 +1,0 @@
-<launch>
- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find franka_combinable_hw)/test/config/ros_console_settings_for_tests.conf"/>
- <test test-name="franka_combinable_hw_test" pkg="franka_combinable_hw" type="franka_combinable_hw_test">
-   <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro" />
-   <rosparam command="load" file="$(find franka_combinable_hw)/test/config/franka_combinable_hw_test_node.yaml" />
- </test>
-</launch>

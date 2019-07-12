@@ -16,12 +16,12 @@
 #include <ros/time.h>
 #include <Eigen/Dense>
 
-#include <franka_combined_example_controllers/dual_arm_compliance_paramConfig.h>
+#include <franka_example_controllers/dual_arm_compliance_paramConfig.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/trigger_rate.h>
 
-namespace franka_combined_example_controllers {
+namespace franka_example_controllers {
 
 /**
  * This container holds all data and parameters used to control one panda arm with a Cartesian
@@ -179,4 +179,4 @@ class DualArmCartesianImpedanceExampleController
   void publishCenteringPose();
 };
 
-}  // namespace franka_combined_example_controllers
+}  // namespace franka_example_controllers

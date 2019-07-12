@@ -1,6 +1,6 @@
 // Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka_combined_example_controllers/dual_arm_cartesian_impedance_example_controller.h>
+#include <franka_example_controllers/dual_arm_cartesian_impedance_example_controller.h>
 
 #include <cmath>
 #include <functional>
@@ -18,7 +18,7 @@
 #include <tf/transform_listener.h>
 #include <tf_conversions/tf_eigen.h>
 
-namespace franka_combined_example_controllers {
+namespace franka_example_controllers {
 
 bool DualArmCartesianImpedanceExampleController::initArm(
     hardware_interface::RobotHW* robot_hw,
@@ -406,8 +406,7 @@ void DualArmCartesianImpedanceExampleController::publishCenteringPose() {
   }
 }
 
-}  // namespace franka_combined_example_controllers
+}  // namespace franka_example_controllers
 
-PLUGINLIB_EXPORT_CLASS(
-    franka_combined_example_controllers::DualArmCartesianImpedanceExampleController,
-    controller_interface::ControllerBase)
+PLUGINLIB_EXPORT_CLASS(franka_example_controllers::DualArmCartesianImpedanceExampleController,
+                       controller_interface::ControllerBase)
