@@ -42,9 +42,10 @@ int main(int argc, char** argv) {
 
   while (ros::ok()) {
     rate.sleep();
-    franka_control.read(ros::Time::now(), period);
-    cm.update(ros::Time::now(), period, franka_control.controllerNeedsReset());
-    franka_control.write(ros::Time::now(), period);
+    ros::Time now = ros::Time::now();
+    franka_control.read(now, period);
+    cm.update(now, period, franka_control.controllerNeedsReset());
+    franka_control.write(now, period);
   }
 
   return 0;
