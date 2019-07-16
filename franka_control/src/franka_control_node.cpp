@@ -20,7 +20,6 @@ using franka_hw::ServiceContainer;
 int main(int argc, char** argv) {
   ros::init(argc, argv, "franka_control_node");
 
-  // TODO hw node_handle + root_node_handle
   ros::NodeHandle public_node_handle;
   ros::NodeHandle node_handle("~");
 
