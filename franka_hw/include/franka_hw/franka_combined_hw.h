@@ -61,4 +61,4 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   bool is_recovering_{false};
 };
 
-}  // namespace franka_combinable_hw
+}  // namespace franka_hw

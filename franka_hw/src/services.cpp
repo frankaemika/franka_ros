@@ -74,7 +74,7 @@ void setForceTorqueCollisionBehavior(
     franka::Robot& robot,
     const franka_msgs::SetForceTorqueCollisionBehavior::Request& req,
     franka_msgs::SetForceTorqueCollisionBehavior::Response& /* res */
-    ) {
+) {
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
             req.lower_torque_thresholds_nominal.cend(), lower_torque_thresholds_nominal.begin());
