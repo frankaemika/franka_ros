@@ -86,7 +86,7 @@ class FrankaCombinableHW : public FrankaHW {
    * Getter method for the arm_id which is used to distinguish between mulitple
    * instances of FrankaCombinableHW.
    *
-   * @return a copy of the arm_id string indentifying the class instance.
+   * @return A copy of the arm_id string indentifying the class instance.
    */
   std::string getArmID();
 
@@ -99,7 +99,7 @@ class FrankaCombinableHW : public FrankaHW {
   /**
    * Getter for the error flag of the class.
    *
-   * @return true in case of an error false otherwise.
+   * @return True in case of an error false otherwise.
    */
   bool hasError();
 
@@ -110,6 +110,8 @@ class FrankaCombinableHW : public FrankaHW {
 
   /**
    * Returns whether the controller needs to be reset e.g. after error recovery.
+   *
+   * @return A copy of the controller_needs_reset flag.
    */
   bool controllerNeedsReset();
 

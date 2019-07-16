@@ -150,28 +150,28 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Gets the current joint position command.
    *
-   * @return Current joint position command.
+   * @return The current joint position command.
    */
   virtual std::array<double, 7> getJointPositionCommand() const noexcept;
 
   /**
    * Gets the current joint velocity command.
    *
-   * @return Current joint velocity command.
+   * @return The current joint velocity command.
    */
   virtual std::array<double, 7> getJointVelocityCommand() const noexcept;
 
   /**
    * Gets the current joint torque command.
    *
-   * @return Current joint torque command.
+   * @return The current joint torque command.
    */
   virtual std::array<double, 7> getJointEffortCommand() const noexcept;
 
   /**
    * Enforces limits on position, velocity, and torque level.
    *
-   * @param[in] period Duration of the current cycle.
+   * @param[in] period The duration of the current cycle.
    */
   virtual void enforceLimits(const ros::Duration& period);
 
@@ -210,7 +210,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks a command for NaN values.
    *
-   * @param[in] The command to check.
+   * @param[in] command  The command to check.
    *
    * @return True if the command contains NaN, false otherwise.
    */
@@ -219,7 +219,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks a command for NaN values.
    *
-   * @param[in] The command to check.
+   * @param[in] command The command to check.
    *
    * @return True if the command contains NaN, false otherwise.
    */
@@ -228,7 +228,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks a command for NaN values.
    *
-   * @param[in] The command to check.
+   * @param[in] command The command to check.
    *
    * @return True if the command contains NaN, false otherwise.
    */
@@ -237,7 +237,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks a command for NaN values.
    *
-   * @param[in] The command to check.
+   * @param[in] command  The command to check.
    *
    * @return True if the command contains NaN, false otherwise.
    */
@@ -246,7 +246,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks a command for NaN values.
    *
-   * @param[in] The command to check.
+   * @param[in] command  The command to check.
    *
    * @return True if the command contains NaN, false otherwise.
    */
@@ -256,7 +256,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Checks whether an array of doubles contains NaN values.
    *
-   * @param[in] array The array to check.
+   * @param[in] command  array The array to check.
    *
    * @return True if the array contains NaN values, false otherwise.
    */
