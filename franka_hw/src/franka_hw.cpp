@@ -141,7 +141,7 @@ bool FrankaHW::controllerActive() const noexcept {
 }
 
 void FrankaHW::control(
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const {
   if (!initialized_) {
     ROS_ERROR("FrankaHW: Call to control before initialization!");
     return;
@@ -203,6 +203,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
     ROS_ERROR("FrankaHW: Unknown interface claimed for starting!");
     return false;
   }
+
   ControlMode start_control_mode = getControlMode(arm_id_, start_arm_claim_map);
 
   ResourceWithClaimsMap stop_resource_map = getResourceMap(stop_list);
@@ -221,6 +222,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                       get_internal_controller_())) {
     return false;
   }
+
   if (current_control_mode_ != requested_control_mode) {
     ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
                     << requested_control_mode << " with parameters "
@@ -284,7 +286,7 @@ void FrankaHW::checkJointLimits() {
   }
 }
 
-franka::Robot& FrankaHW::robot() {
+franka::Robot& FrankaHW::robot() const {
   if (!initialized_ || !robot_) {
     std::string error_message = "FrankaHW: Atempt to access robot before initialization!";
     ROS_ERROR("%s", error_message.c_str());

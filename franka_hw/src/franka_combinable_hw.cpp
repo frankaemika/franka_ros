@@ -116,7 +116,7 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
 }
 
 void FrankaCombinableHW::control(
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) const {
   if (!controller_active_) {
     return;
   }

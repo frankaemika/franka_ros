@@ -14,11 +14,6 @@
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
-#include <franka_hw/control_mode.h>
-#include <franka_hw/franka_cartesian_command_interface.h>
-#include <franka_hw/franka_model_interface.h>
-#include <franka_hw/franka_state_interface.h>
-#include <franka_hw/resource_helpers.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
@@ -27,31 +22,68 @@
 #include <ros/time.h>
 #include <urdf/model.h>
 
+#include <franka_hw/control_mode.h>
+#include <franka_hw/franka_cartesian_command_interface.h>
+#include <franka_hw/franka_model_interface.h>
+#include <franka_hw/franka_state_interface.h>
+#include <franka_hw/resource_helpers.h>
+
 namespace franka_hw {
 
+/**
+ * This class wraps the functionality of libfranka for controlling Panda robots into the ros_control
+ * framework.
+ */
 class FrankaHW : public hardware_interface::RobotHW {
  public:
   /**
-   * Default constructor. Note: Using this constructor you will have to call init before operation.
+   * Default constructor.
+   * Note: Be sure to call the init() method before operation.
    */
   FrankaHW();
 
   virtual ~FrankaHW() override = default;
 
   /**
-   * TODO(jaeh_ch)
+   * Initializes the FrankaHW class to be fully operational. This involves parsing required
+   * configurations from the ROS parameter server, connecting to the robot and setting up interfaces
+   * for the ros_control framework.
    *
+   * @param[in] root_nh A node handle in the root namespace of the control node.
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   *
+   * @return True if successful, false otherwise.
    */
   virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
   /**
-   * Initializes the Parameterization of the FrankaHW class from the ROS parameter server and
-   * sets up interfaces for ros_control.
-   *  TODO(jaeh_ch): explain with parameters required from parameter server
+   * Reads the parameterizsation of the hardware class from the ros parameter server
+   * (e.g. arm_id, robot_ip joint_names etc.)
    *
-   * @return True if initialization was successful, false otherwise.
+   * @param[in] root_nh A node handle in the root namespace of the control node.
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   *
+   * @return True if successful, false otherwise.
+   */
+  virtual bool initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
+
+  /**
+   * Initializes the class in terms of ros_control interfaces.
+   * Note: You have to call initParameters beforehand. Use the complete initialization routine
+   * \ref init() method to control robots.
+   *
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   * @return True if successful, false otherwise.
    */
   virtual void initROSInterfaces(ros::NodeHandle& robot_hw_nh);
+
+  /**
+   * Initializes the callbacks for on-the-fly reading the parameters for rate limiting,
+   * internal controllers and cutoff frequency.
+   *
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   */
+  virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   /**
    * Runs the currently active controller in a realtime loop.
@@ -69,15 +101,12 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
   virtual void control(
-      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback);
+      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const;
 
   /**
    * Updates the controller interfaces from the given robot state.
    *
    * @param[in] robot_state Current robot state.
-   *
-   * @throw franka::InvalidOperationException if a conflicting operation is already running.
-   * @throw franka::NetworkException if the connection is lost.
    */
   virtual void update(const franka::RobotState& robot_state);
 
@@ -102,8 +131,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   /**
    * Performs controller switching (real-time capable).
    */
-  virtual void doSwitch(const std::list<hardware_interface::ControllerInfo>&,
-                        const std::list<hardware_interface::ControllerInfo>&) override;
+  virtual void doSwitch(
+      const std::list<hardware_interface::ControllerInfo>& /*start_list*/,
+      const std::list<hardware_interface::ControllerInfo>& /*stop_list*/) override;
 
   /**
    * Prepares switching between controllers (not real-time capable).
@@ -162,7 +192,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @param[in] time The current time.
    * @param[in] period The time passed since the last call to \ref read.
    */
-  void read(const ros::Time& time, const ros::Duration& period) override;
+  virtual void read(const ros::Time& time, const ros::Duration& period) override;
 
   /**
    * Writes data to the franka robot.
@@ -170,31 +200,85 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @param[in] time The current time.
    * @param[in] period The time passed since the last call to \ref write.
    */
-  void write(const ros::Time& time, const ros::Duration& period) override;
+  virtual void write(const ros::Time& time, const ros::Duration& period) override;
 
-  /** TODO
+  /**
+   * Getter for the libfranka robot instance.
    */
-  franka::Robot& robot();
+  virtual franka::Robot& robot() const;
 
-  franka::ControllerMode getInternalController();
-
-  double getCutoffFrequency();
-
-  bool getRateLimiting();
-
+  /**
+   * Checks a command for NaN values.
+   *
+   * @param[in] The command to check.
+   *
+   * @return True if the command contains NaN, false otherwise.
+   */
   static bool commandHasNaN(const franka::Torques& command);
+
+  /**
+   * Checks a command for NaN values.
+   *
+   * @param[in] The command to check.
+   *
+   * @return True if the command contains NaN, false otherwise.
+   */
   static bool commandHasNaN(const franka::JointPositions& command);
+
+  /**
+   * Checks a command for NaN values.
+   *
+   * @param[in] The command to check.
+   *
+   * @return True if the command contains NaN, false otherwise.
+   */
   static bool commandHasNaN(const franka::JointVelocities& command);
+
+  /**
+   * Checks a command for NaN values.
+   *
+   * @param[in] The command to check.
+   *
+   * @return True if the command contains NaN, false otherwise.
+   */
   static bool commandHasNaN(const franka::CartesianPose& command);
+
+  /**
+   * Checks a command for NaN values.
+   *
+   * @param[in] The command to check.
+   *
+   * @return True if the command contains NaN, false otherwise.
+   */
   static bool commandHasNaN(const franka::CartesianVelocities& command);
 
  protected:
+  /**
+   * Checks whether an array of doubles contains NaN values.
+   *
+   * @param[in] array The array to check.
+   *
+   * @return True if the array contains NaN values, false otherwise.
+   */
   template <size_t size>
   static bool arrayHasNaN(const std::array<double, size> array) {
     return std::any_of(array.begin(), array.end(), [](const double& e) { return std::isnan(e); });
   }
 
   using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
+
+  /**
+   * Callback for the libfranka control loop. This method is designed to incorporate a
+   * second callback named ros_callback that will be called on each iteration of the callback.
+   *
+   * @param[in] command The datafield containing the command to send to the robot.
+   * @param[in] ros_callback An additional callback that is executed every time step.
+   * @param[in] robot_state The current robot state to compute commands with.
+   * @param[in] time_step Time since last call to the callback.
+   * @throw std::invalid_argument When a command contains NaN values.
+   *
+   * @return The command to be sent to the robot via libfranka.
+   */
   template <typename T>
   T controlCallback(const T& command,
                     Callback ros_callback,
@@ -218,6 +302,13 @@ class FrankaHW : public hardware_interface::RobotHW {
     return command;
   }
 
+  /**
+   * Configures a limit interface to enforce limits on effort, velocity or position level
+   * on joint commands.
+   *
+   * @param[out] limit_interface The limit interface to set up.
+   * @param[out] command_interface The command interface to hook the limit interface to.
+   */
   template <typename T>
   void setupLimitInterface(joint_limits_interface::JointLimitsInterface<T>& limit_interface,
                            hardware_interface::JointCommandInterface& command_interface) {
@@ -254,8 +345,22 @@ class FrankaHW : public hardware_interface::RobotHW {
     }
   }
 
+  /**
+   * Configures and registers the joint state interface in ros_control.
+   *
+   * @param[in] robot_state The data field holding the updated robot state.
+   */
   virtual void setupJointStateInterface(franka::RobotState& robot_state);
 
+  /**
+   * Configures and registers a joint command interface for positions velocities or efforts in
+   * ros_control.
+   *
+   * @param[in] command The data field holding the command to execute.
+   * @param[in] state The data field holding the updated robot state.
+   * @param[in] use_q_d Flag to configure using desired values as joint_states.
+   * @param[out] interface The command interface to configure.
+   */
   template <typename T>
   void setupJointCommandInterface(std::array<double, 7>& command,
                                   franka::RobotState& state,
@@ -276,25 +381,58 @@ class FrankaHW : public hardware_interface::RobotHW {
     registerInterface(&interface);
   }
 
+  /**
+   * Configures and registers the state interface offering the full franka::RobotState in
+   * ros_control.
+   *
+   * @param[in] robot_state The data field holding the updated robot state.
+   */
   virtual void setupFrankaStateInterface(franka::RobotState& robot_state);
 
+  /**
+   * Configures and registers the command interface for Cartesian poses in ros_control.
+   *
+   * @param[in] pose_cartesian_command The data field holding the command to execute.
+   */
   virtual void setupFrankaCartesianPoseInterface(franka::CartesianPose& pose_cartesian_command);
 
+  /**
+   * Configures and registers the command interface for Cartesian velocities in ros_control.
+   *
+   * @param[in] velocity_cartesian_command The data field holding the command to execute.
+   */
   virtual void setupFrankaCartesianVelocityInterface(
       franka::CartesianVelocities& velocity_cartesian_command);
 
+  /**
+   * Configures and registers the model interface offering kinematics and dynamics in ros_control.
+   *
+   * @param[in] robot_state A reference to the data field storing the current robot state. This
+   * state is used to evaluate model qunatities (by default) at the current state.
+   */
   virtual void setupFrankaModelInterface(franka::RobotState& robot_state);
 
+  /**
+   * Configures the run function which is used as libfranka control callback based on the requested
+   * control mode.
+   *
+   * @param[in] requested_control_mode The control mode to configure (e.g. torque/position/velocity
+   * etc.)
+   * @param[in] limit_rate Flag to enable/disable rate limiting to smoothen the commands.
+   * @param[in] cutoff_frequency The cutoff frequency applied for command smoothing.
+   * @param[in] internal_controller The internal controller to use when using position or velocity
+   * modes.
+   *
+   * @return True if successful, false otherwise.
+   */
   virtual bool setRunFunction(const ControlMode& requested_control_mode,
                               const bool limit_rate,
                               const double cutoff_frequency,
                               const franka::ControllerMode internal_controller);
-
-  virtual bool initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh);
-
+  /**
+   * Uses the robot_ip_ to connect to the robot via libfranka and loads the libfranka model.
+   */
   virtual void initRobot();
-
-  virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   hardware_interface::JointStateInterface joint_state_interface_{};
   FrankaStateInterface franka_state_interface_{};

@@ -24,13 +24,9 @@ using hardware_interface::InterfaceResources;
 using hardware_interface::ControllerInfo;
 
 std::string arm_id("panda");
-std::array<std::string, 7> joint_names  = {arm_id + "_joint1",
-        arm_id + "_joint2",
-        arm_id + "_joint3",
-        arm_id + "_joint4",
-        arm_id + "_joint5",
-        arm_id + "_joint6",
-        arm_id + "_joint7"};
+std::array<std::string, 7> joint_names = {
+    arm_id + "_joint1", arm_id + "_joint2", arm_id + "_joint3", arm_id + "_joint4",
+    arm_id + "_joint5", arm_id + "_joint6", arm_id + "_joint7"};
 
 namespace franka_hw {
 
@@ -67,32 +63,45 @@ hardware_interface::ControllerInfo newInfo(
   return info;
 }
 
-class ControllerConflict :
-        public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
-public:
- ControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, urdf::Model())) {}
- bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
-     return robot_->checkForConflict(info_list);
- }
- bool callPrepareSwitch(const std::list<hardware_interface::ControllerInfo> info_list) {
-     return robot_->prepareSwitch(info_list, info_list);
- }
+class ControllerConflict
+    : public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo>> {
+ public:
+  ControllerConflict() : robot_(std::make_unique<FrankaHW>()) {
+    ros::NodeHandle private_nh("~");
+    ros::NodeHandle root_nh;
+    EXPECT_TRUE(robot_->initParameters(root_nh, private_nh));
+    robot_->initROSInterfaces(private_nh);
+  }
+  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
+    return robot_->checkForConflict(info_list);
+  }
+  bool callPrepareSwitch(const std::list<hardware_interface::ControllerInfo> info_list) {
+    return robot_->prepareSwitch(info_list, info_list);
+  }
+
  private:
- std::unique_ptr<FrankaHW>  robot_;
+  std::unique_ptr<FrankaHW> robot_;
 };
 
-class NoControllerConflict : public
-        ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo> > {
-public:
- NoControllerConflict() : robot_(new FrankaHW(joint_names, arm_id, urdf::Model())) {}
- bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
-     return robot_->checkForConflict(info_list);
- }
- bool callPrepareSwitch(const std::list<hardware_interface::ControllerInfo> info_list) {
-     return robot_->prepareSwitch(info_list, info_list);
- }
+class NoControllerConflict
+    : public ::testing::TestWithParam<std::list<hardware_interface::ControllerInfo>> {
+ public:
+  NoControllerConflict() : robot_(std::make_unique<FrankaHW>()) {
+    ros::NodeHandle private_nh("~");
+    ros::NodeHandle root_nh;
+    EXPECT_TRUE(robot_->initParameters(root_nh, private_nh));
+    robot_->initROSInterfaces(private_nh);
+    robot_->setupParameterCallbacks(private_nh);
+  }
+  bool callCheckForConflict(const std::list<hardware_interface::ControllerInfo> info_list) {
+    return robot_->checkForConflict(info_list);
+  }
+  bool callPrepareSwitch(const std::list<hardware_interface::ControllerInfo> info_list) {
+    return robot_->prepareSwitch(info_list, info_list);
+  }
+
  private:
- std::unique_ptr<FrankaHW>  robot_;
+  std::unique_ptr<FrankaHW> robot_;
 };
 
 string arm_id2("panda2");
@@ -104,13 +113,8 @@ string cp_iface_str("franka_hw::FrankaPoseCartesianInterface");
 string unknown_iface_str("hardware_interface::UnknownInterface");
 string name_str("some_controller");
 string type_str("SomeControllerClass");
-set<string> joints_set = {joint_names[0],
-                          joint_names[1],
-                          joint_names[2],
-                          joint_names[3],
-                          joint_names[4],
-                          joint_names[5],
-                          joint_names[6]};
+set<string> joints_set = {joint_names[0], joint_names[1], joint_names[2], joint_names[3],
+                          joint_names[4], joint_names[5], joint_names[6]};
 set<string> cartesian_set = {arm_id + "_robot"};
 set<string> cartesian_arm2_set = {arm_id2 + "_robot"};
 set<string> no_id_set = {"joint1"};
@@ -186,7 +190,7 @@ TEST_P(NoControllerConflict, DoesNotConflictForCompatibleControllers) {
 }
 
 TEST_P(NoControllerConflict, CanPrepareSwitchForCompatibleControllers) {
-    EXPECT_TRUE(callPrepareSwitch(GetParam()));
+  EXPECT_TRUE(callPrepareSwitch(GetParam()));
 }
 
 }  // namespace franka_hw
