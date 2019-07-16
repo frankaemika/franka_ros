@@ -6,6 +6,5 @@
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "franka_hw_test_node");
-  ros::NodeHandle nh;
   return RUN_ALL_TESTS();
 }
