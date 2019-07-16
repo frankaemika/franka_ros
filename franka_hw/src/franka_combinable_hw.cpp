@@ -210,18 +210,19 @@ bool FrankaCombinableHW::controllerNeedsReset() {
 bool FrankaCombinableHW::setRunFunction(const ControlMode& requested_control_mode,
                                         const bool limit_rate,
                                         const double cutoff_frequency,
-                                        const franka::ControllerMode internal_controller) {
+                                        const franka::ControllerMode /*internal_controller*/) {
   using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
 
   if (requested_control_mode == ControlMode::None) {
     return true;
   }
   if (requested_control_mode == ControlMode::JointTorque) {
-    run_function_ = [this, limit_rate](franka::Robot& robot, Callback /*callback*/) {
+    run_function_ = [this, limit_rate, cutoff_frequency](franka::Robot& robot,
+                                                         Callback /*callback*/) {
       robot.control(std::bind(&FrankaCombinableHW::libfrankaUpdateCallback<franka::Torques>, this,
                               std::cref(effort_joint_command_libfranka_), std::placeholders::_1,
                               std::placeholders::_2),
-                    limit_rate);
+                    limit_rate, cutoff_frequency);
     };
     return true;
   }

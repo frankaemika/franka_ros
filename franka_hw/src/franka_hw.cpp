@@ -295,15 +295,13 @@ franka::Robot& FrankaHW::robot() const {
   return *robot_;
 }
 
-void FrankaHW::read(const ros::Time&,        // NOLINT (readability-identifier-naming)
-                    const ros::Duration&) {  // NOLINT [readability-named-parameter]
+void FrankaHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   std::lock_guard<std::mutex> ros_lock(ros_state_mutex_);
   std::lock_guard<std::mutex> libfranka_lock(libfranka_state_mutex_);
   robot_state_ros_ = robot_state_libfranka_;
 }
 
-void FrankaHW::write(const ros::Time&,  // NOLINT (readability-identifier-naming)
-                     const ros::Duration& period) {
+void FrankaHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
   std::lock_guard<std::mutex> ros_lock(ros_cmd_mutex_);
   std::lock_guard<std::mutex> libfranka_lock(libfranka_cmd_mutex_);
   pose_cartesian_command_libfranka_ = pose_cartesian_command_ros_;
