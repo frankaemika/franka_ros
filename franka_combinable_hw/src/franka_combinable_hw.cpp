@@ -585,7 +585,7 @@ void FrankaCombinableHW::read(const ros::Time&,        // NOLINT (readability-id
 
 void FrankaCombinableHW::write(const ros::Time&,  // NOLINT (readability-identifier-naming)
                                const ros::Duration& period) {
-  // if flag `controlller_needs_reset_` was updated, then controller_manager. update(...,
+  // if flag `controller_needs_reset_` was updated, then controller_manager. update(...,
   // reset_controller) must
   // have been executed to reset the controller.
   if (controller_needs_reset_ && error_recovered_) {

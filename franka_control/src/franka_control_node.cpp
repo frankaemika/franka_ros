@@ -171,6 +171,7 @@ int main(int argc, char** argv) {
 
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);
+      franka_control.checkJointLimits();
       last_time = now;
 
       if (!ros::ok()) {
@@ -184,9 +185,11 @@ int main(int argc, char** argv) {
         if (period.toSec() == 0.0) {
           // Reset controllers before starting a motion
           control_manager.update(now, period, true);
+          franka_control.checkJointLimits();
           franka_control.reset();
         } else {
           control_manager.update(now, period);
+          franka_control.checkJointLimits();
           franka_control.enforceLimits(period);
         }
         return ros::ok();
