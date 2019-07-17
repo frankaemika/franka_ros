@@ -23,7 +23,8 @@ namespace franka_hw {
  * A hardware class for a Panda robot based on the ros_control framework.
  * This class is ready to be combined with other hardware classes e.g. to
  * control mulitple robots from a single controller.
- * Note: This class allows for torque (effort) control only.
+ * Note: This class allows for torque (effort) control only (see documentation at
+ * https://frankaemika.github.io/docs/franka_ros.html ).
  */
 class FrankaCombinableHW : public FrankaHW {
  public:
