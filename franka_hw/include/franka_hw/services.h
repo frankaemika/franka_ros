@@ -20,6 +20,15 @@
 
 namespace franka_hw {
 
+/**
+ * Advertises a service that acts according to the handler function which is used in the service
+ * callback.
+ *
+ * @param[in] node_handle The NodeHandle in the namespace at which to advertise the service.
+ * @param[in] name The name of the service.
+ * @param[in] handler The callback method for the service.
+ * @return The service server.
+ */
 template <typename T>
 ros::ServiceServer advertiseService(
     ros::NodeHandle& node_handle,
@@ -40,8 +49,17 @@ ros::ServiceServer advertiseService(
       });
 }
 
+/**
+ * This class serves as container that gathers all possible service interfaces to a libfranka robot
+ * instance.
+ */
 class ServiceContainer {
  public:
+  /**
+   * Advertises and adds a service to the container class.
+   *
+   * @return A reference to the service container to allow a fluent API.
+   */
   template <typename T, typename... TArgs>
   ServiceContainer& advertiseService(TArgs&&... args) {
     ros::ServiceServer server = franka_hw::advertiseService<T>(std::forward<TArgs>(args)...);
@@ -53,29 +71,89 @@ class ServiceContainer {
   std::vector<ros::ServiceServer> services_;
 };
 
+/**
+ * Sets up all services relevant for a libfranka robot inside a service container.
+ *
+ * @param[in] robot The libfranka robot for which to set up services interfaces.
+ * @param[in] node_handle The NodeHandle in the namespace at which to advertise the services.
+ * @param[in] services The container to store the service servers.
+ */
 void setupServices(franka::Robot& robot, ros::NodeHandle& node_handle, ServiceContainer& services);
 
-// void setupRecoveryActionServer()
-
+/**
+ * Callback for the service interface to franka::robot::setCartesianImpedance.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setCartesianImpedance(franka::Robot& robot,
                            const franka_msgs::SetCartesianImpedance::Request& req,
                            franka_msgs::SetCartesianImpedance::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setJointImpedance.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setJointImpedance(franka::Robot& robot,
                        const franka_msgs::SetJointImpedance::Request& req,
                        franka_msgs::SetJointImpedance::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setEEFrame.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setEEFrame(franka::Robot& robot,
                 const franka_msgs::SetEEFrame::Request& req,
                 franka_msgs::SetEEFrame::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setKFrame.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setKFrame(franka::Robot& robot,
                const franka_msgs::SetKFrame::Request& req,
                franka_msgs::SetKFrame::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setForceTorqueCollisionBehavior.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setForceTorqueCollisionBehavior(
     franka::Robot& robot,
     const franka_msgs::SetForceTorqueCollisionBehavior::Request& req,
     franka_msgs::SetForceTorqueCollisionBehavior::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setFullCollisionBehavior.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setFullCollisionBehavior(franka::Robot& robot,
                               const franka_msgs::SetFullCollisionBehavior::Request& req,
                               franka_msgs::SetFullCollisionBehavior::Response& res);
+
+/**
+ * Callback for the service interface to franka::robot::setLoad.
+ *
+ * @param[in] robot The libfranka robot for which to set up the service.
+ * @param[in] req The service request.
+ * @param[out] res The service response.
+ */
 void setLoad(franka::Robot& robot,
              const franka_msgs::SetLoad::Request& req,
              franka_msgs::SetLoad::Response& res);

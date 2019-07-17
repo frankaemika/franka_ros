@@ -41,7 +41,7 @@ void FrankaCombinableHW::initRobot() {
 
 void FrankaCombinableHW::publishErrorState(const bool error) {
   std_msgs::Bool msg;
-  msg.data = error;  // NOLINT (readability-implicit-bool-cast)
+  msg.data = static_cast<int>(error);
   has_error_pub_.publish(msg);
 }
 
@@ -80,9 +80,7 @@ void FrankaCombinableHW::controlLoop() {
     libfranka_cmd_mutex_.unlock();
 
     try {
-      // Run control loop. It will exit if the controller is switched.
-      auto empty_method = [](const ros::Time&, const ros::Duration&) -> bool { return true; };
-      control(empty_method);
+      control();
     } catch (const franka::ControlException& e) {
       // Reflex could be caught and it needs to wait for automatic error recovery
       ROS_ERROR("%s", e.what());
@@ -120,7 +118,7 @@ void FrankaCombinableHW::control(
   if (!controller_active_) {
     return;
   }
-  auto empty_method = [](const franka::RobotState&, franka::Duration) -> bool { return true; };
+  auto empty_method = [](const franka::RobotState&, franka::Duration) { return true; };
   run_function_(*robot_, empty_method);
 }
 
@@ -180,7 +178,7 @@ std::array<double, 7> FrankaCombinableHW::saturateTorqueRate(
   return tau_d_saturated;
 }
 
-std::string FrankaCombinableHW::getArmID() {
+std::string FrankaCombinableHW::getArmID() const noexcept {
   return arm_id_;
 }
 
@@ -189,7 +187,7 @@ void FrankaCombinableHW::triggerError() {
   publishErrorState(has_error_);
 }
 
-bool FrankaCombinableHW::hasError() {
+bool FrankaCombinableHW::hasError() const noexcept {
   return has_error_;
 }
 
@@ -203,7 +201,7 @@ void FrankaCombinableHW::resetError() {
   publishErrorState(has_error_);
 }
 
-bool FrankaCombinableHW::controllerNeedsReset() {
+bool FrankaCombinableHW::controllerNeedsReset() const noexcept {
   return controller_needs_reset_;
 }
 

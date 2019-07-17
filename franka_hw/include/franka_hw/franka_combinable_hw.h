@@ -53,8 +53,8 @@ class FrankaCombinableHW : public FrankaHW {
    * @throw franka::NetworkException if the connection is lost, e.g. after a timeout.
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
-  void control(const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback)
-      const override;
+  void control(const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback =
+                   [](const ros::Time&, const ros::Duration&) { return true; }) const override;
 
   /**
    * Checks whether a requested controller can be run, based on the resources and interfaces it
@@ -88,7 +88,7 @@ class FrankaCombinableHW : public FrankaHW {
    *
    * @return A copy of the arm_id string indentifying the class instance.
    */
-  std::string getArmID();
+  std::string getArmID() const noexcept;
 
   /**
    * Triggers a stop of the controlLoop. This interface is used to stop all combined
@@ -101,7 +101,7 @@ class FrankaCombinableHW : public FrankaHW {
    *
    * @return True in case of an error false otherwise.
    */
-  bool hasError();
+  bool hasError() const noexcept;
 
   /**
    * Recovers the libfranka robot, resets the error flag and publishes the error state.
@@ -113,7 +113,7 @@ class FrankaCombinableHW : public FrankaHW {
    *
    * @return A copy of the controller_needs_reset flag.
    */
-  bool controllerNeedsReset();
+  bool controllerNeedsReset() const noexcept;
 
  private:
   template <typename T>

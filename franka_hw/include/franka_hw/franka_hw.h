@@ -57,7 +57,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
   /**
-   * Reads the parameterizsation of the hardware class from the ros parameter server
+   * Reads the parameterizsation of the hardware class from the ROS parameter server
    * (e.g. arm_id, robot_ip joint_names etc.)
    *
    * @param[in] root_nh A node handle in the root namespace of the control node.
