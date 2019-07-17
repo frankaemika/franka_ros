@@ -1,17 +1,18 @@
 robot_hardware:
-  - panda_left
-  - panda_right
-panda_left:
+  - panda_1
+  - panda_2
+
+panda_1:
   type: franka_hw/FrankaCombinableHW
-  arm_id: panda_left
+  arm_id: panda_1
   joint_names:
-    - panda_left_joint1
-    - panda_left_joint2
-    - panda_left_joint3
-    - panda_left_joint4
-    - panda_left_joint5
-    - panda_left_joint6
-    - panda_left_joint7
+    - panda_1_joint1
+    - panda_1_joint2
+    - panda_1_joint3
+    - panda_1_joint4
+    - panda_1_joint5
+    - panda_1_joint6
+    - panda_1_joint7
   # Configure the threshold angle for printing joint limit warnings.
   joint_limit_warning_threshold: 0.1 # [rad]
   # Activate rate limiter? [true|false]
@@ -21,17 +22,17 @@ panda_left:
   # Internal controller for motion generators [joint_impedance|cartesian_impedance]
   internal_controller: joint_impedance
 
-panda_right:
+panda_2:
   type: franka_hw/FrankaCombinableHW
-  arm_id: panda_right
+  arm_id: panda_2
   joint_names:
-    - panda_right_joint1
-    - panda_right_joint2
-    - panda_right_joint3
-    - panda_right_joint4
-    - panda_right_joint5
-    - panda_right_joint6
-    - panda_right_joint7
+    - panda_2_joint1
+    - panda_2_joint2
+    - panda_2_joint3
+    - panda_2_joint4
+    - panda_2_joint5
+    - panda_2_joint6
+    - panda_2_joint7
   # Configure the threshold angle for printing joint limit warnings.
   joint_limit_warning_threshold: 0.1 # [rad]
   # Activate rate limiter? [true|false]

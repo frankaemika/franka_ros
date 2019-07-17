@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <xacro:arg name="arm_id_1" default="panda_1" />
+  <xacro:arg name="arm_id_2" default="panda_2" />
+
   <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro"/>
   <xacro:include filename="$(find franka_description)/robots/hand.xacro"/>
-  
+
   <!-- box shaped table as base for the 2 Pandas -->
   <link name="base">
     <visual>
@@ -21,13 +24,13 @@
       </geometry>
     </collision>
   </link>
-  
-  <!-- left arm with gripper -->
-  <xacro:panda_arm arm_id="panda_left" connected_to="base"  xyz="0 0.5 1" safety_distance="0.03"/>
-  <xacro:hand ns="panda_left" rpy="0 0 ${-pi/4}" connected_to="panda_left_link8" safety_distance="0.03"/>
-  
+
   <!-- right arm with gripper -->
-  <xacro:panda_arm arm_id="panda_right" connected_to="base"  xyz="0 -0.5 1" safety_distance="0.03"/>
-  <xacro:hand ns="panda_right" rpy="0 0 ${-pi/4}" connected_to="panda_right_link8" safety_distance="0.03"/>
-  
+  <xacro:panda_arm arm_id="$(arg arm_id_1)" connected_to="base"  xyz="0 -0.5 1" safety_distance="0.03"/>
+  <xacro:hand ns="$(arg arm_id_1)" rpy="0 0 ${-pi/4}" connected_to="$(arg arm_id_1)_link8" safety_distance="0.03"/>
+
+  <!-- left arm with gripper -->
+  <xacro:panda_arm arm_id="$(arg arm_id_2)" connected_to="base"  xyz="0 0.5 1" safety_distance="0.03"/>
+  <xacro:hand ns="$(arg arm_id_2)" rpy="0 0 ${-pi/4}" connected_to="$(arg arm_id_2)_link8" safety_distance="0.03"/>
+
 </robot>
