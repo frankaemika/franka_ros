@@ -54,8 +54,11 @@ class FrankaCombinableHW : public FrankaHW {
    * @throw franka::NetworkException if the connection is lost, e.g. after a timeout.
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
-  void control(const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback =
-                   [](const ros::Time&, const ros::Duration&) { return true; }) const override;
+  void control(const std::function<bool(const ros::Time&, const ros::Duration&)>&
+                   ros_callback =  // NOLINT (google-default-arguments)
+               [](const ros::Time&, const ros::Duration&) {
+                 return true;
+               }) const override;  // NOLINT (google-default-arguments)
 
   /**
    * Checks whether a requested controller can be run, based on the resources and interfaces it
