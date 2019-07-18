@@ -113,9 +113,8 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
   recovery_action_server_->start();
 }
 
-void FrankaCombinableHW::control(
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/)
-    const {  // NOLINT (google-default-arguments)
+void FrankaCombinableHW::control(  // NOLINT (google-default-arguments)
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) const {
   if (!controller_active_) {
     return;
   }
