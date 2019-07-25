@@ -127,6 +127,42 @@ bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
         joint_limit_warning_threshold_);
   }
 
+  // Get full collision behavior config from the parameter server.
+  std::vector<double> thresholds =
+      getCollisionThresholds("lower_torque_thresholds_acceleration", robot_hw_nh,
+                             {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_torque_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("upper_torque_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_torque_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("lower_torque_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_torque_thresholds_nominal.begin());
+  thresholds = getCollisionThresholds("upper_torque_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_torque_thresholds_nominal.begin());
+  thresholds.resize(6);
+  thresholds = getCollisionThresholds("lower_force_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_force_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("upper_force_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_force_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("lower_force_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_force_thresholds_nominal.begin());
+  thresholds = getCollisionThresholds("upper_force_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_force_thresholds_nominal.begin());
+
   return true;
 }
 
@@ -464,6 +500,14 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 void FrankaHW::initRobot() {
   robot_ = std::make_unique<franka::Robot>(robot_ip_);
   model_ = std::make_unique<franka::Model>(robot_->loadModel());
+  robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
+                               collision_config_.upper_torque_thresholds_acceleration,
+                               collision_config_.lower_torque_thresholds_nominal,
+                               collision_config_.upper_torque_thresholds_nominal,
+                               collision_config_.lower_force_thresholds_acceleration,
+                               collision_config_.upper_force_thresholds_acceleration,
+                               collision_config_.lower_force_thresholds_nominal,
+                               collision_config_.upper_force_thresholds_nominal);
   update(robot_->readOnce());
 }
 
@@ -514,6 +558,22 @@ bool FrankaHW::commandHasNaN(const franka::CartesianPose& command) {
 
 bool FrankaHW::commandHasNaN(const franka::CartesianVelocities& command) {
   return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_dP_EE);
+}
+
+std::vector<double> FrankaHW::getCollisionThresholds(const std::string& name,
+                                                     ros::NodeHandle& robot_hw_nh,
+                                                     const std::vector<double>& defaults) {
+  std::vector<double> thresholds;
+  if (!robot_hw_nh.getParam("collision_config/" + name, thresholds) ||
+      thresholds.size() != defaults.size()) {
+    std::string message;
+    for (const double& threshold : defaults) {
+      message = message + std::to_string(threshold) + " ";
+    }
+    ROS_INFO("No parameter %s found, using default values: %s", name.c_str(), message.c_str());
+    return defaults;
+  }
+  return thresholds;
 }
 
 }  // namespace franka_hw

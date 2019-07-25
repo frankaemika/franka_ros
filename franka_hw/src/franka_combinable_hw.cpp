@@ -27,15 +27,7 @@ void FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& robot_hw_nh) {
 }
 
 void FrankaCombinableHW::initRobot() {
-  robot_ = std::make_unique<franka::Robot>(robot_ip_);
-  robot_->setCollisionBehavior(
-      {{40.0, 40.0, 38.0, 38.0, 32.0, 30.0, 24.0}}, {{40.0, 40.0, 38.0, 36.0, 32.0, 30.0, 24.0}},
-      {{40.0, 40.0, 38.0, 38.0, 32.0, 30.0, 24.0}}, {{40.0, 40.0, 38.0, 36.0, 32.0, 30.0, 24.0}},
-      {{40.0, 40.0, 40.0, 50.0, 50.0, 50.0}}, {{40.0, 40.0, 40.0, 50.0, 50.0, 50.0}},
-      {{40.0, 40.0, 40.0, 50.0, 50.0, 50.0}}, {{40.0, 40.0, 40.0, 50.0, 50.0, 50.0}});
-  update(robot_->readOnce());
-  model_ = std::make_unique<franka::Model>(robot_->loadModel());
-
+  FrankaHW::initRobot();
   control_loop_thread_ = std::make_unique<std::thread>(&FrankaCombinableHW::controlLoop, this);
 }
 

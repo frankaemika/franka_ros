@@ -12,9 +12,10 @@
   <arg name="robot_id" default="combined_panda" />
   <arg name="robot_1_ip" default="robot_1.franka.de" />
   <arg name="robot_2_ip" default="robot_2.franka.de" />
+  <arg name="hw_config_file" default="$(find franka_control)/config/franka_combined_control_node.yaml"/>
 
   <node name="$(arg robot_id)" pkg="franka_control" type="franka_combined_control_node" output="screen" required="true" >
-    <rosparam command="load" file="$(find franka_control)/config/franka_combined_control_node.yaml" />
+    <rosparam command="load" file="$(arg hw_config_file)" />
     <param name="panda_1/robot_ip" value="$(arg robot_1_ip)" />
     <param name="panda_2/robot_ip" value="$(arg robot_2_ip)" />
     <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />

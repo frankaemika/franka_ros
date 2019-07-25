@@ -434,6 +434,22 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   virtual void initRobot();
 
+  virtual std::vector<double> getCollisionThresholds(const std::string& name,
+                                                     ros::NodeHandle& robot_hw_nh,
+                                                     const std::vector<double>& defaults);
+
+  struct CollisionConfig {
+    std::array<double, 7> lower_torque_thresholds_acceleration;
+    std::array<double, 7> upper_torque_thresholds_acceleration;
+    std::array<double, 7> lower_torque_thresholds_nominal;
+    std::array<double, 7> upper_torque_thresholds_nominal;
+    std::array<double, 6> lower_force_thresholds_acceleration;
+    std::array<double, 6> upper_force_thresholds_acceleration;
+    std::array<double, 6> lower_force_thresholds_nominal;
+    std::array<double, 6> upper_force_thresholds_nominal;
+  };
+
+  CollisionConfig collision_config_;
   hardware_interface::JointStateInterface joint_state_interface_{};
   FrankaStateInterface franka_state_interface_{};
   hardware_interface::PositionJointInterface position_joint_interface_{};
