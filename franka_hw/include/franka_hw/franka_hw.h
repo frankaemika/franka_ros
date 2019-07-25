@@ -434,9 +434,20 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   virtual void initRobot();
 
+  /**
+   * Parses a set of collision thresholds from the parameter server. The methods returns
+   * the default values if no parameter was found or the size of the array did not match
+   * the defaults dimension.
+   *
+   * @param[in] name The name of the parameter to look for.
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   * @param[in] defaults A set of default values that also specify the size the parameter must have
+   * to be valid.
+   * @return A set parsed parameters if valid parameters where found, the default values otherwise.
+   */
   virtual std::vector<double> getCollisionThresholds(const std::string& name,
                                                      ros::NodeHandle& robot_hw_nh,
-                                                     const std::vector<double>& defaults);
+                                                     const std::vector<double>& defaults) const;
 
   struct CollisionConfig {
     std::array<double, 7> lower_torque_thresholds_acceleration;
