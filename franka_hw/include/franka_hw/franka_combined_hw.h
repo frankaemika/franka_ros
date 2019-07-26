@@ -3,8 +3,8 @@
 #pragma once
 
 #include <combined_robot_hw/combined_robot_hw.h>
-#include <franka_combinable_hw/franka_combinable_hw.h>
-#include <franka_control/ErrorRecoveryAction.h>
+#include <franka_hw/franka_combinable_hw.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 
 #include <actionlib/server/simple_action_server.h>
 #include <ros/node_handle.h>
@@ -12,7 +12,7 @@
 
 #include <memory>
 
-namespace franka_combinable_hw {
+namespace franka_hw {
 
 class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
  public:
@@ -51,7 +51,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   bool controllerNeedsReset();
 
  protected:
-  std::unique_ptr<actionlib::SimpleActionServer<franka_control::ErrorRecoveryAction>>
+  std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
       combined_recovery_action_server_;
 
  private:
@@ -61,4 +61,4 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   bool is_recovering_{false};
 };
 
-}  // namespace franka_combinable_hw
+}  // namespace franka_hw

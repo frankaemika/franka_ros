@@ -36,13 +36,17 @@
   </class>
   <class name="franka_example_controllers/CartesianImpedanceExampleController" type="franka_example_controllers::CartesianImpedanceExampleController" base_class_type="controller_interface::ControllerBase">
     <description>
-      A controller that renders a spring damper system in cartesian space. Compliance parameters and the equilibrium pose can be modified online with dynamic reconfigure and an interactive marker respectively. 
+      A controller that renders a spring damper system in cartesian space. Compliance parameters and the equilibrium pose can be modified online with dynamic reconfigure and an interactive marker respectively.
     </description>
   </class>
   <class name="franka_example_controllers/ForceExampleController" type="franka_example_controllers::ForceExampleController" base_class_type="controller_interface::ControllerBase">
     <description>
-      A PI controller that applies a force corresponding to a user-provided desired mass in the z axis. The desired mass value can be modified online with dynamic reconfigure. 
+      A PI controller that applies a force corresponding to a user-provided desired mass in the z axis. The desired mass value can be modified online with dynamic reconfigure.
     </description>
   </class>
-
+  <class name="franka_example_controllers/DualArmCartesianImpedanceExampleController" type="franka_example_controllers::DualArmCartesianImpedanceExampleController" base_class_type="controller_interface::ControllerBase">
+      <description>
+          A controller that renders Cartesian impedance based tracking of separate target poses for 2 panda arms.
+      </description>
+  </class>
 </library>

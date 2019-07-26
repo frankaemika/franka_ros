@@ -12,8 +12,8 @@ from interactive_markers.interactive_marker_server import \
     InteractiveMarkerServer, InteractiveMarkerFeedback
 from visualization_msgs.msg import InteractiveMarker, \
     InteractiveMarkerControl, Marker
+from franka_msgs.msg import FrankaState
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
 
 marker_pose = PoseStamped()
 
@@ -53,25 +53,31 @@ def publish_target_pose():
     pose_pub.publish(marker_pose)
 
 
-def left_has_error_callback(msg):
+def left_franka_state_callback(msg):
     """
     This callback function set `has_error` variable to True if the left arm is having an error.
-    :param msg: error msg data
+    :param msg: FrankaState msg data
     :return:  None
     """
-    global has_error, left_has_error, right_has_error
-    left_has_error = msg.data
+    global has_error, left_has_error
+    if msg.robot_mode == FrankaState.ROBOT_MODE_MOVE:
+        left_has_error = False
+    else:
+        left_has_error = True
     has_error = left_has_error or right_has_error
 
 
-def right_has_error_callback(msg):
+def right_franka_state_callback(msg):
     """
     This callback function set `has_error` variable to True if the right arm is having an error.
-    :param msg: error msg data
+    :param msg: FrankaState msg data
     :return:  None
     """
-    global has_error, left_has_error, right_has_error
-    right_has_error = msg.data
+    global has_error, right_has_error
+    if msg.robot_mode == FrankaState.ROBOT_MODE_MOVE:
+        right_has_error = False
+    else:
+        right_has_error = True
     has_error = left_has_error or right_has_error
 
 
@@ -142,10 +148,11 @@ if __name__ == "__main__":
     right_arm_id = args.right_arm_id
 
     # Initialize subscribers for error states of the arms
-    left_error_sub = rospy.Subscriber(left_arm_id + "/has_error", Bool,
-                                      left_has_error_callback)
-    right_error_sub = rospy.Subscriber(right_arm_id + "/has_error", Bool,
-                                       right_has_error_callback)
+    left_state_sub = rospy.Subscriber(left_arm_id + "_state_controller/franka_states",
+                                 FrankaState, left_franka_state_callback)
+
+    right_state_sub = rospy.Subscriber(right_arm_id + "_state_controller/franka_states",
+                                 FrankaState, right_franka_state_callback)
 
     # Set marker pose to be the current "middle pose" of both EEs
     reset_marker_pose_blocking()

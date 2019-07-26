@@ -13,11 +13,7 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>message_generation</build_depend>
-
   <depend>libfranka</depend>
-  <depend>actionlib</depend>
-  <depend>actionlib_msgs</depend>
   <depend>controller_interface</depend>
   <depend>controller_manager</depend>
   <depend>franka_hw</depend>
@@ -33,10 +29,7 @@
   <exec_depend>franka_description</exec_depend>
   <exec_depend>franka_gripper</exec_depend>
   <exec_depend>joint_state_publisher</exec_depend>
-  <exec_depend>message_runtime</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
-
-  <build_export_depend>message_runtime</build_export_depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_controller_plugins.xml"/>

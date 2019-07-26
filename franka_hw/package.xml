@@ -13,14 +13,25 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
+  <build_depend>message_generation</build_depend>
+
+  <depend>actionlib_msgs</depend>
+  <depend>actionlib</depend>
   <depend>controller_interface</depend>
+  <depend>combined_robot_hw</depend>
   <depend>hardware_interface</depend>
   <depend>joint_limits_interface</depend>
   <depend>libfranka</depend>
   <depend>roscpp</depend>
   <depend>urdf</depend>
+  <depend>pluginlib</depend>
+  <depend>franka_msgs</depend>
 
   <test_depend>franka_description</test_depend>
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
+
+  <export>
+      <hardware_interface plugin="${prefix}/franka_combinable_hw_plugin.xml"/>
+  </export>
 </package>

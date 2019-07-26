@@ -1,12 +1,45 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka_control/services.h>
+#include <franka_hw/services.h>
 
-namespace franka_control {
+namespace franka_hw {
+
+void setupServices(franka::Robot& robot, ros::NodeHandle& node_handle, ServiceContainer& services) {
+  services
+      .advertiseService<franka_msgs::SetJointImpedance>(node_handle, "set_joint_impedance",
+                                                        [&robot](auto&& req, auto&& res) {
+                                                          return franka_hw::setJointImpedance(
+                                                              robot, req, res);
+                                                        })
+      .advertiseService<franka_msgs::SetCartesianImpedance>(
+          node_handle, "set_cartesian_impedance",
+          [&robot](auto&& req, auto&& res) {
+            return franka_hw::setCartesianImpedance(robot, req, res);
+          })
+      .advertiseService<franka_msgs::SetEEFrame>(
+          node_handle, "set_EE_frame",
+          [&robot](auto&& req, auto&& res) { return franka_hw::setEEFrame(robot, req, res); })
+      .advertiseService<franka_msgs::SetKFrame>(
+          node_handle, "set_K_frame",
+          [&robot](auto&& req, auto&& res) { return franka_hw::setKFrame(robot, req, res); })
+      .advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
+          node_handle, "set_force_torque_collision_behavior",
+          [&robot](auto&& req, auto&& res) {
+            return franka_hw::setForceTorqueCollisionBehavior(robot, req, res);
+          })
+      .advertiseService<franka_msgs::SetFullCollisionBehavior>(
+          node_handle, "set_full_collision_behavior",
+          [&robot](auto&& req, auto&& res) {
+            return franka_hw::setFullCollisionBehavior(robot, req, res);
+          })
+      .advertiseService<franka_msgs::SetLoad>(
+          node_handle, "set_load",
+          [&robot](auto&& req, auto&& res) { return franka_hw::setLoad(robot, req, res); });
+}
 
 void setCartesianImpedance(franka::Robot& robot,
-                           const SetCartesianImpedance::Request& req,
-                           SetCartesianImpedance::Response& /* res */) {
+                           const franka_msgs::SetCartesianImpedance::Request& req,
+                           franka_msgs::SetCartesianImpedance::Response& /* res */) {
   std::array<double, 6> cartesian_stiffness;
   std::copy(req.cartesian_stiffness.cbegin(), req.cartesian_stiffness.cend(),
             cartesian_stiffness.begin());
@@ -14,32 +47,33 @@ void setCartesianImpedance(franka::Robot& robot,
 }
 
 void setJointImpedance(franka::Robot& robot,
-                       const SetJointImpedance::Request& req,
-                       SetJointImpedance::Response& /* res */) {
+                       const franka_msgs::SetJointImpedance::Request& req,
+                       franka_msgs::SetJointImpedance::Response& /* res */) {
   std::array<double, 7> joint_stiffness;
   std::copy(req.joint_stiffness.cbegin(), req.joint_stiffness.cend(), joint_stiffness.begin());
   robot.setJointImpedance(joint_stiffness);
 }
 
 void setEEFrame(franka::Robot& robot,
-                const SetEEFrame::Request& req,
-                SetEEFrame::Response& /* res */) {
+                const franka_msgs::SetEEFrame::Request& req,
+                franka_msgs::SetEEFrame::Response& /* res */) {
   std::array<double, 16> F_T_EE;  // NOLINT [readability-identifier-naming]
   std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
   robot.setEE(F_T_EE);
 }
 
 void setKFrame(franka::Robot& robot,
-               const SetKFrame::Request& req,
-               SetKFrame::Response& /* res */) {
+               const franka_msgs::SetKFrame::Request& req,
+               franka_msgs::SetKFrame::Response& /* res */) {
   std::array<double, 16> EE_T_K;  // NOLINT [readability-identifier-naming]
   std::copy(req.EE_T_K.cbegin(), req.EE_T_K.cend(), EE_T_K.begin());
   robot.setK(EE_T_K);
 }
 
-void setForceTorqueCollisionBehavior(franka::Robot& robot,
-                                     const SetForceTorqueCollisionBehavior::Request& req,
-                                     SetForceTorqueCollisionBehavior::Response& /* res */
+void setForceTorqueCollisionBehavior(
+    franka::Robot& robot,
+    const franka_msgs::SetForceTorqueCollisionBehavior::Request& req,
+    franka_msgs::SetForceTorqueCollisionBehavior::Response& /* res */
 ) {
   std::array<double, 7> lower_torque_thresholds_nominal;
   std::copy(req.lower_torque_thresholds_nominal.cbegin(),
@@ -59,8 +93,8 @@ void setForceTorqueCollisionBehavior(franka::Robot& robot,
 }
 
 void setFullCollisionBehavior(franka::Robot& robot,
-                              const SetFullCollisionBehavior::Request& req,
-                              SetFullCollisionBehavior::Response& /* res */) {
+                              const franka_msgs::SetFullCollisionBehavior::Request& req,
+                              franka_msgs::SetFullCollisionBehavior::Response& /* res */) {
   std::array<double, 7> lower_torque_thresholds_acceleration;
   std::copy(req.lower_torque_thresholds_acceleration.cbegin(),
             req.lower_torque_thresholds_acceleration.cend(),
@@ -96,7 +130,9 @@ void setFullCollisionBehavior(franka::Robot& robot,
                              upper_force_thresholds_nominal);
 }
 
-void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Response& /* res */) {
+void setLoad(franka::Robot& robot,
+             const franka_msgs::SetLoad::Request& req,
+             franka_msgs::SetLoad::Response& /* res */) {
   double mass(req.mass);
   std::array<double, 3> F_x_center_load;  // NOLINT [readability-identifier-naming]
   std::copy(req.F_x_center_load.cbegin(), req.F_x_center_load.cend(), F_x_center_load.begin());
@@ -106,4 +142,4 @@ void setLoad(franka::Robot& robot, const SetLoad::Request& req, SetLoad::Respons
   robot.setLoad(mass, F_x_center_load, load_inertia);
 }
 
-}  // namespace franka_control
+}  // namespace franka_hw

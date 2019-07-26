@@ -5,11 +5,16 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(catkin REQUIRED COMPONENTS
+  actionlib
   controller_interface
+  combined_robot_hw
   hardware_interface
   joint_limits_interface
   roscpp
+  pluginlib
   urdf
+  franka_msgs
+  message_generation
 )
 
 find_package(Franka 0.5.0 REQUIRED)
@@ -17,13 +22,25 @@ find_package(Franka 0.5.0 REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES franka_hw
-  CATKIN_DEPENDS controller_interface hardware_interface joint_limits_interface roscpp urdf
+  CATKIN_DEPENDS
+    actionlib_msgs
+    actionlib
+    controller_interface
+    combined_robot_hw
+    hardware_interface
+    joint_limits_interface
+    roscpp
+    pluginlib
+    urdf
+    franka_msgs
   DEPENDS Franka
 )
 
 add_library(franka_hw
   src/control_mode.cpp
   src/franka_hw.cpp
+  src/franka_combinable_hw.cpp
+  src/franka_combined_hw.cpp
   src/resource_helpers.cpp
   src/trigger_rate.cpp
 )
@@ -36,6 +53,7 @@ add_dependencies(franka_hw
 target_link_libraries(franka_hw
   ${Franka_LIBRARIES}
   ${catkin_LIBRARIES}
+  franka_control_services
 )
 
 target_include_directories(franka_hw SYSTEM PUBLIC
@@ -54,6 +72,29 @@ install(TARGETS franka_hw
 )
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
+
+## franka_control_services
+add_library(franka_control_services
+  src/services.cpp
+)
+
+add_dependencies(franka_control_services
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(franka_control_services
+  ${Franka_LIBRARIES}
+  ${catkin_LIBRARIES}
+)
+
+target_include_directories(franka_control_services SYSTEM PUBLIC
+  ${Franka_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
+target_include_directories(franka_control_services PUBLIC
+  include
 )
 
 if(CATKIN_ENABLE_TESTING)

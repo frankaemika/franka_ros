@@ -1,5 +1,8 @@
 <launch>
  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find franka_hw)/test/config/ros_console_settings_for_tests.conf"/>
  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro" />
- <test test-name="franka_hw_test" pkg="franka_hw" type="franka_hw_test" />
+ <test test-name="franka_hw_test" pkg="franka_hw" type="franka_hw_test" >
+   <rosparam command="load" file="$(find franka_control)/config/franka_control_node.yaml" />
+   <param name="robot_ip" value="unused_dummy_ip" />
+ </test>
 </launch>

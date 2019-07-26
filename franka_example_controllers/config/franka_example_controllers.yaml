@@ -92,3 +92,26 @@ cartesian_impedance_example_controller:
         - panda_joint5
         - panda_joint6
         - panda_joint7
+
+dual_arm_cartesian_impedance_example_controller:
+    type: franka_example_controllers/DualArmCartesianImpedanceExampleController
+    right:
+        arm_id: panda_1
+        joint_names:
+            - panda_1_joint1
+            - panda_1_joint2
+            - panda_1_joint3
+            - panda_1_joint4
+            - panda_1_joint5
+            - panda_1_joint6
+            - panda_1_joint7
+    left:
+        arm_id: panda_2
+        joint_names:
+            - panda_2_joint1
+            - panda_2_joint2
+            - panda_2_joint3
+            - panda_2_joint4
+            - panda_2_joint5
+            - panda_2_joint6
+            - panda_2_joint7

@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /RobotModel1
         - /InteractiveMarkers1
       Splitter Ratio: 0.655555546
     Tree Height: 820
@@ -80,122 +81,122 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_hand:
+        panda_1_hand:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_leftfinger:
+        panda_1_leftfinger:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link0:
+        panda_1_link0:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link1:
+        panda_1_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link2:
+        panda_1_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link3:
+        panda_1_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link4:
+        panda_1_link4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link5:
+        panda_1_link5:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link6:
+        panda_1_link6:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link7:
+        panda_1_link7:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_link8:
+        panda_1_link8:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_left_rightfinger:
+        panda_1_rightfinger:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_hand:
+        panda_2_hand:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_leftfinger:
+        panda_2_leftfinger:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link0:
+        panda_2_link0:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link1:
+        panda_2_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link2:
+        panda_2_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link3:
+        panda_2_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link4:
+        panda_2_link4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link5:
+        panda_2_link5:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link6:
+        panda_2_link6:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link7:
+        panda_2_link7:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_link8:
+        panda_2_link8:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        panda_right_rightfinger:
+        panda_2_rightfinger:
           Alpha: 1
           Show Axes: false
           Show Trail: false
