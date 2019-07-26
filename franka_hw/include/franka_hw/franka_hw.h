@@ -445,9 +445,9 @@ class FrankaHW : public hardware_interface::RobotHW {
    * to be valid.
    * @return A set parsed parameters if valid parameters where found, the default values otherwise.
    */
-  virtual std::vector<double> getCollisionThresholds(const std::string& name,
-                                                     ros::NodeHandle& robot_hw_nh,
-                                                     const std::vector<double>& defaults) const;
+  static std::vector<double> getCollisionThresholds(const std::string& name,
+                                                    ros::NodeHandle& robot_hw_nh,
+                                                    const std::vector<double>& defaults);
 
   struct CollisionConfig {
     std::array<double, 7> lower_torque_thresholds_acceleration;

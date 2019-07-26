@@ -562,13 +562,14 @@ bool FrankaHW::commandHasNaN(const franka::CartesianVelocities& command) {
 
 std::vector<double> FrankaHW::getCollisionThresholds(const std::string& name,
                                                      ros::NodeHandle& robot_hw_nh,
-                                                     const std::vector<double>& defaults) const {
+                                                     const std::vector<double>& defaults) {
   std::vector<double> thresholds;
   if (!robot_hw_nh.getParam("collision_config/" + name, thresholds) ||
       thresholds.size() != defaults.size()) {
     std::string message;
     for (const double& threshold : defaults) {
-      message = message + std::to_string(threshold) + " ";
+      message += std::to_string(threshold);
+      message += " ";
     }
     ROS_INFO("No parameter %s found, using default values: %s", name.c_str(), message.c_str());
     return defaults;
