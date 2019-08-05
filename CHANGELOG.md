@@ -2,15 +2,24 @@
 
 ## 0.7.0 - UNRELEASED
 
-Requires `libfranka` >= 0.5.0
-
-  * `franka_combined_example_controllers` : Added this package with an example for dual-arm control based on franka_combinable_hw
+Requires `libfranka` >= 0.7.0
+  * **Breaking** moved services and action from `franka_control` to `franka_msgs`.
+  * **Breaking** moved Service container from `franka_control` to `franka_hw`.
+  * `franka_example_controllers` : Added example for dual-arm control based on franka_combinable_hw.
   * `franka_description` : Added an example urdf with two panda arms.
-  * `franka_combinable_hw`: Added this package to support torque-controlling multiple robots from one controller.
-  * `franka_combined_control`: Added this package which contains a control node that can run multiple instances of `FrankaCombinableHW`.
+  * `franka_hw`:
+    - Added hardware classes to support torque-controlling multiple robots from one controller.
+    - Refactored FrankaHW class to serve as base class (e.g. for FrankaCombinableHW).
+    - Added joint limits checking to FrankaHW which means parameterized warning prints when approaching limits.
+    - Made initial collision behavior a parameter.
+    - Added default constructor and init method to FrankaHW.
+    - **Breaking** moved parsing of parameters from control node to FrankaHW::init.
+    - **Breaking** made libfranka robot a member of FrankaHW.
+  * `franka_control` :
+    - Added control node that can runs a `FrankaCombinedHW` to control mulitple Pandas.
   * `franka_control`:
     - Publish whole `libfranka` `franka::RobotState` in `franka_state_controller`.
-  * `franka_description`
+  * `franka_description` :
     - **BREAKING** Updated collision volumes.
     - Removed invalid `axis` for `joint8`.
   * `franka_example_controllers`:
@@ -124,4 +133,3 @@ Requires `libfranka` >= 0.2.0
 ## 0.1.0 - 2017-09-15
 
   * Initial release
-

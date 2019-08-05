@@ -5,6 +5,7 @@
 #include <franka_hw/franka_combined_hw.h>
 #include <ros/ros.h>
 
+#include <franka/control_tools.h>
 #include <sched.h>
 #include <string>
 
@@ -21,18 +22,11 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // set current control_loop thread to real-time
-  const int kThreadPriority = sched_get_priority_max(SCHED_FIFO);
-  if (kThreadPriority == -1) {
-    ROS_ERROR("franka_combined_control_node: unable to get maximum possible thread priority: %s",
-              std::strerror(errno));
-    return 1;
-  }
-  sched_param thread_param{};
-  thread_param.sched_priority = kThreadPriority;
-  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
-    ROS_ERROR("franka_combined_control_node: unable to set realtime scheduling: %s",
-              std::strerror(errno));
+  // set current thread to real-time priority
+  std::string error_message;
+  if (!franka::setCurrentThreadToHighestSchedulerPriority(&error_message)) {
+    ROS_ERROR("franka_combined_control_node: Failed to set thread priority to real-time. Error: %s",
+              error_message.c_str());
     return 1;
   }
 
