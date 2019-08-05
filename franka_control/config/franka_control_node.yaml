@@ -13,3 +13,5 @@ rate_limiting: true
 cutoff_frequency: 100
 # Internal controller for motion generators [joint_impedance|cartesian_impedance]
 internal_controller: joint_impedance
+# Used to decide whether to enforce realtime mode [enforce|ignore]
+realtime_config: enforce

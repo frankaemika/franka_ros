@@ -17,6 +17,7 @@ Requires `libfranka` >= 0.5.0
   * **BREAKING** Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config).
   * Added support for ROS Melodic Morenia.
   * Raised minimum CMake version to 3.4 to match `libfranka`.
+  * Add rosparam to choose value of `franka::RealtimeConfig`.
 
 ## 0.6.0 - 2018-08-08
 

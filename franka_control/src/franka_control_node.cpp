@@ -78,7 +78,18 @@ int main(int argc, char** argv) {
     ROS_ERROR("Invalid or no arm_id parameter provided");
     return 1;
   }
-  franka::Robot robot(robot_ip);
+
+  std::string realtime_config_param = node_handle.param("realtime_config", std::string("enforce"));
+  franka::RealtimeConfig realtime_config;
+  if (realtime_config_param == "enforce") {
+    realtime_config = franka::RealtimeConfig::kEnforce;
+  } else if (realtime_config_param == "ignore") {
+    realtime_config = franka::RealtimeConfig::kIgnore;
+  } else {
+    ROS_ERROR("Invalid realtime_config parameter provided. Valid values are 'enforce', 'ignore'.");
+    return 1;
+  }
+  franka::Robot robot(robot_ip, realtime_config);
 
   // Set default collision behavior
   robot.setCollisionBehavior(
@@ -149,7 +160,9 @@ int main(int argc, char** argv) {
     } else if (internal_controller == "cartesian_impedance") {
       controller_mode = franka::ControllerMode::kCartesianImpedance;
     } else {
-      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
+      ROS_WARN(
+          "Invalid internal_controller parameter provided, falling back to joint impedance. Valid "
+          "values are: 'joint_impedance', 'cartesian_impedance'.");
       controller_mode = franka::ControllerMode::kJointImpedance;
     }
 
