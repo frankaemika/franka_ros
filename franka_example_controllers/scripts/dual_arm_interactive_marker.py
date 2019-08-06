@@ -242,8 +242,6 @@ if __name__ == "__main__":
     server.insert(int_marker, process_feedback)
     server.applyChanges()
 
-    global marker_pose
-
     # main loop
     while not rospy.is_shutdown():
         publish_target_pose()
