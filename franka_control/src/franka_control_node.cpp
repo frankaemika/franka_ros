@@ -31,17 +31,6 @@ int main(int argc, char** argv) {
 
   franka::Robot& robot = franka_control.robot();
 
-  std::string realtime_config_param = node_handle.param("realtime_config", std::string("enforce"));
-  franka::RealtimeConfig realtime_config;
-  if (realtime_config_param == "enforce") {
-    realtime_config = franka::RealtimeConfig::kEnforce;
-  } else if (realtime_config_param == "ignore") {
-    realtime_config = franka::RealtimeConfig::kIgnore;
-  } else {
-    ROS_ERROR("Invalid realtime_config parameter provided. Valid values are 'enforce', 'ignore'.");
-    return 1;
-  }
-
   std::atomic_bool has_error(false);
 
   ServiceContainer services;
