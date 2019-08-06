@@ -9,6 +9,7 @@
 #include <list>
 #include <string>
 
+#include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/model.h>
 #include <franka/rate_limiting.h>
@@ -500,6 +501,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   std::string robot_ip_;
   urdf::Model urdf_model_;
   double joint_limit_warning_threshold_{0.1};
+  franka::RealtimeConfig realtime_config_;
 
   bool initialized_{false};
   std::atomic_bool controller_active_{false};

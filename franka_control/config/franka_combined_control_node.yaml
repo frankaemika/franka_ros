@@ -21,6 +21,8 @@ panda_1:
   cutoff_frequency: 100
   # Internal controller for motion generators [joint_impedance|cartesian_impedance]
   internal_controller: joint_impedance
+  # Used to decide whether to enforce realtime mode [enforce|ignore]
+  realtime_config: enforce
   # Configure the initial defaults for the collision behavior reflexes.
   collision_config:
     lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
@@ -51,6 +53,8 @@ panda_2:
   cutoff_frequency: 100
   # Internal controller for motion generators [joint_impedance|cartesian_impedance]
   internal_controller: joint_impedance
+  # Used to decide whether to enforce realtime mode [enforce|ignore]
+  realtime_config: enforce
   # Configure the initial defaults for the collision behavior reflexes.
   collision_config:
     lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
