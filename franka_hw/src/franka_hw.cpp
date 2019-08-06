@@ -509,7 +509,7 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 }
 
 void FrankaHW::initRobot() {
-  robot_ = std::make_unique<franka::Robot>(robot_ip_);
+  robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
   model_ = std::make_unique<franka::Model>(robot_->loadModel());
   robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
                                collision_config_.upper_torque_thresholds_acceleration,
