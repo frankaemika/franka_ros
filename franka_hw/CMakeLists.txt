@@ -17,11 +17,11 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-find_package(Franka 0.5.0 REQUIRED)
+find_package(Franka 0.7.0 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES franka_hw
+  LIBRARIES franka_hw franka_control_services
   CATKIN_DEPENDS
     actionlib_msgs
     actionlib

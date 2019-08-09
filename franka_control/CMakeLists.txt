@@ -19,11 +19,11 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_msgs
 )
 
-find_package(Franka 0.5.0 REQUIRED)
+find_package(Franka 0.7.0 REQUIRED)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES franka_state_controller franka_control_services
+  LIBRARIES franka_state_controller
   CATKIN_DEPENDS
     controller_interface
     franka_hw
