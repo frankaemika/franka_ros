@@ -72,7 +72,6 @@ add_dependencies(franka_control_node
 
 target_link_libraries(franka_control_node
   ${Franka_LIBRARIES}
-  franka_control_services
   ${catkin_LIBRARIES}
 )
 
