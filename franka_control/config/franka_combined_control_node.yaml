@@ -5,6 +5,7 @@ robot_hardware:
 panda_1:
   type: franka_hw/FrankaCombinableHW
   arm_id: panda_1
+  robot_ip: robot_1.franka.de
   joint_names:
     - panda_1_joint1
     - panda_1_joint2
@@ -37,6 +38,7 @@ panda_1:
 panda_2:
   type: franka_hw/FrankaCombinableHW
   arm_id: panda_2
+  robot_ip: robot_2.franka.de
   joint_names:
     - panda_2_joint1
     - panda_2_joint2

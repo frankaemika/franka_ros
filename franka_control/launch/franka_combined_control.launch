@@ -32,8 +32,8 @@
   <group ns="$(arg robot_id)">
 
     <rosparam command="load" file="$(arg controllers_file)" />
-    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
-      args="(arg controllers_to_start)"/>
+    <node name="hw_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+      args="$(arg controllers_to_start)"/>
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
