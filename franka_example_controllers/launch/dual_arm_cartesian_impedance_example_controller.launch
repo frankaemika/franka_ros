@@ -1,15 +1,11 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_id" default="panda_dual" />
-  <arg name="robot_right_ip" default="robot_1.franka.de" />
-  <arg name="robot_left_ip" default="robot_2.franka.de" />
   <arg name="rviz" default="true" />
   <arg name="rqt" default="true" />
 
   <include file="$(find franka_control)/launch/franka_combined_control.launch" >
     <arg name="robot_id" value="$(arg robot_id)" />
-    <arg name="robot_1_ip" value="$(arg robot_right_ip)" />
-    <arg name="robot_2_ip" value="$(arg robot_left_ip)" />
   </include>
 
   <group ns="$(arg robot_id)">
