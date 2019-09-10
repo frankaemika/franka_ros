@@ -8,11 +8,24 @@
         <origin xyz="${xyz}" rpy="${rpy}"/>
       </joint>
     </xacro:unless>
+
+    <xacro:arg name="gazebo" default="true"/>
+    <xacro:if value="$(arg gazebo)">
+      <!-- Gazebo Tags -->
+      <xacro:include filename="$(find mopa_description)/robots/hand.gazebo.xacro"/>
+    </xacro:if>
+
     <link name="${ns}_hand">
+      <inertial>
+        <mass value="0.73" />
+        <origin xyz="0 0.0015244 0.0275912" rpy="0 0 0" />
+        <inertia ixx="0.00278560230025" ixy="0.0" ixz="0.0" iyy="0.000400033405336" iyz="0.0" izz="0.00256378041832" />
+      </inertial>
       <visual>
         <geometry>
           <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
         </geometry>
+        <!-- <origin xyz="0 0 0" rpy="0 0 0" /> -->
       </visual>
       <collision>
         <geometry>
@@ -21,6 +34,11 @@
       </collision>
     </link>
     <link name="${ns}_leftfinger">
+      <inertial>
+        <mass value="0.1" />
+        <origin xyz="0 0.0145644 0.0227941" rpy="0 0 0" />
+        <inertia ixx="3.01220925051e-05" ixy="0.0" ixz="0.0" iyy="2.95873808038e-05" iyz="0.0" izz="6.95125211657e-06" />
+      </inertial>
       <visual>
         <geometry>
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
@@ -33,6 +51,11 @@
       </collision>
     </link>
     <link name="${ns}_rightfinger">
+      <inertial>
+        <mass value="0.1" />
+        <origin xyz="0 0.0145644 0.0227941" rpy="0 0 ${pi}" />
+        <inertia ixx="3.01220925051e-05" ixy="0.0" ixz="0.0" iyy="2.95873808038e-05" iyz="0.0" izz="6.95125211657e-06" />
+      </inertial>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
