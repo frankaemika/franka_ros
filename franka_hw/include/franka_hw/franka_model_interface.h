@@ -221,7 +221,7 @@ class FrankaModelHandle {
       const std::array<double, 16>& F_T_EE,  // NOLINT (readability-identifier-naming)
       const std::array<double, 16>& EE_T_K)  // NOLINT (readability-identifier-naming)
       const {
-    return model_->bodyJacobian(frame, *robot_state_);
+    return model_->bodyJacobian(frame, q, F_T_EE, EE_T_K);
   }
 
   /**
@@ -261,7 +261,7 @@ class FrankaModelHandle {
       const std::array<double, 16>& F_T_EE,  // NOLINT (readability-identifier-naming)
       const std::array<double, 16>& EE_T_K)  // NOLINT (readability-identifier-naming)
       const {
-    return model_->zeroJacobian(frame, *robot_state_);
+    return model_->zeroJacobian(frame, q, F_T_EE, EE_T_K);
   }
 
  private:
