@@ -156,9 +156,6 @@ class FrankaCombinableHW : public FrankaHW {
 
   void controlLoop();
 
-  static std::array<double, 7> saturateTorqueRate(const std::array<double, 7>& tau_d_calculated,
-                                                  const std::array<double, 7>& tau_J_d);
-
   std::unique_ptr<std::thread> control_loop_thread_;
   ServiceContainer services_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>

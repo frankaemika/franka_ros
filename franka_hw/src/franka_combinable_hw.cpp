@@ -158,18 +158,6 @@ void FrankaCombinableHW::write(const ros::Time& time, const ros::Duration& perio
   FrankaHW::write(time, period);
 }
 
-std::array<double, 7> FrankaCombinableHW::saturateTorqueRate(
-    const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d) {  // NOLINT (readability-identifier-naming)
-  const double kDeltaTauMax = 1.0;
-  std::array<double, 7> tau_d_saturated{};
-  for (size_t i = 0; i < 7; i++) {
-    double difference = tau_d_calculated[i] - tau_J_d[i];
-    tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, kDeltaTauMax), -kDeltaTauMax);
-  }
-  return tau_d_saturated;
-}
-
 std::string FrankaCombinableHW::getArmID() const noexcept {
   return arm_id_;
 }

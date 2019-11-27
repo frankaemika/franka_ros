@@ -19,7 +19,7 @@ panda_1:
   # Activate rate limiter? [true|false]
   rate_limiting: true
   # Cutoff frequency of the low-pass filter. Set to >= 1000 to deactivate.
-  cutoff_frequency: 100
+  cutoff_frequency: 1000
   # Internal controller for motion generators [joint_impedance|cartesian_impedance]
   internal_controller: joint_impedance
   # Used to decide whether to enforce realtime mode [enforce|ignore]
@@ -52,7 +52,7 @@ panda_2:
   # Activate rate limiter? [true|false]
   rate_limiting: true
   # Cutoff frequency of the low-pass filter. Set to >= 1000 to deactivate.
-  cutoff_frequency: 100
+  cutoff_frequency: 1000
   # Internal controller for motion generators [joint_impedance|cartesian_impedance]
   internal_controller: joint_impedance
   # Used to decide whether to enforce realtime mode [enforce|ignore]
