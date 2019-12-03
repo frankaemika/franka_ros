@@ -12,7 +12,7 @@
     <xacro:arg name="gazebo" default="true"/>
     <xacro:if value="$(arg gazebo)">
       <!-- Gazebo Tags -->
-      <xacro:include filename="$(find mopa_description)/robots/panda_arm.gazebo.xacro"/>
+      <xacro:include filename="$(find franka_description)/robots/panda_arm.gazebo.xacro"/>
     </xacro:if>
 
     <link name="${arm_id}_link0">
