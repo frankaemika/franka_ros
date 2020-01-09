@@ -3,6 +3,7 @@
 
 #include <franka/control_types.h>
 #include <franka/exception.h>
+#include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
 #include <franka_combinable_hw/franka_combinable_hw.h>
 #include <franka_control/ErrorRecoveryAction.h>
@@ -518,7 +519,7 @@ bool FrankaCombinableHW::prepareSwitch(
       run_function_ = [this](franka::Robot& robot) {
         robot.control(std::bind(&FrankaCombinableHW::controlCallback<franka::Torques>, this,
                                 std::cref(effort_joint_command_libfranka_), _1, _2),
-                      limit_rate_);
+                      limit_rate_, franka::kMaxCutoffFrequency);
       };
       break;
     case ControlMode::JointPosition:
@@ -545,7 +546,7 @@ bool FrankaCombinableHW::prepareSwitch(
                                 std::cref(effort_joint_command_libfranka_), _1, _2),
                       std::bind(&FrankaCombinableHW::controlCallback<franka::CartesianPose>, this,
                                 std::cref(pose_cartesian_command_libfranka_), _1, _2),
-                      limit_rate_);
+                      limit_rate_, franka::kMaxCutoffFrequency);
       };
       break;
     case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
@@ -554,7 +555,7 @@ bool FrankaCombinableHW::prepareSwitch(
                                 std::cref(effort_joint_command_libfranka_), _1, _2),
                       std::bind(&FrankaCombinableHW::controlCallback<franka::CartesianVelocities>,
                                 this, std::cref(velocity_cartesian_command_libfranka_), _1, _2),
-                      limit_rate_);
+                      limit_rate_, franka::kMaxCutoffFrequency);
       };
       break;
     default:
