@@ -54,12 +54,13 @@ void FrankaCombinableHW::controlLoop() {
 
       checkJointLimits();
 
-      ros_state_mutex_.lock();
-      libfranka_state_mutex_.lock();
-      robot_state_libfranka_ = robot_->readOnce();
-      robot_state_ros_ = robot_->readOnce();
-      libfranka_state_mutex_.unlock();
-      ros_state_mutex_.unlock();
+      {
+        std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
+        std::lock_guard<std::mutex> libfranka_state_lock(libfranka_state_mutex_);
+        robot_state_libfranka_ = robot_->readOnce();
+        robot_state_ros_ = robot_->readOnce();
+      }
+
       if (!ros::ok()) {
         return;
       }
@@ -67,9 +68,10 @@ void FrankaCombinableHW::controlLoop() {
     ROS_INFO("FrankaCombinableHW::%s::control_loop(): controller is active.", arm_id_.c_str());
 
     // Reset commands
-    libfranka_cmd_mutex_.lock();
-    effort_joint_command_libfranka_ = franka::Torques({0., 0., 0., 0., 0., 0., 0.});
-    libfranka_cmd_mutex_.unlock();
+    {
+      std::lock_guard<std::mutex> command_lock(libfranka_cmd_mutex_);
+      effort_joint_command_libfranka_ = franka::Torques({0., 0., 0., 0., 0., 0., 0.});
+    }
 
     try {
       control();

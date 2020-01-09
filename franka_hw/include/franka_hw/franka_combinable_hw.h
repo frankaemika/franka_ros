@@ -131,12 +131,13 @@ class FrankaCombinableHW : public FrankaHW {
       throw std::invalid_argument(error_message);
     }
     checkJointLimits();
-    libfranka_state_mutex_.lock();
-    robot_state_libfranka_ = robot_state;
-    libfranka_state_mutex_.unlock();
-    libfranka_cmd_mutex_.lock();
+    {
+      std::lock_guard<std::mutex> state_lock(libfranka_state_mutex_);
+      robot_state_libfranka_ = robot_state;
+    }
+
+    std::lock_guard<std::mutex> command_lock(libfranka_cmd_mutex_);
     T current_cmd = command;
-    libfranka_cmd_mutex_.unlock();
     if (has_error_ || !controller_active_) {
       return franka::MotionFinished(current_cmd);
     }
