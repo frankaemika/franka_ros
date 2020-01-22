@@ -77,7 +77,7 @@ void FrankaCombinableHW::controlLoop() {
       control();
     } catch (const franka::ControlException& e) {
       // Reflex could be caught and it needs to wait for automatic error recovery
-      ROS_ERROR("%s", e.what());
+      ROS_ERROR("%s: %s", arm_id_.c_str(), e.what());
       has_error_ = true;
       publishErrorState(has_error_);
     }
