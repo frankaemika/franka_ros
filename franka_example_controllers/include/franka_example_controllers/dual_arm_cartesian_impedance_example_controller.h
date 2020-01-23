@@ -70,7 +70,7 @@ class DualArmCartesianImpedanceExampleController
    * Initializes the controller class to be ready to run.
    *
    * @param[in] robot_hw Pointer to a RobotHW class to get interfaces and resource handles.
-   * @param[in] node_handle Nodehanlde that allows getting parameterizations from the server and
+   * @param[in] node_handle Nodehandle that allows getting parameterizations from the server and
    * starting subscribers.
    * @return True if the controller was initialized successfully, false otherwise.
    */
