@@ -1,10 +1,7 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <algorithm>
-#include <array>
 #include <atomic>
-#include <string>
-#include <utility>
 
 #include <actionlib/server/simple_action_server.h>
 #include <controller_manager/controller_manager.h>
