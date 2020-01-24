@@ -6,7 +6,6 @@
 
 import rospy
 import argparse
-from threading import Thread, Lock
 
 from interactive_markers.interactive_marker_server import \
     InteractiveMarkerServer, InteractiveMarkerFeedback

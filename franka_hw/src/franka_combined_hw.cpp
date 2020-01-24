@@ -1,17 +1,17 @@
 // Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka_hw/franka_combinable_hw.h>
-
 #include <franka_hw/franka_combined_hw.h>
-#include <franka_hw/franka_hw.h>
-#include <franka_msgs/ErrorRecoveryAction.h>
+
+#include <algorithm>
+#include <memory>
 
 #include <actionlib/server/simple_action_server.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
 
-#include <algorithm>
-#include <memory>
+#include <franka_hw/franka_combinable_hw.h>
+#include <franka_hw/franka_hw.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 
 namespace franka_hw {
 

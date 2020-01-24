@@ -22,7 +22,7 @@ namespace franka_hw {
 /**
  * A hardware class for a Panda robot based on the ros_control framework.
  * This class is ready to be combined with other hardware classes e.g. to
- * control mulitple robots from a single controller.
+ * control multiple robots from a single controller.
  * Note: This class allows for torque (effort) control only due to the lack of synchronization
  * between master controllers of different robots. For more information see the documentation at
  * https://frankaemika.github.io/docs/franka_ros.html .
@@ -50,7 +50,7 @@ class FrankaCombinableHW : public FrankaHW {
    *
    * @param[in] ros_callback A callback function that is executed at each time step.
    *
-   * @throw franka::ControlException if an error related to torque control occured.
+   * @throw franka::ControlException if an error related to torque control occurred.
    * @throw franka::InvalidOperationException if a conflicting operation is already running.
    * @throw franka::NetworkException if the connection is lost, e.g. after a timeout.
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
@@ -88,10 +88,10 @@ class FrankaCombinableHW : public FrankaHW {
   void write(const ros::Time& /*time*/, const ros::Duration& period) override;
 
   /**
-   * Getter method for the arm_id which is used to distinguish between mulitple
+   * Getter method for the arm_id which is used to distinguish between multiple
    * instances of FrankaCombinableHW.
    *
-   * @return A copy of the arm_id string indentifying the class instance.
+   * @return A copy of the arm_id string identifying the class instance.
    */
   std::string getArmID() const noexcept;
 

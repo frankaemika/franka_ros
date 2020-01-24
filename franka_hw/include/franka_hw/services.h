@@ -1,6 +1,7 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
+#include <vector>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
@@ -15,8 +16,6 @@
 #include <franka_msgs/SetJointImpedance.h>
 #include <franka_msgs/SetKFrame.h>
 #include <franka_msgs/SetLoad.h>
-
-#include <vector>
 
 namespace franka_hw {
 

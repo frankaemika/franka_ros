@@ -33,7 +33,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
    * should read its configuration.
    * @return True if initialization was successful.
    */
-  virtual bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+  bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
 
   /**
    * Reads data from the robot HW
@@ -41,7 +41,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
    * @param[in] time The current time.
    * @param[in] period The time passed since the last call to \ref read.
    */
-  virtual void read(const ros::Time& time, const ros::Duration& period) override;
+  void read(const ros::Time& time, const ros::Duration& period) override;
 
   /**
    * Checks whether the controller needs to be reset.

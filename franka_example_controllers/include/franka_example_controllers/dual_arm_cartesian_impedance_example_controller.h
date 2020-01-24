@@ -49,8 +49,8 @@ struct FrankaDataContainer {
   Eigen::Matrix<double, 7, 1> q_d_nullspace_;               ///< Target joint pose for nullspace
                                                             ///< motion. For now we track the
                                                             ///< initial joint pose.
-  Eigen::Vector3d position_d_;                              ///< Target position of the endeffector.
-  Eigen::Quaterniond orientation_d_;         ///< Target orientation of the endeffector.
+  Eigen::Vector3d position_d_;               ///< Target position of the end effector.
+  Eigen::Quaterniond orientation_d_;         ///< Target orientation of the end effector.
   Eigen::Vector3d position_d_target_;        ///< Unfiltered raw value.
   Eigen::Quaterniond orientation_d_target_;  ///< Unfiltered raw value.
 };
@@ -77,8 +77,8 @@ class DualArmCartesianImpedanceExampleController
   bool init(hardware_interface::RobotHW* robot_hw, ros::NodeHandle& node_handle) override;
 
   /**
-   * Prepares the controller for the real-time execution. This method is executed once everytime the
-   * controller is started and runs in real-time.
+   * Prepares the controller for the real-time execution. This method is executed once every time
+   * the controller is started and runs in real-time.
    */
   void starting(const ros::Time&) override;
 
@@ -92,14 +92,14 @@ class DualArmCartesianImpedanceExampleController
  private:
   std::map<std::string, FrankaDataContainer>
       arms_data_;             ///< Holds all relevant data for both arms.
-  std::string left_arm_id_;   ///< Name of the left arm, retreived from the parameter server.
-  std::string right_arm_id_;  ///< Name of the right arm, retreived from the parameter server.
+  std::string left_arm_id_;   ///< Name of the left arm, retrieved from the parameter server.
+  std::string right_arm_id_;  ///< Name of the right arm, retrieved from the parameter server.
 
   ///< Transformation between base frames of the robots.
   Eigen::Affine3d Ol_T_Or_;  // NOLINT (readability-identifier-naming)
   ///< Target transformation between the two endeffectors.
   Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
-  ///< Transformation from the centering frame to the left endeffector.
+  ///< Transformation from the centering frame to the left end effector.
   Eigen::Affine3d EEl_T_C_;
 
   ///< Publisher for the centering tracking frame of the coordinated motion.
@@ -113,7 +113,7 @@ class DualArmCartesianImpedanceExampleController
    * @param[in] arm_data The data container of the arm.
    * @param[in] tau_d_calculated The raw command according to the control law.
    * @param[in] tau_J_d The current desired torque, read from the robot state.
-   * @return The saturated torque commmand for the 7 joints of one arm.
+   * @return The saturated torque command for the 7 joints of one arm.
    */
   Eigen::Matrix<double, 7, 1> saturateTorqueRate(
       const FrankaDataContainer& arm_data,
@@ -126,7 +126,7 @@ class DualArmCartesianImpedanceExampleController
    * @param[in] robot_hw A pointer the RobotHW class for getting interfaces and resource handles.
    * @param[in] arm_id The name of the panda arm.
    * @param[in] joint_names The names of all joints of the panda.
-   * @return True if successfull, false otherwise.
+   * @return True if successful, false otherwise.
    */
   bool initArm(hardware_interface::RobotHW* robot_hw,
                const std::string& arm_id,

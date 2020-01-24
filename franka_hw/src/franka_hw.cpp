@@ -128,7 +128,6 @@ bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
   }
 
   std::string realtime_config_param = robot_hw_nh.param("realtime_config", std::string("enforce"));
-  franka::RealtimeConfig realtime_config;
   if (realtime_config_param == "enforce") {
     realtime_config_ = franka::RealtimeConfig::kEnforce;
   } else if (realtime_config_param == "ignore") {
@@ -334,7 +333,7 @@ void FrankaHW::checkJointLimits() {
 
 franka::Robot& FrankaHW::robot() const {
   if (!initialized_ || !robot_) {
-    std::string error_message = "FrankaHW: Atempt to access robot before initialization!";
+    std::string error_message = "FrankaHW: Attempt to access robot before initialization!";
     ROS_ERROR("%s", error_message.c_str());
     throw std::logic_error(error_message);
   }

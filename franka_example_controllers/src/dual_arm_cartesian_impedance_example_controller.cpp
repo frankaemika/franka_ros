@@ -141,8 +141,8 @@ bool DualArmCartesianImpedanceExampleController::init(hardware_interface::RobotH
 
   dynamic_server_compliance_param_ = std::make_unique<dynamic_reconfigure::Server<
       franka_combined_example_controllers::dual_arm_compliance_paramConfig>>(
-
       dynamic_reconfigure_compliance_param_node_);
+
   dynamic_server_compliance_param_->setCallback(boost::bind(
       &DualArmCartesianImpedanceExampleController::complianceParamCallback, this, _1, _2));
 

@@ -1,10 +1,12 @@
+// Copyright (c) 2019 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#include <franka_hw/franka_combinable_hw.h>
 
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <std_msgs/Bool.h>
 
-#include <franka_hw/franka_combinable_hw.h>
 #include <franka_hw/services.h>
 
 namespace franka_hw {
