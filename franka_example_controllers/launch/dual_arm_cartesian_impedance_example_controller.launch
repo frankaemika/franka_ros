@@ -1,11 +1,13 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_id" default="panda_dual" />
+  <arg name="robot_ips" default="{panda_1/robot_ip: robot_1, panda_2/robot_ip: robot_2}" />
   <arg name="rviz" default="true" />
   <arg name="rqt" default="true" />
 
   <include file="$(find franka_control)/launch/franka_combined_control.launch" >
     <arg name="robot_id" value="$(arg robot_id)" />
+    <arg name="robot_ips" value="$(arg robot_ips)" />
   </include>
 
   <group ns="$(arg robot_id)">
