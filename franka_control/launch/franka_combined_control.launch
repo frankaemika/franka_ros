@@ -15,6 +15,10 @@
   <!-- The config file containing all parameters for the combined hardware node like the IPs of the robots etc. -->
   <arg name="hw_config_file" default="$(find franka_control)/config/franka_combined_control_node.yaml"/>
 
+  <!-- Optional arg to manually configure the ips of all robots, overwriting ips that are configured in hw_config_file -->
+  <!-- The ips must be set as dictionary like {<arm_id_1>/robot_ip: <my_ip_1>, <arm_id_2>/robot_ip: <my_ip_2>} -->
+  <arg name="robot_ips" default="{}" />
+
   <!-- The config file containing the parameterization for all controllers to start with this launch file -->
   <arg name="controllers_file" default="$(find franka_control)/config/default_combined_controllers.yaml" />
 
@@ -26,6 +30,8 @@
 
   <node name="$(arg robot_id)" pkg="franka_control" type="franka_combined_control_node" output="screen" required="true" >
     <rosparam command="load" file="$(arg hw_config_file)" />
+    <!-- Add or overwrite manually configured ips -->
+    <rosparam subst_value="True">$(arg robot_ips)</rosparam>
     <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
   </node>
 
