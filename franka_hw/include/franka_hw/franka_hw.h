@@ -262,7 +262,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @return True if the array contains NaN values, false otherwise.
    */
   template <size_t size>
-  static bool arrayHasNaN(const std::array<double, size> array) {
+  static bool arrayHasNaN(const std::array<double, size>& array) {
     return std::any_of(array.begin(), array.end(), [](const double& e) { return std::isnan(e); });
   }
 
@@ -365,7 +365,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   template <typename T>
   void setupJointCommandInterface(std::array<double, 7>& command,
                                   franka::RobotState& state,
-                                  const bool use_q_d,
+                                  bool use_q_d,
                                   T& interface) {
     for (size_t i = 0; i < joint_names_.size(); i++) {
       hardware_interface::JointStateHandle state_handle;
@@ -427,9 +427,9 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @return True if successful, false otherwise.
    */
   virtual bool setRunFunction(const ControlMode& requested_control_mode,
-                              const bool limit_rate,
-                              const double cutoff_frequency,
-                              const franka::ControllerMode internal_controller);
+                              bool limit_rate,
+                              double cutoff_frequency,
+                              franka::ControllerMode internal_controller);
   /**
    * Uses the robot_ip_ to connect to the robot via libfranka and loads the libfranka model.
    */

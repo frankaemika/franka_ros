@@ -144,16 +144,16 @@ class FrankaCombinableHW : public FrankaHW {
     return current_cmd;
   }
 
-  void publishErrorState(const bool error);
+  void publishErrorState(bool error);
 
   void setupServicesAndActionServers(ros::NodeHandle& node_handle);
 
   void initRobot() override;
 
   bool setRunFunction(const ControlMode& requested_control_mode,
-                      const bool limit_rate,
-                      const double cutoff_frequency,
-                      const franka::ControllerMode internal_controller) override;
+                      bool limit_rate,
+                      double cutoff_frequency,
+                      franka::ControllerMode internal_controller) override;
 
   void controlLoop();
 
