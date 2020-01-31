@@ -17,7 +17,7 @@
 
   <!-- Optional arg to manually configure the ips of all robots, overwriting ips that are configured in hw_config_file -->
   <!-- The ips must be set as dictionary like {<arm_id_1>/robot_ip: <my_ip_1>, <arm_id_2>/robot_ip: <my_ip_2>} -->
-  <arg name="robot_ips" />
+  <arg name="robot_ips"  default="{}"/>
 
   <!-- The config file containing the parameterization for all controllers to start with this launch file -->
   <arg name="controllers_file" default="$(find franka_control)/config/default_combined_controllers.yaml" />
