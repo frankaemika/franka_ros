@@ -2,18 +2,30 @@
 
 ## 0.7.0 - UNRELEASED
 
-Requires `libfranka` >= 0.5.0
+Requires `libfranka` >= 0.7.0
 
-  * `franka_control`:
-    - Publish whole `libfranka` `franka::RobotState` in `franka_state_controller`.
-  * `franka_description`
+  * **BREAKING** moved services and action from `franka_control` to `franka_msgs`.
+  * **BREAKING** moved Service container from `franka_control` to `franka_hw`.
+  * `franka_example_controllers` : Added example for dual-arm control based on franka_combinable_hw.
+  * `franka_description` :
+    - Added an example urdf with two panda arms.
     - **BREAKING** Updated collision volumes.
     - Removed invalid `axis` for `joint8`.
+  * `franka_hw`:
+    - Added hardware classes to support torque-controlling multiple robots from one controller.
+    - Refactored FrankaHW class to serve as base class (e.g. for FrankaCombinableHW).
+    - Added joint limits checking to FrankaHW which means parameterized warning prints when approaching limits.
+    - Made initial collision behavior a parameter.
+    - Added default constructor and init method to FrankaHW.
+    - **BREAKING** moved parsing of parameters from control node to FrankaHW::init.
+    - **BREAKING** made libfranka robot a member of FrankaHW.
+    - Added missing return value to `franka::ControllerMode` stream operator function.
+  * `franka_control`:
+    - Added control node that can runs a `FrankaCombinedHW` to control mulitple Pandas.
+    - Publish whole `libfranka` `franka::RobotState` in `franka_state_controller`.
   * `franka_example_controllers`:
     - Cartesian impedance example controller: Interpolate desired orientations with slerp and change orientation error
       to quaternion.
-  * `franka_hw`:
-    - Added missing return value to `franka::ControllerMode` stream operator function.
   * **BREAKING** Moved `panda_moveit_config` to [`ros-planning`](https://github.com/ros-planning/panda_moveit_config).
   * Added support for ROS Melodic Morenia.
   * Raised minimum CMake version to 3.4 to match `libfranka`.
@@ -122,4 +134,3 @@ Requires `libfranka` >= 0.2.0
 ## 0.1.0 - 2017-09-15
 
   * Initial release
-

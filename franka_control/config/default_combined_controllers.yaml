@@ -1,0 +1,88 @@
+effort_joint_trajectory_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - panda_2_joint1
+    - panda_2_joint2
+    - panda_2_joint3
+    - panda_2_joint4
+    - panda_2_joint5
+    - panda_2_joint6
+    - panda_2_joint7
+    - panda_1_joint1
+    - panda_1_joint2
+    - panda_1_joint3
+    - panda_1_joint4
+    - panda_1_joint5
+    - panda_1_joint6
+    - panda_1_joint7
+  constraints:
+    goal_time: 0.5
+    panda_2_joint1:
+      goal: 0.05
+    panda_2_joint2:
+      goal: 0.05
+    panda_2_joint3:
+      goal: 0.05
+    panda_2_joint4:
+      goal: 0.05
+    panda_2_joint5:
+      goal: 0.05
+    panda_2_joint6:
+      goal: 0.05
+    panda_2_joint7:
+      goal: 0.05
+    panda_1_joint1:
+      goal: 0.05
+    panda_1_joint2:
+      goal: 0.05
+    panda_1_joint3:
+      goal: 0.05
+    panda_1_joint4:
+      goal: 0.05
+    panda_1_joint5:
+      goal: 0.05
+    panda_1_joint6:
+      goal: 0.05
+    panda_1_joint7:
+      goal: 0.05
+  gains:
+    panda_1_joint1: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_1_joint2: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_1_joint3: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_1_joint4: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_1_joint5: {p: 250, d: 10, i: 0, i_clamp: 1}
+    panda_1_joint6: {p: 150, d: 10, i: 0, i_clamp: 1}
+    panda_1_joint7: {p: 50, d: 5, i: 0, i_clamp: 1}
+    panda_2_joint1: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_2_joint2: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_2_joint3: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_2_joint4: {p: 600, d: 30, i: 0, i_clamp: 1}
+    panda_2_joint5: {p: 250, d: 10, i: 0, i_clamp: 1}
+    panda_2_joint6: {p: 150, d: 10, i: 0, i_clamp: 1}
+    panda_2_joint7: {p: 50, d: 5, i: 0, i_clamp: 1}
+
+panda_1_state_controller:
+  type: franka_control/FrankaStateController
+  arm_id: panda_1
+  joint_names:
+    - panda_1_joint1
+    - panda_1_joint2
+    - panda_1_joint3
+    - panda_1_joint4
+    - panda_1_joint5
+    - panda_1_joint6
+    - panda_1_joint7
+  publish_rate: 30  # [Hz]
+
+panda_2_state_controller:
+  type: franka_control/FrankaStateController
+  arm_id: panda_2
+  joint_names:
+    - panda_2_joint1
+    - panda_2_joint2
+    - panda_2_joint3
+    - panda_2_joint4
+    - panda_2_joint5
+    - panda_2_joint6
+    - panda_2_joint7
+  publish_rate: 30  # [Hz]

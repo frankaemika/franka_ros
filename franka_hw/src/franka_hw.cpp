@@ -1,15 +1,23 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/resource_helpers.h>
 
+#include <array>
 #include <cstdint>
+#include <exception>
+#include <functional>
+#include <list>
+#include <mutex>
 #include <ostream>
+#include <sstream>
+#include <string>
 #include <utility>
 
+#include <franka/control_types.h>
 #include <franka/rate_limiting.h>
+#include <franka/robot.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
-
-#include "resource_helpers.h"
 
 namespace franka_hw {
 
@@ -24,133 +32,153 @@ std::ostream& operator<<(std::ostream& ostream, franka::ControllerMode mode) {
   }
   return ostream;
 }
-}  // anonymous namespace
 
-FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
-                   const std::string& arm_id,
-                   const urdf::Model& urdf_model,
-                   std::function<bool()> get_limit_rate,
-                   std::function<double()> get_cutoff_frequency,
-                   std::function<franka::ControllerMode()> get_internal_controller)
-    : joint_names_(joint_names),
-      arm_id_(arm_id),
-      get_internal_controller_(std::move(get_internal_controller)),
-      get_limit_rate_(std::move(get_limit_rate)),
-      get_cutoff_frequency_(std::move(get_cutoff_frequency)),
-      position_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-      velocity_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-      effort_joint_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
-      pose_cartesian_command_(
-          {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
-      velocity_cartesian_command_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {
-  for (size_t i = 0; i < joint_names_.size(); i++) {
-    hardware_interface::JointStateHandle joint_handle_q_d(
-        joint_names_[i], &robot_state_.q_d[i], &robot_state_.dq_d[i], &robot_state_.tau_J[i]);
-
-    hardware_interface::JointStateHandle joint_handle_q(
-        joint_names_[i], &robot_state_.q[i], &robot_state_.dq[i], &robot_state_.tau_J[i]);
-
-    joint_state_interface_.registerHandle(joint_handle_q);
-
-    hardware_interface::JointHandle position_joint_handle(joint_handle_q_d,
-                                                          &position_joint_command_.q[i]);
-    position_joint_interface_.registerHandle(position_joint_handle);
-
-    hardware_interface::JointHandle velocity_joint_handle(joint_handle_q_d,
-                                                          &velocity_joint_command_.dq[i]);
-    velocity_joint_interface_.registerHandle(velocity_joint_handle);
-
-    hardware_interface::JointHandle effort_joint_handle(joint_handle_q,
-                                                        &effort_joint_command_.tau_J[i]);
-    effort_joint_interface_.registerHandle(effort_joint_handle);
-  }
-
-  joint_limits_interface::SoftJointLimits soft_limits;
-  joint_limits_interface::JointLimits joint_limits;
-
-  for (size_t i = 0; i < joint_names_.size(); i++) {
-    const std::string& joint_name = joint_names_[i];
-    auto urdf_joint = urdf_model.getJoint(joint_name);
-    if (!urdf_joint) {
-      ROS_ERROR_STREAM("FrankaHW: Could not get joint " << joint_name << " from urdf");
-      continue;
-    }
-    if (!urdf_joint->safety) {
-      ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no safety");
-      continue;
-    }
-    if (!urdf_joint->limits) {
-      ROS_ERROR_STREAM("FrankaHW: Joint " << joint_name << " has no limits");
-      continue;
-    }
-
-    if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
-      if (joint_limits_interface::getJointLimits(urdf_joint, joint_limits)) {
-        joint_limits.max_acceleration = franka::kMaxJointAcceleration[i];
-        joint_limits.has_acceleration_limits = true;
-        joint_limits.max_jerk = franka::kMaxJointJerk[i];
-        joint_limits.has_jerk_limits = true;
-        joint_limits_interface::PositionJointSoftLimitsHandle position_limit_handle(
-            position_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-        position_joint_limit_interface_.registerHandle(position_limit_handle);
-
-        joint_limits_interface::VelocityJointSoftLimitsHandle velocity_limit_handle(
-            velocity_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-        velocity_joint_limit_interface_.registerHandle(velocity_limit_handle);
-
-        joint_limits_interface::EffortJointSoftLimitsHandle effort_limit_handle(
-            effort_joint_interface_.getHandle(joint_name), joint_limits, soft_limits);
-        effort_joint_limit_interface_.registerHandle(effort_limit_handle);
-      } else {
-        ROS_ERROR_STREAM("FrankaHW: Could not parse joint limit for joint "
-                         << joint_name << " for joint limit interfaces");
-      }
-    } else {
-      ROS_ERROR_STREAM("FrankaHW: Could not parse soft joint limit for joint "
-                       << joint_name << " for joint limit interfaces");
-    }
-  }
-
-  FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state_);
-  franka_state_interface_.registerHandle(franka_state_handle);
-  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
-      franka_state_handle, pose_cartesian_command_.O_T_EE, pose_cartesian_command_.elbow);
-  franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
-  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
-      franka_state_handle, velocity_cartesian_command_.O_dP_EE, velocity_cartesian_command_.elbow);
-  franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
-
-  registerInterface(&franka_state_interface_);
-  registerInterface(&joint_state_interface_);
-  registerInterface(&position_joint_interface_);
-  registerInterface(&velocity_joint_interface_);
-  registerInterface(&effort_joint_interface_);
-  registerInterface(&franka_pose_cartesian_interface_);
-  registerInterface(&franka_velocity_cartesian_interface_);
+std::string toStringWithPrecision(const double value, const size_t precision = 6) {
+  std::ostringstream out;
+  out.precision(precision);
+  out << std::fixed << value;
+  return out.str();
 }
 
-FrankaHW::FrankaHW(const std::array<std::string, 7>& joint_names,
-                   const std::string& arm_id,
-                   const urdf::Model& urdf_model,
-                   franka::Model& model,
-                   std::function<bool()> get_limit_rate,
-                   std::function<double()> get_cutoff_frequency,
-                   std::function<franka::ControllerMode()> get_internal_controller)
-    : FrankaHW(joint_names,
-               arm_id,
-               urdf_model,
-               std::move(get_limit_rate),
-               std::move(get_cutoff_frequency),
-               std::move(get_internal_controller)) {
-  franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", model, robot_state_);
+}  // anonymous namespace
 
-  franka_model_interface_.registerHandle(model_handle);
+FrankaHW::FrankaHW()
+    : position_joint_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      position_joint_command_libfranka_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      velocity_joint_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      velocity_joint_command_libfranka_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      effort_joint_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      effort_joint_command_libfranka_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      pose_cartesian_command_ros_(
+          {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
+      pose_cartesian_command_libfranka_(
+          {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}),
+      velocity_cartesian_command_ros_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}),
+      velocity_cartesian_command_libfranka_({0.0, 0.0, 0.0, 0.0, 0.0, 0.0}) {}
 
-  registerInterface(&franka_model_interface_);
+bool FrankaHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+  if (initialized_) {
+    ROS_ERROR("FrankaHW: Cannot be initialized twice.");
+    return false;
+  }
+
+  if (!initParameters(root_nh, robot_hw_nh)) {
+    ROS_ERROR("FrankaHW: Failed to parse all required parameters.");
+    return false;
+  }
+  try {
+    initRobot();
+  } catch (const std::runtime_error& error) {
+    ROS_ERROR("FrankaHW: Failed to initialize libfranka robot. %s", error.what());
+    return false;
+  }
+  initROSInterfaces(robot_hw_nh);
+  setupParameterCallbacks(robot_hw_nh);
+
+  initialized_ = true;
+  return true;
+}
+
+bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+  std::vector<std::string> joint_names_vector;
+  if (!robot_hw_nh.getParam("joint_names", joint_names_vector) || joint_names_vector.size() != 7) {
+    ROS_ERROR("Invalid or no joint_names parameters provided");
+    return false;
+  }
+  std::copy(joint_names_vector.cbegin(), joint_names_vector.cend(), joint_names_.begin());
+
+  bool rate_limiting;
+  if (!robot_hw_nh.getParamCached("rate_limiting", rate_limiting)) {
+    ROS_ERROR("Invalid or no rate_limiting parameter provided");
+    return false;
+  }
+
+  double cutoff_frequency;
+  if (!robot_hw_nh.getParamCached("cutoff_frequency", cutoff_frequency)) {
+    ROS_ERROR("Invalid or no cutoff_frequency parameter provided");
+    return false;
+  }
+
+  std::string internal_controller;
+  if (!robot_hw_nh.getParam("internal_controller", internal_controller)) {
+    ROS_ERROR("No internal_controller parameter provided");
+    return false;
+  }
+
+  if (!robot_hw_nh.getParam("arm_id", arm_id_)) {
+    ROS_ERROR("Invalid or no arm_id parameter provided");
+    return false;
+  }
+
+  if (!urdf_model_.initParamWithNodeHandle("robot_description", root_nh)) {
+    ROS_ERROR("Could not initialize URDF model from robot_description");
+    return false;
+  }
+
+  if (!robot_hw_nh.getParam("robot_ip", robot_ip_)) {
+    ROS_ERROR("Invalid or no robot_ip parameter provided");
+    return false;
+  }
+
+  if (!robot_hw_nh.getParam("joint_limit_warning_threshold", joint_limit_warning_threshold_)) {
+    ROS_INFO(
+        "No parameter joint_limit_warning_threshold is found, using default "
+        "value %f",
+        joint_limit_warning_threshold_);
+  }
+
+  std::string realtime_config_param = robot_hw_nh.param("realtime_config", std::string("enforce"));
+  if (realtime_config_param == "enforce") {
+    realtime_config_ = franka::RealtimeConfig::kEnforce;
+  } else if (realtime_config_param == "ignore") {
+    realtime_config_ = franka::RealtimeConfig::kIgnore;
+  } else {
+    ROS_ERROR("Invalid realtime_config parameter provided. Valid values are 'enforce', 'ignore'.");
+    return false;
+  }
+
+  // Get full collision behavior config from the parameter server.
+  std::vector<double> thresholds =
+      getCollisionThresholds("lower_torque_thresholds_acceleration", robot_hw_nh,
+                             {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_torque_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("upper_torque_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_torque_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("lower_torque_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_torque_thresholds_nominal.begin());
+  thresholds = getCollisionThresholds("upper_torque_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_torque_thresholds_nominal.begin());
+  thresholds.resize(6);
+  thresholds = getCollisionThresholds("lower_force_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_force_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("upper_force_thresholds_acceleration", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_force_thresholds_acceleration.begin());
+  thresholds = getCollisionThresholds("lower_force_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.lower_force_thresholds_nominal.begin());
+  thresholds = getCollisionThresholds("upper_force_thresholds_nominal", robot_hw_nh,
+                                      {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+  std::copy(thresholds.begin(), thresholds.end(),
+            collision_config_.upper_force_thresholds_nominal.begin());
+
+  return true;
 }
 
 void FrankaHW::update(const franka::RobotState& robot_state) {
-  robot_state_ = robot_state;
+  std::lock_guard<std::mutex> ros_lock(ros_state_mutex_);
+  robot_state_ros_ = robot_state;
 }
 
 bool FrankaHW::controllerActive() const noexcept {
@@ -158,18 +186,22 @@ bool FrankaHW::controllerActive() const noexcept {
 }
 
 void FrankaHW::control(
-    franka::Robot& robot,
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const {
+  if (!initialized_) {
+    ROS_ERROR("FrankaHW: Call to control before initialization!");
+    return;
+  }
   if (!controller_active_) {
     return;
   }
 
-  franka::Duration last_time = robot_state_.time;
+  franka::Duration last_time = robot_state_ros_.time;
 
-  run_function_(robot, [this, ros_callback, &last_time](const franka::RobotState& robot_state,
-                                                        franka::Duration time_step) {
+  run_function_(*robot_, [this, ros_callback, &last_time](const franka::RobotState& robot_state,
+                                                          franka::Duration time_step) {
     if (last_time != robot_state.time) {
       last_time = robot_state.time;
+
       return ros_callback(ros::Time::now(), ros::Duration(time_step.toSec()));
     }
     return true;
@@ -186,68 +218,19 @@ void FrankaHW::enforceLimits(const ros::Duration& period) {
 
 bool FrankaHW::checkForConflict(const std::list<hardware_interface::ControllerInfo>& info) const {
   ResourceWithClaimsMap resource_map = getResourceMap(info);
-  // check for conflicts in single resources: no triple claims,
-  // for 2 claims it must be one torque and one non-torque claim
-  for (auto map_it = resource_map.begin(); map_it != resource_map.end(); map_it++) {
-    if (map_it->second.size() > 2) {
-      ROS_ERROR_STREAM("FrankaHW: Resource "
-                       << map_it->first << " claimed with more than two interfaces. Conflict!");
-      return true;
-    }
-    uint8_t torque_claims = 0;
-    uint8_t other_claims = 0;
-    if (map_it->second.size() == 2) {
-      for (auto& claimed_by : map_it->second) {
-        if (claimed_by[2] == "hardware_interface::EffortJointInterface") {
-          torque_claims++;
-        } else {
-          other_claims++;
-        }
-      }
-      if (torque_claims != 1) {
-        ROS_ERROR_STREAM("FrankaHW: Resource "
-                         << map_it->first
-                         << " is claimed with two non-compatible interfaces. Conflict!");
-        return true;
-      }
-    }
+  if (hasConflictingMultiClaim(resource_map)) {
+    return true;
   }
-
   ArmClaimedMap arm_claim_map;
   if (!getArmClaimedMap(resource_map, arm_claim_map)) {
     ROS_ERROR_STREAM("FrankaHW: Unknown interface claimed. Conflict!");
     return true;
   }
-
-  // check for conflicts between joint and cartesian level for each arm.
-  // Valid claims are torque claims on joint level in combination with either
-  // 7 non-torque claims on joint_level or one claim on cartesian level.
-  if (arm_claim_map.find(arm_id_) != arm_claim_map.end()) {
-    if ((arm_claim_map[arm_id_].cartesian_velocity_claims +
-                 arm_claim_map[arm_id_].cartesian_pose_claims >
-             0 &&
-         arm_claim_map[arm_id_].joint_position_claims +
-                 arm_claim_map[arm_id_].joint_velocity_claims >
-             0)) {
-      ROS_ERROR_STREAM("FrankaHW: Invalid claims on joint AND cartesian level on arm "
-                       << arm_id_ << ". Conflict!");
-      return true;
-    }
-    if ((arm_claim_map[arm_id_].joint_position_claims > 0 &&
-         arm_claim_map[arm_id_].joint_position_claims != 7) ||
-        (arm_claim_map[arm_id_].joint_velocity_claims > 0 &&
-         arm_claim_map[arm_id_].joint_velocity_claims != 7) ||
-        (arm_claim_map[arm_id_].joint_torque_claims > 0 &&
-         arm_claim_map[arm_id_].joint_torque_claims != 7)) {
-      ROS_ERROR_STREAM("FrankaHW: Non-consistent claims on the joints of "
-                       << arm_id_ << ". Not supported. Conflict!");
-      return true;
-    }
-  }
-  return false;
+  return hasConflictingJointAndCartesianClaim(arm_claim_map, arm_id_) ||
+         partiallyClaimsArmJoints(arm_claim_map, arm_id_);
 }
 
-// doSwitch runs on the main realtime thread
+// doSwitch runs on the main realtime thread.
 void FrankaHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* start_list */,
                         const std::list<hardware_interface::ControllerInfo>& /* stop_list */) {
   if (current_control_mode_ != ControlMode::None) {
@@ -256,7 +239,7 @@ void FrankaHW::doSwitch(const std::list<hardware_interface::ControllerInfo>& /* 
   }
 }
 
-// prepareSwitch runs on the background message handling thread
+// prepareSwitch runs on the background message handling thread.
 bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                              const std::list<hardware_interface::ControllerInfo>& stop_list) {
   ResourceWithClaimsMap start_resource_map = getResourceMap(start_list);
@@ -265,6 +248,7 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
     ROS_ERROR("FrankaHW: Unknown interface claimed for starting!");
     return false;
   }
+
   ControlMode start_control_mode = getControlMode(arm_id_, start_arm_claim_map);
 
   ResourceWithClaimsMap stop_resource_map = getResourceMap(stop_list);
@@ -279,99 +263,18 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
   requested_control_mode &= ~stop_control_mode;
   requested_control_mode |= start_control_mode;
 
-  auto limit_rate = get_limit_rate_();
-  auto cutoff_frequency = get_cutoff_frequency_();
-  auto internal_controller = get_internal_controller_();
-
-  using std::placeholders::_1;
-  using std::placeholders::_2;
-
-  switch (requested_control_mode) {
-    case ControlMode::None:
-      break;
-    case ControlMode::JointTorque:
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      limit_rate, cutoff_frequency);
-      };
-      break;
-    case ControlMode::JointPosition:
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                                std::cref(position_joint_command_), ros_callback, _1, _2),
-                      internal_controller, limit_rate, cutoff_frequency);
-      };
-      break;
-    case ControlMode::JointVelocity:
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                                std::cref(velocity_joint_command_), ros_callback, _1, _2),
-                      internal_controller, limit_rate, cutoff_frequency);
-      };
-      break;
-    case ControlMode::CartesianPose:
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                                std::cref(pose_cartesian_command_), ros_callback, _1, _2),
-                      internal_controller, limit_rate, cutoff_frequency);
-      };
-      break;
-    case ControlMode::CartesianVelocity:
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2),
-                      internal_controller, limit_rate, cutoff_frequency);
-      };
-      break;
-    case (ControlMode::JointTorque | ControlMode::JointPosition):
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
-                                std::cref(position_joint_command_), ros_callback, _1, _2),
-                      limit_rate, cutoff_frequency);
-      };
-      break;
-    case (ControlMode::JointTorque | ControlMode::JointVelocity):
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
-                                std::cref(velocity_joint_command_), ros_callback, _1, _2),
-                      limit_rate, cutoff_frequency);
-      };
-      break;
-    case (ControlMode::JointTorque | ControlMode::CartesianPose):
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
-                                std::cref(pose_cartesian_command_), ros_callback, _1, _2),
-                      limit_rate, cutoff_frequency);
-      };
-      break;
-    case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
-      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
-        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
-                                std::cref(effort_joint_command_), ros_callback, _1, _2),
-                      std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
-                                std::cref(velocity_cartesian_command_), ros_callback, _1, _2),
-                      limit_rate, cutoff_frequency);
-      };
-      break;
-    default:
-      ROS_WARN("FrankaHW: No valid control mode selected; cannot switch controllers.");
-      return false;
+  if (!setRunFunction(requested_control_mode, get_limit_rate_(), get_cutoff_frequency_(),
+                      get_internal_controller_())) {
+    return false;
   }
 
   if (current_control_mode_ != requested_control_mode) {
     ROS_INFO_STREAM("FrankaHW: Prepared switching controllers to "
                     << requested_control_mode << " with parameters "
-                    << "limit_rate=" << limit_rate << ", cutoff_frequency=" << cutoff_frequency
-                    << ", internal_controller=" << internal_controller);
+                    << "limit_rate=" << get_limit_rate_()
+                    << ", cutoff_frequency=" << get_cutoff_frequency_()
+                    << ", internal_controller=" << get_internal_controller_());
     current_control_mode_ = requested_control_mode;
-
     controller_active_ = false;
   }
 
@@ -379,19 +282,309 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
 }
 
 std::array<double, 7> FrankaHW::getJointPositionCommand() const noexcept {
-  return position_joint_command_.q;
+  return position_joint_command_ros_.q;
 }
 
 std::array<double, 7> FrankaHW::getJointVelocityCommand() const noexcept {
-  return velocity_joint_command_.dq;
+  return velocity_joint_command_ros_.dq;
 }
 
 std::array<double, 7> FrankaHW::getJointEffortCommand() const noexcept {
-  return effort_joint_command_.tau_J;
+  return effort_joint_command_ros_.tau_J;
 }
 
 void FrankaHW::reset() {
   position_joint_limit_interface_.reset();
+}
+
+void FrankaHW::checkJointLimits() {
+  std::string joint_limits_warning;
+  for (const auto& k_joint_name : joint_names_) {
+    try {
+      auto joint_handle = joint_state_interface_.getHandle(k_joint_name);
+      auto urdf_joint = urdf_model_.getJoint(k_joint_name);
+      joint_limits_interface::JointLimits joint_limits;
+      if (getJointLimits(urdf_joint, joint_limits)) {
+        double joint_lower = joint_limits.min_position;
+        double joint_upper = joint_limits.max_position;
+        double joint_position = joint_handle.getPosition();
+        double dist = fmin(fabs(joint_position - joint_lower), fabs(joint_position - joint_upper));
+        if (dist < joint_limit_warning_threshold_) {
+          joint_limits_warning +=
+              "\n\t" + k_joint_name + ": " + toStringWithPrecision(dist * 180 / M_PI) +
+              " degrees to joint limits (limits: [" + toStringWithPrecision(joint_lower) + ", " +
+              toStringWithPrecision(joint_upper) + "]" +
+              " q: " + toStringWithPrecision(joint_position) + ") ";
+        }
+      } else {
+        ROS_ERROR_STREAM_ONCE("FrankaHW: Could not parse joint limit for joint "
+                              << k_joint_name << " for joint limit interfaces");
+      }
+    } catch (const hardware_interface::HardwareInterfaceException& ex) {
+      ROS_ERROR_STREAM_ONCE("FrankaHW: Could not get joint handle " << k_joint_name << " .\n"
+                                                                    << ex.what());
+      return;
+    }
+  }
+  if (!joint_limits_warning.empty()) {
+    ROS_WARN_THROTTLE(5, "FrankaHW: %s", joint_limits_warning.c_str());
+  }
+}
+
+franka::Robot& FrankaHW::robot() const {
+  if (!initialized_ || !robot_) {
+    std::string error_message = "FrankaHW: Attempt to access robot before initialization!";
+    ROS_ERROR("%s", error_message.c_str());
+    throw std::logic_error(error_message);
+  }
+  return *robot_;
+}
+
+void FrankaHW::read(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
+  std::lock_guard<std::mutex> ros_lock(ros_state_mutex_);
+  std::lock_guard<std::mutex> libfranka_lock(libfranka_state_mutex_);
+  robot_state_ros_ = robot_state_libfranka_;
+}
+
+void FrankaHW::write(const ros::Time& /*time*/, const ros::Duration& /*period*/) {
+  std::lock_guard<std::mutex> ros_lock(ros_cmd_mutex_);
+  std::lock_guard<std::mutex> libfranka_lock(libfranka_cmd_mutex_);
+  pose_cartesian_command_libfranka_ = pose_cartesian_command_ros_;
+  velocity_cartesian_command_libfranka_ = velocity_cartesian_command_ros_;
+  effort_joint_command_libfranka_ = effort_joint_command_ros_;
+  position_joint_command_libfranka_ = position_joint_command_ros_;
+  velocity_joint_command_libfranka_ = velocity_joint_command_ros_;
+}
+
+void FrankaHW::setupJointStateInterface(franka::RobotState& robot_state) {
+  for (size_t i = 0; i < joint_names_.size(); i++) {
+    hardware_interface::JointStateHandle joint_handle_q(joint_names_[i], &robot_state.q[i],
+                                                        &robot_state.dq[i], &robot_state.tau_J[i]);
+    joint_state_interface_.registerHandle(joint_handle_q);
+  }
+  registerInterface(&joint_state_interface_);
+}
+
+void FrankaHW::setupFrankaStateInterface(franka::RobotState& robot_state) {
+  FrankaStateHandle franka_state_handle(arm_id_ + "_robot", robot_state);
+  franka_state_interface_.registerHandle(franka_state_handle);
+  registerInterface(&franka_state_interface_);
+}
+
+void FrankaHW::setupFrankaCartesianPoseInterface(franka::CartesianPose& pose_cartesian_command) {
+  FrankaCartesianPoseHandle franka_cartesian_pose_handle(
+      franka_state_interface_.getHandle(arm_id_ + "_robot"), pose_cartesian_command.O_T_EE,
+      pose_cartesian_command.elbow);
+  franka_pose_cartesian_interface_.registerHandle(franka_cartesian_pose_handle);
+  registerInterface(&franka_pose_cartesian_interface_);
+}
+
+void FrankaHW::setupFrankaCartesianVelocityInterface(
+    franka::CartesianVelocities& velocity_cartesian_command) {
+  FrankaCartesianVelocityHandle franka_cartesian_velocity_handle(
+      franka_state_interface_.getHandle(arm_id_ + "_robot"), velocity_cartesian_command.O_dP_EE,
+      velocity_cartesian_command.elbow);
+  franka_velocity_cartesian_interface_.registerHandle(franka_cartesian_velocity_handle);
+  registerInterface(&franka_velocity_cartesian_interface_);
+}
+
+void FrankaHW::setupFrankaModelInterface(franka::RobotState& robot_state) {
+  if (model_) {
+    franka_hw::FrankaModelHandle model_handle(arm_id_ + "_model", *model_, robot_state);
+    franka_model_interface_.registerHandle(model_handle);
+    registerInterface(&franka_model_interface_);
+  }
+}
+
+bool FrankaHW::setRunFunction(const ControlMode& requested_control_mode,
+                              const bool limit_rate,
+                              const double cutoff_frequency,
+                              const franka::ControllerMode internal_controller) {
+  using std::placeholders::_1;
+  using std::placeholders::_2;
+  using Callback = std::function<bool(const franka::RobotState&, franka::Duration)>;
+
+  switch (requested_control_mode) {
+    case ControlMode::None:
+      break;
+    case ControlMode::JointTorque:
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_libfranka_), ros_callback, _1, _2),
+                      limit_rate, cutoff_frequency);
+      };
+      break;
+    case ControlMode::JointPosition:
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
+                                std::cref(position_joint_command_libfranka_), ros_callback, _1, _2),
+                      internal_controller, limit_rate, cutoff_frequency);
+      };
+      break;
+    case ControlMode::JointVelocity:
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+                                std::cref(velocity_joint_command_libfranka_), ros_callback, _1, _2),
+                      internal_controller, limit_rate, cutoff_frequency);
+      };
+      break;
+    case ControlMode::CartesianPose:
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+                                std::cref(pose_cartesian_command_libfranka_), ros_callback, _1, _2),
+                      internal_controller, limit_rate, cutoff_frequency);
+      };
+      break;
+    case ControlMode::CartesianVelocity:
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(
+            std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
+                      std::cref(velocity_cartesian_command_libfranka_), ros_callback, _1, _2),
+            internal_controller, limit_rate, cutoff_frequency);
+      };
+      break;
+    case (ControlMode::JointTorque | ControlMode::JointPosition):
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_libfranka_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::JointPositions>, this,
+                                std::cref(position_joint_command_libfranka_), ros_callback, _1, _2),
+                      limit_rate, cutoff_frequency);
+      };
+      break;
+    case (ControlMode::JointTorque | ControlMode::JointVelocity):
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_libfranka_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::JointVelocities>, this,
+                                std::cref(velocity_joint_command_libfranka_), ros_callback, _1, _2),
+                      limit_rate, cutoff_frequency);
+      };
+      break;
+    case (ControlMode::JointTorque | ControlMode::CartesianPose):
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                                std::cref(effort_joint_command_libfranka_), ros_callback, _1, _2),
+                      std::bind(&FrankaHW::controlCallback<franka::CartesianPose>, this,
+                                std::cref(pose_cartesian_command_libfranka_), ros_callback, _1, _2),
+                      limit_rate, cutoff_frequency);
+      };
+      break;
+    case (ControlMode::JointTorque | ControlMode::CartesianVelocity):
+      run_function_ = [=](franka::Robot& robot, Callback ros_callback) {
+        robot.control(
+            std::bind(&FrankaHW::controlCallback<franka::Torques>, this,
+                      std::cref(effort_joint_command_libfranka_), ros_callback, _1, _2),
+            std::bind(&FrankaHW::controlCallback<franka::CartesianVelocities>, this,
+                      std::cref(velocity_cartesian_command_libfranka_), ros_callback, _1, _2),
+            limit_rate, cutoff_frequency);
+      };
+      break;
+    default:
+      ROS_WARN("FrankaHW: No valid control mode selected; cannot switch controllers.");
+      return false;
+  }
+  return true;
+}
+
+void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
+  setupJointStateInterface(robot_state_ros_);
+  setupJointCommandInterface(position_joint_command_ros_.q, robot_state_ros_, true,
+                             position_joint_interface_);
+  setupJointCommandInterface(velocity_joint_command_ros_.dq, robot_state_ros_, true,
+                             velocity_joint_interface_);
+  setupJointCommandInterface(effort_joint_command_ros_.tau_J, robot_state_ros_, false,
+                             effort_joint_interface_);
+  setupLimitInterface<joint_limits_interface::PositionJointSoftLimitsHandle>(
+      position_joint_limit_interface_, position_joint_interface_);
+  setupLimitInterface<joint_limits_interface::VelocityJointSoftLimitsHandle>(
+      velocity_joint_limit_interface_, velocity_joint_interface_);
+  setupLimitInterface<joint_limits_interface::EffortJointSoftLimitsHandle>(
+      effort_joint_limit_interface_, effort_joint_interface_);
+  setupFrankaStateInterface(robot_state_ros_);
+  setupFrankaCartesianPoseInterface(pose_cartesian_command_ros_);
+  setupFrankaCartesianVelocityInterface(velocity_cartesian_command_ros_);
+  setupFrankaModelInterface(robot_state_ros_);
+}
+
+void FrankaHW::initRobot() {
+  robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
+  model_ = std::make_unique<franka::Model>(robot_->loadModel());
+  robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
+                               collision_config_.upper_torque_thresholds_acceleration,
+                               collision_config_.lower_torque_thresholds_nominal,
+                               collision_config_.upper_torque_thresholds_nominal,
+                               collision_config_.lower_force_thresholds_acceleration,
+                               collision_config_.upper_force_thresholds_acceleration,
+                               collision_config_.lower_force_thresholds_nominal,
+                               collision_config_.upper_force_thresholds_nominal);
+  update(robot_->readOnce());
+}
+
+void FrankaHW::setupParameterCallbacks(ros::NodeHandle& robot_hw_nh) {
+  get_limit_rate_ = [robot_hw_nh]() {
+    bool rate_limiting;
+    robot_hw_nh.getParamCached("rate_limiting", rate_limiting);
+    return rate_limiting;
+  };
+
+  get_internal_controller_ = [robot_hw_nh]() {
+    std::string internal_controller;
+    robot_hw_nh.getParamCached("internal_controller", internal_controller);
+    franka::ControllerMode controller_mode;
+    if (internal_controller == "joint_impedance") {
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    } else if (internal_controller == "cartesian_impedance") {
+      controller_mode = franka::ControllerMode::kCartesianImpedance;
+    } else {
+      ROS_WARN("Invalid internal_controller parameter provided, falling back to joint impedance");
+      controller_mode = franka::ControllerMode::kJointImpedance;
+    }
+    return controller_mode;
+  };
+
+  get_cutoff_frequency_ = [robot_hw_nh]() {
+    double cutoff_frequency;
+    robot_hw_nh.getParamCached("cutoff_frequency", cutoff_frequency);
+    return cutoff_frequency;
+  };
+}
+
+bool FrankaHW::commandHasNaN(const franka::Torques& command) {
+  return arrayHasNaN(command.tau_J);
+}
+
+bool FrankaHW::commandHasNaN(const franka::JointPositions& command) {
+  return arrayHasNaN(command.q);
+}
+
+bool FrankaHW::commandHasNaN(const franka::JointVelocities& command) {
+  return arrayHasNaN(command.dq);
+}
+
+bool FrankaHW::commandHasNaN(const franka::CartesianPose& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_T_EE);
+}
+
+bool FrankaHW::commandHasNaN(const franka::CartesianVelocities& command) {
+  return arrayHasNaN(command.elbow) || arrayHasNaN(command.O_dP_EE);
+}
+
+std::vector<double> FrankaHW::getCollisionThresholds(const std::string& name,
+                                                     ros::NodeHandle& robot_hw_nh,
+                                                     const std::vector<double>& defaults) {
+  std::vector<double> thresholds;
+  if (!robot_hw_nh.getParam("collision_config/" + name, thresholds) ||
+      thresholds.size() != defaults.size()) {
+    std::string message;
+    for (const double& threshold : defaults) {
+      message += std::to_string(threshold);
+      message += " ";
+    }
+    ROS_INFO("No parameter %s found, using default values: %s", name.c_str(), message.c_str());
+    return defaults;
+  }
+  return thresholds;
 }
 
 }  // namespace franka_hw

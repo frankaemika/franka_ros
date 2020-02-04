@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<launch>
+
+  <!-- The path to a robot description (xacro) file to control -->
+  <arg name="robot" default="$(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+
+  <!-- Additional XACRO args. Be sure to escape colons and equal signs
+       with backslashes, because XACRO use same syntax as roslaunch:
+       roslaunch <pkg> <launchfile> robot:=path/to/urdf.xacro args:="foo\:\=bar other\:\=true"  -->
+  <arg name="args" default="" />
+
+  <!-- The name of the combined robot, used as control node name -->
+  <arg name="robot_id" default="combined_panda" />
+
+  <!-- The config file containing all parameters for the combined hardware node like the IPs of the robots etc. -->
+  <arg name="hw_config_file" default="$(find franka_control)/config/franka_combined_control_node.yaml"/>
+
+  <!-- Optional arg to manually configure the ips of all robots, overwriting ips that are configured in hw_config_file -->
+  <!-- The ips must be set as dictionary like {<arm_id_1>/robot_ip: <my_ip_1>, <arm_id_2>/robot_ip: <my_ip_2>} -->
+  <arg name="robot_ips" />
+
+  <!-- The config file containing the parameterization for all controllers to start with this launch file -->
+  <arg name="controllers_file" default="$(find franka_control)/config/default_combined_controllers.yaml" />
+
+  <!-- The space separated list of controllers to start in this launch files. The controllers should be known from the controllers_file -->
+  <arg name="controllers_to_start" default="panda_1_state_controller panda_2_state_controller"/>
+
+  <!-- The list of the joint_states topics of all combined robots to fuse to a complete topic -->
+  <arg name="joint_states_source_list" default="[panda_1_state_controller/joint_states, panda_2_state_controller/joint_states, panda_1/franka_gripper/joint_states, panda_2/franka_gripper/joint_states]"/>
+
+  <node name="$(arg robot_id)" pkg="franka_control" type="franka_combined_control_node" output="screen" required="true" >
+    <rosparam command="load" file="$(arg hw_config_file)" />
+    <!-- Add or overwrite manually configured ips -->
+    <rosparam subst_value="True">$(arg robot_ips)</rosparam>
+    <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
+  </node>
+
+  <group ns="$(arg robot_id)">
+
+    <rosparam command="load" file="$(arg controllers_file)" />
+    <node name="hw_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"
+      args="$(arg controllers_to_start)"/>
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
+    <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
+      <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
+      <rosparam param="source_list"  subst_value="true">$(arg joint_states_source_list)</rosparam>
+      <param name="rate" value="30"/>
+    </node>
+
+  </group>
+
+</launch>

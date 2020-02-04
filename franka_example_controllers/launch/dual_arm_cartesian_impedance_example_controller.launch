@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<launch>
+  <!--Be sure to pass the IPs of your pandas like robot_ips:={panda_1/robot_ip: <my_ip_1>, panda_2/robot_ip: <my_ip_2>}   -->
+  <arg name="robot_ips" />
+
+  <arg name="robot_id" default="panda_dual" />
+  <arg name="rviz" default="true" />
+  <arg name="rqt" default="true" />
+
+  <include file="$(find franka_control)/launch/franka_combined_control.launch" >
+    <arg name="robot_id" value="$(arg robot_id)" />
+    <arg name="robot_ips" value="$(arg robot_ips)" />
+  </include>
+
+  <group ns="$(arg robot_id)">
+    <rosparam command="load" file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="dual_arm_cartesian_impedance_example_controller"/>
+    <node name="interactive_marker_left" pkg="franka_example_controllers" type="dual_arm_interactive_marker.py"
+      args="--right_arm_id panda_1 --left_arm_id panda_2" required="false" output="screen" />
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(arg rqt)"/>
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_dual_description_with_marker.rviz" if="$(arg rviz)"/>
+  </group>
+</launch>
