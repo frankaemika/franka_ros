@@ -9,6 +9,26 @@
       </joint>
     </xacro:unless>
 
+    <!-- Masses, COG and inertias -->
+    <xacro:property name="link0_mass" value="3.06357" />
+    <xacro:property name="link1_mass" value="2.34471" />
+    <xacro:property name="link2_mass" value="2.36414" />
+    <xacro:property name="link3_mass" value="2.38050" />
+    <xacro:property name="link4_mass" value="2.42754" />
+    <xacro:property name="link5_mass" value="3.49611" />
+    <xacro:property name="link6_mass" value="1.46736" />
+    <xacro:property name="link7_mass" value="0.45606" />
+    <xacro:property name="link8_mass" value="0.001" /> --
+    <xacro:property name="link0_cog" value="-0.029190 -0.000879 0.056603" />
+    <xacro:property name="link1_cog" value="0.000011 -0.031266 -0.069373" />
+    <xacro:property name="link2_cog" value="-0.000013 -0.070322 0.031178" />
+    <xacro:property name="link3_cog" value="0.044348 0.024928 -0.038130" />
+    <xacro:property name="link4_cog" value="-0.038550 0.039526 0.024716" />
+    <xacro:property name="link5_cog" value="-0.000064 0.038412 -0.109970" />
+    <xacro:property name="link6_cog" value="0.051002 0.006933 0.006169" />
+    <xacro:property name="link7_cog" value="0.010361 0.010360 0.079108" />
+    <xacro:property name="link8_cog" value="0.0 0.0 0.0" />
+
     <!-- for simulation -->
     <link name="world" />
 
@@ -35,9 +55,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="3.06" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link0_cog}" rpy="0 0 0" />
+        <mass value="${link0_mass}" />
+        <inertia ixx="0.009" iyy="0.0122" izz="0.0122" ixy="0.0" ixz="-0.00010" iyz="0.0" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -55,9 +75,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="2.34" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link1_cog}" rpy="0 0 0" />
+        <mass value="${link1_mass}" />
+        <inertia ixx="0.01418" iyy="0.01181" izz="0.005515" ixy="0.0" ixz="0.0" iyz="0.00236" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -87,9 +107,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="2.36" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link2_cog}" rpy="0 0 0" />
+        <mass value="${link2_mass}" />
+        <inertia ixx="0.014" ixy="0.0" ixz="0.0" iyy="0.0055" iyz="-0.0023" izz="0.01259" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -119,9 +139,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="2.38" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link3_cog}" rpy="0 0 0" />
+        <mass value="${link3_mass}" />
+        <inertia ixx="0.00716" ixy="-0.00102" ixz="-0.02040" iyy="0.00920" iyz="-0.00102" izz="0.007159" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -151,9 +171,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="2.43" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link4_cog}" rpy="0 0 0" />
+        <mass value="${link4_mass}" />
+        <inertia ixx="0.008164" ixy="0.003061" ixz="0.00102" iyy="0.008165" iyz="0.00102" izz="0.009185" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -183,9 +203,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="3.5" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link5_cog}" rpy="0 0 0" />
+        <mass value="${link5_mass}" />
+        <inertia ixx="0.0307" ixy="0.0" ixz="0.0" iyy="0.02761" iyz="-0.0613" izz="0.00818" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -215,9 +235,9 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="1.47" />
-        <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+        <origin xyz="${link6_cog}" rpy="0 0 0" />
+        <mass value="${link6_mass}" />
+        <inertia ixx="0.00205" ixy="0.0" ixz="0.0" iyy="0.004089" iyz="0" izz="0.00490" />
       </inertial>
       <!-- end for simulation -->
     </link>
@@ -247,8 +267,8 @@
 
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="0.45" />
+        <origin xyz="${link7_cog}" rpy="0 0 0" />
+        <mass value="${link7_mass}" />
         <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
       </inertial>
       <!-- end for simulation -->
@@ -268,8 +288,8 @@
     <link name="${arm_id}_link8">
       <!-- for simulation -->
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="0.0" />
+        <origin xyz="${link8_cog}" rpy="0 0 0" />
+        <mass value="${link8_mass}" />
         <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
       </inertial>
       <!-- end for simulation -->
