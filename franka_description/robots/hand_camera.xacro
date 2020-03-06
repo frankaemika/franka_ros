@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' ">
     <xacro:unless value="${connected_to == ''}">
-    <xacro:include filename="$(find realsense2_camera)/urdf/_d435.urdf.xacro"/>
+    <xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>
 
       <joint name="${ns}_hand_joint" type="fixed">
         <parent link="${connected_to}"/>
@@ -82,13 +82,14 @@
         <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
     </joint>
 
-	<link name="camera_link1" />
+	<link name="camera_link" />
+	<!--
   	<sensor_d435 parent="picking_camera_link">
    		<origin xyz="0.0485 0 0.0" rpy="0 0 0"/>
-  	</sensor_d435>
+  	</sensor_d435>-->
 	<joint name="robot_to_camera" type="fixed">
 	    <parent link="${ns}_mount"/>
-	    <child link="picking_camera_link"/>
+	    <child link="camera_link"/>
 	    <origin xyz="0 0 0.0" rpy="-1.57096327 -1.57096327 0"/>
 	</joint>
 <!--CAMERAMOUNT JOINT END!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->

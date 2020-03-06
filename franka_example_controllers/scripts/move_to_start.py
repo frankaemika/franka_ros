@@ -9,5 +9,6 @@ if __name__ == '__main__':
     rospy.wait_for_message('move_group/status', GoalStatusArray)
     commander = MoveGroupCommander('panda_arm')
     #commander = MoveGroupCommander('panda_arm')
+    commander.set_max_velocity_scaling_factor(0.1) 
     commander.set_named_target('ready')
     commander.go()
