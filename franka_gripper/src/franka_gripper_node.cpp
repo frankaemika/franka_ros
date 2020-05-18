@@ -152,6 +152,12 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  bool stop_at_shutdown(false);
+  if (!node_handle.getParam("stop_at_shutdown", stop_at_shutdown)) {
+    ROS_INFO_STREAM("franka_gripper_node: Could not find parameter stop_at_shutdown. Defaulting to "
+                    << std::boolalpha << stop_at_shutdown);
+  }
+
   franka::GripperState gripper_state;
   std::mutex gripper_state_mutex;
   std::thread read_thread([&gripper_state, &gripper, &gripper_state_mutex]() {
@@ -188,5 +194,8 @@ int main(int argc, char** argv) {
     rate.sleep();
   }
   read_thread.join();
+  if (stop_at_shutdown) {
+    gripper.stop();
+  }
   return 0;
 }
