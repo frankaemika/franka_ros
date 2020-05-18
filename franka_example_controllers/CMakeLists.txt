@@ -34,6 +34,7 @@ generate_dynamic_reconfigure_options(
   cfg/compliance_param.cfg
   cfg/desired_mass_param.cfg
   cfg/dual_arm_compliance_param.cfg
+  cfg/teleop_param.cfg
 )
 
 catkin_package(
@@ -66,6 +67,7 @@ add_library(franka_example_controllers
   src/cartesian_impedance_example_controller.cpp
   src/force_example_controller.cpp
   src/dual_arm_cartesian_impedance_example_controller.cpp
+  src/teleop_joint_pd_example_controller.cpp
 )
 
 add_dependencies(franka_example_controllers
@@ -88,6 +90,16 @@ target_include_directories(franka_example_controllers SYSTEM PUBLIC
 )
 target_include_directories(franka_example_controllers PUBLIC
   include
+)
+
+add_executable(teleop_joint_pd_example_gripper_node
+  src/teleop_joint_pd_example_gripper_node.cpp
+)
+target_include_directories(teleop_joint_pd_example_gripper_node PUBLIC
+  ${catkin_INCLUDE_DIRS}
+)
+target_link_libraries(teleop_joint_pd_example_gripper_node PUBLIC
+  ${catkin_LIBRARIES}
 )
 
 ## Installation

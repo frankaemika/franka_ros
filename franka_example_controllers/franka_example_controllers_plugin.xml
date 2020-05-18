@@ -49,4 +49,9 @@
           A controller that renders Cartesian impedance based tracking of separate target poses for 2 panda arms.
       </description>
   </class>
+  <class name="franka_example_controllers/TeleopJointPDExampleController" type="franka_example_controllers::TeleopJointPDExampleController" base_class_type="controller_interface::ControllerBase">
+      <description>
+          A PD controller that tracks position and velocity of the leading arm and applies it to the following arm. It also applies force-feedback to the leading arm.
+      </description>
+  </class>
 </library>

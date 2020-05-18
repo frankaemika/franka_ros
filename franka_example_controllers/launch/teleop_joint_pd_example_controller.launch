@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="master_ip" />
+  <arg name="slave_ip" />
+
+  <arg name="robot_id" default="panda_teleop" />
+  <arg name="debug" default="false" />
+
+  <arg name="load_gripper" default="true" />
+  <arg name="gripper_homed" default="false" />
+
+  <include file="$(find franka_control)/launch/franka_combined_control.launch" >
+    <arg name="robot_id" value="$(arg robot_id)" />
+    <arg name="robot_ips" value="{panda_1/robot_ip: $(arg master_ip), panda_2/robot_ip: $(arg slave_ip)}" />
+    <arg name="hw_config_file" value="$(find franka_example_controllers)/config/teleop_joint_pd_example_control_node.yaml"/>
+  </include>
+
+  <group ns="$(arg robot_id)">
+    <rosparam command="load" file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
+    <rosparam param="teleop_joint_pd_example_controller/debug" subst_value="true">$(arg debug)</rosparam>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="teleop_joint_pd_example_controller"/>
+
+    <include file="$(find franka_example_controllers)/launch/teleop_joint_pd_example_gripper.launch" if="$(arg load_gripper)">
+      <arg name="master_ip" value="$(arg master_ip)" />
+      <arg name="slave_ip" value="$(arg slave_ip)" />
+      <arg name="master_id" value="panda_1" />
+      <arg name="slave_id" value="panda_2" />
+      <arg name="gripper_homed" value="$(arg gripper_homed)" />
+    </include>
+
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(arg debug)"/>
+  </group>
+</launch>
