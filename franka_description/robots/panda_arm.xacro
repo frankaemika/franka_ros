@@ -3,26 +3,15 @@
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- arm_id: Namespace of the panda arm. Serves to differentiate between arms in case of multiple instances. -->
   <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0">
+    <link name="world" />
     <xacro:unless value="${not connected_to}">
-      <joint name="${arm_id}_joint_${connected_to}" type="fixed">
+      <joint name="virtual_joint" type="fixed">
         <parent link="${connected_to}"/>
         <child link="${arm_id}_link0"/>
         <origin rpy="${rpy}" xyz="${xyz}"/>
+        <dynamics damping="1.0"/>
       </joint>
     </xacro:unless>
-
-    <!-- for simulation -->
-    <link name="world" />
-
-    <joint name="robot_to_world" type="fixed">
-      <parent link="world" />
-      <child link="${arm_id}_link0" />
-      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
-    </joint>
-
-    <xacro:property name="joint_damping" value="1.0"/>
-    <!-- end for simulation -->
-
     <link name="${arm_id}_link0">
       <visual>
         <geometry>
@@ -98,7 +87,7 @@
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link2">
@@ -143,7 +132,7 @@
       <limit effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link3">
@@ -188,7 +177,7 @@
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link4">
@@ -233,7 +222,7 @@
       <limit effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link5">
@@ -295,7 +284,7 @@
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link6">
@@ -340,7 +329,7 @@
       <limit effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link7">
@@ -385,7 +374,7 @@
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
 
       <!-- for simulation -->
-      <dynamics damping="${joint_damping}"/>
+      <dynamics damping="1.0"/>
       <!-- end for simulation -->
     </joint>
     <link name="${arm_id}_link8">
@@ -422,3 +411,4 @@
     </joint>
   </xacro:macro>
 </robot>
+

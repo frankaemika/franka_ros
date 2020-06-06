@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:macro name="panda_control" params="arm_id load_hand">
+        <xacro:macro name="arm_control" params="transmission joint motor">
+            <transmission name="${transmission}">
+                <type>transmission_interface/SimpleTransmission</type>
+                <joint name="${joint}">
+                    <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                </joint>
+                <actuator name="${motor}">
+                    <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                    <mechanicalReduction>1</mechanicalReduction>
+                </actuator>
+            </transmission>
+        </xacro:macro>
+        <xacro:arm_control transmission="${arm_id}_tran_1" joint="${arm_id}_joint1" motor="${arm_id}_motor_1"/>
+        <xacro:arm_control transmission="${arm_id}_tran_2" joint="${arm_id}_joint2" motor="${arm_id}_motor_2"/>
+        <xacro:arm_control transmission="${arm_id}_tran_3" joint="${arm_id}_joint3" motor="${arm_id}_motor_3"/>
+        <xacro:arm_control transmission="${arm_id}_tran_4" joint="${arm_id}_joint4" motor="${arm_id}_motor_4"/>
+        <xacro:arm_control transmission="${arm_id}_tran_5" joint="${arm_id}_joint5" motor="${arm_id}_motor_5"/>
+        <xacro:arm_control transmission="${arm_id}_tran_6" joint="${arm_id}_joint6" motor="${arm_id}_motor_6"/>
+        <xacro:arm_control transmission="${arm_id}_tran_7" joint="${arm_id}_joint7" motor="${arm_id}_motor_7"/>
+        <xacro:if value="${load_hand}">
+            <xacro:arm_control transmission="${arm_id}_leftfinger" joint="${arm_id}_finger_joint1" motor="${arm_id}_finger_joint1"/>
+            <xacro:arm_control transmission="${arm_id}_rightfinger" joint="${arm_id}_finger_joint2" motor="${arm_id}_finger_joint2"/>
+        </xacro:if>
+        <gazebo>
+            <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"/>
+        </gazebo>
+    </xacro:macro>
+</robot>
