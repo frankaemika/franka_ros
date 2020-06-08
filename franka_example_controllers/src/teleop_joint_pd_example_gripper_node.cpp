@@ -24,18 +24,18 @@ using HomingClient = actionlib::SimpleActionClient<HomingAction>;
 using MoveClient = actionlib::SimpleActionClient<MoveAction>;
 using StopClient = actionlib::SimpleActionClient<StopAction>;
 
-class SubscribeAndCallActions {
+class TeleopGripperClient {
  public:
-  SubscribeAndCallActions() = delete;
-
-  SubscribeAndCallActions(ros::NodeHandle& pnh)
+  TeleopGripperClient()
       : master_homing_client_("master/homing", true),
         slave_homing_client_("slave/homing", true),
         grasp_client_("slave/grasp", true),
         move_client_("slave/move", true),
-        stop_client_("slave/stop", true),
-        grasping_{false},
-        max_width_{0.079} {
+        stop_client_("slave/stop", true){};
+
+  bool init(ros::NodeHandle& pnh) {
+    grasping_ = false;
+    max_width_ = 0.07;
     gripper_homed_ = false;
     if (!pnh.getParam("gripper_homed", gripper_homed_)) {
       ROS_INFO_STREAM(
@@ -45,6 +45,7 @@ class SubscribeAndCallActions {
     }
     bool homing_success(false);
     if (!gripper_homed_) {
+      ROS_INFO("teleop_joint_pd_example_gripper_node: Homing Gripper.");
       homing_success = homingGripper_();
     }
 
@@ -53,13 +54,16 @@ class SubscribeAndCallActions {
       if (grasp_client_.waitForServer(timeout) && move_client_.waitForServer(timeout) &&
           stop_client_.waitForServer(timeout)) {
         master_sub_ = pnh.subscribe("master/joint_states", 1,
-                                    &SubscribeAndCallActions::subscriberCallback_, this);
-        ros::spin();
+                                    &TeleopGripperClient::subscriberCallback_, this);
+        return true;
       } else {
         ROS_ERROR(
             "teleop_joint_pd_example_gripper_node: Action Server could not be started. Shutting "
             "down node.");
+        return false;
       }
+    } else {
+      return false;
     }
   };
 
@@ -132,6 +136,9 @@ class SubscribeAndCallActions {
 int main(int argc, char** argv) {
   ros::init(argc, argv, "teleop_joint_pd_example_gripper_node");
   ros::NodeHandle pnh("~");
-  SubscribeAndCallActions saca_object(pnh);
+  TeleopGripperClient teleop_gripper_client;
+  if (teleop_gripper_client.init(pnh)) {
+    ros::spin();
+  }
   return 0;
 }

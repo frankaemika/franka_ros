@@ -12,18 +12,27 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
-#include <ros/node_handle.h>
+#include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
 
 #include <Eigen/Dense>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 namespace franka_example_controllers {
 
 /**
- * Controller class for ros_control that tracks joint positions and joint velocities of a master
- * arm and applies them to a slave arm. It also applies force-feedback to the master arm.
+ * Controller class for ros_control that allows force-feedback teleoperation of a slave arm from a
+ * master arm.
+ * Smooth tracking is implemented by integrating a velocity signal, which is calculated by limiting
+ * and saturating the velocity of the master arm and a drift compensation.
+ * The torque control of the slave arm is implemented by a simple PD-controller.
+ * The master arm is slightly damped to reduce vibrations.
+ * Force-feedback is applied to the master arm if the external forces on the slave arm exceed a
+ * configured threshold.
+ * While the master arm is unguided (not in contact), the applied force-feedback will be reduced.
  */
 class TeleopJointPDExampleController : public controller_interface::MultiInterfaceController<
                                            hardware_interface::EffortJointInterface,
@@ -57,6 +66,10 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   using Matrix7d = Eigen::Matrix<double, 7, 7>;
 
   struct FrankaDataContainer {
+    FrankaDataContainer(const double& cntct_force_threshold, const double& cntct_ramp_increase)
+        : contact_force_threshold{cntct_force_threshold},
+          contact_ramp_increase{cntct_ramp_increase} {};
+
     std::unique_ptr<franka_hw::FrankaStateHandle> state_handle;
     std::vector<hardware_interface::JointHandle> joint_handles;
 
@@ -71,13 +84,13 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     double contact_force_threshold;
   };
 
-  FrankaDataContainer master_data_;
-  FrankaDataContainer slave_data_;
+  FrankaDataContainer master_data_{4.0, 0.3};
+  FrankaDataContainer slave_data_{5.0, 0.3};
 
   // positions and velocities for slave arm
   Vector7d q_target_;
   Vector7d q_target_last_;
-  Vector7d dq_calc_;
+  Vector7d dq_unsaturated_;
   Vector7d dq_target_;
   Vector7d dq_target_last_;
 
@@ -85,16 +98,19 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   Vector7d dq_max_upper_;
   Vector7d ddq_max_lower_;
   Vector7d ddq_max_upper_;
-  double velocity_ramp_shift_;     // parameter for ramping dq_max and ddq_max in rad
-  double velocity_ramp_increase_;  // parameter for ramping dq_max and ddq_max
+  double velocity_ramp_shift_{0.25};   // parameter for ramping dq_max and ddq_max [rad]
+  double velocity_ramp_increase_{20};  // parameter for ramping dq_max and ddq_max
 
   Vector7d k_p_slave_;   // p-gain for slave arm
   Vector7d k_d_slave_;   // d-gain for slave arm
   Vector7d k_d_master_;  // d-gain for master arm
   Vector7d k_dq_;        // gain for drift compensation in slave arm
 
-  double force_feedback_idle_;     // Applied force-feedback, when master arm is not guided
-  double force_feedback_guiding_;  // Applied force-feeback, when master arm is guided
+  double force_feedback_idle_{0.5};      // Applied force-feedback, when master arm is not guided
+  double force_feedback_guiding_{0.95};  // Applied force-feeback, when master arm is guided
+
+  double decrease_factor_{
+      0.95};  // Filter param used when (in error state) controlling torques to zero
 
   bool initArm(hardware_interface::RobotHW* robot_hw,
                FrankaDataContainer& arm_data,
@@ -110,8 +126,8 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
                             const double& delta_t);
 
   double rampParameter(const double& x,
-                       const double& left_bound,
-                       const double& right_bound,
+                       const double& neg_x_asymptote,
+                       const double& pos_x_asymptote,
                        const double& shift_along_x,
                        const double& increase_factor);
 
@@ -127,7 +143,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
       dynamic_server_teleop_param_;
   void teleopParamCallback(franka_example_controllers::teleop_paramConfig& config, uint32_t level);
 
-  franka_hw::TriggerRate publish_rate_;
+  franka_hw::TriggerRate publish_rate_{60.0};
   realtime_tools::RealtimePublisher<sensor_msgs::JointState> master_target_pub_;
   realtime_tools::RealtimePublisher<sensor_msgs::JointState> slave_target_pub_;
   realtime_tools::RealtimePublisher<std_msgs::Float64> master_contact_pub_;

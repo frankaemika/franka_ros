@@ -44,6 +44,70 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     return false;
   }
 
+  std::vector<double> k_d_master;
+  if (!node_handle.getParam("master/d_gains", k_d_master) || k_d_master.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no master/d_gains provided, aborting "
+        "controller init!");
+    return false;
+  }
+  k_d_master_ = Eigen::Map<Vector7d>(k_d_master.data());
+
+  std::vector<double> k_p_slave;
+  if (!node_handle.getParam("slave/p_gains", k_p_slave) || k_p_slave.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/p_gains provided, aborting "
+        "controller init!");
+    return false;
+  }
+  k_p_slave_ = Eigen::Map<Vector7d>(k_p_slave.data());
+  // TODO:  k_d_slave_ = 2.0 * sqrt(k_p_slave_);
+
+  std::vector<double> k_dq;
+  if (!node_handle.getParam("slave/drift_comp_gains", k_dq) || k_dq.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/drift_comp_gains provided, aborting "
+        "controller init!");
+    return false;
+  }
+  k_dq_ = Eigen::Map<Vector7d>(k_dq.data());
+
+  std::vector<double> dq_max_lower;
+  if (!node_handle.getParam("slave/dq_max_lower", dq_max_lower) || dq_max_lower.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/dq_max_lower provided, aborting "
+        "controller init!");
+    return false;
+  }
+  dq_max_lower_ = Eigen::Map<Vector7d>(dq_max_lower.data());
+
+  std::vector<double> dq_max_upper;
+  if (!node_handle.getParam("slave/dq_max_upper", dq_max_upper) || dq_max_upper.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/dq_max_upper provided, aborting "
+        "controller init!");
+    return false;
+  }
+  dq_max_upper_ = Eigen::Map<Vector7d>(dq_max_upper.data());
+
+  std::vector<double> ddq_max_lower;
+  if (!node_handle.getParam("slave/ddq_max_lower", ddq_max_lower) || ddq_max_lower.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/ddq_max_lower provided, aborting "
+        "controller init!");
+    return false;
+  }
+  ddq_max_lower_ = Eigen::Map<Vector7d>(ddq_max_lower.data());
+
+  std::vector<double> ddq_max_upper;
+  if (!node_handle.getParam("slave/ddq_max_upper", ddq_max_upper) || ddq_max_upper.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/ddq_max_upper provided, aborting "
+        "controller init!");
+    return false;
+  }
+  ddq_max_upper_ = Eigen::Map<Vector7d>(ddq_max_upper.data());
+
   debug_ = false;
   if (!node_handle.getParam("debug", debug_)) {
     ROS_INFO_STREAM("TeleopJointPDExampleController: Could not find parameter debug. Defaulting to "
@@ -51,30 +115,29 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
 
   // Set controller gains.
-  k_p_slave_ << 900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0;
-  k_d_slave_ << 45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0;
-  k_d_master_ << 1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17;
-  k_dq_ << 4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3;
+  // k_p_slave_ << 900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0;
+  // k_d_slave_ << 45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0;
+  // k_d_master_ << 1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17;
+  // k_dq_ << 4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3;
 
   // Set max velocities and accelerations
-  dq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5;
-  dq_max_upper_ << 2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5;
-  ddq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0;
-  ddq_max_upper_ << 6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0;
-
-  force_feedback_idle_ = 0.5;
-  force_feedback_guiding_ = 0.95;
-
-  velocity_ramp_shift_ = 0.25;
-  velocity_ramp_increase_ = 20;
+  // dq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5;
+  // dq_max_upper_ << 2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5;
+  // ddq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0;
+  // ddq_max_upper_ << 6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0;
 
   // Set contact parameter
-  master_data_.contact_force_threshold = 4.0;
-  master_data_.contact_ramp_increase = 0.3;
-  slave_data_.contact_force_threshold = 5.0;
-  slave_data_.contact_ramp_increase = 0.3;
+  // master_data_.contact_force_threshold = 4.0;
+  // master_data_.contact_ramp_increase = 0.3;
+  // slave_data_.contact_force_threshold = 5.0;
+  // slave_data_.contact_ramp_increase = 0.3;
 
-  publish_rate_ = franka_hw::TriggerRate(60.0);
+  // Init for each arm
+  if (!initArm(robot_hw, master_data_, master_arm_id, master_joint_names) ||
+      !initArm(robot_hw, slave_data_, slave_arm_id, slave_joint_names)) {
+    return false;
+  }
+
   if (debug_) {
     // Init for dynamic reconfigure
     dynamic_reconfigure_teleop_param_node_ =
@@ -87,22 +150,31 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
 
     // Init for publishers
     master_target_pub_.init(node_handle, "master_target", 1);
+    master_target_pub_.lock();
+    master_target_pub_.msg_.name.resize(7);
+    master_target_pub_.msg_.position.resize(7);
+    master_target_pub_.msg_.velocity.resize(7);
+    master_target_pub_.msg_.effort.resize(7);
+    master_target_pub_.unlock();
+
     slave_target_pub_.init(node_handle, "slave_target", 1);
+    slave_target_pub_.lock();
+    slave_target_pub_.msg_.name.resize(7);
+    slave_target_pub_.msg_.position.resize(7);
+    slave_target_pub_.msg_.velocity.resize(7);
+    slave_target_pub_.msg_.effort.resize(7);
+    slave_target_pub_.unlock();
+
     master_contact_pub_.init(node_handle, "master_contact", 1);
     slave_contact_pub_.init(node_handle, "slave_contact", 1);
   }
 
-  bool master_success = initArm(robot_hw, master_data_, master_arm_id, master_joint_names);
-  bool slave_success = initArm(robot_hw, slave_data_, slave_arm_id, slave_joint_names);
-
-  return master_success && slave_success;
+  return true;
 }
 
 void TeleopJointPDExampleController::starting(const ros::Time& time) {
   franka::RobotState slave_robot_state = slave_data_.state_handle->getRobotState();
-  for (size_t i = 0; i < 7; ++i) {
-    q_target_last_[i] = slave_robot_state.q.data()[i];
-  }
+  q_target_last_ = Eigen::Map<Vector7d>(slave_robot_state.q.data());
   dq_target_last_.setZero();
   master_data_.tau_target_last.setZero();
   slave_data_.tau_target_last.setZero();
@@ -116,7 +188,8 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
   slave_data_.q = Eigen::Map<Vector7d>(slave_robot_state.q.data());
   slave_data_.dq = Eigen::Map<Vector7d>(slave_robot_state.dq.data());
 
-  // Ramping of contact
+  // Determine contact scaling factor depending on the external cartesian forces applied on the
+  // endeffector.
   Vector6d master_f_ext_hat = Eigen::Map<Vector6d>(master_robot_state.K_F_ext_hat_K.data());
   master_data_.f_ext_norm = master_f_ext_hat.head(3).norm();
   master_data_.contact =
@@ -129,7 +202,8 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
       rampParameter(slave_data_.f_ext_norm, 1.0, 0.0, slave_data_.contact_force_threshold,
                     slave_data_.contact_ramp_increase);
 
-  // Ramping of max velocities and accelerations
+  // Determine max velocities and accelerations of slave arm depending on tracking errors to avoid
+  // jumps and high velocities when starting example.
   Vector7d q_deviation = (q_target_last_ - master_data_.q).cwiseAbs();
   Vector7d dq_max;
   Vector7d ddq_max;
@@ -140,15 +214,16 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
                                velocity_ramp_shift_, velocity_ramp_increase_);
   }
 
-  // Calculate postions and velocities for slave arm
-  dq_calc_ = k_dq_.asDiagonal() * (master_data_.q - q_target_last_) + master_data_.dq;
-  dq_target_ = saturateAndLimit(dq_calc_, dq_target_last_, dq_max, ddq_max, period.toSec());
+  // Calculate target postions and velocities for slave arm
+  dq_unsaturated_ = k_dq_.asDiagonal() * (master_data_.q - q_target_last_) + master_data_.dq;
+  dq_target_ = saturateAndLimit(dq_unsaturated_, dq_target_last_, dq_max, ddq_max, period.toSec());
   dq_target_last_ = dq_target_;
   q_target_ = q_target_last_ + (dq_target_ * period.toSec());
   q_target_last_ = q_target_;
 
   if (!master_robot_state.current_errors && !slave_robot_state.current_errors) {
-    // Calculate torques for master arm
+    // Compute force-feedback for the master arm to render the haptic interaction of the slave
+    // robot. Add a slight damping to reduce vibrations.
     Vector7d slave_tau_ext_hat =
         Eigen::Map<Vector7d>(slave_robot_state.tau_ext_hat_filtered.data());
     Vector7d master_damping_torque =
@@ -162,16 +237,18 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
     master_data_.tau_target = master_force_feedback - master_damping_torque;
     master_data_.tau_target_last = master_data_.tau_target;
 
-    // Calculate torques for slave arm
+    // Compute PD control for the slave arm to track the master's motions.
+    k_d_slave_ = 1.5 * k_p_slave_.cwiseSqrt();
     slave_data_.tau_target =
         slave_p_gain_factor_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
         slave_d_gain_factor_ * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target_last = slave_data_.tau_target;
 
   } else {
-    master_data_.tau_target = 0.95 * master_data_.tau_target_last;
+    // Control target torques to zero if any arm is in error state.
+    master_data_.tau_target = decrease_factor_ * master_data_.tau_target_last;
     master_data_.tau_target_last = master_data_.tau_target;
-    slave_data_.tau_target = 0.95 * slave_data_.tau_target_last;
+    slave_data_.tau_target = decrease_factor_ * slave_data_.tau_target_last;
     slave_data_.tau_target_last = slave_data_.tau_target;
   }
 
@@ -251,12 +328,13 @@ Eigen::Matrix<double, 7, 1> TeleopJointPDExampleController::saturateAndLimit(
 }
 
 double TeleopJointPDExampleController::rampParameter(const double& x,
-                                                     const double& left_bound,
-                                                     const double& right_bound,
+                                                     const double& neg_x_asymptote,
+                                                     const double& pos_x_asymptote,
                                                      const double& shift_along_x,
                                                      const double& increase_factor) {
-  double ramp = 0.5 * (right_bound + left_bound -
-                       (right_bound - left_bound) * tanh(increase_factor * (x - shift_along_x)));
+  double ramp =
+      0.5 * (pos_x_asymptote + neg_x_asymptote -
+             (pos_x_asymptote - neg_x_asymptote) * tanh(increase_factor * (x - shift_along_x)));
   return ramp;
 }
 
@@ -312,10 +390,6 @@ void TeleopJointPDExampleController::teleopParamCallback(
 
 void TeleopJointPDExampleController::publishMasterTarget() {
   if (master_target_pub_.trylock()) {
-    master_target_pub_.msg_.name.resize(7);
-    master_target_pub_.msg_.position.resize(7);
-    master_target_pub_.msg_.velocity.resize(7);
-    master_target_pub_.msg_.effort.resize(7);
     for (size_t i = 0; i < 7; ++i) {
       master_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
       master_target_pub_.msg_.position[i] = 0.0;
@@ -328,10 +402,6 @@ void TeleopJointPDExampleController::publishMasterTarget() {
 
 void TeleopJointPDExampleController::publishSlaveTarget() {
   if (slave_target_pub_.trylock()) {
-    slave_target_pub_.msg_.name.resize(7);
-    slave_target_pub_.msg_.position.resize(7);
-    slave_target_pub_.msg_.velocity.resize(7);
-    slave_target_pub_.msg_.effort.resize(7);
     for (size_t i = 0; i < 7; ++i) {
       slave_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
       slave_target_pub_.msg_.position[i] = q_target_[i];

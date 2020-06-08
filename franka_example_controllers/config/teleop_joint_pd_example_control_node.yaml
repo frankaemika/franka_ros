@@ -23,7 +23,8 @@ panda_1:
   internal_controller: joint_impedance
   # Used to decide whether to enforce realtime mode [enforce|ignore]
   realtime_config: enforce
-  # Configure the initial defaults for the collision behavior reflexes.
+  # Configure collision behavior reflexes.
+  # The upper torque and upper force thresholds are set to higher values compared to the default ones.
   collision_config:
     lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
     upper_torque_thresholds_acceleration: [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
@@ -55,7 +56,8 @@ panda_2:
   internal_controller: joint_impedance
   # Used to decide whether to enforce realtime mode [enforce|ignore]
   realtime_config: enforce
-  # Configure the initial defaults for the collision behavior reflexes.
+  # Configure collision behavior reflexes.
+  # The upper torque and upper force thresholds are set to higher values compared to the default ones.
   collision_config:
     lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
     upper_torque_thresholds_acceleration: [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
