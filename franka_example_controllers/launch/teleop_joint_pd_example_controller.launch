@@ -5,7 +5,7 @@
 
   <arg name="robot_id" default="panda_teleop" />
   <arg name="debug" default="false" />
-
+  <arg name="rviz" default="true" />
   <arg name="load_gripper" default="true" />
   <arg name="gripper_homed" default="false" />
 
@@ -29,5 +29,6 @@
     </include>
 
     <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(arg debug)"/>
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/teleop_joint_pd_example.rviz" if="$(arg rviz)"/>
   </group>
 </launch>
