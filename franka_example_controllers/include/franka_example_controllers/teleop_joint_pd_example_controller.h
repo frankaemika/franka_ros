@@ -130,9 +130,8 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   // Debug tool
   bool debug_;
   std::mutex dynamic_reconfigure_mutex_;
-  double master_damping_factor_{1.0};
-  double slave_p_gain_factor_{1.0};
-  double slave_d_gain_factor_{1.0};
+  double master_damping_scaling_{1.0};
+  double slave_stiffness_scaling_{1.0};
 
   ros::NodeHandle dynamic_reconfigure_teleop_param_node_;
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::teleop_paramConfig>>

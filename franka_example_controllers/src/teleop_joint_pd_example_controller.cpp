@@ -145,8 +145,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
 
   if (debug_) {
     // Init for dynamic reconfigure
-    dynamic_reconfigure_teleop_param_node_ =
-        ros::NodeHandle("dynamic_reconfigure_teleop_param_node");
+    dynamic_reconfigure_teleop_param_node_ = ros::NodeHandle("dyn_reconf_teleop_param_node");
     dynamic_server_teleop_param_ = std::make_unique<
         dynamic_reconfigure::Server<franka_example_controllers::teleop_paramConfig>>(
         dynamic_reconfigure_teleop_param_node_);
@@ -232,7 +231,7 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
     Vector7d slave_tau_ext_hat =
         Eigen::Map<Vector7d>(slave_robot_state.tau_ext_hat_filtered.data());
     Vector7d master_damping_torque =
-        master_damping_factor_ * k_d_master_.asDiagonal() * master_data_.dq;
+        master_damping_scaling_ * k_d_master_.asDiagonal() * master_data_.dq;
     Vector7d master_force_feedback =
         slave_data_.contact *
         (force_feedback_idle_ +
@@ -244,11 +243,11 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
 
     // Compute PD control for the slave arm to track the master's motions.
     // slave_data_.tau_target =
-    //   slave_p_gain_factor_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
+    //   slave_stiffness_scaling_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
     //   slave_d_gain_factor_ * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target =
-        slave_p_gain_factor_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
-        sqrt(slave_p_gain_factor_) * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
+        slave_stiffness_scaling_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
+        sqrt(slave_stiffness_scaling_) * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target_last = slave_data_.tau_target;
 
   } else {
@@ -349,9 +348,8 @@ void TeleopJointPDExampleController::teleopParamCallback(
     franka_example_controllers::teleop_paramConfig& config,
     uint32_t level) {
   if (dynamic_reconfigure_mutex_.try_lock()) {
-    master_damping_factor_ = config.master_damping_factor;
-    slave_p_gain_factor_ = config.slave_p_gain_factor;
-    slave_d_gain_factor_ = config.slave_d_gain_factor;
+    master_damping_scaling_ = config.master_damping_scaling;
+    slave_stiffness_scaling_ = config.slave_stiffness_scaling;
     force_feedback_guiding_ = config.force_feedback_guiding;
     force_feedback_idle_ = config.force_feedback_idle;
     slave_data_.contact_force_threshold = config.slave_contact_force_threshold;

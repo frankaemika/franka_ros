@@ -35,6 +35,7 @@ generate_dynamic_reconfigure_options(
   cfg/desired_mass_param.cfg
   cfg/dual_arm_compliance_param.cfg
   cfg/teleop_param.cfg
+  cfg/teleop_gripper_param.cfg
 )
 
 catkin_package(
