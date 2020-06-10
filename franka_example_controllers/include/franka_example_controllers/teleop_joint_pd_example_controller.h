@@ -66,10 +66,6 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   using Matrix7d = Eigen::Matrix<double, 7, 7>;
 
   struct FrankaDataContainer {
-    FrankaDataContainer(const double& cntct_force_threshold, const double& cntct_ramp_increase)
-        : contact_force_threshold{cntct_force_threshold},
-          contact_ramp_increase{cntct_ramp_increase} {};
-
     std::unique_ptr<franka_hw::FrankaStateHandle> state_handle;
     std::vector<hardware_interface::JointHandle> joint_handles;
 
@@ -79,13 +75,13 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     Vector7d dq;
 
     double f_ext_norm;
-    double contact;
-    double contact_ramp_increase;
-    double contact_force_threshold;
+    double contact;                     // contact scaling factor (values between 0 and 1)
+    double contact_ramp_increase{0.3};  // parameter for contact scaling factor
+    double contact_force_threshold;     // parameter for contact scaling factor [N]
   };
 
-  FrankaDataContainer master_data_{4.0, 0.3};
-  FrankaDataContainer slave_data_{5.0, 0.3};
+  FrankaDataContainer master_data_;
+  FrankaDataContainer slave_data_;
 
   // positions and velocities for slave arm
   Vector7d q_target_;
@@ -110,7 +106,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   double force_feedback_guiding_{0.95};  // Applied force-feeback, when master arm is guided
 
   double decrease_factor_{
-      0.95};  // Filter param used when (in error state) controlling torques to zero
+      0.95};  // Filter param, used when (in error state) controlling torques to zero
 
   bool initArm(hardware_interface::RobotHW* robot_hw,
                FrankaDataContainer& arm_data,

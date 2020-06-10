@@ -61,7 +61,15 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     return false;
   }
   k_p_slave_ = Eigen::Map<Vector7d>(k_p_slave.data());
-  // TODO:  k_d_slave_ = 2.0 * sqrt(k_p_slave_);
+
+  std::vector<double> k_d_slave;
+  if (!node_handle.getParam("slave/d_gains", k_d_slave) || k_d_slave.size() != 7) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/d_gains provided, aborting "
+        "controller init!");
+    return false;
+  }
+  k_d_slave_ = Eigen::Map<Vector7d>(k_d_slave.data());
 
   std::vector<double> k_dq;
   if (!node_handle.getParam("slave/drift_comp_gains", k_dq) || k_dq.size() != 7) {
@@ -108,29 +116,26 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
   ddq_max_upper_ = Eigen::Map<Vector7d>(ddq_max_upper.data());
 
+  if (!node_handle.getParam("master/contact_force_threshold",
+                            master_data_.contact_force_threshold)) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no master/contact_force_threshold provided, "
+        "aborting controller init!");
+    return false;
+  }
+
+  if (!node_handle.getParam("slave/contact_force_threshold", slave_data_.contact_force_threshold)) {
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Invalid or no slave/contact_force_threshold provided, "
+        "aborting controller init!");
+    return false;
+  }
+
   debug_ = false;
   if (!node_handle.getParam("debug", debug_)) {
     ROS_INFO_STREAM("TeleopJointPDExampleController: Could not find parameter debug. Defaulting to "
                     << std::boolalpha << debug_);
   }
-
-  // Set controller gains.
-  // k_p_slave_ << 900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0;
-  // k_d_slave_ << 45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0;
-  // k_d_master_ << 1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17;
-  // k_dq_ << 4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3;
-
-  // Set max velocities and accelerations
-  // dq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5;
-  // dq_max_upper_ << 2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5;
-  // ddq_max_lower_ << 0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0;
-  // ddq_max_upper_ << 6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0;
-
-  // Set contact parameter
-  // master_data_.contact_force_threshold = 4.0;
-  // master_data_.contact_ramp_increase = 0.3;
-  // slave_data_.contact_force_threshold = 5.0;
-  // slave_data_.contact_ramp_increase = 0.3;
 
   // Init for each arm
   if (!initArm(robot_hw, master_data_, master_arm_id, master_joint_names) ||
@@ -238,10 +243,12 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
     master_data_.tau_target_last = master_data_.tau_target;
 
     // Compute PD control for the slave arm to track the master's motions.
-    k_d_slave_ = 1.5 * k_p_slave_.cwiseSqrt();
+    // slave_data_.tau_target =
+    //   slave_p_gain_factor_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
+    //   slave_d_gain_factor_ * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target =
         slave_p_gain_factor_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
-        slave_d_gain_factor_ * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
+        sqrt(slave_p_gain_factor_) * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target_last = slave_data_.tau_target;
 
   } else {
@@ -350,7 +357,8 @@ void TeleopJointPDExampleController::teleopParamCallback(
     slave_data_.contact_force_threshold = config.slave_contact_force_threshold;
     master_data_.contact_force_threshold = config.master_contact_force_threshold;
 
-    /// TODO(puxb_st): Think about removing these
+    /// TODO(puxb_st): Think about removing these. Remove dynamic reconfigure from params in config
+    /// file
     dq_max_lower_[0] = config.dq_l_1;
     dq_max_lower_[1] = config.dq_l_2;
     dq_max_lower_[2] = config.dq_l_3;

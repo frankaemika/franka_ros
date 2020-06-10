@@ -129,6 +129,7 @@ teleop_joint_pd_example_controller:
             - panda_1_joint6
             - panda_1_joint7
        d_gains: [1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17]
+       contact_force_threshold: 4.0
    slave:
        arm_id: panda_2
        joint_names:
@@ -140,8 +141,14 @@ teleop_joint_pd_example_controller:
             - panda_2_joint6
             - panda_2_joint7
        p_gains: [900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0]
+       d_gains: [45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0]
        drift_comp_gains: [4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3]
-       dq_max_lower: [0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5]
-       dq_max_upper: [2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5]
-       ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0]
-       ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0]
+       dq_max_lower: [0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5] # [rad/s]
+       dq_max_upper: [2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5] # [rad/s]
+       ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s²]
+       ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s²]
+       contact_force_threshold: 5.0
+   gripper:
+       grasp_force: 40.0 # [N]
+       grasp_speed: 0.3 # [m/s]
+       move_speed: 0.3 # [m/s]

@@ -35,7 +35,6 @@ class TeleopGripperClient {
 
   bool init(ros::NodeHandle& pnh) {
     grasping_ = false;
-    max_width_ = 0.07;
     gripper_homed_ = false;
     if (!pnh.getParam("gripper_homed", gripper_homed_)) {
       ROS_INFO_STREAM(
@@ -43,6 +42,28 @@ class TeleopGripperClient {
           "Defaulting to "
           << std::boolalpha << gripper_homed_);
     }
+
+    if (!pnh.getParam("gripper/grasp_force", grasp_force_)) {
+      ROS_ERROR(
+          "teleop_joint_pd_example_gripper_node: Could not read parameter gripper/grasp_force. "
+          "Aborting init!");
+      return false;
+    }
+
+    if (!pnh.getParam("gripper/grasp_speed", grasp_speed_)) {
+      ROS_ERROR(
+          "teleop_joint_pd_example_gripper_node: Could not read parameter gripper/grasp_speed. "
+          "Aborting init!");
+      return false;
+    }
+
+    if (!pnh.getParam("gripper/move_speed", move_speed_)) {
+      ROS_ERROR(
+          "teleop_joint_pd_example_gripper_node: Could not read parameter gripper/move_speed. "
+          "Aborting init!");
+      return false;
+    }
+
     bool homing_success(false);
     if (!gripper_homed_) {
       ROS_INFO("teleop_joint_pd_example_gripper_node: Homing Gripper.");
@@ -50,6 +71,7 @@ class TeleopGripperClient {
     }
 
     if (gripper_homed_ || homing_success) {
+      // Start action servers and subscriber for gripper
       ros::Duration timeout(2.0);
       if (grasp_client_.waitForServer(timeout) && move_client_.waitForServer(timeout) &&
           stop_client_.waitForServer(timeout)) {
@@ -68,9 +90,19 @@ class TeleopGripperClient {
   };
 
  private:
-  double max_width_;
+  double max_width_{0.07};  // Default value. It will be reset when gripper is homed [m]
   bool grasping_;
   bool gripper_homed_;
+
+  double grasp_force_;
+  double grasp_speed_;
+  double grasp_epsilon_inner_{0.001};  // [m]
+  double grasp_epsilon_outer_scaling_{0.9};
+  double move_speed_;
+
+  double start_grasping_{0.5};  // Threshold position of master gripper where to start grasping.
+  double start_opening_{0.6};   // Threshold position of master gripper where to open.
+
   HomingClient slave_homing_client_;
   HomingClient master_homing_client_;
   GraspClient grasp_client_;
@@ -98,17 +130,18 @@ class TeleopGripperClient {
   void subscriberCallback_(const sensor_msgs::JointState& msg) {
     std::lock_guard<std::mutex> _(subscriber_mutex_);
     if (!gripper_homed_) {
+      // If gripper had to be homed, reset max_width_.
       max_width_ = 2 * msg.position[0];
       gripper_homed_ = true;
     }
     double gripper_width = 2 * msg.position[0];
-    if (gripper_width < 0.5 * max_width_ && !grasping_) {
+    if (gripper_width < start_grasping_ * max_width_ && !grasping_) {
       // Grasp object
       franka_gripper::GraspGoal grasp_goal;
-      grasp_goal.force = 40.0;
-      grasp_goal.speed = 0.3;
-      grasp_goal.epsilon.inner = 0.001;
-      grasp_goal.epsilon.outer = 0.9 * max_width_;
+      grasp_goal.force = grasp_force_;
+      grasp_goal.speed = grasp_speed_;
+      grasp_goal.epsilon.inner = grasp_epsilon_inner_;
+      grasp_goal.epsilon.outer = grasp_epsilon_outer_scaling_ * max_width_;
 
       grasp_client_.sendGoal(grasp_goal);
       if (grasp_client_.waitForResult(ros::Duration(5.0))) {
@@ -117,10 +150,10 @@ class TeleopGripperClient {
         ROS_INFO("teleop_joint_pd_example_gripper_node: GraspAction was not successful.");
         stop_client_.sendGoal(franka_gripper::StopGoal());
       }
-    } else if (gripper_width > 0.6 * max_width_ && grasping_) {
+    } else if (gripper_width > start_opening_ * max_width_ && grasping_) {
       // Open gripper
       franka_gripper::MoveGoal move_goal;
-      move_goal.speed = 0.3;
+      move_goal.speed = move_speed_;
       move_goal.width = max_width_;
       move_client_.sendGoal(move_goal);
       if (move_client_.waitForResult(ros::Duration(5.0))) {
