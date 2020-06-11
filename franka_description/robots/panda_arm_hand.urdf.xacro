@@ -9,7 +9,7 @@
   <!-- end for simulation -->
 
   <xacro:panda_arm xyz="0 0 0" rpy="0 0 0" connected_to="world" arm_id="panda"/>
-  <xacro:hand ns="panda" rpy="0 0 ${-pi/4}" connected_to="panda_link8"/>
+  <xacro:hand ns="panda" rpy="0 0 ${-pi/4}" connected_to="panda_link8" safety_distance="0.03"/>
 
   <!-- for simulation -->
   <xacro:panda_gazebo arm_id="panda"/>
