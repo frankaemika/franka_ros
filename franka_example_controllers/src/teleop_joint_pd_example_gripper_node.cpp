@@ -51,6 +51,15 @@ class TeleopGripperClient {
           << std::boolalpha << gripper_homed_);
     }
 
+    // Init for dynamic reconfigure
+    dynamic_reconfigure_teleop_gripper_param_node_ =
+        ros::NodeHandle("dyn_reconf_teleop_gripper_param_node");
+    dynamic_server_teleop_gripper_param_ = std::make_unique<
+        dynamic_reconfigure::Server<franka_example_controllers::teleop_gripper_paramConfig>>(
+        dynamic_reconfigure_teleop_gripper_param_node_);
+    dynamic_server_teleop_gripper_param_->setCallback(
+        boost::bind(&TeleopGripperClient::teleopGripperParamCallback, this, _1, _2));
+
     bool homing_success(false);
     if (!gripper_homed_) {
       ROS_INFO("teleop_joint_pd_example_gripper_node: Homing Gripper.");
@@ -73,16 +82,6 @@ class TeleopGripperClient {
     } else {
       return false;
     }
-
-    // Init for dynamic reconfigure
-    dynamic_reconfigure_teleop_gripper_param_node_ =
-        ros::NodeHandle("dyn_reconf_teleop_gripper_param_node");
-    dynamic_server_teleop_gripper_param_ = std::make_unique<
-        dynamic_reconfigure::Server<franka_example_controllers::teleop_gripper_paramConfig>>(
-        dynamic_reconfigure_teleop_gripper_param_node_);
-    dynamic_server_teleop_gripper_param_->setCallback(
-        boost::bind(&TeleopGripperClient::teleopGripperParamCallback, this, _1, _2));
-
     return true;
   };
 
@@ -119,7 +118,7 @@ class TeleopGripperClient {
     if (dynamic_reconfigure_mutex_.try_lock()) {
       grasp_force_ = config.grasp_force;
       move_speed_ = config.move_speed;
-      ROS_INFO_STREAM("Dynamic Reconfigure: New gripper params set! grasp_force = "
+      ROS_INFO_STREAM("Dynamic Reconfigure: Gripper params set: grasp_force = "
                       << grasp_force_ << " N ; move_speed = " << move_speed_ << " m/s");
     }
     dynamic_reconfigure_mutex_.unlock();

@@ -128,6 +128,7 @@ teleop_joint_pd_example_controller:
             - panda_1_joint5
             - panda_1_joint6
             - panda_1_joint7
+       # WARNING: Varying the following parameters may result in instability!
        d_gains: [1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17]
        contact_force_threshold: 4.0
    slave:
@@ -140,6 +141,7 @@ teleop_joint_pd_example_controller:
             - panda_2_joint5
             - panda_2_joint6
             - panda_2_joint7
+       # WARNING: Varying the following parameters may result in instability!
        p_gains: [900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0]
        d_gains: [45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0]
        drift_comp_gains: [4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3]

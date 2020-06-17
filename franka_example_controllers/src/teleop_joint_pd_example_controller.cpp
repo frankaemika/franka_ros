@@ -389,7 +389,7 @@ void TeleopJointPDExampleController::teleopParamCallback(
     ddq_max_upper_[5] = config.ddq_u_6;
     ddq_max_upper_[6] = config.ddq_u_7;
 
-    ROS_INFO("Dynamic reconfigure: New params set.");
+    ROS_INFO("Dynamic reconfigure: Controller params set.");
   }
   dynamic_reconfigure_mutex_.unlock();
 }
