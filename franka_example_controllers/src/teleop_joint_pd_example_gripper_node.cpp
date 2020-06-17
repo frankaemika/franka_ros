@@ -28,9 +28,9 @@ using StopClient = actionlib::SimpleActionClient<StopAction>;
 
 /**
  * Client class for teleoperating a slave gripper from a master gripper.
- * By closing and opening the master gripper manually, exceeding a defined width threshold, ROS
- * actions are called and the slave gripper will grasp an object with a configurable force and open
- * again.
+ * By closing the master gripper manually, exceeding a defined width threshold, a ROS
+ * action is called and the slave gripper will grasp an object with a configurable force.
+ * When opening the master gripper, the slave gripper will also open.
  */
 class TeleopGripperClient {
  public:
@@ -91,13 +91,13 @@ class TeleopGripperClient {
   bool grasping_;
   bool gripper_homed_;
 
-  double grasp_force_;
+  double grasp_force_;                 // [N]
   double grasp_epsilon_inner_{0.001};  // [m]
   double grasp_epsilon_outer_scaling_{0.9};
-  double move_speed_;
+  double move_speed_;  // [m/s]
 
-  double start_grasping_{0.5};  // Threshold position of master gripper where to start grasping.
-  double start_opening_{0.6};   // Threshold position of master gripper where to open.
+  double start_pos_grasping_{0.5};  // Threshold position of master gripper where to start grasping.
+  double start_pos_opening_{0.6};   // Threshold position of master gripper where to open.
 
   HomingClient slave_homing_client_;
   HomingClient master_homing_client_;
@@ -148,7 +148,7 @@ class TeleopGripperClient {
       gripper_homed_ = true;
     }
     double gripper_width = 2 * msg.position[0];
-    if (gripper_width < start_grasping_ * max_width_ && !grasping_) {
+    if (gripper_width < start_pos_grasping_ * max_width_ && !grasping_) {
       // Grasp object
       franka_gripper::GraspGoal grasp_goal;
       grasp_goal.force = grasp_force_;
@@ -163,7 +163,7 @@ class TeleopGripperClient {
         ROS_INFO("teleop_joint_pd_example_gripper_node: GraspAction was not successful.");
         stop_client_.sendGoal(franka_gripper::StopGoal());
       }
-    } else if (gripper_width > start_opening_ * max_width_ && grasping_) {
+    } else if (gripper_width > start_pos_opening_ * max_width_ && grasping_) {
       // Open gripper
       franka_gripper::MoveGoal move_goal;
       move_goal.speed = move_speed_;

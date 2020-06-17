@@ -30,7 +30,7 @@ namespace franka_example_controllers {
  * and saturating the velocity of the master arm and a drift compensation.
  * The torque control of the slave arm is implemented by a simple PD-controller.
  * The master arm is slightly damped to reduce vibrations.
- * Force-feedback is applied to the master arm if the external forces on the slave arm exceed a
+ * Force-feedback is applied to the master arm when the external forces on the slave arm exceed a
  * configured threshold.
  * While the master arm is unguided (not in contact), the applied force-feedback will be reduced.
  */
@@ -51,14 +51,14 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
    * Prepares the controller for the real-time execution. This method is executed once every time
    * the controller is started and runs in real-time
    */
-  void starting(const ros::Time& time) override;
+  void starting(const ros::Time& /*time*/) override;
 
   /**
    * Computes the control-law and commands the resulting joint torques to the robots.
    *
    * @param[in] period The control period (here 0.001s)
    */
-  void update(const ros::Time& time, const ros::Duration& period) override;
+  void update(const ros::Time& /*time*/, const ros::Duration& period) override;
 
  private:
   using Vector6d = Eigen::Matrix<double, 6, 1>;
@@ -69,31 +69,30 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     std::unique_ptr<franka_hw::FrankaStateHandle> state_handle;
     std::vector<hardware_interface::JointHandle> joint_handles;
 
-    Vector7d tau_target;
-    Vector7d tau_target_last;
-    Vector7d q;
-    Vector7d dq;
+    Vector7d tau_target;       // Target effort of each joint [Nm, Nm, Nm, Nm, Nm, Nm, Nm]
+    Vector7d tau_target_last;  // Last target effort of each joint [Nm, ...]
+    Vector7d q;                // Measured position of each joint [rad, ...]
+    Vector7d dq;               // Measured velocity of each joint [rad/s, ...]
 
-    double f_ext_norm;
-    double contact;                     // contact scaling factor (values between 0 and 1)
-    double contact_ramp_increase{0.3};  // parameter for contact scaling factor
-    double contact_force_threshold;     // parameter for contact scaling factor [N]
+    double f_ext_norm;  // Norm of the external (cartesian) forces vector at the EE [N]
+    double contact;     // Contact scaling factor (values between 0 and 1)
+    double contact_ramp_increase{0.3};  // Parameter for contact scaling factor
+    double contact_force_threshold;     // Parameter for contact scaling factor [N]
   };
 
-  FrankaDataContainer master_data_;
-  FrankaDataContainer slave_data_;
+  FrankaDataContainer master_data_;  // Container for data of the master arm
+  FrankaDataContainer slave_data_;   // Container for data of the slave arm
 
-  // positions and velocities for slave arm
-  Vector7d q_target_;
-  Vector7d q_target_last_;
-  Vector7d dq_unsaturated_;
-  Vector7d dq_target_;
-  Vector7d dq_target_last_;
+  Vector7d q_target_;       // Target positions of the slave arm [rad, rad, rad, rad, rad, rad, rad]
+  Vector7d q_target_last_;  // Last target positions of the slave arm [rad, ...]
+  Vector7d dq_unsaturated_;  // Unsaturated target velocities of the slave arm [rad/s, ...]
+  Vector7d dq_target_;       // Target velocities of the slave arm [rad/s, ...]
+  Vector7d dq_target_last_;  // Last target velocities of the slave arm [rad/s, ...]
 
-  Vector7d dq_max_lower_;
-  Vector7d dq_max_upper_;
-  Vector7d ddq_max_lower_;
-  Vector7d ddq_max_upper_;
+  Vector7d dq_max_lower_;              // Lower max velocities of the slave arm [rad/s, ...]
+  Vector7d dq_max_upper_;              // Upper max velocities of the slave arm [rad/s, ...]
+  Vector7d ddq_max_lower_;             // Lower max accelerations of the slave arm [rad/s², ...]
+  Vector7d ddq_max_upper_;             // Upper max accelerations of the slave arm [rad/s², ...]
   double velocity_ramp_shift_{0.25};   // parameter for ramping dq_max and ddq_max [rad]
   double velocity_ramp_increase_{20};  // parameter for ramping dq_max and ddq_max
 
@@ -105,8 +104,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   double force_feedback_idle_{0.5};      // Applied force-feedback, when master arm is not guided
   double force_feedback_guiding_{0.95};  // Applied force-feeback, when master arm is guided
 
-  double decrease_factor_{
-      0.95};  // Filter param, used when (in error state) controlling torques to zero
+  double decrease_factor_{0.95};  // Param, used when (in error state) controlling torques to zero
 
   bool initArm(hardware_interface::RobotHW* robot_hw,
                FrankaDataContainer& arm_data,

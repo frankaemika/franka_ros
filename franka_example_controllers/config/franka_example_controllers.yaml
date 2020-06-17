@@ -148,6 +148,3 @@ teleop_joint_pd_example_controller:
        ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s²]
        ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s²]
        contact_force_threshold: 5.0
-   gripper:
-       grasp_force: 40.0 # [N]
-       move_speed: 0.3 # [m/s]

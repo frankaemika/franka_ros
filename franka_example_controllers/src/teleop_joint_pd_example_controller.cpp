@@ -176,7 +176,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   return true;
 }
 
-void TeleopJointPDExampleController::starting(const ros::Time& time) {
+void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
   franka::RobotState slave_robot_state = slave_data_.state_handle->getRobotState();
   q_target_last_ = Eigen::Map<Vector7d>(slave_robot_state.q.data());
   dq_target_last_.setZero();
@@ -184,7 +184,8 @@ void TeleopJointPDExampleController::starting(const ros::Time& time) {
   slave_data_.tau_target_last.setZero();
 }
 
-void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Duration& period) {
+void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
+                                            const ros::Duration& period) {
   franka::RobotState master_robot_state = master_data_.state_handle->getRobotState();
   franka::RobotState slave_robot_state = slave_data_.state_handle->getRobotState();
   master_data_.q = Eigen::Map<Vector7d>(master_robot_state.q.data());
@@ -228,6 +229,8 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
   if (!master_robot_state.current_errors && !slave_robot_state.current_errors) {
     // Compute force-feedback for the master arm to render the haptic interaction of the slave
     // robot. Add a slight damping to reduce vibrations.
+    // The force feedback is applied when the external forces on the slave arm exceed a threshold.
+    // While the master arm is unguided (not in contact), the force-feedback is reduced.
     Vector7d slave_tau_ext_hat =
         Eigen::Map<Vector7d>(slave_robot_state.tau_ext_hat_filtered.data());
     Vector7d master_damping_torque =
@@ -242,9 +245,6 @@ void TeleopJointPDExampleController::update(const ros::Time& time, const ros::Du
     master_data_.tau_target_last = master_data_.tau_target;
 
     // Compute PD control for the slave arm to track the master's motions.
-    // slave_data_.tau_target =
-    //   slave_stiffness_scaling_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
-    //   slave_d_gain_factor_ * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
     slave_data_.tau_target =
         slave_stiffness_scaling_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
         sqrt(slave_stiffness_scaling_) * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
