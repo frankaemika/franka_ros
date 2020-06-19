@@ -130,7 +130,7 @@ teleop_joint_pd_example_controller:
             - panda_1_joint7
        # WARNING: Varying the following parameters may result in instability!
        d_gains: [1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17]
-       contact_force_threshold: 4.0
+       contact_force_threshold: 4.0 # [N]
    slave:
        arm_id: panda_2
        joint_names:
@@ -149,4 +149,4 @@ teleop_joint_pd_example_controller:
        dq_max_upper: [2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5] # [rad/s]
        ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s²]
        ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s²]
-       contact_force_threshold: 5.0
+       contact_force_threshold: 5.0 # [N]
