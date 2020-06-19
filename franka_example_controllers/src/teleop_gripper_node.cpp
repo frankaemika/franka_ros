@@ -46,7 +46,7 @@ class TeleopGripperClient {
     gripper_homed_ = false;
     if (!pnh.getParam("gripper_homed", gripper_homed_)) {
       ROS_INFO_STREAM(
-          "teleop_joint_pd_example_gripper_node: Could not read parameter gripper_homed. "
+          "teleop_gripper_node: Could not read parameter gripper_homed. "
           "Defaulting to "
           << std::boolalpha << gripper_homed_);
     }
@@ -62,7 +62,7 @@ class TeleopGripperClient {
 
     bool homing_success(false);
     if (!gripper_homed_) {
-      ROS_INFO("teleop_joint_pd_example_gripper_node: Homing Gripper.");
+      ROS_INFO("teleop_gripper_node: Homing Gripper.");
       homing_success = homingGripper_();
     }
 
@@ -75,7 +75,7 @@ class TeleopGripperClient {
                                     &TeleopGripperClient::subscriberCallback_, this);
       } else {
         ROS_ERROR(
-            "teleop_joint_pd_example_gripper_node: Action Server could not be started. Shutting "
+            "teleop_gripper_node: Action Server could not be started. Shutting "
             "down node.");
         return false;
       }
@@ -135,7 +135,7 @@ class TeleopGripperClient {
         return true;
       }
     }
-    ROS_ERROR("teleop_joint_pd_example_gripper_node: HomingAction has timed out.");
+    ROS_ERROR("teleop_gripper_node: HomingAction has timed out.");
     return false;
   }
 
@@ -159,7 +159,7 @@ class TeleopGripperClient {
       if (grasp_client_.waitForResult(ros::Duration(5.0))) {
         grasping_ = true;
       } else {
-        ROS_INFO("teleop_joint_pd_example_gripper_node: GraspAction was not successful.");
+        ROS_INFO("teleop_gripper_node: GraspAction was not successful.");
         stop_client_.sendGoal(franka_gripper::StopGoal());
       }
     } else if (gripper_width > start_pos_opening_ * max_width_ && grasping_) {
@@ -171,7 +171,7 @@ class TeleopGripperClient {
       if (move_client_.waitForResult(ros::Duration(5.0))) {
         grasping_ = false;
       } else {
-        ROS_ERROR("teleop_joint_pd_example_gripper_node: MoveAction was not successful.");
+        ROS_ERROR("teleop_gripper_node: MoveAction was not successful.");
         stop_client_.sendGoal(franka_gripper::StopGoal());
       }
     }
@@ -179,7 +179,7 @@ class TeleopGripperClient {
 };
 
 int main(int argc, char** argv) {
-  ros::init(argc, argv, "teleop_joint_pd_example_gripper_node");
+  ros::init(argc, argv, "teleop_gripper_node");
   ros::NodeHandle pnh("~");
   TeleopGripperClient teleop_gripper_client;
   if (teleop_gripper_client.init(pnh)) {

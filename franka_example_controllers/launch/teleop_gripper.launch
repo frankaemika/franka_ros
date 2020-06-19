@@ -23,7 +23,7 @@
     </include>
   </group>
 
-  <node name="teleop_joint_pd_example_gripper_node" pkg="franka_example_controllers" type="teleop_joint_pd_example_gripper_node" respawn="false" output="screen" >
+  <node name="teleop_gripper_node" pkg="franka_example_controllers" type="teleop_gripper_node" respawn="false" output="screen" >
     <rosparam param="gripper_homed" subst_value="true">$(arg gripper_homed)</rosparam>
     <remap from="~master/joint_states" to="$(arg master_id)/franka_gripper/joint_states"/>
     <remap from="master/homing" to="$(arg master_id)/franka_gripper/homing"/>

@@ -355,8 +355,8 @@ void TeleopJointPDExampleController::teleopParamCallback(
     slave_data_.contact_force_threshold = config.slave_contact_force_threshold;
     master_data_.contact_force_threshold = config.master_contact_force_threshold;
 
-    /// TODO(puxb_st): Think about removing these. Remove dynamic reconfigure from params in config
-    /// file
+    /// TODO(puxb_st): Remove dynamic reconfigure of max velocities and accelerations after testing
+    /// and before merging into master branch
     dq_max_lower_[0] = config.dq_l_1;
     dq_max_lower_[1] = config.dq_l_2;
     dq_max_lower_[2] = config.dq_l_3;

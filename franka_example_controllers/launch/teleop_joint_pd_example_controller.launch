@@ -20,7 +20,7 @@
   </include>
 
   <group ns="$(arg robot_id)">
-    <include file="$(find franka_example_controllers)/launch/teleop_joint_pd_example_gripper.launch" if="$(arg load_gripper)">
+    <include file="$(find franka_example_controllers)/launch/teleop_gripper.launch" if="$(arg load_gripper)">
       <arg name="master_ip" value="$(arg master_ip)" />
       <arg name="slave_ip" value="$(arg slave_ip)" />
       <arg name="master_id" value="panda_1" />

@@ -93,13 +93,13 @@ target_include_directories(franka_example_controllers PUBLIC
   include
 )
 
-add_executable(teleop_joint_pd_example_gripper_node
-  src/teleop_joint_pd_example_gripper_node.cpp
+add_executable(teleop_gripper_node
+  src/teleop_gripper_node.cpp
 )
-target_include_directories(teleop_joint_pd_example_gripper_node PUBLIC
+target_include_directories(teleop_gripper_node PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
-target_link_libraries(teleop_joint_pd_example_gripper_node PUBLIC
+target_link_libraries(teleop_gripper_node PUBLIC
   ${catkin_LIBRARIES}
 )
 
