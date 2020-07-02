@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>franka_control</name>
   <version>0.7.0</version>
   <description>franka_control provides a hardware node to control a Franka Emika research robot</description>
