@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.0 - UNRELEASED
+## 0.7.0 - 2020-07-15
 
 Requires `libfranka` >= 0.7.0
 
@@ -31,6 +31,7 @@ Requires `libfranka` >= 0.7.0
   * Raised minimum CMake version to 3.4 to match `libfranka`.
   * Add rosparam to choose value of `franka::RealtimeConfig`.
   * Fix unused parameter bugs in `FrankaModelHandle` (#78).
+  * Added (experimental) support for ROS Noetic Ninjemys.
 
 ## 0.6.0 - 2018-08-08
 
