@@ -100,7 +100,7 @@ class DualArmCartesianImpedanceExampleController
   ///< Target transformation between the two endeffectors.
   Eigen::Affine3d EEr_T_EEl_;  // NOLINT (readability-identifier-naming)
   ///< Transformation from the centering frame to the left end effector.
-  Eigen::Affine3d EEl_T_C_;
+  Eigen::Affine3d EEl_T_C_{};
 
   ///< Publisher for the centering tracking frame of the coordinated motion.
   realtime_tools::RealtimePublisher<geometry_msgs::PoseStamped> center_frame_pub_;

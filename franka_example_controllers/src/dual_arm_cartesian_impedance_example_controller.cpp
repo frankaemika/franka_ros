@@ -348,7 +348,7 @@ void DualArmCartesianImpedanceExampleController::complianceParamCallback(
 void DualArmCartesianImpedanceExampleController::targetPoseCallback(
     const geometry_msgs::PoseStamped::ConstPtr& msg) {
   try {
-    if (msg->header.frame_id != left_arm_id_ + "_link0") {
+    if (msg->header.frame_id != left_arm_id_ + "_link0") {  // NOLINT
       ROS_ERROR_STREAM(
           "DualArmCartesianImpedanceExampleController: Got pose target with invalid"
           " frame_id "
@@ -358,13 +358,13 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
 
     // Set target for the left robot.
     auto& left_arm_data = arms_data_.at(left_arm_id_);
-    Eigen::Affine3d Ol_T_C;  // NOLINT (readability-identifier-naming)
+    Eigen::Affine3d Ol_T_C{};  // NOLINT (readability-identifier-naming)
     tf::poseMsgToEigen(msg->pose, Ol_T_C);
     Eigen::Affine3d Ol_T_EEl_d =      // NOLINT (readability-identifier-naming)
         Ol_T_C * EEl_T_C_.inverse();  // NOLINT (readability-identifier-naming)
     left_arm_data.position_d_target_ = Ol_T_EEl_d.translation();
     Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
-    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.linear());
+    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.linear());  // NOLINT
     if (last_orientation_d_target.coeffs().dot(new_orientation_target.coeffs()) < 0.0) {
       new_orientation_target.coeffs() << -new_orientation_target.coeffs();
     }
