@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   eigen_conversions
   franka_hw
+  franka_gripper
   geometry_msgs
   hardware_interface
   tf
@@ -44,6 +45,7 @@ catkin_package(
     dynamic_reconfigure
     eigen_conversions
     franka_hw
+    franka_gripper
     geometry_msgs
     hardware_interface
     tf
@@ -66,6 +68,8 @@ add_library(franka_example_controllers
   src/cartesian_impedance_example_controller.cpp
   src/force_example_controller.cpp
   src/dual_arm_cartesian_impedance_example_controller.cpp
+  src/cartesian_pickup_task.cpp
+  src/cartesian_text_write_task.cpp
 )
 
 add_dependencies(franka_example_controllers

@@ -24,6 +24,14 @@ cartesian_pose_example_controller:
     type: franka_example_controllers/CartesianPoseExampleController
     arm_id: panda
 
+cartesian_pickup_task:
+    type: franka_example_controllers/CartesianPickupTask
+    arm_id: panda
+
+cartesian_text_writing_task:
+    type: franka_example_controllers/CartesianTextWritingTask
+    arm_id: panda
+
 elbow_example_controller:
     type: franka_example_controllers/ElbowExampleController
     arm_id: panda
