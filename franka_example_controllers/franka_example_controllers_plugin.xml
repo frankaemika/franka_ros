@@ -14,6 +14,19 @@
       A controller that executes a short motion based on cartesian poses to demonstrate correct usage
     </description>
   </class>
+  <class name="franka_example_controllers/CartesianPickupTask" type="franka_example_controllers::CartesianPickupTask" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a pick up object from point (xy,z) to another based on cartesian poses to demonstrate correct usage
+    </description>
+  </class>
+
+  <class name="franka_example_controllers/CartesianTextWritingTask" type="franka_example_controllers::CartesianTextWritingTask" base_class_type="controller_interface::ControllerBase">
+    <description>
+      A controller that executes a a simple text writing (IAI) based on cartesian poses to demonstrate correct usage
+    </description>
+  </class>
+
+
   <class name="franka_example_controllers/CartesianVelocityExampleController" type="franka_example_controllers::CartesianVelocityExampleController" base_class_type="controller_interface::ControllerBase">
     <description>
       A controller that executes a short motion based on cartesian velocities to demonstrate correct usage
