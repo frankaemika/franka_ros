@@ -1,6 +1,6 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-// Grasp includes (Khesbak)
+// Modified by (M.Khesbak july 2020)
 #include <actionlib/client/simple_action_client.h>
 #include <controller_interface/controller_base.h>
 #include <franka/gripper.h>
