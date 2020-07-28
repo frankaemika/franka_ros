@@ -99,23 +99,29 @@ void CartesianTextWritingTask::update(const ros::Time& /* time */, const ros::Du
   if (line == 6) {  // lifting the pen from the paper
     x_d = 0, y_d = 0, z_d = 0.01;
   }
-  if (line == 7) {  // Puting the pen to the paper to draw next letter
-    x_d = 0, y_d = -0.03, z_d = -0.01;
+  if (line == 7) {  // Moving to draw next letter
+    x_d = 0, y_d = -0.03, z_d = 0;
   }
-  if (line == 8) {  // Line 8 drawing  (the letter  I again)
-    x_d = 0.12, y_d = 0, z_d = 0;
+  if (line == 8) {  // Puting the pen to the paper to draw next letter
+    x_d = 0, y_d = 0, z_d = -0.012;
   }
-  if (line == 9) {  // lifting the pen from the paper
+  if (line == 9) {  // Line 9 drawing  (the letter  I again)
+    x_d = 0.12, y_d = 0, z_d =0;
+  }
+  if (line == 10) {  // lifting the pen from the paper
     x_d = 0, y_d = 0, z_d = 0.01;
   }
-  if (line == 10) {  // moving the pen again to complete the letter  A
-    x_d = -0.06, y_d = 0.1053, z_d = -0.01;
+  if (line == 11) {  // moving the pen again to complete the letter  A
+    x_d = -0.06, y_d = 0.1053, z_d = 0;
   }
-  if (line == 11) {  // completing the letter  A
-    x_d = 0, y_d = -0.047, z_d = 0;
+  if (line == 12) {  // moving the pen to start of the letter  A
+    x_d = 0, y_d = 0, z_d = -0.01;
+  }
+  if (line == 13) {  // completing the letter  A
+    x_d = 0, y_d = -0.049, z_d = 0;
   }
 
-  if (line == 13) {  //   condition for terminating writing (Last step)
+  if (line == 15) {  //   condition for terminating writing (Last step)
     step = 3;
     //exit(0);       
   }
@@ -141,7 +147,7 @@ void CartesianTextWritingTask::update(const ros::Time& /* time */, const ros::Du
     y = yyy + y_d;
     z = zzz + z_d;
 
-    if (line == 12) {  // setting hOME coordinates
+    if (line == 14) {  // setting hOME coordinates
       x = xx_home;
       y = yy_home;
       z = zz_home;
