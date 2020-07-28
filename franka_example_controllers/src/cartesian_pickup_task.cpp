@@ -6,6 +6,7 @@
 #include <franka/gripper.h>
 #include <franka_example_controllers/cartesian_pickup_task.h>
 #include <franka_gripper/GraspAction.h>
+#include <franka_gripper/MoveAction.h>
 #include <hardware_interface/hardware_interface.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/node_handle.h>
@@ -78,16 +79,23 @@ double Pcheck = 0;
 double move = 1;
 // Defining the Grasp action variable (ac).
 actionlib::SimpleActionClient<franka_gripper::GraspAction> ac("franka_gripper/grasp", true);
+// Defining the gripper Move action variable (ac1).
+actionlib::SimpleActionClient<franka_gripper::MoveAction> ac1("franka_gripper/move", true);
 
 void CartesianPickupTask::update(const ros::Time& /* time */, const ros::Duration& period) {
   std::array<double, 16> new_pose;
-  double x, y, z, angle, delta_x, delta_y, delta_z, ampl, f, Grasp_Width;
+  double x, y, z, angle, delta_x, delta_y, delta_z, ampl, f, Grasp_Width, Move_Width;
 
   //   These steps (moves) are the conditions for Arm movement steps and object Grasp and release.
   //   You may add any required steps to do more actions.
   if (move == 1) {
     x = 0.5, y = -0.45, z = 0.13;  // Go to the Object coordinations
     F_x = 1, F_y = 1, F_z = 1;
+    Move_Width = 0.08;
+    franka_gripper::MoveGoal goal1;
+    goal1.width = Move_Width;
+    goal1.speed = 0.1;  //  Closing speed. [m/s]
+    ac1.sendGoal(goal1);
   }
   if (move == 2) {  // go down to pick up the object
     z = 0.09;
