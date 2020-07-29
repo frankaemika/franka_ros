@@ -12,9 +12,9 @@
 #include <ros/init.h>
 #include <ros/node_handle.h>
 #include <sensor_msgs/JointState.h>
-#include <signal.h>
 
 #include <functional>
+#include <memory>
 #include <mutex>
 
 using franka_gripper::GraspAction;
@@ -41,10 +41,10 @@ class TeleopGripperClient {
         move_client_("slave/move", true),
         stop_client_("slave/stop", true){};
 
-  bool init(ros::NodeHandle& pnh) {
+  bool init(const std::shared_ptr<ros::NodeHandle>& pnh) {
     grasping_ = false;
     gripper_homed_ = false;
-    if (!pnh.getParam("gripper_homed", gripper_homed_)) {
+    if (!pnh->getParam("gripper_homed", gripper_homed_)) {
       ROS_INFO_STREAM(
           "teleop_gripper_node: Could not read parameter gripper_homed. "
           "Defaulting to "
@@ -63,7 +63,7 @@ class TeleopGripperClient {
     bool homing_success(false);
     if (!gripper_homed_) {
       ROS_INFO("teleop_gripper_node: Homing Gripper.");
-      homing_success = homingGripper_();
+      homing_success = homingGripper();
     }
 
     if (gripper_homed_ || homing_success) {
@@ -71,8 +71,8 @@ class TeleopGripperClient {
       ros::Duration timeout(2.0);
       if (grasp_client_.waitForServer(timeout) && move_client_.waitForServer(timeout) &&
           stop_client_.waitForServer(timeout)) {
-        master_sub_ = pnh.subscribe("master/joint_states", 1,
-                                    &TeleopGripperClient::subscriberCallback_, this);
+        master_sub_ = pnh->subscribe("master/joint_states", 1,
+                                     &TeleopGripperClient::subscriberCallback, this);
       } else {
         ROS_ERROR(
             "teleop_gripper_node: Action Server could not be started. Shutting "
@@ -113,8 +113,9 @@ class TeleopGripperClient {
       dynamic_reconfigure::Server<franka_example_controllers::teleop_gripper_paramConfig>>
       dynamic_server_teleop_gripper_param_;
 
-  void teleopGripperParamCallback(franka_example_controllers::teleop_gripper_paramConfig& config,
-                                  uint32_t level) {
+  void teleopGripperParamCallback(
+      const franka_example_controllers::teleop_gripper_paramConfig& config,
+      uint32_t /*level*/) {
     if (dynamic_reconfigure_mutex_.try_lock()) {
       grasp_force_ = config.grasp_force;
       move_speed_ = config.move_speed;
@@ -124,7 +125,7 @@ class TeleopGripperClient {
     dynamic_reconfigure_mutex_.unlock();
   };
 
-  bool homingGripper_() {
+  bool homingGripper() {
     if (slave_homing_client_.waitForServer(ros::Duration(2.0)) &&
         master_homing_client_.waitForServer(ros::Duration(2.0))) {
       master_homing_client_.sendGoal(franka_gripper::HomingGoal());
@@ -139,7 +140,7 @@ class TeleopGripperClient {
     return false;
   }
 
-  void subscriberCallback_(const sensor_msgs::JointState& msg) {
+  void subscriberCallback(const sensor_msgs::JointState& msg) {
     std::lock_guard<std::mutex> _(subscriber_mutex_);
     if (!gripper_homed_) {
       // If gripper had to be homed, reset max_width_.
@@ -180,7 +181,7 @@ class TeleopGripperClient {
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "teleop_gripper_node");
-  ros::NodeHandle pnh("~");
+  auto pnh = std::make_shared<ros::NodeHandle>("~");
   TeleopGripperClient teleop_gripper_client;
   if (teleop_gripper_client.init(pnh)) {
     ros::spin();

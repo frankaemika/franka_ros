@@ -346,7 +346,7 @@ double TeleopJointPDExampleController::rampParameter(const double& x,
 
 void TeleopJointPDExampleController::teleopParamCallback(
     franka_example_controllers::teleop_paramConfig& config,
-    uint32_t level) {
+    uint32_t /*level*/) {
   if (dynamic_reconfigure_mutex_.try_lock()) {
     master_damping_scaling_ = config.master_damping_scaling;
     slave_stiffness_scaling_ = config.slave_stiffness_scaling;
