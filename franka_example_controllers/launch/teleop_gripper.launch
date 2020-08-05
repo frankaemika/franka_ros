@@ -25,11 +25,11 @@
 
   <node name="teleop_gripper_node" pkg="franka_example_controllers" type="teleop_gripper_node" respawn="false" output="screen" >
     <rosparam param="gripper_homed" subst_value="true">$(arg gripper_homed)</rosparam>
-    <remap from="~master/joint_states" to="$(arg master_id)/franka_gripper/joint_states"/>
-    <remap from="master/homing" to="$(arg master_id)/franka_gripper/homing"/>
-    <remap from="slave/homing" to="$(arg slave_id)/franka_gripper/homing"/>
-    <remap from="slave/grasp" to="$(arg slave_id)/franka_gripper/grasp"/>
-    <remap from="slave/move" to="$(arg slave_id)/franka_gripper/move"/>
-    <remap from="slave/stop" to="$(arg slave_id)/franka_gripper/stop"/>
+    <remap from="~master/joint_states" to="$(arg master_id)/franka_gripper/joint_states" />
+    <remap from="master/homing" to="$(arg master_id)/franka_gripper/homing" />
+    <remap from="slave/homing" to="$(arg slave_id)/franka_gripper/homing" />
+    <remap from="slave/grasp" to="$(arg slave_id)/franka_gripper/grasp" />
+    <remap from="slave/move" to="$(arg slave_id)/franka_gripper/move" />
+    <remap from="slave/stop" to="$(arg slave_id)/franka_gripper/stop" />
   </node>
 </launch>
