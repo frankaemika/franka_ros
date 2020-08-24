@@ -17,101 +17,87 @@ namespace franka_example_controllers {
 
 bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
+  auto get_joint_params = [&node_handle](const std::string& key, auto& vec) {
+    if (!node_handle.getParam(key, vec) || vec.size() != 7) {
+      ROS_ERROR(
+          "TeleopJointPDExampleController: Invalid or no parameter %s provided, "
+          "aborting controller init!",
+          key.c_str());
+      return false;
+    }
+    return true;
+  };
+
   std::string master_arm_id;
   if (!node_handle.getParam("master/arm_id", master_arm_id)) {
-    ROS_ERROR("TeleopJointPDExampleController: Could not read parameter master_arm_id");
-    return false;
-  }
-  std::vector<std::string> master_joint_names;
-  if (!node_handle.getParam("master/joint_names", master_joint_names) ||
-      master_joint_names.size() != 7) {
     ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no master_joint_names parameters provided, "
-        "aborting controller init!");
+        "TeleopJointPDExampleController: Could not read parameter master_arm_id, aborting "
+        "controller init!");
     return false;
   }
+
+  std::vector<std::string> master_joint_names;
+  if (!get_joint_params("master/joint_names", master_joint_names)) {
+    return false;
+  }
+
   std::string slave_arm_id;
   if (!node_handle.getParam("slave/arm_id", slave_arm_id)) {
-    ROS_ERROR("TeleopJointPDExampleController: Could not read parameter slave_arm_id");
+    ROS_ERROR(
+        "TeleopJointPDExampleController: Could not read parameter slave_arm_id, aborting "
+        "controller init!");
     return false;
   }
+
   std::vector<std::string> slave_joint_names;
-  if (!node_handle.getParam("slave/joint_names", slave_joint_names) ||
-      slave_joint_names.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave_joint_names parameters provided, "
-        "aborting controller init!");
+  if (!get_joint_params("slave/joint_names", slave_joint_names)) {
     return false;
   }
 
   std::vector<double> k_d_master;
-  if (!node_handle.getParam("master/d_gains", k_d_master) || k_d_master.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no master/d_gains provided, aborting "
-        "controller init!");
+  if (!get_joint_params("master/d_gains", k_d_master)) {
     return false;
   }
   k_d_master_ = Eigen::Map<Vector7d>(k_d_master.data());
 
   std::vector<double> k_p_slave;
-  if (!node_handle.getParam("slave/p_gains", k_p_slave) || k_p_slave.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/p_gains provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/p_gains", k_p_slave)) {
     return false;
   }
   k_p_slave_ = Eigen::Map<Vector7d>(k_p_slave.data());
 
   std::vector<double> k_d_slave;
-  if (!node_handle.getParam("slave/d_gains", k_d_slave) || k_d_slave.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/d_gains provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/d_gains", k_d_slave)) {
     return false;
   }
   k_d_slave_ = Eigen::Map<Vector7d>(k_d_slave.data());
 
   std::vector<double> k_dq;
-  if (!node_handle.getParam("slave/drift_comp_gains", k_dq) || k_dq.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/drift_comp_gains provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/drift_comp_gains", k_dq)) {
     return false;
   }
   k_dq_ = Eigen::Map<Vector7d>(k_dq.data());
 
   std::vector<double> dq_max_lower;
-  if (!node_handle.getParam("slave/dq_max_lower", dq_max_lower) || dq_max_lower.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/dq_max_lower provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/dq_max_lower", dq_max_lower)) {
     return false;
   }
   dq_max_lower_ = Eigen::Map<Vector7d>(dq_max_lower.data());
 
   std::vector<double> dq_max_upper;
-  if (!node_handle.getParam("slave/dq_max_upper", dq_max_upper) || dq_max_upper.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/dq_max_upper provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/dq_max_upper", dq_max_upper)) {
     return false;
   }
   dq_max_upper_ = Eigen::Map<Vector7d>(dq_max_upper.data());
 
   std::vector<double> ddq_max_lower;
-  if (!node_handle.getParam("slave/ddq_max_lower", ddq_max_lower) || ddq_max_lower.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/ddq_max_lower provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/ddq_max_lower", ddq_max_lower)) {
     return false;
   }
   ddq_max_lower_ = Eigen::Map<Vector7d>(ddq_max_lower.data());
 
   std::vector<double> ddq_max_upper;
-  if (!node_handle.getParam("slave/ddq_max_upper", ddq_max_upper) || ddq_max_upper.size() != 7) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/ddq_max_upper provided, aborting "
-        "controller init!");
+  if (!get_joint_params("slave/ddq_max_upper", ddq_max_upper)) {
     return false;
   }
   ddq_max_upper_ = Eigen::Map<Vector7d>(ddq_max_upper.data());
@@ -153,22 +139,18 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
         boost::bind(&TeleopJointPDExampleController::teleopParamCallback, this, _1, _2));
 
     // Init for publishers
-    master_target_pub_.init(node_handle, "master_target", 1);
-    master_target_pub_.lock();
-    master_target_pub_.msg_.name.resize(7);
-    master_target_pub_.msg_.position.resize(7);
-    master_target_pub_.msg_.velocity.resize(7);
-    master_target_pub_.msg_.effort.resize(7);
-    master_target_pub_.unlock();
+    auto init_publisher = [&node_handle](auto& publisher, const auto& topic) {
+      publisher.init(node_handle, topic, 1);
+      publisher.lock();
+      publisher.msg_.name.resize(7);
+      publisher.msg_.position.resize(7);
+      publisher.msg_.velocity.resize(7);
+      publisher.msg_.effort.resize(7);
+      publisher.unlock();
+    };
 
-    slave_target_pub_.init(node_handle, "slave_target", 1);
-    slave_target_pub_.lock();
-    slave_target_pub_.msg_.name.resize(7);
-    slave_target_pub_.msg_.position.resize(7);
-    slave_target_pub_.msg_.velocity.resize(7);
-    slave_target_pub_.msg_.effort.resize(7);
-    slave_target_pub_.unlock();
-
+    init_publisher(master_target_pub_, "master_target");
+    init_publisher(slave_target_pub_, "slave_target");
     master_contact_pub_.init(node_handle, "master_contact", 1);
     slave_contact_pub_.init(node_handle, "slave_contact", 1);
   }
