@@ -4,6 +4,8 @@
 
 Requires `libfranka` >= 0.7.0
 
+  * `franka_example_controllers` : Added example for dual-arm teleoperation based on franka_combinable_hw.
+  * `franka_gripper` : Made stopping on shutdown optional.
   * **BREAKING** moved services and action from `franka_control` to `franka_msgs`.
   * **BREAKING** moved Service container from `franka_control` to `franka_hw`.
   * `franka_example_controllers` : Added example for dual-arm control based on franka_combinable_hw.
