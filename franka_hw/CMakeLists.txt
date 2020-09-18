@@ -64,16 +64,6 @@ target_include_directories(franka_hw PUBLIC
   include
 )
 
-## Installation
-install(TARGETS franka_hw
-  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-)
-
 ## franka_control_services
 add_library(franka_control_services
   src/services.cpp
@@ -93,6 +83,7 @@ target_include_directories(franka_control_services SYSTEM PUBLIC
   ${Franka_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
+
 target_include_directories(franka_control_services PUBLIC
   include
 )
@@ -100,6 +91,16 @@ target_include_directories(franka_control_services PUBLIC
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
+
+## Installation
+install(TARGETS franka_hw franka_control_services
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
 ## Tools
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
