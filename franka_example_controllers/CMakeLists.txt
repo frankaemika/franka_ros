@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   eigen_conversions
   franka_hw
+  franka_gripper
   geometry_msgs
   hardware_interface
   tf
@@ -46,6 +47,7 @@ catkin_package(
     dynamic_reconfigure
     eigen_conversions
     franka_hw
+    franka_gripper
     geometry_msgs
     hardware_interface
     tf
