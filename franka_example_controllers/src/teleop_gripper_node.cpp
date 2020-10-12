@@ -27,19 +27,19 @@ using MoveClient = actionlib::SimpleActionClient<MoveAction>;
 using StopClient = actionlib::SimpleActionClient<StopAction>;
 
 /**
- * Client class for teleoperating a slave gripper from a master gripper.
- * By closing the master gripper manually, exceeding a defined width threshold, a ROS
- * action is called and the slave gripper will grasp an object with a configurable force.
- * When opening the master gripper, the slave gripper will also open.
+ * Client class for teleoperating a follower gripper from a leader gripper.
+ * By closing the leader gripper manually, exceeding a defined width threshold, a ROS
+ * action is called and the follower gripper will grasp an object with a configurable force.
+ * When opening the leader gripper, the follower gripper will also open.
  */
 class TeleopGripperClient {
  public:
   TeleopGripperClient()
-      : master_homing_client_("master/homing", true),
-        slave_homing_client_("slave/homing", true),
-        grasp_client_("slave/grasp", true),
-        move_client_("slave/move", true),
-        stop_client_("slave/stop", true){};
+      : leader_homing_client_("leader/homing", true),
+        follower_homing_client_("follower/homing", true),
+        grasp_client_("follower/grasp", true),
+        move_client_("follower/move", true),
+        stop_client_("follower/stop", true){};
 
   bool init(const std::shared_ptr<ros::NodeHandle>& pnh) {
     grasping_ = false;
@@ -71,7 +71,7 @@ class TeleopGripperClient {
       ros::Duration timeout(2.0);
       if (grasp_client_.waitForServer(timeout) && move_client_.waitForServer(timeout) &&
           stop_client_.waitForServer(timeout)) {
-        master_sub_ = pnh->subscribe("master/joint_states", 1,
+        leader_sub_ = pnh->subscribe("leader/joint_states", 1,
                                      &TeleopGripperClient::subscriberCallback, this);
       } else {
         ROS_ERROR(
@@ -95,17 +95,17 @@ class TeleopGripperClient {
   double grasp_epsilon_outer_scaling_{0.9};
   double move_speed_;  // [m/s]
 
-  double start_pos_grasping_{0.5};  // Threshold position of master gripper where to start grasping.
-  double start_pos_opening_{0.6};   // Threshold position of master gripper where to open.
+  double start_pos_grasping_{0.5};  // Threshold position of leader gripper where to start grasping.
+  double start_pos_opening_{0.6};   // Threshold position of leader gripper where to open.
 
-  HomingClient slave_homing_client_;
-  HomingClient master_homing_client_;
+  HomingClient follower_homing_client_;
+  HomingClient leader_homing_client_;
   GraspClient grasp_client_;
   MoveClient move_client_;
   StopClient stop_client_;
 
   std::mutex subscriber_mutex_;
-  ros::Subscriber master_sub_;
+  ros::Subscriber leader_sub_;
 
   std::mutex dynamic_reconfigure_mutex_;
   ros::NodeHandle dynamic_reconfigure_teleop_gripper_param_node_;
@@ -126,13 +126,13 @@ class TeleopGripperClient {
   };
 
   bool homingGripper() {
-    if (slave_homing_client_.waitForServer(ros::Duration(2.0)) &&
-        master_homing_client_.waitForServer(ros::Duration(2.0))) {
-      master_homing_client_.sendGoal(franka_gripper::HomingGoal());
-      slave_homing_client_.sendGoal(franka_gripper::HomingGoal());
+    if (follower_homing_client_.waitForServer(ros::Duration(2.0)) &&
+        leader_homing_client_.waitForServer(ros::Duration(2.0))) {
+      leader_homing_client_.sendGoal(franka_gripper::HomingGoal());
+      follower_homing_client_.sendGoal(franka_gripper::HomingGoal());
 
-      if (master_homing_client_.waitForResult(ros::Duration(10.0)) &&
-          slave_homing_client_.waitForResult(ros::Duration(10.0))) {
+      if (leader_homing_client_.waitForResult(ros::Duration(10.0)) &&
+          follower_homing_client_.waitForResult(ros::Duration(10.0))) {
         return true;
       }
     }

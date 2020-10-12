@@ -24,15 +24,14 @@
 namespace franka_example_controllers {
 
 /**
- * Controller class for ros_control that allows force-feedback teleoperation of a slave arm from a
- * master arm.
- * Smooth tracking is implemented by integrating a velocity signal, which is calculated by limiting
- * and saturating the velocity of the master arm and a drift compensation.
- * The torque control of the slave arm is implemented by a simple PD-controller.
- * The master arm is slightly damped to reduce vibrations.
- * Force-feedback is applied to the master arm when the external forces on the slave arm exceed a
+ * Controller class for ros_control that allows force-feedback teleoperation of a follower arm from
+ * a leader arm. Smooth tracking is implemented by integrating a velocity signal, which is
+ * calculated by limiting and saturating the velocity of the leader arm and a drift compensation.
+ * The torque control of the follower arm is implemented by a simple PD-controller.
+ * The leader arm is slightly damped to reduce vibrations.
+ * Force-feedback is applied to the leader arm when the external forces on the follower arm exceed a
  * configured threshold.
- * While the master arm is unguided (not in contact), the applied force-feedback will be reduced.
+ * While the leader arm is unguided (not in contact), the applied force-feedback will be reduced.
  */
 class TeleopJointPDExampleController : public controller_interface::MultiInterfaceController<
                                            hardware_interface::EffortJointInterface,
@@ -80,29 +79,29 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     double contact_force_threshold;     // Parameter for contact scaling factor [N]
   };
 
-  FrankaDataContainer master_data_;  // Container for data of the master arm
-  FrankaDataContainer slave_data_;   // Container for data of the slave arm
+  FrankaDataContainer leader_data_;    // Container for data of the leader arm
+  FrankaDataContainer follower_data_;  // Container for data of the follower arm
 
-  Vector7d q_target_;       // Target positions of the slave arm [rad, rad, rad, rad, rad, rad, rad]
-  Vector7d q_target_last_;  // Last target positions of the slave arm [rad, ...]
-  Vector7d dq_unsaturated_;  // Unsaturated target velocities of the slave arm [rad/s, ...]
-  Vector7d dq_target_;       // Target velocities of the slave arm [rad/s, ...]
-  Vector7d dq_target_last_;  // Last target velocities of the slave arm [rad/s, ...]
+  Vector7d q_target_;  // Target positions of the follower arm [rad, rad, rad, rad, rad, rad, rad]
+  Vector7d q_target_last_;   // Last target positions of the follower arm [rad, ...]
+  Vector7d dq_unsaturated_;  // Unsaturated target velocities of the follower arm [rad/s, ...]
+  Vector7d dq_target_;       // Target velocities of the follower arm [rad/s, ...]
+  Vector7d dq_target_last_;  // Last target velocities of the follower arm [rad/s, ...]
 
-  Vector7d dq_max_lower_;              // Lower max velocities of the slave arm [rad/s, ...]
-  Vector7d dq_max_upper_;              // Upper max velocities of the slave arm [rad/s, ...]
-  Vector7d ddq_max_lower_;             // Lower max accelerations of the slave arm [rad/s², ...]
-  Vector7d ddq_max_upper_;             // Upper max accelerations of the slave arm [rad/s², ...]
+  Vector7d dq_max_lower_;              // Lower max velocities of the follower arm [rad/s, ...]
+  Vector7d dq_max_upper_;              // Upper max velocities of the follower arm [rad/s, ...]
+  Vector7d ddq_max_lower_;             // Lower max accelerations of the follower arm [rad/s², ...]
+  Vector7d ddq_max_upper_;             // Upper max accelerations of the follower arm [rad/s², ...]
   double velocity_ramp_shift_{0.25};   // parameter for ramping dq_max and ddq_max [rad]
   double velocity_ramp_increase_{20};  // parameter for ramping dq_max and ddq_max
 
-  Vector7d k_p_slave_;   // p-gain for slave arm
-  Vector7d k_d_slave_;   // d-gain for slave arm
-  Vector7d k_d_master_;  // d-gain for master arm
-  Vector7d k_dq_;        // gain for drift compensation in slave arm
+  Vector7d k_p_follower_;  // p-gain for follower arm
+  Vector7d k_d_follower_;  // d-gain for follower arm
+  Vector7d k_d_leader_;    // d-gain for leader arm
+  Vector7d k_dq_;          // gain for drift compensation in follower arm
 
-  double force_feedback_idle_{0.5};      // Applied force-feedback, when master arm is not guided
-  double force_feedback_guiding_{0.95};  // Applied force-feeback, when master arm is guided
+  double force_feedback_idle_{0.5};      // Applied force-feedback, when leader arm is not guided
+  double force_feedback_guiding_{0.95};  // Applied force-feeback, when leader arm is guided
 
   double decrease_factor_{0.95};  // Param, used when (in error state) controlling torques to zero
 
@@ -128,8 +127,8 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   // Debug tool
   bool debug_;
   std::mutex dynamic_reconfigure_mutex_;
-  double master_damping_scaling_{1.0};
-  double slave_stiffness_scaling_{1.0};
+  double leader_damping_scaling_{1.0};
+  double follower_stiffness_scaling_{1.0};
 
   ros::NodeHandle dynamic_reconfigure_teleop_param_node_;
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::teleop_paramConfig>>
@@ -137,14 +136,14 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   void teleopParamCallback(franka_example_controllers::teleop_paramConfig& config, uint32_t level);
 
   franka_hw::TriggerRate publish_rate_{60.0};
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState> master_target_pub_;
-  realtime_tools::RealtimePublisher<sensor_msgs::JointState> slave_target_pub_;
-  realtime_tools::RealtimePublisher<std_msgs::Float64> master_contact_pub_;
-  realtime_tools::RealtimePublisher<std_msgs::Float64> slave_contact_pub_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState> leader_target_pub_;
+  realtime_tools::RealtimePublisher<sensor_msgs::JointState> follower_target_pub_;
+  realtime_tools::RealtimePublisher<std_msgs::Float64> leader_contact_pub_;
+  realtime_tools::RealtimePublisher<std_msgs::Float64> follower_contact_pub_;
 
-  void publishMasterTarget();
-  void publishSlaveTarget();
-  void publishMasterContact();
-  void publishSlaveContact();
+  void publishLeaderTarget();
+  void publishFollowerTarget();
+  void publishLeaderContact();
+  void publishFollowerContact();
 };
 }  // namespace franka_example_controllers

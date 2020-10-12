@@ -28,91 +28,92 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     return true;
   };
 
-  std::string master_arm_id;
-  if (!node_handle.getParam("master/arm_id", master_arm_id)) {
+  std::string leader_arm_id;
+  if (!node_handle.getParam("leader/arm_id", leader_arm_id)) {
     ROS_ERROR(
-        "TeleopJointPDExampleController: Could not read parameter master_arm_id, aborting "
+        "TeleopJointPDExampleController: Could not read parameter leader_arm_id, aborting "
         "controller init!");
     return false;
   }
 
-  std::vector<std::string> master_joint_names;
-  if (!get_joint_params("master/joint_names", master_joint_names)) {
+  std::vector<std::string> leader_joint_names;
+  if (!get_joint_params("leader/joint_names", leader_joint_names)) {
     return false;
   }
 
-  std::string slave_arm_id;
-  if (!node_handle.getParam("slave/arm_id", slave_arm_id)) {
+  std::string follower_arm_id;
+  if (!node_handle.getParam("follower/arm_id", follower_arm_id)) {
     ROS_ERROR(
-        "TeleopJointPDExampleController: Could not read parameter slave_arm_id, aborting "
+        "TeleopJointPDExampleController: Could not read parameter follower_arm_id, aborting "
         "controller init!");
     return false;
   }
 
-  std::vector<std::string> slave_joint_names;
-  if (!get_joint_params("slave/joint_names", slave_joint_names)) {
+  std::vector<std::string> follower_joint_names;
+  if (!get_joint_params("follower/joint_names", follower_joint_names)) {
     return false;
   }
 
-  std::vector<double> k_d_master;
-  if (!get_joint_params("master/d_gains", k_d_master)) {
+  std::vector<double> k_d_leader;
+  if (!get_joint_params("leader/d_gains", k_d_leader)) {
     return false;
   }
-  k_d_master_ = Eigen::Map<Vector7d>(k_d_master.data());
+  k_d_leader_ = Eigen::Map<Vector7d>(k_d_leader.data());
 
-  std::vector<double> k_p_slave;
-  if (!get_joint_params("slave/p_gains", k_p_slave)) {
+  std::vector<double> k_p_follower;
+  if (!get_joint_params("follower/p_gains", k_p_follower)) {
     return false;
   }
-  k_p_slave_ = Eigen::Map<Vector7d>(k_p_slave.data());
+  k_p_follower_ = Eigen::Map<Vector7d>(k_p_follower.data());
 
-  std::vector<double> k_d_slave;
-  if (!get_joint_params("slave/d_gains", k_d_slave)) {
+  std::vector<double> k_d_follower;
+  if (!get_joint_params("follower/d_gains", k_d_follower)) {
     return false;
   }
-  k_d_slave_ = Eigen::Map<Vector7d>(k_d_slave.data());
+  k_d_follower_ = Eigen::Map<Vector7d>(k_d_follower.data());
 
   std::vector<double> k_dq;
-  if (!get_joint_params("slave/drift_comp_gains", k_dq)) {
+  if (!get_joint_params("follower/drift_comp_gains", k_dq)) {
     return false;
   }
   k_dq_ = Eigen::Map<Vector7d>(k_dq.data());
 
   std::vector<double> dq_max_lower;
-  if (!get_joint_params("slave/dq_max_lower", dq_max_lower)) {
+  if (!get_joint_params("follower/dq_max_lower", dq_max_lower)) {
     return false;
   }
   dq_max_lower_ = Eigen::Map<Vector7d>(dq_max_lower.data());
 
   std::vector<double> dq_max_upper;
-  if (!get_joint_params("slave/dq_max_upper", dq_max_upper)) {
+  if (!get_joint_params("follower/dq_max_upper", dq_max_upper)) {
     return false;
   }
   dq_max_upper_ = Eigen::Map<Vector7d>(dq_max_upper.data());
 
   std::vector<double> ddq_max_lower;
-  if (!get_joint_params("slave/ddq_max_lower", ddq_max_lower)) {
+  if (!get_joint_params("follower/ddq_max_lower", ddq_max_lower)) {
     return false;
   }
   ddq_max_lower_ = Eigen::Map<Vector7d>(ddq_max_lower.data());
 
   std::vector<double> ddq_max_upper;
-  if (!get_joint_params("slave/ddq_max_upper", ddq_max_upper)) {
+  if (!get_joint_params("follower/ddq_max_upper", ddq_max_upper)) {
     return false;
   }
   ddq_max_upper_ = Eigen::Map<Vector7d>(ddq_max_upper.data());
 
-  if (!node_handle.getParam("master/contact_force_threshold",
-                            master_data_.contact_force_threshold)) {
+  if (!node_handle.getParam("leader/contact_force_threshold",
+                            leader_data_.contact_force_threshold)) {
     ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no master/contact_force_threshold provided, "
+        "TeleopJointPDExampleController: Invalid or no leader/contact_force_threshold provided, "
         "aborting controller init!");
     return false;
   }
 
-  if (!node_handle.getParam("slave/contact_force_threshold", slave_data_.contact_force_threshold)) {
+  if (!node_handle.getParam("follower/contact_force_threshold",
+                            follower_data_.contact_force_threshold)) {
     ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no slave/contact_force_threshold provided, "
+        "TeleopJointPDExampleController: Invalid or no follower/contact_force_threshold provided, "
         "aborting controller init!");
     return false;
   }
@@ -124,8 +125,8 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
 
   // Init for each arm
-  if (!initArm(robot_hw, master_data_, master_arm_id, master_joint_names) ||
-      !initArm(robot_hw, slave_data_, slave_arm_id, slave_joint_names)) {
+  if (!initArm(robot_hw, leader_data_, leader_arm_id, leader_joint_names) ||
+      !initArm(robot_hw, follower_data_, follower_arm_id, follower_joint_names)) {
     return false;
   }
 
@@ -149,49 +150,49 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
       publisher.unlock();
     };
 
-    init_publisher(master_target_pub_, "master_target");
-    init_publisher(slave_target_pub_, "slave_target");
-    master_contact_pub_.init(node_handle, "master_contact", 1);
-    slave_contact_pub_.init(node_handle, "slave_contact", 1);
+    init_publisher(leader_target_pub_, "leader_target");
+    init_publisher(follower_target_pub_, "follower_target");
+    leader_contact_pub_.init(node_handle, "leader_contact", 1);
+    follower_contact_pub_.init(node_handle, "follower_contact", 1);
   }
 
   return true;
 }
 
 void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
-  franka::RobotState slave_robot_state = slave_data_.state_handle->getRobotState();
-  q_target_last_ = Eigen::Map<Vector7d>(slave_robot_state.q.data());
+  franka::RobotState follower_robot_state = follower_data_.state_handle->getRobotState();
+  q_target_last_ = Eigen::Map<Vector7d>(follower_robot_state.q.data());
   dq_target_last_.setZero();
-  master_data_.tau_target_last.setZero();
-  slave_data_.tau_target_last.setZero();
+  leader_data_.tau_target_last.setZero();
+  follower_data_.tau_target_last.setZero();
 }
 
 void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
                                             const ros::Duration& period) {
-  franka::RobotState master_robot_state = master_data_.state_handle->getRobotState();
-  franka::RobotState slave_robot_state = slave_data_.state_handle->getRobotState();
-  master_data_.q = Eigen::Map<Vector7d>(master_robot_state.q.data());
-  master_data_.dq = Eigen::Map<Vector7d>(master_robot_state.dq.data());
-  slave_data_.q = Eigen::Map<Vector7d>(slave_robot_state.q.data());
-  slave_data_.dq = Eigen::Map<Vector7d>(slave_robot_state.dq.data());
+  franka::RobotState leader_robot_state = leader_data_.state_handle->getRobotState();
+  franka::RobotState follower_robot_state = follower_data_.state_handle->getRobotState();
+  leader_data_.q = Eigen::Map<Vector7d>(leader_robot_state.q.data());
+  leader_data_.dq = Eigen::Map<Vector7d>(leader_robot_state.dq.data());
+  follower_data_.q = Eigen::Map<Vector7d>(follower_robot_state.q.data());
+  follower_data_.dq = Eigen::Map<Vector7d>(follower_robot_state.dq.data());
 
   // Determine contact scaling factor depending on the external cartesian forces applied on the
   // endeffector.
-  Vector6d master_f_ext_hat = Eigen::Map<Vector6d>(master_robot_state.K_F_ext_hat_K.data());
-  master_data_.f_ext_norm = master_f_ext_hat.head(3).norm();
-  master_data_.contact =
-      rampParameter(master_data_.f_ext_norm, 1.0, 0.0, master_data_.contact_force_threshold,
-                    master_data_.contact_ramp_increase);
+  Vector6d leader_f_ext_hat = Eigen::Map<Vector6d>(leader_robot_state.K_F_ext_hat_K.data());
+  leader_data_.f_ext_norm = leader_f_ext_hat.head(3).norm();
+  leader_data_.contact =
+      rampParameter(leader_data_.f_ext_norm, 1.0, 0.0, leader_data_.contact_force_threshold,
+                    leader_data_.contact_ramp_increase);
 
-  Vector6d slave_f_ext_hat = Eigen::Map<Vector6d>(slave_robot_state.K_F_ext_hat_K.data());
-  slave_data_.f_ext_norm = slave_f_ext_hat.head(3).norm();
-  slave_data_.contact =
-      rampParameter(slave_data_.f_ext_norm, 1.0, 0.0, slave_data_.contact_force_threshold,
-                    slave_data_.contact_ramp_increase);
+  Vector6d follower_f_ext_hat = Eigen::Map<Vector6d>(follower_robot_state.K_F_ext_hat_K.data());
+  follower_data_.f_ext_norm = follower_f_ext_hat.head(3).norm();
+  follower_data_.contact =
+      rampParameter(follower_data_.f_ext_norm, 1.0, 0.0, follower_data_.contact_force_threshold,
+                    follower_data_.contact_ramp_increase);
 
-  // Determine max velocities and accelerations of slave arm depending on tracking errors to avoid
-  // jumps and high velocities when starting example.
-  Vector7d q_deviation = (q_target_last_ - master_data_.q).cwiseAbs();
+  // Determine max velocities and accelerations of follower arm depending on tracking errors to
+  // avoid jumps and high velocities when starting example.
+  Vector7d q_deviation = (q_target_last_ - leader_data_.q).cwiseAbs();
   Vector7d dq_max;
   Vector7d ddq_max;
   for (size_t i = 0; i < 7; ++i) {
@@ -201,53 +202,54 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
                                velocity_ramp_shift_, velocity_ramp_increase_);
   }
 
-  // Calculate target postions and velocities for slave arm
-  dq_unsaturated_ = k_dq_.asDiagonal() * (master_data_.q - q_target_last_) + master_data_.dq;
+  // Calculate target postions and velocities for follower arm
+  dq_unsaturated_ = k_dq_.asDiagonal() * (leader_data_.q - q_target_last_) + leader_data_.dq;
   dq_target_ = saturateAndLimit(dq_unsaturated_, dq_target_last_, dq_max, ddq_max, period.toSec());
   dq_target_last_ = dq_target_;
   q_target_ = q_target_last_ + (dq_target_ * period.toSec());
   q_target_last_ = q_target_;
 
-  if (!master_robot_state.current_errors && !slave_robot_state.current_errors) {
-    // Compute force-feedback for the master arm to render the haptic interaction of the slave
+  if (!leader_robot_state.current_errors && !follower_robot_state.current_errors) {
+    // Compute force-feedback for the leader arm to render the haptic interaction of the follower
     // robot. Add a slight damping to reduce vibrations.
-    // The force feedback is applied when the external forces on the slave arm exceed a threshold.
-    // While the master arm is unguided (not in contact), the force-feedback is reduced.
-    Vector7d slave_tau_ext_hat =
-        Eigen::Map<Vector7d>(slave_robot_state.tau_ext_hat_filtered.data());
-    Vector7d master_damping_torque =
-        master_damping_scaling_ * k_d_master_.asDiagonal() * master_data_.dq;
-    Vector7d master_force_feedback =
-        slave_data_.contact *
+    // The force feedback is applied when the external forces on the follower arm exceed a
+    // threshold. While the leader arm is unguided (not in contact), the force-feedback is reduced.
+    Vector7d follower_tau_ext_hat =
+        Eigen::Map<Vector7d>(follower_robot_state.tau_ext_hat_filtered.data());
+    Vector7d leader_damping_torque =
+        leader_damping_scaling_ * k_d_leader_.asDiagonal() * leader_data_.dq;
+    Vector7d leader_force_feedback =
+        follower_data_.contact *
         (force_feedback_idle_ +
-         master_data_.contact * (force_feedback_guiding_ - force_feedback_idle_)) *
-        (-slave_tau_ext_hat);
+         leader_data_.contact * (force_feedback_guiding_ - force_feedback_idle_)) *
+        (-follower_tau_ext_hat);
 
-    master_data_.tau_target = master_force_feedback - master_damping_torque;
-    master_data_.tau_target_last = master_data_.tau_target;
+    leader_data_.tau_target = leader_force_feedback - leader_damping_torque;
+    leader_data_.tau_target_last = leader_data_.tau_target;
 
-    // Compute PD control for the slave arm to track the master's motions.
-    slave_data_.tau_target =
-        slave_stiffness_scaling_ * k_p_slave_.asDiagonal() * (q_target_ - slave_data_.q) +
-        sqrt(slave_stiffness_scaling_) * k_d_slave_.asDiagonal() * (dq_target_ - slave_data_.dq);
-    slave_data_.tau_target_last = slave_data_.tau_target;
+    // Compute PD control for the follower arm to track the leader's motions.
+    follower_data_.tau_target =
+        follower_stiffness_scaling_ * k_p_follower_.asDiagonal() * (q_target_ - follower_data_.q) +
+        sqrt(follower_stiffness_scaling_) * k_d_follower_.asDiagonal() *
+            (dq_target_ - follower_data_.dq);
+    follower_data_.tau_target_last = follower_data_.tau_target;
 
   } else {
     // Control target torques to zero if any arm is in error state.
-    master_data_.tau_target = decrease_factor_ * master_data_.tau_target_last;
-    master_data_.tau_target_last = master_data_.tau_target;
-    slave_data_.tau_target = decrease_factor_ * slave_data_.tau_target_last;
-    slave_data_.tau_target_last = slave_data_.tau_target;
+    leader_data_.tau_target = decrease_factor_ * leader_data_.tau_target_last;
+    leader_data_.tau_target_last = leader_data_.tau_target;
+    follower_data_.tau_target = decrease_factor_ * follower_data_.tau_target_last;
+    follower_data_.tau_target_last = follower_data_.tau_target;
   }
 
-  updateArm(master_data_);
-  updateArm(slave_data_);
+  updateArm(leader_data_);
+  updateArm(follower_data_);
 
   if (debug_ && publish_rate_()) {
-    publishMasterTarget();
-    publishSlaveTarget();
-    publishMasterContact();
-    publishSlaveContact();
+    publishLeaderTarget();
+    publishFollowerTarget();
+    publishLeaderContact();
+    publishFollowerContact();
   }
 }
 
@@ -330,12 +332,12 @@ void TeleopJointPDExampleController::teleopParamCallback(
     franka_example_controllers::teleop_paramConfig& config,
     uint32_t /*level*/) {
   if (dynamic_reconfigure_mutex_.try_lock()) {
-    master_damping_scaling_ = config.master_damping_scaling;
-    slave_stiffness_scaling_ = config.slave_stiffness_scaling;
+    leader_damping_scaling_ = config.leader_damping_scaling;
+    follower_stiffness_scaling_ = config.follower_stiffness_scaling;
     force_feedback_guiding_ = config.force_feedback_guiding;
     force_feedback_idle_ = config.force_feedback_idle;
-    slave_data_.contact_force_threshold = config.slave_contact_force_threshold;
-    master_data_.contact_force_threshold = config.master_contact_force_threshold;
+    follower_data_.contact_force_threshold = config.follower_contact_force_threshold;
+    leader_data_.contact_force_threshold = config.leader_contact_force_threshold;
 
     /// TODO(puxb_st): Remove dynamic reconfigure of max velocities and accelerations after testing
     /// and before merging into master branch
@@ -376,41 +378,41 @@ void TeleopJointPDExampleController::teleopParamCallback(
   dynamic_reconfigure_mutex_.unlock();
 }
 
-void TeleopJointPDExampleController::publishMasterTarget() {
-  if (master_target_pub_.trylock()) {
+void TeleopJointPDExampleController::publishLeaderTarget() {
+  if (leader_target_pub_.trylock()) {
     for (size_t i = 0; i < 7; ++i) {
-      master_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
-      master_target_pub_.msg_.position[i] = 0.0;
-      master_target_pub_.msg_.velocity[i] = 0.0;
-      master_target_pub_.msg_.effort[i] = master_data_.tau_target[i];
+      leader_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
+      leader_target_pub_.msg_.position[i] = 0.0;
+      leader_target_pub_.msg_.velocity[i] = 0.0;
+      leader_target_pub_.msg_.effort[i] = leader_data_.tau_target[i];
     }
-    master_target_pub_.unlockAndPublish();
+    leader_target_pub_.unlockAndPublish();
   }
 }
 
-void TeleopJointPDExampleController::publishSlaveTarget() {
-  if (slave_target_pub_.trylock()) {
+void TeleopJointPDExampleController::publishFollowerTarget() {
+  if (follower_target_pub_.trylock()) {
     for (size_t i = 0; i < 7; ++i) {
-      slave_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
-      slave_target_pub_.msg_.position[i] = q_target_[i];
-      slave_target_pub_.msg_.velocity[i] = dq_target_[i];
-      slave_target_pub_.msg_.effort[i] = slave_data_.tau_target[i];
+      follower_target_pub_.msg_.name[i] = "panda_joint" + std::to_string(i + 1);
+      follower_target_pub_.msg_.position[i] = q_target_[i];
+      follower_target_pub_.msg_.velocity[i] = dq_target_[i];
+      follower_target_pub_.msg_.effort[i] = follower_data_.tau_target[i];
     }
-    slave_target_pub_.unlockAndPublish();
+    follower_target_pub_.unlockAndPublish();
   }
 }
 
-void TeleopJointPDExampleController::publishMasterContact() {
-  if (master_contact_pub_.trylock()) {
-    master_contact_pub_.msg_.data = master_data_.contact;
-    master_contact_pub_.unlockAndPublish();
+void TeleopJointPDExampleController::publishLeaderContact() {
+  if (leader_contact_pub_.trylock()) {
+    leader_contact_pub_.msg_.data = leader_data_.contact;
+    leader_contact_pub_.unlockAndPublish();
   }
 }
 
-void TeleopJointPDExampleController::publishSlaveContact() {
-  if (slave_contact_pub_.trylock()) {
-    slave_contact_pub_.msg_.data = slave_data_.contact;
-    slave_contact_pub_.unlockAndPublish();
+void TeleopJointPDExampleController::publishFollowerContact() {
+  if (follower_contact_pub_.trylock()) {
+    follower_contact_pub_.msg_.data = follower_data_.contact;
+    follower_contact_pub_.unlockAndPublish();
   }
 }
 
