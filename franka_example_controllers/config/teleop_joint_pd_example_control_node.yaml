@@ -26,13 +26,13 @@ panda_1:
   # Configure collision behavior reflexes.
   # The upper torque and upper force thresholds are set to higher values compared to the default ones.
   collision_config:
-    lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
-    upper_torque_thresholds_acceleration: [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
-    lower_torque_thresholds_nominal: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
-    upper_torque_thresholds_nominal:  [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
-    lower_force_thresholds_acceleration: [25.0, 25.0, 25.0, 25.0, 25.0, 25.0]  # [N, N, N, Nm, Nm, Nm]
+    lower_torque_thresholds_acceleration: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
+    upper_torque_thresholds_acceleration: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
+    lower_torque_thresholds_nominal: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
+    upper_torque_thresholds_nominal: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
+    lower_force_thresholds_acceleration: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0]  # [N, N, N, Nm, Nm, Nm]
     upper_force_thresholds_acceleration: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0]  # [N, N, N, Nm, Nm, Nm]
-    lower_force_thresholds_nominal: [25.0, 25.0, 25.0, 25.0, 25.0, 25.0]  # [N, N, N, Nm, Nm, Nm]
+    lower_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
     upper_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
 
 panda_2:
@@ -59,11 +59,11 @@ panda_2:
   # Configure collision behavior reflexes.
   # The upper torque and upper force thresholds are set to higher values compared to the default ones.
   collision_config:
-    lower_torque_thresholds_acceleration: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
-    upper_torque_thresholds_acceleration: [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
-    lower_torque_thresholds_nominal: [20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0]  # [Nm]
-    upper_torque_thresholds_nominal:  [25.0, 25.0,23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
-    lower_force_thresholds_acceleration: [25.0, 25.0, 25.0, 25.0, 25.0, 25.0]  # [N, N, N, Nm, Nm, Nm]
+    lower_torque_thresholds_acceleration: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
+    upper_torque_thresholds_acceleration: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0]  # [Nm]
+    lower_torque_thresholds_nominal: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
+    upper_torque_thresholds_nominal: [25.0, 25.0, 23.0, 23.0, 20.0, 17.5, 15.0] # [Nm]
+    lower_force_thresholds_acceleration: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0]  # [N, N, N, Nm, Nm, Nm]
     upper_force_thresholds_acceleration: [40.0, 40.0, 40.0, 40.0, 40.0, 40.0]  # [N, N, N, Nm, Nm, Nm]
-    lower_force_thresholds_nominal: [25.0, 25.0, 25.0, 25.0, 25.0, 25.0]  # [N, N, N, Nm, Nm, Nm]
+    lower_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
     upper_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
