@@ -6,7 +6,7 @@
   <arg name="robot_id" default="panda_teleop" />
   <arg name="debug" default="false" />
   <arg name="rviz" default="true" />
-  <arg name="load_gripper" default="true" />
+  <arg name="load_gripper" default="false" />
   <arg name="gripper_homed" default="false" />
 
   <remap from="dyn_reconf_teleop_param_node" to="$(arg robot_id)/dyn_reconf_teleop_param_node" />

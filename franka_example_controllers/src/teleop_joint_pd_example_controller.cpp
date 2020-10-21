@@ -339,8 +339,6 @@ void TeleopJointPDExampleController::teleopParamCallback(
     follower_data_.contact_force_threshold = config.follower_contact_force_threshold;
     leader_data_.contact_force_threshold = config.leader_contact_force_threshold;
 
-    /// TODO(puxb_st): Remove dynamic reconfigure of max velocities and accelerations after testing
-    /// and before merging into master branch
     dq_max_lower_[0] = config.dq_l_1;
     dq_max_lower_[1] = config.dq_l_2;
     dq_max_lower_[2] = config.dq_l_3;
