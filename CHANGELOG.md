@@ -1,11 +1,12 @@
 # CHANGELOG
 
-## 0.7.1 - UNRELEASED
+## 0.7.1 - 2020-10-22
 
 Requires `libfranka` >= 0.7.0
 
-  * `franka_example_controllers` : Added example for dual-arm teleoperation based on franka_combinable_hw.
-  * `franka_gripper` : Made stopping on shutdown optional.
+  * `franka_example_controllers`: Added example for dual-arm teleoperation based on `franka_combinable_hw`.
+  * `franka_gripper`: Made stopping on shutdown optional.
+  * `franka_hw`: Added `franka_control_services` install instruction.
 
 ## 0.7.0 - 2020-07-15
 
@@ -13,7 +14,7 @@ Requires `libfranka` >= 0.7.0
 
   * **BREAKING** moved services and action from `franka_control` to `franka_msgs`.
   * **BREAKING** moved Service container from `franka_control` to `franka_hw`.
-  * `franka_example_controllers` : Added example for dual-arm control based on franka_combinable_hw.
+  * `franka_example_controllers`: Added example for dual-arm control based on `franka_combinable_hw`.
   * `franka_description` :
     - Added an example urdf with two panda arms.
     - **BREAKING** Updated collision volumes.
