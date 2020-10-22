@@ -22,6 +22,7 @@
   <depend>dynamic_reconfigure</depend>
   <depend>eigen_conversions</depend>
   <depend>franka_hw</depend>
+  <depend>franka_gripper</depend>
   <depend>geometry_msgs</depend>
   <depend>hardware_interface</depend>
   <depend>tf</depend>

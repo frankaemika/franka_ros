@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.7.1 - UNRELEASED
+
+Requires `libfranka` >= 0.7.0
+
+  * `franka_example_controllers` : Added example for dual-arm teleoperation based on franka_combinable_hw.
+  * `franka_gripper` : Made stopping on shutdown optional.
+
 ## 0.7.0 - 2020-07-15
 
 Requires `libfranka` >= 0.7.0

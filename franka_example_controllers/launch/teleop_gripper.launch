@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="robot_id" />
+  <arg name="leader_ip" />
+  <arg name="follower_ip" />
+  <arg name="leader_id" default="panda_1" />
+  <arg name="follower_id" default="panda_2" />
+  <arg name="gripper_homed" default="false" />
+
+  <group ns="$(arg leader_id)">
+    <include file="$(find franka_gripper)/launch/franka_gripper.launch" >
+      <arg name="robot_ip" value="$(arg leader_ip)" />
+      <arg name="stop_at_shutdown" value="true" />
+      <arg name="arm_id" value="$(arg leader_id)" />
+    </include>
+  </group>
+
+  <group ns="$(arg follower_id)">
+    <include file="$(find franka_gripper)/launch/franka_gripper.launch" >
+      <arg name="robot_ip" value="$(arg follower_ip)" />
+      <arg name="stop_at_shutdown" value="true" />
+      <arg name="arm_id" value="$(arg follower_id)" />
+    </include>
+  </group>
+
+  <node name="teleop_gripper_node" pkg="franka_example_controllers" type="teleop_gripper_node" respawn="false" output="screen" >
+    <rosparam param="gripper_homed" subst_value="true">$(arg gripper_homed)</rosparam>
+    <remap from="~leader/joint_states" to="$(arg leader_id)/franka_gripper/joint_states" />
+    <remap from="leader/homing" to="$(arg leader_id)/franka_gripper/homing" />
+    <remap from="follower/homing" to="$(arg follower_id)/franka_gripper/homing" />
+    <remap from="follower/grasp" to="$(arg follower_id)/franka_gripper/grasp" />
+    <remap from="follower/move" to="$(arg follower_id)/franka_gripper/move" />
+    <remap from="follower/stop" to="$(arg follower_id)/franka_gripper/stop" />
+  </node>
+</launch>
