@@ -11,6 +11,7 @@
 #include <franka_hw/services.h>
 #include <franka_msgs/ErrorRecoveryAction.h>
 #include <ros/ros.h>
+#include <std_srvs/Trigger.h>
 
 using franka_hw::ServiceContainer;
 
@@ -26,33 +27,81 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  franka::Robot& robot = franka_control.robot();
+  auto services = std::make_unique<ServiceContainer>();
+  std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
+      recovery_action_server;
 
   std::atomic_bool has_error(false);
 
-  ServiceContainer services;
-  franka_hw::setupServices(robot, node_handle, services);
+  auto disconnect = [&](std_srvs::Trigger::Request& request,
+                        std_srvs::Trigger::Response& response) -> bool {
+    if (franka_control.controllerActive()) {
+      response.success = false;
+      response.message = "Controller is active. Cannont disconnect while a controller is running.";
+      return true;
+    }
+    response.success = true;
+    response.message = "";
+    services.reset();
+    recovery_action_server.reset();
+    return franka_control.disconnect();
+  };
 
-  actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction> recovery_action_server(
-      node_handle, "error_recovery",
-      [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
-        try {
-          robot.automaticErrorRecovery();
-          has_error = false;
-          recovery_action_server.setSucceeded();
-          ROS_INFO("Recovered from error");
-        } catch (const franka::Exception& ex) {
-          recovery_action_server.setAborted(franka_msgs::ErrorRecoveryResult(), ex.what());
-        }
-      },
-      false);
+  auto connect = [&](std_srvs::Trigger::Request& request,
+                     std_srvs::Trigger::Response& response) -> bool {
+    if (franka_control.connected()) {
+      response.success = false;
+      response.message = "Already conneceted to robot. Cannot connect twice.";
+      return true;
+    }
+    franka_control.connect();
+    std::lock_guard<std::mutex> lock(franka_control.robotMutex());
+    auto& robot = franka_control.robot();
 
-  // Initialize robot state before loading any controller
-  franka_control.update(robot.readOnce());
+    // ServiceContainer services;
+    franka_hw::setupServices(robot, franka_control.robotMutex(), node_handle, *services);
+
+    recovery_action_server =
+        std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
+            node_handle, "error_recovery",
+            [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
+              try {
+                std::lock_guard<std::mutex> lock(franka_control.robotMutex());
+                robot.automaticErrorRecovery();
+                has_error = false;
+                recovery_action_server->setSucceeded();
+                ROS_INFO("Recovered from error");
+              } catch (const franka::Exception& ex) {
+                recovery_action_server->setAborted(franka_msgs::ErrorRecoveryResult(), ex.what());
+              }
+            },
+            false);
+
+    recovery_action_server->start();
+
+    // Initialize robot state before loading any controller
+    franka_control.update(robot.readOnce());
+
+    response.success = true;
+    response.message = "";
+    return true;
+  };
+
+  std_srvs::Trigger::Request request;
+  std_srvs::Trigger::Response response;
+  if (!connect(request, response)) {
+    ROS_ERROR("franka_control_node: Initial connect failed. Shutting down.");
+    return 1;
+  }
+
+  ros::ServiceServer connectServer =
+      node_handle.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
+          "connect", connect);
+  ros::ServiceServer disconnectServer =
+      node_handle.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
+          "disconnect", disconnect);
 
   controller_manager::ControllerManager control_manager(&franka_control, public_node_handle);
-
-  recovery_action_server.start();
 
   // Start background threads for message handling
   ros::AsyncSpinner spinner(4);
@@ -63,8 +112,10 @@ int main(int argc, char** argv) {
 
     // Wait until controller has been activated or error has been recovered
     while (!franka_control.controllerActive() || has_error) {
-      franka_control.update(robot.readOnce());
-
+      if (franka_control.connected()) {
+        std::lock_guard<std::mutex> lock(franka_control.robotMutex());
+        franka_control.update(franka_control.robot().readOnce());
+      }
       ros::Time now = ros::Time::now();
       control_manager.update(now, now - last_time);
       franka_control.checkJointLimits();
@@ -75,25 +126,28 @@ int main(int argc, char** argv) {
       }
     }
 
-    try {
-      // Run control loop. Will exit if the controller is switched.
-      franka_control.control([&](const ros::Time& now, const ros::Duration& period) {
-        if (period.toSec() == 0.0) {
-          // Reset controllers before starting a motion
-          control_manager.update(now, period, true);
-          franka_control.checkJointLimits();
-          franka_control.reset();
-        } else {
-          control_manager.update(now, period);
-          franka_control.checkJointLimits();
-          franka_control.enforceLimits(period);
-        }
-        return ros::ok();
-      });
-    } catch (const franka::ControlException& e) {
-      ROS_ERROR("%s", e.what());
-      has_error = true;
+    if (franka_control.connected()) {
+      try {
+        // Run control loop. Will exit if the controller is switched.
+        franka_control.control([&](const ros::Time& now, const ros::Duration& period) {
+          if (period.toSec() == 0.0) {
+            // Reset controllers before starting a motion
+            control_manager.update(now, period, true);
+            franka_control.checkJointLimits();
+            franka_control.reset();
+          } else {
+            control_manager.update(now, period);
+            franka_control.checkJointLimits();
+            franka_control.enforceLimits(period);
+          }
+          return ros::ok();
+        });
+      } catch (const franka::ControlException& e) {
+        ROS_ERROR("%s", e.what());
+        has_error = true;
+      }
     }
+    ros::Duration(0.001).sleep();
   }
 
   return 0;

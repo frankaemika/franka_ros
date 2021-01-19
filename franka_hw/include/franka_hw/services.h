@@ -1,6 +1,7 @@
 // Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
+#include <mutex>
 #include <vector>
 
 #include <franka/exception.h>
@@ -74,10 +75,14 @@ class ServiceContainer {
  * Sets up all services relevant for a libfranka robot inside a service container.
  *
  * @param[in] robot The libfranka robot for which to set up services interfaces.
+ * @param[in] robot_mutex A mutex to lock before accessing the robot.
  * @param[in] node_handle The NodeHandle in the namespace at which to advertise the services.
  * @param[in] services The container to store the service servers.
  */
-void setupServices(franka::Robot& robot, ros::NodeHandle& node_handle, ServiceContainer& services);
+void setupServices(franka::Robot& robot,
+                   std::mutex& robot_mutex,
+                   ros::NodeHandle& node_handle,
+                   ServiceContainer& services);
 
 /**
  * Callback for the service interface to franka::robot::setCartesianImpedance.

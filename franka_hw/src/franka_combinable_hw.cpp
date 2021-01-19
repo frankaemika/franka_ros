@@ -87,7 +87,7 @@ void FrankaCombinableHW::controlLoop() {
 }
 
 void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_handle) {
-  setupServices(*robot_, node_handle, services_);
+  setupServices(*robot_, robot_mutex_, node_handle, services_);
   recovery_action_server_ =
       std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
           node_handle, "error_recovery",

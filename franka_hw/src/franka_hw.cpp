@@ -176,6 +176,28 @@ bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
   return true;
 }
 
+void FrankaHW::connect() {
+  std::lock_guard<std::mutex> lock(robot_mutex_);
+  if (!robot_) {
+    robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
+  }
+}
+
+bool FrankaHW::disconnect() {
+  if (controllerActive()) {
+    ROS_WARN("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(robot_mutex_);
+  robot_.reset();
+  return true;
+}
+
+bool FrankaHW::connected() {
+  std::lock_guard<std::mutex> lock(robot_mutex_);
+  return robot_ != nullptr;
+}
+
 void FrankaHW::update(const franka::RobotState& robot_state) {
   std::lock_guard<std::mutex> ros_lock(ros_state_mutex_);
   robot_state_ros_ = robot_state;
@@ -183,6 +205,10 @@ void FrankaHW::update(const franka::RobotState& robot_state) {
 
 bool FrankaHW::controllerActive() const noexcept {
   return controller_active_;
+}
+
+std::mutex& FrankaHW::robotMutex() {
+  return robot_mutex_;
 }
 
 void FrankaHW::control(
@@ -508,7 +534,7 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 }
 
 void FrankaHW::initRobot() {
-  robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
+  connect();
   model_ = std::make_unique<franka::Model>(robot_->loadModel());
   robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
                                collision_config_.upper_torque_thresholds_acceleration,
