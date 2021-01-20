@@ -38,44 +38,33 @@ int main(int argc, char** argv) {
 
   auto disconnect = [&](std_srvs::Trigger::Request& request,
                         std_srvs::Trigger::Response& response) -> bool {
-    ROS_INFO("franka_control, disconnect, db1");
     if (franka_control.controllerActive()) {
       response.success = false;
       response.message = "Controller is active. Cannont disconnect while a controller is running.";
       return true;
     }
-    ROS_INFO("franka_control, disconnect, db2");
     response.success = true;
     response.message = "";
     services.reset();
-    ROS_INFO("franka_control, disconnect, db3");
     recovery_action_server.reset();
-    ROS_INFO("franka_control, disconnect, db4");
     auto result = franka_control.disconnect();
-    ROS_INFO("franka_control, disconnect, db5 finished destroying robot");
     return true;
   };
 
   auto connect = [&](std_srvs::Trigger::Request& request,
                      std_srvs::Trigger::Response& response) -> bool {
-    ROS_INFO("Connect db1");
     if (franka_control.connected()) {
       response.success = false;
       response.message = "Already conneceted to robot. Cannot connect twice.";
       return true;
     }
-    ROS_INFO("Connect db2");
     franka_control.connect();
-    ROS_INFO("Connect db3");
     std::lock_guard<std::mutex> lock(franka_control.robotMutex());
-    ROS_INFO("Connect db4");
     auto& robot = franka_control.robot();
-    ROS_INFO("Connect db5");
 
     // ServiceContainer services;
     services = std::make_unique<ServiceContainer>();
     franka_hw::setupServices(robot, franka_control.robotMutex(), node_handle, *services);
-    ROS_INFO("Connect db6");
 
     recovery_action_server =
         std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
@@ -92,14 +81,11 @@ int main(int argc, char** argv) {
               }
             },
             false);
-    ROS_INFO("Connect db7");
 
     recovery_action_server->start();
 
-    ROS_INFO("Connect db8");
     // Initialize robot state before loading any controller
     franka_control.update(robot.readOnce());
-    ROS_INFO("Connect db9");
     response.success = true;
     response.message = "";
     return true;
@@ -139,7 +125,6 @@ int main(int argc, char** argv) {
           franka_control.checkJointLimits();
           last_time = now;
         } catch (const std::logic_error& e) {
-          ROS_WARN_THROTTLE(1, "franka_control_node: Can't access robot: " + e.what());
         }
       } else {
         std::this_thread::sleep_for(10ms);
