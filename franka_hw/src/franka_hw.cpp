@@ -359,8 +359,9 @@ void FrankaHW::checkJointLimits() {
 
 franka::Robot& FrankaHW::robot() const {
   if (!initialized_ || !robot_) {
-    std::string error_message = "FrankaHW: Attempt to access robot before initialization!";
-    ROS_ERROR("%s", error_message.c_str());
+    std::string error_message = !initialized_
+                                    ? "FrankaHW: Attempt to access robot before initialization!"
+                                    : "FrankaHW: Attempt to access disconnected robot!";
     throw std::logic_error(error_message);
   }
   return *robot_;

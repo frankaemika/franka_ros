@@ -220,6 +220,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
    * Getter for the libfranka robot instance.
+   * @throw std::logic_error in case the robot is not connected or the class in not initialized
    */
   virtual franka::Robot& robot() const;
 
