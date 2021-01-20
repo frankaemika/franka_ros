@@ -45,6 +45,16 @@ class FrankaCombinableHW : public FrankaHW {
   void initROSInterfaces(ros::NodeHandle& robot_hw_nh) override;
 
   /**
+   * TODO(jaeh_ch)
+   */
+  void connect() override;
+
+  /**
+   * TODO(jaeh_ch)
+   */
+  bool disconnect() override;
+
+  /**
    * Runs the currently active controller in a realtime loop. If no controller is active, the
    * function immediately exits.
    *
@@ -158,13 +168,14 @@ class FrankaCombinableHW : public FrankaHW {
   void controlLoop();
 
   std::unique_ptr<std::thread> control_loop_thread_;
-  ServiceContainer services_;
+  std::unique_ptr<ServiceContainer> services_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
       recovery_action_server_;
   std::atomic_bool has_error_{false};
   ros::Publisher has_error_pub_;
   std::atomic_bool error_recovered_{false};
   std::atomic_bool controller_needs_reset_{false};
+  ros::NodeHandle* robot_hw_nh_{};  // Nodehandle in the robot hw namespace
 };
 
 }  // namespace franka_hw

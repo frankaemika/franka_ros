@@ -8,6 +8,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <ros/node_handle.h>
 #include <ros/time.h>
+#include <std_srvs/Trigger.h>
 
 #include <franka_hw/franka_combinable_hw.h>
 #include <franka_hw/franka_hw.h>
@@ -51,6 +52,35 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
           },
           false);
   combined_recovery_action_server_->start();
+
+  connect_server_ =
+      robot_hw_nh.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
+          "connect",
+          [this](std_srvs::Trigger::Request& request,
+                 std_srvs::Trigger::Response& response) -> bool {
+            try {
+              connect();
+              response.success = true;
+              response.message = "";
+            } catch (const std::exception& e) {
+              response.success = false;
+              response.message =
+                  "FrankaCombinedHW: Failed to connect robot: " + std::string(e.what());
+            }
+            return true;
+          });
+
+  disconnect_server_ =
+      robot_hw_nh.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
+          "disconnect",
+          [this](std_srvs::Trigger::Request& request,
+                 std_srvs::Trigger::Response& response) -> bool {
+            response.success = disconnect();
+            response.message =
+                response.success ? "" : "FrankaCombinedHW: Failed to disconnect robots.";
+            return true;
+          });
+
   return success;
 }
 
@@ -106,6 +136,36 @@ void FrankaCombinedHW::triggerError() {
       ROS_ERROR("FrankaCombinedHW: dynamic_cast from RobotHW to FrankaCombinableHW failed.");
     }
   }
+}
+
+void FrankaCombinedHW::connect() {
+  for (const auto& robot_hw : robot_hw_list_) {
+    auto* franka_combinable_hw_ptr = dynamic_cast<franka_hw::FrankaCombinableHW*>(robot_hw.get());
+    if (franka_combinable_hw_ptr != nullptr && !franka_combinable_hw_ptr->connected()) {
+      franka_combinable_hw_ptr->connect();
+    }
+  }
+}
+
+bool FrankaCombinedHW::disconnect() {
+  // Ensure all robots are disconnectable (not running a controller)
+  for (const auto& robot_hw : robot_hw_list_) {
+    auto* franka_combinable_hw_ptr = dynamic_cast<franka_hw::FrankaCombinableHW*>(robot_hw.get());
+    if (franka_combinable_hw_ptr != nullptr && franka_combinable_hw_ptr->controllerActive()) {
+      return false;
+    }
+  }
+
+  // Only if all robots are in fact disconnectable, disconnecting them.
+  // Fail and abort if any robot cannot be disconnected.
+  for (const auto& robot_hw : robot_hw_list_) {
+    auto* franka_combinable_hw_ptr = dynamic_cast<franka_hw::FrankaCombinableHW*>(robot_hw.get());
+    if (franka_combinable_hw_ptr != nullptr && !franka_combinable_hw_ptr->disconnect()) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace franka_hw

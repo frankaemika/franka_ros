@@ -50,9 +50,21 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
    */
   bool controllerNeedsReset();
 
+  /**
+   * TODO(jaeh_ch)
+   */
+  void connect();
+
+  /**
+   *
+   */
+  bool disconnect();
+
  protected:
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
       combined_recovery_action_server_;
+  ros::ServiceServer connect_server_;
+  ros::ServiceServer disconnect_server_;
 
  private:
   void handleError();

@@ -26,6 +26,7 @@ void FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& robot_hw_nh) {
   publishErrorState(has_error_);
 
   setupServicesAndActionServers(robot_hw_nh);
+  robot_hw_nh_ = &robot_hw_nh;
 }
 
 void FrankaCombinableHW::initRobot() {
@@ -57,10 +58,13 @@ void FrankaCombinableHW::controlLoop() {
       checkJointLimits();
 
       {
-        std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
-        std::lock_guard<std::mutex> libfranka_state_lock(libfranka_state_mutex_);
-        robot_state_libfranka_ = robot_->readOnce();
-        robot_state_ros_ = robot_->readOnce();
+        std::lock_guard<std::mutex> robot_lock(robot_mutex_);
+        if (connected()) {
+          std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
+          std::lock_guard<std::mutex> libfranka_state_lock(libfranka_state_mutex_);
+          robot_state_libfranka_ = robot_->readOnce();
+          robot_state_ros_ = robot_->readOnce();
+        }
       }
 
       if (!ros::ok()) {
@@ -76,7 +80,9 @@ void FrankaCombinableHW::controlLoop() {
     }
 
     try {
-      control();
+      if (connected()) {
+        control();
+      }
     } catch (const franka::ControlException& e) {
       // Reflex could be caught and it needs to wait for automatic error recovery
       ROS_ERROR("%s: %s", arm_id_.c_str(), e.what());
@@ -87,12 +93,20 @@ void FrankaCombinableHW::controlLoop() {
 }
 
 void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_handle) {
-  setupServices(*robot_, robot_mutex_, node_handle, services_);
+  if (!connected()) {
+    ROS_ERROR(
+        "FrankaCombinableHW::setupServicesAndActionServers: Cannot create services without "
+        "connected robot.");
+    return;
+  }
+  services_ = std::make_unique<ServiceContainer>();
+  setupServices(*robot_, robot_mutex_, node_handle, *services_);
   recovery_action_server_ =
       std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
           node_handle, "error_recovery",
           [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
             try {
+              std::lock_guard<std::mutex> lock(robot_mutex_);
               robot_->automaticErrorRecovery();
               // error recovered => reset controller
               if (has_error_) {
@@ -107,6 +121,25 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
           },
           false);
   recovery_action_server_->start();
+}
+
+void FrankaCombinableHW::connect() {
+  if (!robot_hw_nh_) {
+    ROS_ERROR("FrankaCombinableHW::connect() Robot node handle is not set. Cannot connect robot.");
+    return;
+  }
+  FrankaHW::connect();
+  setupServicesAndActionServers(*robot_hw_nh_);
+}
+
+bool FrankaCombinableHW::disconnect() {
+  if (controllerActive()) {
+    ROS_WARN("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    return false;
+  }
+  recovery_action_server_.reset();
+  services_.reset();
+  return FrankaHW::disconnect();
 }
 
 void FrankaCombinableHW::control(  // NOLINT (google-default-arguments)
