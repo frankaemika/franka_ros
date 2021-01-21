@@ -18,7 +18,6 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
  public:
   /**
    * Creates an instance of CombinedFrankaHW.
-   *
    */
   FrankaCombinedHW();
 
@@ -51,12 +50,13 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   bool controllerNeedsReset();
 
   /**
-   * TODO(jaeh_ch)
+   * Calls connect on all hardware classes that are of type `FrankaCombinableHW`.
    */
   void connect();
 
   /**
-   * TODO(jaeh_ch)
+   * Tries to disconnect on all hardware classes that are of type `FrankaCombinableHW`.
+   * @return true if successful, false otherwise.
    */
   bool disconnect();
 

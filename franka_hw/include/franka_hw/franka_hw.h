@@ -87,17 +87,21 @@ class FrankaHW : public hardware_interface::RobotHW {
   virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   /**
-   * TODO(jaeh_ch)
+   * Create a libfranka robot, connecting the hardware class to the master controller.
+   * Note: While the robot is connected, no DESK based tasks can be executed.
    */
   virtual void connect();
 
   /**
-   * TODO(jaeh_ch)
+   * Tries to disconnect the hardware class from the robot, freeing it for e.g. DESK-based tasks.
+   * Note: Disconnecting is only possible when no controller is actively running.
+   * @return true if successfully disconnected, false otherwise.
    */
   virtual bool disconnect();
 
   /**
-   * TODO(jaeh_ch)
+   * Checks whether the hardware class is connected to a robot.
+   * @return true if connected, false otherwise.
    */
   virtual bool connected();
 
@@ -225,7 +229,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   virtual franka::Robot& robot() const;
 
   /**
-   * TODO(jaeh_ch)
+   * Getter for the mutex protecting access to the libfranka::robot class. This enables thread-safe
+   * access to robot().
+   * @return A reference to the robot mutex.
    */
   virtual std::mutex& robotMutex();
 
