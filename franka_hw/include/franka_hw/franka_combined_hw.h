@@ -56,7 +56,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   void connect();
 
   /**
-   *
+   * TODO(jaeh_ch)
    */
   bool disconnect();
 

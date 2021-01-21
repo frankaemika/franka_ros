@@ -60,9 +60,11 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
                  std_srvs::Trigger::Response& response) -> bool {
             try {
               connect();
+              ROS_INFO("FrankaCombinedHW: successfully connected robots.");
               response.success = true;
               response.message = "";
             } catch (const std::exception& e) {
+              ROS_INFO("Combined: exception %s", e.what());
               response.success = false;
               response.message =
                   "FrankaCombinedHW: Failed to connect robot: " + std::string(e.what());
@@ -76,8 +78,15 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
           [this](std_srvs::Trigger::Request& request,
                  std_srvs::Trigger::Response& response) -> bool {
             response.success = disconnect();
-            response.message =
-                response.success ? "" : "FrankaCombinedHW: Failed to disconnect robots.";
+            response.message = response.success
+                                   ? "FrankaCombinedHW: Successfully disconnected robots."
+                                   : "FrankaCombinedHW: Failed to disconnect robots. All active "
+                                     "controllers must be stopped before you can disconnect.";
+            if (response.success) {
+              ROS_INFO("%s", response.message.c_str());
+            } else {
+              ROS_ERROR("%s", response.message.c_str());
+            }
             return true;
           });
 
