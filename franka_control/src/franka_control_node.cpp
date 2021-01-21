@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
         } catch (const std::logic_error& e) {
         }
       } else {
-        std::this_thread::sleep_for(10ms);
+        std::this_thread::sleep_for(1ms);
       }
 
       if (!ros::ok()) {
