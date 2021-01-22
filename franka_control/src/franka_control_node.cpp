@@ -62,7 +62,6 @@ int main(int argc, char** argv) {
     std::lock_guard<std::mutex> lock(franka_control.robotMutex());
     auto& robot = franka_control.robot();
 
-    // ServiceContainer services;
     services = std::make_unique<ServiceContainer>();
     franka_hw::setupServices(robot, franka_control.robotMutex(), node_handle, *services);
 
