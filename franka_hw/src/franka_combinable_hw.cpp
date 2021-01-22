@@ -68,7 +68,6 @@ void FrankaCombinableHW::controlLoop() {
         checkJointLimits();
       }
       {
-        // ROS_INFO("FrankaCombinableHW::controlLoop lock robot %s", arm_id_.c_str());
         std::lock_guard<std::mutex> robot_lock(robot_mutex_);
         if (connected()) {
           std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
@@ -145,7 +144,7 @@ void FrankaCombinableHW::connect() {
 
 bool FrankaCombinableHW::disconnect() {
   if (controllerActive()) {
-    ROS_WARN("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    ROS_ERROR("FrankaHW: Rejected attempt to disconnect while controller is still running!");
     return false;
   }
   recovery_action_server_.reset();
