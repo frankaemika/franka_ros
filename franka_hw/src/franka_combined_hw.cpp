@@ -78,7 +78,7 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
           [this](std_srvs::Trigger::Request& request,
                  std_srvs::Trigger::Response& response) -> bool {
             bool success = disconnect();
-            response.success = success ? 0u : 1u;
+            response.success = success ? 1u : 0u;
             response.message = success
                                    ? "FrankaCombinedHW: Successfully disconnected robots."
                                    : "FrankaCombinedHW: Failed to disconnect robots. All active "

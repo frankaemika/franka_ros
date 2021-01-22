@@ -39,22 +39,22 @@ int main(int argc, char** argv) {
   auto disconnect = [&](std_srvs::Trigger::Request& request,
                         std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.controllerActive()) {
-      response.success = 1u;
+      response.success = 0u;
       response.message = "Controller is active. Cannont disconnect while a controller is running.";
       return true;
     }
-    response.success = 0u;
-    response.message = "";
     services.reset();
     recovery_action_server.reset();
     auto result = franka_control.disconnect();
+    response.success = result ? 1u : 0u;
+    response.message = result ? "" : "Failed to disconnect robot.";
     return true;
   };
 
   auto connect = [&](std_srvs::Trigger::Request& request,
                      std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.connected()) {
-      response.success = 1u;
+      response.success = 0u;
       response.message = "Already conneceted to robot. Cannot connect twice.";
       return true;
     }
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 
     // Initialize robot state before loading any controller
     franka_control.update(robot.readOnce());
-    response.success = 0u;
+    response.success = 1u;
     response.message = "";
     return true;
   };

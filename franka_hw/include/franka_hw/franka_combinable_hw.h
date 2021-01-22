@@ -188,7 +188,7 @@ class FrankaCombinableHW : public FrankaHW {
   ros::Publisher has_error_pub_;
   std::atomic_bool error_recovered_{false};
   std::atomic_bool controller_needs_reset_{false};
-  ros::NodeHandle robot_hw_nh_{};  // Nodehandle in the robot hw namespace
+  ros::NodeHandle robot_hw_nh_;
 };
 
 }  // namespace franka_hw

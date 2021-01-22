@@ -185,7 +185,7 @@ void FrankaHW::connect() {
 
 bool FrankaHW::disconnect() {
   if (controllerActive()) {
-    ROS_WARN("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    ROS_ERROR("FrankaHW: Rejected attempt to disconnect while controller is still running!");
     return false;
   }
   std::lock_guard<std::mutex> lock(robot_mutex_);
@@ -346,9 +346,9 @@ void FrankaHW::checkJointLimits() {
                               << k_joint_name << " for joint limit interfaces");
       }
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
-      ROS_WARN_STREAM_ONCE("FrankaHW::checkJointLimits Could not get joint handle " << k_joint_name
-                                                                                    << " .\n"
-                                                                                    << ex.what());
+      ROS_ERROR_STREAM_ONCE("FrankaHW::checkJointLimits Could not get joint handle " << k_joint_name
+                                                                                     << " .\n"
+                                                                                     << ex.what());
       return;
     }
   }
