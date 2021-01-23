@@ -1,31 +1,33 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="panda_gazebo" params="arm_id">
-        <xacro:macro name="arm_gazebo" params="link">
+    <xacro:macro name="arm_gazebo" params="arm_id">
+        <xacro:macro name="arm_link_gazebo" params="link">
             <gazebo reference="${link}">
                 <material>Gazebo/White</material>
                 <mu1>0.2</mu1>
                 <mu2>0.2</mu2>
             </gazebo>
         </xacro:macro>
-        <xacro:macro name="hand_gazebo" params="link">
+        <xacro:arm_link_gazebo link="${arm_id}_link0"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link1"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link2"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link3"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link4"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link5"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link6"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link7"/>
+        <xacro:arm_link_gazebo link="${arm_id}_link8"/>
+    </xacro:macro>
+    <xacro:macro name="hand_gazebo" params="arm_id">
+        <xacro:macro name="hand_link_gazebo" params="link">
             <gazebo reference="${link}">
                 <material>Gazebo/Grey</material>
                 <mu1>0.2</mu1>
                 <mu2>0.2</mu2>
             </gazebo>
         </xacro:macro>
-        <xacro:arm_gazebo link="${arm_id}_link0"/>
-        <xacro:arm_gazebo link="${arm_id}_link1"/>
-        <xacro:arm_gazebo link="${arm_id}_link2"/>
-        <xacro:arm_gazebo link="${arm_id}_link3"/>
-        <xacro:arm_gazebo link="${arm_id}_link4"/>
-        <xacro:arm_gazebo link="${arm_id}_link5"/>
-        <xacro:arm_gazebo link="${arm_id}_link6"/>
-        <xacro:hand_gazebo link="${arm_id}_link7"/>
-        <xacro:hand_gazebo link="${arm_id}_link8"/>
-        <xacro:hand_gazebo link="${arm_id}_hand"/>
-        <xacro:hand_gazebo link="${arm_id}_rightfinger"/>
-        <xacro:hand_gazebo link="${arm_id}_leftfinger"/>
+        <xacro:hand_link_gazebo link="${arm_id}_hand"/>
+        <xacro:hand_link_gazebo link="${arm_id}_rightfinger"/>
+        <xacro:hand_link_gazebo link="${arm_id}_leftfinger"/>
     </xacro:macro>
 </robot>
