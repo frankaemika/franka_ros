@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
+  <xacro:arg name="use_gazebo_sim" default="false"/>
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 
     use_cylinder_collision_model:='true'">
@@ -61,13 +62,13 @@
           </geometry>
         </collision>
       </xacro:unless>
-      <!-- for simulation -->
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="0.68" />
-        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
-      </inertial>
-      <!-- end for simulation -->
+      <xacro:if value="$(arg use_gazebo_sim)">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <mass value="0.68" />
+          <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+        </inertial>
+      </xacro:if>
     </link>
     <link name="${ns}_leftfinger">
       <visual>
@@ -82,13 +83,13 @@
           </geometry>
         </collision>
       </xacro:unless>
-      <!-- for simulation -->
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0" />
-        <mass value="0.01" />
-        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
-      </inertial>
-      <!-- end for simulation -->
+      <xacro:if value="$(arg use_gazebo_sim)">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0" />
+          <mass value="0.01" />
+          <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+        </inertial>
+      </xacro:if>
     </link>
     <link name="${ns}_rightfinger">
       <visual>
@@ -105,13 +106,13 @@
           </geometry>
         </collision>
       </xacro:unless>
-      <!-- for simulation -->
-      <inertial>
-        <origin xyz="0 0 0" rpy="0 0 ${pi}" />
-        <mass value="0.01" />
-        <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
-      </inertial>
-      <!-- end for simulation -->
+      <xacro:if value="$(arg use_gazebo_sim)">
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+          <mass value="0.01" />
+          <inertia ixx="0.1" ixy="0.0" ixz="0.0" iyy="0.1" iyz="0.0" izz="0.1" />
+        </inertial>
+      </xacro:if>
    </link>
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
@@ -126,7 +127,9 @@
       <origin xyz="0 0 0.0584" rpy="0 0 0"/>
       <axis xyz="0 -1 0"/>
       <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
-      <mimic joint="${ns}_finger_joint1" />
+      <xacro:unless value="$(arg use_gazebo_sim)">
+        <mimic joint="${ns}_finger_joint1" />
+      </xacro:unless>
     </joint>
   </xacro:macro>
 </robot>

@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+  <xacro:arg name="use_gazebo_sim" default="false"/>
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- arm_id: Namespace of the panda arm. Serves to differentiate between arms in case of multiple instances. -->
   <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description'
@@ -9,9 +10,9 @@
         <parent link="${connected_to}"/>
         <child link="${arm_id}_link0"/>
         <origin rpy="${rpy}" xyz="${xyz}"/>
-        <!-- for simulation -->
-        <dynamics damping="1.0"/>
-        <!-- end for simulation -->
+        <xacro:if value="$(arg use_gazebo_sim)">
+          <dynamics damping="1.0"/>
+        </xacro:if>
       </joint>
     </xacro:unless>
     <xacro:macro name="arm_link" params="name visual_mesh:='' collision_mesh:='' mass:='0.0'
@@ -36,13 +37,13 @@
             </geometry>
           </collision>
         </xacro:unless>
-        <!-- for simulation -->
-        <inertial>
-          <origin xyz="0 0 0" rpy="0 0 0" />
-          <mass value="${mass}"/>
-          <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
-        </inertial>
-        <!-- end for simulation -->
+        <xacro:if value="$(arg use_gazebo_sim)">
+          <inertial>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <mass value="${mass}"/>
+            <inertia ixx="0.3" ixy="0.0" ixz="0.0" iyy="0.3" iyz="0.0" izz="0.3" />
+          </inertial>
+        </xacro:if>
       </link>
     </xacro:macro>
 

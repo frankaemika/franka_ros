@@ -25,7 +25,4 @@
         <xacro:joint_control transmission="${arm_id}_leftfinger" joint="${arm_id}_finger_joint1" motor="${arm_id}_finger_joint1"/>
         <xacro:joint_control transmission="${arm_id}_rightfinger" joint="${arm_id}_finger_joint2" motor="${arm_id}_finger_joint2"/>
     </xacro:macro>
-    <gazebo>
-        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so"/>
-    </gazebo>
 </robot>
