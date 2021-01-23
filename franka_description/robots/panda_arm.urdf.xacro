@@ -1,14 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
   <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro" />
-  <xacro:panda_arm safety_distance="0.03"/>
 
   <!-- for simulation -->
   <xacro:include filename="$(find franka_description)/robots/panda.gazebo.xacro"/>
-  <xacro:include filename="panda.transmission.xacro"/>
+  <xacro:include filename="$(find franka_description)/robots/panda.control.xacro"/>
   <!-- end for simulation -->
 
-  <xacro:panda_arm />
+  <xacro:panda_arm xyz="0 0 0" rpy="0 0 0" connected_to="world" arm_id="panda" safety_distance="0.03"/>
 
   <!-- for simulation -->
   <xacro:arg name="robot_name" default="panda"/>

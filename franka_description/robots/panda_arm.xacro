@@ -3,7 +3,6 @@
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- arm_id: Namespace of the panda arm. Serves to differentiate between arms in case of multiple instances. -->
   <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0">
-    <link name="world" />
     <xacro:unless value="${not connected_to}">
       <joint name="virtual_joint" type="fixed">
         <parent link="${connected_to}"/>
@@ -315,4 +314,3 @@
       rpy="0 0 0" xyz="0 0 0.107"/>
   </xacro:macro>
 </robot>
-
