@@ -286,7 +286,7 @@
         </cylinder_collision_model>
       </xacro:arm_link>
     </xacro:if>
-    <!-- Empty content must be passed as block parameters cannot be defaulted-->
+    <!-- Empty content must be passed for cylinder_collision_model as block parameters cannot be defaulted-->
     <xacro:unless value="${use_cylinder_collision_model}">
       <xacro:arm_link name="${arm_id}_link0" visual_mesh="package://${description_pkg}/meshes/visual/link0.dae"
         collision_mesh="package://${description_pkg}/meshes/collision/link0.stl" mass="3.06"
