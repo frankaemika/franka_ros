@@ -87,6 +87,25 @@ class FrankaHW : public hardware_interface::RobotHW {
   virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   /**
+   * Create a libfranka robot, connecting the hardware class to the master controller.
+   * Note: While the robot is connected, no DESK based tasks can be executed.
+   */
+  virtual void connect();
+
+  /**
+   * Tries to disconnect the hardware class from the robot, freeing it for e.g. DESK-based tasks.
+   * Note: Disconnecting is only possible when no controller is actively running.
+   * @return true if successfully disconnected, false otherwise.
+   */
+  virtual bool disconnect();
+
+  /**
+   * Checks whether the hardware class is connected to a robot.
+   * @return true if connected, false otherwise.
+   */
+  virtual bool connected();
+
+  /**
    * Runs the currently active controller in a realtime loop.
    *
    * If no controller is active, the function immediately exits. When running a controller,
@@ -205,8 +224,16 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
    * Getter for the libfranka robot instance.
+   * @throw std::logic_error in case the robot is not connected or the class in not initialized
    */
   virtual franka::Robot& robot() const;
+
+  /**
+   * Getter for the mutex protecting access to the libfranka::robot class. This enables thread-safe
+   * access to robot().
+   * @return A reference to the robot mutex.
+   */
+  virtual std::mutex& robotMutex();
 
   /**
    * Checks a command for NaN values.
@@ -493,6 +520,7 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_ros_;
   franka::CartesianVelocities velocity_cartesian_command_ros_;
 
+  std::mutex robot_mutex_;
   std::unique_ptr<franka::Robot> robot_;
   std::unique_ptr<franka::Model> model_;
 

@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   hardware_interface
   joint_limits_interface
   roscpp
+  std_srvs
   pluginlib
   urdf
   franka_msgs
@@ -30,6 +31,7 @@ catkin_package(
     hardware_interface
     joint_limits_interface
     roscpp
+    std_srvs
     pluginlib
     urdf
     franka_msgs

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_control</name>
-  <version>0.7.1</version>
+  <version>0.7.2</version>
   <description>franka_control provides a hardware node to control a Franka Emika research robot</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -25,6 +25,7 @@
   <depend>sensor_msgs</depend>
   <depend>tf2_msgs</depend>
   <depend>tf</depend>
+  <depend>std_srvs</depend>
 
   <exec_depend>franka_description</exec_depend>
   <exec_depend>franka_gripper</exec_depend>
