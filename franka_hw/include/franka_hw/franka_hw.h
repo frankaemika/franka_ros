@@ -121,7 +121,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
   virtual void control(
-      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const;
+      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback);
 
   /**
    * Updates the controller interfaces from the given robot state.

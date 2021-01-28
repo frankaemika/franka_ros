@@ -153,7 +153,7 @@ bool FrankaCombinableHW::disconnect() {
 }
 
 void FrankaCombinableHW::control(  // NOLINT (google-default-arguments)
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) const {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) {
   if (!controller_active_) {
     return;
   }
@@ -244,6 +244,7 @@ bool FrankaCombinableHW::setRunFunction(const ControlMode& requested_control_mod
   if (requested_control_mode == ControlMode::JointTorque) {
     run_function_ = [this, limit_rate, cutoff_frequency](franka::Robot& robot,
                                                          Callback /*callback*/) {
+      std::lock_guard<std::mutex> lock(robot_mutex_);
       robot.control(std::bind(&FrankaCombinableHW::libfrankaUpdateCallback<franka::Torques>, this,
                               std::cref(effort_joint_command_libfranka_), std::placeholders::_1,
                               std::placeholders::_2),

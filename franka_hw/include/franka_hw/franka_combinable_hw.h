@@ -82,7 +82,7 @@ class FrankaCombinableHW : public FrankaHW {
                    ros_callback =  // NOLINT (google-default-arguments)
                [](const ros::Time&, const ros::Duration&) {
                  return true;
-               }) const override;  // NOLINT (google-default-arguments)
+               }) override;  // NOLINT (google-default-arguments)
 
   /**
    * Checks whether a requested controller can be run, based on the resources and interfaces it
