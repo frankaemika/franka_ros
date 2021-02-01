@@ -211,7 +211,7 @@ std::mutex& FrankaHW::robotMutex() {
 }
 
 void FrankaHW::control(
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) {
   if (!initialized_) {
     ROS_ERROR("FrankaHW: Call to control before initialization!");
     return;
@@ -222,6 +222,7 @@ void FrankaHW::control(
 
   franka::Duration last_time = robot_state_ros_.time;
 
+  std::lock_guard<std::mutex> lock(robot_mutex_);
   run_function_(*robot_, [this, ros_callback, &last_time](const franka::RobotState& robot_state,
                                                           franka::Duration time_step) {
     if (last_time != robot_state.time) {

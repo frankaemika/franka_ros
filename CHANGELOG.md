@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## 0.7.2 - UNRELEASED
+## 0.8.0 - UNRELEASED
 
 Requires `libfranka` >= 0.7.0
 
   * `franka_hw`, `franka_combinable_hw`, `franka_combined_hw`: Added service interface to disconnect and reconnect when no controller is active. This allows mixing FCI- and DESK-based application without stopping the according hardware nodes.
+  * **BREAKING** `franka_hw`, `franka_combinable_hw` method control() now is non-const to allow locking a mutex member variable.
 
 ## 0.7.1 - 2020-10-22
 
