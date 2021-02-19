@@ -180,6 +180,14 @@ void FrankaHW::connect() {
   std::lock_guard<std::mutex> lock(robot_mutex_);
   if (!robot_) {
     robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
+    robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
+                                 collision_config_.upper_torque_thresholds_acceleration,
+                                 collision_config_.lower_torque_thresholds_nominal,
+                                 collision_config_.upper_torque_thresholds_nominal,
+                                 collision_config_.lower_force_thresholds_acceleration,
+                                 collision_config_.upper_force_thresholds_acceleration,
+                                 collision_config_.lower_force_thresholds_nominal,
+                                 collision_config_.upper_force_thresholds_nominal);
   }
 }
 
@@ -538,14 +546,6 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 void FrankaHW::initRobot() {
   connect();
   model_ = std::make_unique<franka::Model>(robot_->loadModel());
-  robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
-                               collision_config_.upper_torque_thresholds_acceleration,
-                               collision_config_.lower_torque_thresholds_nominal,
-                               collision_config_.upper_torque_thresholds_nominal,
-                               collision_config_.lower_force_thresholds_acceleration,
-                               collision_config_.upper_force_thresholds_acceleration,
-                               collision_config_.lower_force_thresholds_nominal,
-                               collision_config_.upper_force_thresholds_nominal);
   update(robot_->readOnce());
 }
 
