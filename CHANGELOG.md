@@ -2,10 +2,17 @@
 
 ## 0.8.0 - UNRELEASED
 
-Requires `libfranka` >= 0.7.0
+Requires `libfranka` >= 0.8.0
 
-  * `franka_hw`, `franka_combinable_hw`, `franka_combined_hw`: Added service interface to disconnect and reconnect when no controller is active. This allows mixing FCI- and DESK-based application without stopping the according hardware nodes.
-  * **BREAKING** `franka_hw`, `franka_combinable_hw` method control() now is non-const to allow locking a mutex member variable.
+  * `franka_hw`, `franka_combinable_hw`, `franka_combined_hw`: Added service interface to disconnect
+    and reconnect when no controller is active. This allows mixing FCI- and DESK-based application
+    without stopping the according hardware nodes.
+  * **BREAKING** `franka_hw`, `franka_combinable_hw` method control() now is non-const to allow
+    locking a mutex member variable.
+  * **BREAKING** Change behavior of `franka_msgs/SetEEFrame`. Previously, this method would set
+    the flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
+    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `franka_ros` with `SetEEFrame`
+    and defaults to the identity transformation.
 
 ## 0.7.1 - 2020-10-22
 
