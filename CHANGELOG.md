@@ -13,6 +13,7 @@ Requires `libfranka` >= 0.8.0
     the flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
     `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `franka_ros` with `SetEEFrame`
     and defaults to the identity transformation.
+  * Add `F_T_NE` and `NE_T_EE` to `franka_msgs/FrankaState`.
 
 ## 0.7.1 - 2020-10-22
 
