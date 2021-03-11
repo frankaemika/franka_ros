@@ -6,7 +6,7 @@
   <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description'
     connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0 use_cylinder_collision_model:='true'">
     <xacro:unless value="${not connected_to}">
-      <joint name="virtual_joint" type="fixed">
+      <joint name="${arm_id}_virtual_joint" type="fixed">
         <parent link="${connected_to}"/>
         <child link="${arm_id}_link0"/>
         <origin rpy="${rpy}" xyz="${xyz}"/>
