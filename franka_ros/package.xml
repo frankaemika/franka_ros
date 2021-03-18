@@ -15,7 +15,6 @@
 
   <exec_depend>franka_control</exec_depend>
   <exec_depend>franka_description</exec_depend>
-  <exec_depend>franka_example_controllers</exec_depend>
   <exec_depend>franka_gripper</exec_depend>
   <exec_depend>franka_hw</exec_depend>
   <exec_depend>franka_msgs</exec_depend>
