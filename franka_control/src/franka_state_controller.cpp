@@ -442,7 +442,7 @@ void FrankaStateController::publishJointStates(const ros::Time& time) {
 void FrankaStateController::publishTransforms(const ros::Time& time) {
   if (publisher_transforms_.trylock()) {
     tf::StampedTransform stamped_transform(convertArrayToTf(robot_state_.F_T_NE), time,
-                                           arm_id_ + "_link8", arm_id_ + "_EE");
+                                           arm_id_ + "_link8", arm_id_ + "_NE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
