@@ -37,6 +37,8 @@ float64[16] O_T_EE
 float64[16] O_T_EE_d
 float64[16] O_T_EE_c
 float64[16] F_T_EE
+float64[16] F_T_NE
+float64[16] NE_T_EE
 float64[16] EE_T_K
 float64 time
 float64 control_command_success_rate
