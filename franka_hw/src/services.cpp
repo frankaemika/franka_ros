@@ -72,9 +72,9 @@ void setJointImpedance(franka::Robot& robot,
 void setEEFrame(franka::Robot& robot,
                 const franka_msgs::SetEEFrame::Request& req,
                 franka_msgs::SetEEFrame::Response& /* res */) {
-  std::array<double, 16> F_T_EE;  // NOLINT [readability-identifier-naming]
-  std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
-  robot.setEE(F_T_EE);
+  std::array<double, 16> NE_T_EE;  // NOLINT [readability-identifier-naming]
+  std::copy(req.NE_T_EE.cbegin(), req.NE_T_EE.cend(), NE_T_EE.begin());
+  robot.setEE(NE_T_EE);
 }
 
 void setKFrame(franka::Robot& robot,
