@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
     franka_control.update(robot.readOnce());
   };
 
-  auto disconnectHandler = [&](std_srvs::Trigger::Request& request,
-                               std_srvs::Trigger::Response& response) -> bool {
+  auto disconnect_handler = [&](std_srvs::Trigger::Request& request,
+                                std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.controllerActive()) {
       response.success = 0u;
       response.message = "Controller is active. Cannont disconnect while a controller is running.";
@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
     return true;
   };
 
-  auto connectHandler = [&](std_srvs::Trigger::Request& request,
-                            std_srvs::Trigger::Response& response) -> bool {
+  auto connect_handler = [&](std_srvs::Trigger::Request& request,
+                             std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.connected()) {
       response.success = 0u;
       response.message = "Already connected to robot. Cannot connect twice.";
@@ -100,10 +100,10 @@ int main(int argc, char** argv) {
 
   ros::ServiceServer connect_server =
       node_handle.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
-          "connect", connectHandler);
+          "connect", connect_handler);
   ros::ServiceServer disconnect_server =
       node_handle.advertiseService<std_srvs::Trigger::Request, std_srvs::Trigger::Response>(
-          "disconnect", disconnectHandler);
+          "disconnect", disconnect_handler);
 
   controller_manager::ControllerManager control_manager(&franka_control, public_node_handle);
 
