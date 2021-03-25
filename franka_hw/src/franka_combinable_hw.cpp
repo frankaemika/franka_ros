@@ -114,27 +114,34 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
   services_ = std::make_unique<ServiceContainer>();
   setupServices(*robot_, robot_mutex_, node_handle, *services_);
 
-  recovery_action_server_ =
-      std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
-          node_handle, "error_recovery",
-          [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
-            try {
-              ROS_INFO("FrankaCombinableHW::recovery lock robot %s", arm_id_.c_str());
-              std::lock_guard<std::mutex> lock(robot_mutex_);
-              robot_->automaticErrorRecovery();
-              // error recovered => reset controller
-              if (has_error_) {
-                error_recovered_ = true;
+  if (!recovery_action_server_) {
+    recovery_action_server_ =
+        std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
+            node_handle, "error_recovery",
+            [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
+              if (connected()) {
+                try {
+                  std::lock_guard<std::mutex> lock(robot_mutex_);
+                  robot_->automaticErrorRecovery();
+                  // error recovered => reset controller
+                  if (has_error_) {
+                    error_recovered_ = true;
+                  }
+                  has_error_ = false;
+                  publishErrorState(has_error_);
+                  recovery_action_server_->setSucceeded();
+                } catch (const franka::Exception& ex) {
+                  recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(),
+                                                      ex.what());
+                }
+              } else {
+                recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(),
+                                                    "Cannot recovery robot while disconnected.");
               }
-              has_error_ = false;
-              publishErrorState(has_error_);
-              recovery_action_server_->setSucceeded();
-            } catch (const franka::Exception& ex) {
-              recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(), ex.what());
-            }
-          },
-          false);
-  recovery_action_server_->start();
+            },
+            false);
+    recovery_action_server_->start();
+  }
 }
 
 void FrankaCombinableHW::connect() {
@@ -219,7 +226,9 @@ bool FrankaCombinableHW::hasError() const noexcept {
 }
 
 void FrankaCombinableHW::resetError() {
-  robot_->automaticErrorRecovery();
+  if (connected()) {
+    robot_->automaticErrorRecovery();
+  }
   // error recovered => reset controller
   if (has_error_) {
     error_recovered_ = true;

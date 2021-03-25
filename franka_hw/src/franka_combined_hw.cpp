@@ -30,11 +30,10 @@ bool FrankaCombinedHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_
               for (const auto& robot_hw : robot_hw_list_) {
                 auto* franka_combinable_hw_ptr =
                     dynamic_cast<franka_hw::FrankaCombinableHW*>(robot_hw.get());
-                if (franka_combinable_hw_ptr != nullptr) {
+                if (franka_combinable_hw_ptr != nullptr && franka_combinable_hw_ptr->connected()) {
                   franka_combinable_hw_ptr->resetError();
                 } else {
-                  ROS_ERROR(
-                      "FrankaCombinedHW: dynamic_cast from RobotHW to FrankaCombinableHW failed.");
+                  ROS_ERROR("FrankaCombinedHW: failed to reset error. Is the robot connected?");
                   is_recovering_ = false;
                   combined_recovery_action_server_->setAborted(
                       franka_msgs::ErrorRecoveryResult(),
