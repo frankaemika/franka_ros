@@ -120,7 +120,6 @@ void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_han
             node_handle, "error_recovery",
             [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
               if (connected()) {
-                ROS_INFO("Robot is connected so I'm trying to recover");
                 try {
                   std::lock_guard<std::mutex> lock(robot_mutex_);
                   robot_->automaticErrorRecovery();
