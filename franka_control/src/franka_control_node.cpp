@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
                                 std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.controllerActive()) {
       response.success = 0u;
-      response.message = "Controller is active. Cannont disconnect while a controller is running.";
+      response.message = "Controller is active. Cannot disconnect while a controller is running.";
       return true;
     }
     services.reset();
