@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
   };
 
   auto connectHandler = [&](std_srvs::Trigger::Request& request,
-                     std_srvs::Trigger::Response& response) -> bool {
+                            std_srvs::Trigger::Response& response) -> bool {
     if (franka_control.connected()) {
       response.success = 0u;
       response.message = "Already connected to robot. Cannot connect twice.";
