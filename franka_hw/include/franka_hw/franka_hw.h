@@ -522,7 +522,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   std::mutex robot_mutex_;
   std::unique_ptr<franka::Robot> robot_;
-  std::unique_ptr<franka::Model> model_;
+  franka::ModelPtr model_;
 
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;
