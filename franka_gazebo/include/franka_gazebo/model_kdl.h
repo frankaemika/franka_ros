@@ -45,7 +45,7 @@ class ModelKDL : public franka_hw::ModelBase {
       const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
       double m_total,
       const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
-      const noexcept override;
+      const override;
 
   std::array<double, 7> coriolis(
       const std::array<double, 7>& q,
@@ -53,13 +53,13 @@ class ModelKDL : public franka_hw::ModelBase {
       const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
       double m_total,
       const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
-      const noexcept override;
+      const override;
 
   std::array<double, 7> gravity(
       const std::array<double, 7>& q,
       double m_total,
       const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
-      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const noexcept override;
+      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const override;
 
  private:
   std::unique_ptr<KDL::ChainDynParam> dynamicsSolver_;

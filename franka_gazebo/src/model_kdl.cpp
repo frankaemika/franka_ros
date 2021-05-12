@@ -78,9 +78,8 @@ std::array<double, 16> ModelKDL::pose(
 
   int error = this->kinematicsSolver_->JntToCart(kq, kp, segment(this->chain, frame));
   if (error != KDL::SolverI::E_NOERROR) {
-    ROS_WARN_STREAM(
-        "KDL forward kinematics pose calculation failed with error: " << strError(error));
-    return {};
+    throw std::logic_error("KDL forward kinematics pose calculation failed with error: " +
+                           strError(error));
   }
   Eigen::Matrix4d p;
   // clang-format off
@@ -103,9 +102,7 @@ std::array<double, 42> ModelKDL::bodyJacobian(
     const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
     const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
-  ROS_WARN("Not Implemented bodyJacobian()");
-  return {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  throw std::runtime_error("Not implemented: bodyJacobian()");
 }
 
 std::array<double, 42> ModelKDL::zeroJacobian(
@@ -120,8 +117,7 @@ std::array<double, 42> ModelKDL::zeroJacobian(
 
   int error = this->jacobianSolver_->JntToJac(kq, J, segment(this->chain, frame));
   if (error != KDL::SolverI::E_NOERROR) {
-    ROS_WARN_STREAM("KDL zero jacobian calculation failed with error: " << strError(error));
-    return {};
+    throw std::logic_error("KDL zero jacobian calculation failed with error: " + strError(error));
   }
 
   std::array<double, 42> result;
@@ -135,15 +131,14 @@ std::array<double, 49> ModelKDL::mass(
     const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
     double m_total,
     const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
-    const noexcept {
+    const {
   KDL::JntArray kq;
   KDL::JntSpaceInertiaMatrix M(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   int error = this->dynamicsSolver_->JntToMass(kq, M);
   if (error != KDL::SolverI::E_NOERROR) {
-    ROS_WARN_STREAM("KDL mass calculation failed with error: " << strError(error));
-    return {};
+    throw std::logic_error("KDL mass calculation failed with error: " + strError(error));
   }
 
   std::array<double, 49> result;
@@ -158,15 +153,14 @@ std::array<double, 7> ModelKDL::coriolis(
     const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
     double m_total,
     const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
-    const noexcept {
+    const {
   KDL::JntArray kq, kdq, kc(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
   kdq.data = Eigen::Matrix<double, 7, 1>(dq.data());
 
   int error = this->dynamicsSolver_->JntToCoriolis(kq, kdq, kc);
   if (error != KDL::SolverI::E_NOERROR) {
-    ROS_WARN_STREAM("KDL coriolis calculation failed with error: " << strError(error));
-    return {};
+    throw std::logic_error("KDL coriolis calculation failed with error: " + strError(error));
   }
 
   std::array<double, 7> result;
@@ -179,14 +173,13 @@ std::array<double, 7> ModelKDL::gravity(
     const std::array<double, 7>& q,
     double m_total,
     const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 3>& gravity_earth) const noexcept {
+    const std::array<double, 3>& gravity_earth) const {
   KDL::JntArray kq, kg(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   int error = this->dynamicsSolver_->JntToGravity(kq, kg);
   if (error != KDL::SolverI::E_NOERROR) {
-    ROS_WARN_STREAM("KDL gravity calculation failed with error: " << strError(error));
-    return {};
+    throw std::logic_error("KDL gravity calculation failed with error: " + strError(error));
   }
 
   std::array<double, 7> result;
