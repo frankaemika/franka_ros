@@ -31,8 +31,7 @@ class ModelBase {
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */
-  virtual std::array<double, 16> pose(franka::Frame frame,
-                                      const franka::RobotState& robot_state) const {
+  std::array<double, 16> pose(franka::Frame frame, const franka::RobotState& robot_state) const {
     return pose(frame, robot_state.q, robot_state.F_T_EE, robot_state.EE_T_K);
   }
 
@@ -65,8 +64,8 @@ class ModelBase {
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  virtual std::array<double, 42> bodyJacobian(franka::Frame frame,
-                                              const franka::RobotState& robot_state) const {
+  std::array<double, 42> bodyJacobian(franka::Frame frame,
+                                      const franka::RobotState& robot_state) const {
     return bodyJacobian(frame, robot_state.q, robot_state.F_T_EE, robot_state.EE_T_K);
   }
 
@@ -99,8 +98,8 @@ class ModelBase {
    *
    * @return Vectorized 6x7 Jacobian, column-major.
    */
-  virtual std::array<double, 42> zeroJacobian(franka::Frame frame,
-                                              const franka::RobotState& robot_state) const {
+  std::array<double, 42> zeroJacobian(franka::Frame frame,
+                                      const franka::RobotState& robot_state) const {
     return zeroJacobian(frame, robot_state.q, robot_state.F_T_EE, robot_state.EE_T_K);
   }
 
@@ -130,7 +129,7 @@ class ModelBase {
    *
    * @return Vectorized 7x7 mass matrix, column-major.
    */
-  virtual std::array<double, 49> mass(const franka::RobotState& robot_state) const {
+  std::array<double, 49> mass(const franka::RobotState& robot_state) const {
     return mass(robot_state.q, robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
   }
 
@@ -162,7 +161,7 @@ class ModelBase {
    *
    * @return Coriolis force vector.
    */
-  virtual std::array<double, 7> coriolis(const franka::RobotState& robot_state) const {
+  std::array<double, 7> coriolis(const franka::RobotState& robot_state) const {
     return coriolis(robot_state.q, robot_state.dq, robot_state.I_total, robot_state.m_total,
                     robot_state.F_x_Ctotal);
   }
@@ -201,7 +200,7 @@ class ModelBase {
    *
    * @return Gravity vector.
    */
-  virtual std::array<double, 7> gravity(
+  std::array<double, 7> gravity(
       const std::array<double, 7>& q,
       double m_total,
       const std::array<double, 3>& F_x_Ctotal  // NOLINT(readability-identifier-naming)
@@ -234,7 +233,7 @@ class ModelBase {
    *
    * @return Gravity vector.
    */
-  virtual std::array<double, 7> gravity(const franka::RobotState& robot_state) const {
+  std::array<double, 7> gravity(const franka::RobotState& robot_state) const {
     return gravity(robot_state.q, robot_state.m_total, robot_state.F_x_Ctotal, {0, 0, -9.81});
   }
 
@@ -246,8 +245,8 @@ class ModelBase {
    *
    * @return Gravity vector.
    */
-  virtual std::array<double, 7> gravity(const franka::RobotState& robot_state,
-                                        const std::array<double, 3>& gravity_earth) const {
+  std::array<double, 7> gravity(const franka::RobotState& robot_state,
+                                const std::array<double, 3>& gravity_earth) const {
     return gravity(robot_state.q, robot_state.m_total, robot_state.F_x_Ctotal, gravity_earth);
   }
 };
