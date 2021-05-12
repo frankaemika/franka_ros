@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   joint_limits_interface
   urdf
   angles
+  franka_hw
 )
 
 find_package(Franka 0.7.0 REQUIRED)
@@ -36,6 +37,7 @@ catkin_package(
     joint_limits_interface
     urdf
     angles
+    franka_hw
   INCLUDE_DIRS include
   LIBRARIES franka_hw_sim
   DEPENDS Franka
