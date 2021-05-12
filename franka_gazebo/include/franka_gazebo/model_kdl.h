@@ -1,7 +1,7 @@
 #pragma once
 
-#include <franka/model.h>
 #include <franka/robot_state.h>
+#include <franka_hw/model_base.h>
 #include <urdf/model.h>
 #include <array>
 #include <kdl/chaindynparam.hpp>
@@ -15,7 +15,7 @@ namespace franka_gazebo {
 /**
  * Calculates poses of joints and dynamic properties of the robot.
  */
-class ModelKDL : public franka::Model {
+class ModelKDL : public franka_hw::ModelBase {
  public:
   ModelKDL(const urdf::Model& model, std::string root, std::string tip);
 

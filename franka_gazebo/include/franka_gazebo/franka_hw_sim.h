@@ -1,11 +1,10 @@
 #pragma once
 
-#include <franka/model.h>
 #include <franka/robot_state.h>
 #include <franka_gazebo/joint.h>
-#include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <franka_hw/model_base.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -51,7 +50,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   franka_hw::FrankaModelInterface fmi_;
 
   franka::RobotState robot_state_;
-  franka::ModelPtr model_;
+  std::unique_ptr<franka_hw::ModelBase> model_;
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
