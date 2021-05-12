@@ -148,15 +148,50 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
           if (this->joints_.count(joint.name_) == 0) {
             ROS_ERROR_STREAM_NAMED(
                 "franka_hw_sim", "Cannot create franka_hw/FrankaModelInterface for robot '"
-                                     << robot_namespace + "_model' because the specified joint '"
+                                     << robot_namespace << "_model' because the specified joint '"
                                      << joint.name_
                                      << "' in the <transmission> tag cannot be found in the URDF");
             return false;
           }
         }
-        // TODO: Interprete root + tip from the transmissions and pass to KDL
-        this->fmi_.registerHandle(franka_hw::FrankaModelHandle(robot_namespace + "_model",
-                                                               this->model_, this->robot_state_));
+        auto root = std::find_if(
+            transmission.joints_.begin(), transmission.joints_.end(),
+            [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
+        if (root == transmission.joints_.end()) {
+          ROS_ERROR_STREAM_NAMED(
+              "franka_hw_sim",
+              "Cannot create franka_hw/FrankaModelInterface for robot '"
+                  << robot_namespace
+                  << "_model' because no <joint> with <role>root</root> can be found "
+                     "in the <transmission>");
+          return false;
+        }
+        auto tip = std::find_if(
+            transmission.joints_.begin(), transmission.joints_.end(),
+            [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
+        if (tip == transmission.joints_.end()) {
+          ROS_ERROR_STREAM_NAMED(
+              "franka_hw_sim",
+              "Cannot create franka_hw/FrankaModelInterface for robot '"
+                  << robot_namespace
+                  << "_model' because no <joint> with <role>tip</role> can be found "
+                     "in the <transmission>");
+          return false;
+        }
+        try {
+          auto rootLink = urdf->getJoint(root->name_)->parent_link_name;
+          auto tipLink = urdf->getJoint(tip->name_)->child_link_name;
+
+          this->model_ = std::make_unique<franka_gazebo::ModelKDL>(*urdf, rootLink, tipLink);
+
+          this->fmi_.registerHandle(franka_hw::FrankaModelHandle(
+              robot_namespace + "_model", *this->model_, this->robot_state_));
+        } catch (const std::invalid_argument& e) {
+          ROS_ERROR_STREAM_NAMED("franka_hw_sim",
+                                 "Cannot create franka_hw/FrankaModelInterface for robot '"
+                                     << robot_namespace << "_model'. " << e.what());
+          return false;
+        }
         continue;
       }
       ROS_WARN_STREAM_NAMED("franka_hw_sim", "Unsupported transmission interface of joint '"
