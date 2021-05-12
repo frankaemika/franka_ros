@@ -8,10 +8,10 @@
 namespace franka_hw {
 
 /**
- * An implementation of the abstract ModelBase specifialized for obtaining the model from the real
+ * An implementation of the abstract ModelBase specialized for obtaining the model from the real
  * robot.
  *
- * This class is actually only a thin wrapper around a @ref franka::Model and delegates all calls to
+ * This class is a thin wrapper around a @ref franka::Model and delegates all calls to
  * that
  */
 class Model : public ModelBase {

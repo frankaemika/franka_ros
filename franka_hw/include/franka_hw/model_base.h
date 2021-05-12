@@ -12,11 +12,6 @@ namespace franka_hw {
  * implementations. To get the dynamic model from a real robot refer to
  * @see franka_hw::Model.
  *
- * interface via the @ref ModelImpl class, which gets
- * the data directly from the robot. However you are free to implement
- * your own model by extending from
- * this class.
- *
  * @note
  * Although this class is abstract, it offers default implementations
  * for all methods which take a @ref RobotState. The default implementation
