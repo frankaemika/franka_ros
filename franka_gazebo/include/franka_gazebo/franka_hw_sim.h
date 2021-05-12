@@ -1,7 +1,7 @@
 #pragma once
 
-#include <angles/angles.h>
 #include <franka/robot_state.h>
+#include <franka_gazebo/joint.h>
 #include <franka_hw/franka_state_interface.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
@@ -10,42 +10,12 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
+#include <cmath>
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <memory>
 
 namespace franka_gazebo {
-
-struct Joint {
-  Joint() = default;
-  Joint(Joint&&) = default;
-  Joint(const Joint&) = delete;
-
-  std::string name;
-  gazebo::physics::JointPtr handle;
-  int type;
-  double command;
-  double position;
-  double velocity;
-  double effort;
-
-  void update() {
-    if (not this->handle)
-      return;
-    this->velocity = this->handle->GetVelocity(0);
-    this->effort = this->handle->GetForce(0);
-    double position = this->handle->Position(0);
-    switch (this->type) {
-      case urdf::Joint::PRISMATIC:
-        this->position = position;
-        break;
-      case urdf::Joint::REVOLUTE:
-      case urdf::Joint::CONTINUOUS:
-        this->position += angles::shortest_angular_distance(this->position, position);
-        break;
-    }
-  }
-};
 
 class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
  public:
@@ -60,7 +30,14 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   void eStopActive(const bool active) override;
 
+  void updateRobotState(ros::Time time);
+
+  bool readParameters(ros::NodeHandle nh);
+  std::array<double, 9> readArray9(std::string values, std::string name = "");
+  std::array<double, 3> readArray3(std::string values, std::string name = "");
+
  private:
+  gazebo::physics::ModelPtr robot_;
   std::vector<franka_gazebo::Joint> joints_;
 
   hardware_interface::JointStateInterface jsi_;
@@ -69,7 +46,22 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   franka::RobotState robot_state_;
 
-  double todo = 0;  // joint position + velocity + effort
+  template <int N>
+  std::array<double, N> readArray(std::string param, std::string name = "") {
+    std::array<double, N> x;
+
+    std::istringstream iss(param);
+    std::vector<std::string> values{std::istream_iterator<std::string>{iss},
+                                    std::istream_iterator<std::string>{}};
+    if (values.size() != N) {
+      throw std::invalid_argument("Expected parameter '" + name + "' to have exactely " +
+                                  std::to_string(N) + " numbers separated by spaces, but found " +
+                                  std::to_string(values.size()));
+    }
+    std::transform(values.begin(), values.end(), x.begin(),
+                   [](std::string v) -> double { return std::stod(v); });
+    return x;
+  }
 };
 
 }  // namespace franka_gazebo

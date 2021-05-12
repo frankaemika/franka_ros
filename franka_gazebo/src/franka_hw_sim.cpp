@@ -1,15 +1,34 @@
+#include <franka/duration.h>
 #include <franka_gazebo/franka_hw_sim.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
+#include <Eigen/Dense>
+#include <iostream>
+#include <sstream>
+#include <string>
 
 namespace franka_gazebo {
+
+Eigen::Matrix3d skewMatrix(const Eigen::Vector3d& vec) {
+  Eigen::Matrix3d vec_hat;
+  // clang-format off
+  vec_hat <<      0, -vec(2),  vec(1),
+             vec(2),    0   , -vec(0),
+            -vec(1), vec(0) ,    0   ;
+  // clang-format on
+  return vec_hat;
+}
 
 bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           ros::NodeHandle model_nh,
                           gazebo::physics::ModelPtr parent,
                           const urdf::Model* const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions) {
+  gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
+  ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
+
   // Generate a list of franka_gazebo::Joint to store all relevant information
   auto dof = transmissions.size();
+  this->robot_ = parent;
   this->joints_.resize(dof);
   for (int i = 0; i < dof; i++) {
     const auto& transmission = transmissions.at(i);
@@ -43,6 +62,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       return false;
     }
     joint.type = urdfJoint->type;
+    joint.axis = Eigen::Vector3d(urdfJoint->axis.x, urdfJoint->axis.y, urdfJoint->axis.z);
 
     // Get a handle to the underlying Gazebo Joint
     gazebo::physics::JointPtr handle = parent->GetJoint(joint.name);
@@ -57,6 +77,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   // After the joint data containers have been fully initialized and their memory address don't
   // change anymore, get the respective addresses to pass them to the handles
+  bool frankaStateInterfaceFound = false;
   for (int i = 0; i < dof; i++) {
     auto& joint = this->joints_[i];
 
@@ -65,7 +86,6 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                                                                    &joint.velocity, &joint.effort));
 
     // Register all supported command interfaces
-    bool frankaStateInterfaceFound = false;
     for (const auto interface : transmissions[i].joints_[0].hardware_interfaces_) {
       ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                  << joint.name << "': " << interface);
@@ -76,7 +96,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       }
 
       if (interface == "franka_hw/FrankaStateInterface") {
-        if (frankaStateInterfaceFound) continue;
+        if (dof < 7) {
+          ROS_ERROR_STREAM_NAMED(
+              "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface robot '"
+                                   << robot_namespace + "_robot' because only " << dof
+                                   << " transmission interface were defined, but 7 are required.");
+          return false;
+        }
+        if (frankaStateInterfaceFound)
+          continue;
         this->fsi_.registerHandle(
             franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
         frankaStateInterfaceFound = true;
@@ -92,19 +120,132 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   registerInterface(&this->eji_);
   registerInterface(&this->fsi_);
 
+  if (not readParameters(model_nh)) {
+    return false;
+  }
+
   return true;
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   for (franka_gazebo::Joint& joint : this->joints_) {
-    joint.update();
+    joint.update(period);
   }
-  this->robot_state_.m_ee = 42;
+  this->updateRobotState(time);
 }
 
-void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {}
+void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
+  for (const franka_gazebo::Joint& joint : this->joints_) {
+    // TODO: Add Gravity compensation force here to simulate RCU
+    joint.handle->SetForce(0, joint.command);
+  }
+}
 
 void FrankaHWSim::eStopActive(bool active) {}
+
+bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
+  nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
+
+  try {
+    std::string I_ee;
+    nh.param<std::string>("I_ee", I_ee, "0.001 0 0 0 0.0025 0 0 0 0.0017");
+    this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
+    nh.param<double>("m_load", this->robot_state_.m_load, 0);
+
+    std::string I_load;
+    nh.param<std::string>("I_load", I_load, "0 0 0 0 0 0 0 0 0");
+    this->robot_state_.I_load = readArray<9>(I_load, "I_load");
+
+    std::string F_x_Cload;
+    nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
+    this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
+
+    std::string F_T_EE;
+    nh.param<std::string>("F_T_EE", F_T_EE,
+                          "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
+    this->robot_state_.F_T_EE = readArray<16>(F_T_EE, "F_T_EE");
+
+    std::string conts, colts;
+    nh.param<std::string>("contact_torque_thresholds", conts, "INF INF INF INF INF INF INF");
+    nh.param<std::string>("collision_torque_thresholds", colts, "INF INF INF INF INF INF INF");
+    auto contact_thresholds = readArray<7>(conts, "contact_torque_thresholds");
+    auto collision_thresholds = readArray<7>(colts, "collision_torque_thresholds");
+    for (int i = 0; i < 7; i++) {
+      this->joints_[i].contact_threshold = contact_thresholds.at(i);
+      this->joints_[i].collision_threshold = collision_thresholds.at(i);
+    }
+
+  } catch (const std::invalid_argument& e) {
+    ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
+    return false;
+  }
+  this->robot_state_.m_total = this->robot_state_.m_ee + this->robot_state_.m_load;
+
+  this->robot_state_.NE_T_EE = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
+  this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+  // Compute I_total by convert I_ee into load frame using Theorem of Steiner:
+  // https://de.wikipedia.org/wiki/Steinerscher_Satz#Verallgemeinerung_auf_Tr%C3%A4gheitstensoren
+  Eigen::Vector3d a(this->robot_state_.F_x_Cload.data());
+  Eigen::Matrix3d a_ = skewMatrix(a);
+  Eigen::Matrix3d Is(this->robot_state_.I_ee.data());
+  Eigen::Matrix3d I = Is + this->robot_state_.m_ee * a_.transpose() * a_;
+  Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) = I;
+
+  return true;
+}
+
+void FrankaHWSim::updateRobotState(ros::Time time) {
+  assert(this->joints_.size() >= 7);
+
+  for (int i = 0; i < 7; i++) {
+    const auto& joint = this->joints_.at(i);
+    this->robot_state_.q[i] = joint.position;
+    this->robot_state_.dq[i] = joint.velocity;
+    this->robot_state_.tau_J[i] = joint.effort;
+    this->robot_state_.dtau_J[i] = joint.jerk;
+
+    this->robot_state_.q_d[i] = joint.position;
+    this->robot_state_.dq_d[i] = joint.velocity;
+    this->robot_state_.ddq_d[i] = joint.acceleration;
+    this->robot_state_.tau_J_d[i] = joint.effort;
+
+    // For now we assume no flexible joints
+    this->robot_state_.theta[i] = joint.position;
+    this->robot_state_.dtheta[i] = joint.velocity;
+
+    // TODO: Add configurable noise here?
+    // TODO: Add filter
+    this->robot_state_.tau_ext_hat_filtered[i] = joint.effort - joint.command;
+
+    this->robot_state_.joint_contact[i] = joint.isInContact();
+    this->robot_state_.joint_collision[i] = joint.isInCollision();
+  }
+
+  this->robot_state_.control_command_success_rate = 1.0;
+  this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
+
+  auto world_T_robot = this->robot_->WorldPose();
+  auto world_T_ee = this->joints_.at(6).handle->GetChild()->WorldCoGPose();
+  auto robot_T_ee = world_T_robot - world_T_ee;
+  auto t = robot_T_ee.Pos();
+  auto q = robot_T_ee.Rot();
+
+  Eigen::Affine3d T_ee;
+  T_ee.fromPositionOrientationScale(Eigen::Vector3d(t.X(), t.Y(), t.Z()),
+                                    Eigen::Quaterniond(q.W(), q.X(), q.Y(), q.Z()),
+                                    Eigen::Vector3d(1, 1, 1));
+  // clang-format off
+  // Column-Major format for libfranka's Robot State
+  this->robot_state_.O_T_EE = {
+    T_ee(0,0), T_ee(1,0), T_ee(2,0), T_ee(3,0),
+    T_ee(0,1), T_ee(1,1), T_ee(2,1), T_ee(3,1),
+    T_ee(0,2), T_ee(1,2), T_ee(2,2), T_ee(3,2),
+    T_ee(0,3), T_ee(1,3), T_ee(2,3), T_ee(3,3)
+  };
+  // clang-format on
+}
 
 }  // namespace franka_gazebo
 

@@ -21,6 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Franka 0.7.0 REQUIRED)
+find_package(Eigen3 REQUIRED)
+
 catkin_package(
   CATKIN_DEPENDS
     roscpp
@@ -56,6 +58,7 @@ target_link_libraries(franka_hw_sim
   )
 target_include_directories(franka_hw_sim SYSTEM PUBLIC
   ${Franka_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
   )
 add_dependencies(franka_hw_sim
