@@ -270,7 +270,7 @@ class FrankaModelHandle {
 
  private:
   std::string name_;
-  std::shared_ptr<franka_hw::ModelBase> model_;
+  const franka_hw::ModelBase* model_;
   const franka::RobotState* robot_state_;
 };
 
