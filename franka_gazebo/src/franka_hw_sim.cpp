@@ -220,10 +220,26 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
 }
 
 void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
+  auto g = this->model_->gravity(this->robot_state_);
+
   for (auto& pair : this->joints_) {
     auto joint = pair.second;
-    // TODO: Add Gravity compensation force here to simulate RCU
-    joint->handle->SetForce(0, joint->command);
+    auto command = joint->command;
+
+    // Check if this joint is affected by gravity compensation. That is the case, if it is part
+    // of the list of joints of the FrankaStateInterface
+    auto index = std::find(this->names_.begin(), this->names_.end(), pair.first);
+    if (index != this->names_.end()) {
+      int i = index - this->names_.begin();
+      command += g.at(i);
+    }
+
+    if (std::isnan(command)) {
+      ROS_WARN_STREAM_NAMED("franka_hw_sim",
+                            "Command for " << joint->name << "is NaN, won't send to robot");
+      continue;
+    }
+    joint->handle->SetForce(0, command);
   }
 }
 
