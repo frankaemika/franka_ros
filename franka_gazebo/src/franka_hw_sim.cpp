@@ -65,6 +65,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                                                                    &joint.velocity, &joint.effort));
 
     // Register all supported command interfaces
+    bool frankaStateInterfaceFound = false;
     for (const auto interface : transmissions[i].joints_[0].hardware_interfaces_) {
       ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                  << joint.name << "': " << interface);
@@ -74,10 +75,11 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         continue;
       }
 
-      // TODO: Only register this once
       if (interface == "franka_hw/FrankaStateInterface") {
+        if (frankaStateInterfaceFound) continue;
         this->fsi_.registerHandle(
             franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
+        frankaStateInterfaceFound = true;
         continue;
       }
 
