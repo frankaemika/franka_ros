@@ -332,26 +332,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
-
-  auto world_T_robot = this->robot_->WorldPose();
-  auto world_T_ee = this->joints_.at(this->names_.at(6))->handle->GetChild()->WorldCoGPose();
-  auto robot_T_ee = world_T_robot - world_T_ee;
-  auto t = robot_T_ee.Pos();
-  auto q = robot_T_ee.Rot();
-
-  Eigen::Affine3d T_ee;
-  T_ee.fromPositionOrientationScale(Eigen::Vector3d(t.X(), t.Y(), t.Z()),
-                                    Eigen::Quaterniond(q.W(), q.X(), q.Y(), q.Z()),
-                                    Eigen::Vector3d(1, 1, 1));
-  // clang-format off
-  // Column-Major format for libfranka's Robot State
-  this->robot_state_.O_T_EE = {
-    T_ee(0,0), T_ee(1,0), T_ee(2,0), T_ee(3,0),
-    T_ee(0,1), T_ee(1,1), T_ee(2,1), T_ee(3,1),
-    T_ee(0,2), T_ee(1,2), T_ee(2,2), T_ee(3,2),
-    T_ee(0,3), T_ee(1,3), T_ee(2,3), T_ee(3,3)
-  };
-  // clang-format on
+  this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
 }
 
 }  // namespace franka_gazebo
