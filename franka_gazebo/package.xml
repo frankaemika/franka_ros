@@ -23,6 +23,7 @@
   <depend>control_toolbox</depend>
   <depend>controller_manager</depend>
   <depend>pluginlib</depend>
+  <depend>kdl_parser</depend>
   <depend>hardware_interface</depend>
   <depend>transmission_interface</depend>
   <depend>joint_limits_interface</depend>

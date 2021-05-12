@@ -1,5 +1,6 @@
 #include <franka/duration.h>
 #include <franka_gazebo/franka_hw_sim.h>
+#include <franka_gazebo/model_kdl.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <Eigen/Dense>
 #include <iostream>
@@ -23,15 +24,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           gazebo::physics::ModelPtr parent,
                           const urdf::Model* const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions) {
+  this->robot_ = parent;
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
 
   // Generate a list of franka_gazebo::Joint to store all relevant information
-  auto dof = transmissions.size();
-  this->robot_ = parent;
-  this->joints_.resize(dof);
-  for (int i = 0; i < dof; i++) {
-    const auto& transmission = transmissions.at(i);
+  for (auto& transmission : transmissions) {
+    if (transmission.type_ != "transmission_interface/SimpleTransmission") {
+      continue;
+    }
     if (transmission.joints_.size() == 0) {
       ROS_WARN_STREAM_NAMED("franka_hw_sim",
                             "Transmission " << transmission.name_ << " has no associated joints.");
@@ -48,77 +49,125 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
     }
 
     // Fill a 'Joint' struct which holds all necessary data
-    franka_gazebo::Joint& joint = this->joints_[i];
-    joint.name = transmission.joints_[0].name_;
+    auto joint = std::make_shared<franka_gazebo::Joint>();
+    joint->name = transmission.joints_[0].name_;
     if (not urdf) {
       ROS_ERROR_STREAM_NAMED(
           "franka_hw_sim", "Could not find any URDF model. Was it loaded on the parameter server?");
       return false;
     }
-    const auto urdfJoint = urdf->getJoint(joint.name);
+    const auto urdfJoint = urdf->getJoint(joint->name);
     if (not urdfJoint) {
       ROS_ERROR_STREAM_NAMED("franka_hw_sim",
-                             "Could not get joint '" << joint.name << "' from URDF");
+                             "Could not get joint '" << joint->name << "' from URDF");
       return false;
     }
-    joint.type = urdfJoint->type;
-    joint.axis = Eigen::Vector3d(urdfJoint->axis.x, urdfJoint->axis.y, urdfJoint->axis.z);
+    joint->type = urdfJoint->type;
+    joint->axis = Eigen::Vector3d(urdfJoint->axis.x, urdfJoint->axis.y, urdfJoint->axis.z);
 
     // Get a handle to the underlying Gazebo Joint
-    gazebo::physics::JointPtr handle = parent->GetJoint(joint.name);
+    gazebo::physics::JointPtr handle = parent->GetJoint(joint->name);
     if (not handle) {
       ROS_ERROR_STREAM_NAMED("franka_hw_sim", "This robot has a joint named '"
-                                                  << joint.name
+                                                  << joint->name
                                                   << "' which is not in the gazebo model.");
       return false;
     }
-    joint.handle = handle;
+    joint->handle = handle;
+    this->joints_.emplace(joint->name, joint);
   }
 
   // After the joint data containers have been fully initialized and their memory address don't
   // change anymore, get the respective addresses to pass them to the handles
-  bool frankaStateInterfaceFound = false;
-  for (int i = 0; i < dof; i++) {
-    auto& joint = this->joints_[i];
+  for (auto& pair : this->joints_) {
+    auto joint = pair.second;
 
     // Register the state interface
-    this->jsi_.registerHandle(hardware_interface::JointStateHandle(joint.name, &joint.position,
-                                                                   &joint.velocity, &joint.effort));
+    this->jsi_.registerHandle(hardware_interface::JointStateHandle(
+        joint->name, &joint->position, &joint->velocity, &joint->effort));
+  }
 
-    // Register all supported command interfaces
-    for (const auto interface : transmissions[i].joints_[0].hardware_interfaces_) {
-      ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
-                                                 << joint.name << "': " << interface);
-      if (interface == "hardware_interface/EffortJointInterface") {
-        this->eji_.registerHandle(
-            hardware_interface::JointHandle(this->jsi_.getHandle(joint.name), &joint.command));
-        continue;
+  // Register all supported command interfaces
+  for (auto& transmission : transmissions) {
+    for (const auto interface : transmission.joints_[0].hardware_interfaces_) {
+      auto joint = this->joints_[transmission.joints_[0].name_];
+      if (transmission.type_ == "transmission_interface/SimpleTransmission") {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
+                                                   << joint->name << "': " << interface);
+        if (interface == "hardware_interface/EffortJointInterface") {
+          this->eji_.registerHandle(
+              hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+          continue;
+        }
       }
 
-      if (interface == "franka_hw/FrankaStateInterface") {
-        if (dof < 7) {
+      if (transmission.type_ == "franka_hw/FrankaStateInterface") {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                              "Found transmission interface '" << transmission.type_ << "'");
+        if (transmission.joints_.size() != 7) {
           ROS_ERROR_STREAM_NAMED(
-              "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface robot '"
-                                   << robot_namespace + "_robot' because only " << dof
-                                   << " transmission interface were defined, but 7 are required.");
+              "franka_hw_sim",
+              "Cannot create franka_hw/FrankaStateInterface for robot '"
+                  << robot_namespace << "_robot' because " << transmission.joints_.size()
+                  << " joints were found beneath the <transmission> tag, but 7 are required.");
           return false;
         }
-        if (frankaStateInterfaceFound)
-          continue;
+
+        // Check if all joints defined in the <transmission> actually exist in the URDF
+        for (auto& joint : transmission.joints_) {
+          if (this->joints_.count(joint.name_) == 0) {
+            ROS_ERROR_STREAM_NAMED(
+                "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface for robot '"
+                                     << robot_namespace + "_robot' because the specified joint '"
+                                     << joint.name_
+                                     << "' in the <transmission> tag cannot be found in the URDF");
+            return false;
+          }
+          ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                                "Found joint " << joint.name_ << " to belong to a Panda robot");
+          this->names_.push_back(joint.name_);
+        }
         this->fsi_.registerHandle(
             franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
-        frankaStateInterfaceFound = true;
         continue;
       }
 
-      ROS_WARN_STREAM_NAMED("franka_hw_sim", "Unknown transmission interface of joint '"
-                                                 << joint.name << "': " << interface);
+      if (transmission.type_ == "franka_hw/FrankaModelInterface") {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                              "Found transmission interface '" << transmission.type_ << "'");
+        if (transmission.joints_.size() != 2) {
+          ROS_ERROR_STREAM_NAMED(
+              "franka_hw_sim",
+              "Cannot create franka_hw/FrankaModelInterface for robot '"
+                  << robot_namespace << "_model' because " << transmission.joints_.size()
+                  << " joints were found beneath the <transmission> tag, but 2 are required.");
+          return false;
+        }
+
+        for (auto& joint : transmission.joints_) {
+          if (this->joints_.count(joint.name_) == 0) {
+            ROS_ERROR_STREAM_NAMED(
+                "franka_hw_sim", "Cannot create franka_hw/FrankaModelInterface for robot '"
+                                     << robot_namespace + "_model' because the specified joint '"
+                                     << joint.name_
+                                     << "' in the <transmission> tag cannot be found in the URDF");
+            return false;
+          }
+        }
+        // TODO: Interprete root + tip from the transmissions and pass to KDL
+        this->fmi_.registerHandle(franka_hw::FrankaModelHandle(robot_namespace + "_model",
+                                                               this->model_, this->robot_state_));
+        continue;
+      }
+      ROS_WARN_STREAM_NAMED("franka_hw_sim", "Unsupported transmission interface of joint '"
+                                                 << joint->name << "': " << interface);
     }
   }
 
   registerInterface(&this->jsi_);
   registerInterface(&this->eji_);
   registerInterface(&this->fsi_);
+  registerInterface(&this->fmi_);
 
   if (not readParameters(model_nh)) {
     return false;
@@ -128,16 +177,18 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
-  for (franka_gazebo::Joint& joint : this->joints_) {
-    joint.update(period);
+  for (auto& pair : this->joints_) {
+    auto joint = pair.second;
+    joint->update(period);
   }
   this->updateRobotState(time);
 }
 
 void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
-  for (const franka_gazebo::Joint& joint : this->joints_) {
+  for (auto& pair : this->joints_) {
+    auto joint = pair.second;
     // TODO: Add Gravity compensation force here to simulate RCU
-    joint.handle->SetForce(0, joint.command);
+    joint->handle->SetForce(0, joint->command);
   }
 }
 
@@ -170,9 +221,11 @@ bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
     nh.param<std::string>("collision_torque_thresholds", colts, "INF INF INF INF INF INF INF");
     auto contact_thresholds = readArray<7>(conts, "contact_torque_thresholds");
     auto collision_thresholds = readArray<7>(colts, "collision_torque_thresholds");
+    // TODO: Lookup the thresholds by name not index
     for (int i = 0; i < 7; i++) {
-      this->joints_[i].contact_threshold = contact_thresholds.at(i);
-      this->joints_[i].collision_threshold = collision_thresholds.at(i);
+      std::string name = this->names_.at(i);
+      this->joints_[name]->contact_threshold = contact_thresholds.at(i);
+      this->joints_[name]->collision_threshold = collision_thresholds.at(i);
     }
 
   } catch (const std::invalid_argument& e) {
@@ -197,37 +250,40 @@ bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
 }
 
 void FrankaHWSim::updateRobotState(ros::Time time) {
-  assert(this->joints_.size() >= 7);
+  // This is ensured, because a FrankaStateInterface checks exactly for seven joints in the URDF
+  assert(this->names_.size() == 7);
+  assert(this->joints_.size() == 7);
 
   for (int i = 0; i < 7; i++) {
-    const auto& joint = this->joints_.at(i);
-    this->robot_state_.q[i] = joint.position;
-    this->robot_state_.dq[i] = joint.velocity;
-    this->robot_state_.tau_J[i] = joint.effort;
-    this->robot_state_.dtau_J[i] = joint.jerk;
+    std::string name = this->names_.at(i);
+    const auto& joint = this->joints_.at(name);
+    this->robot_state_.q[i] = joint->position;
+    this->robot_state_.dq[i] = joint->velocity;
+    this->robot_state_.tau_J[i] = joint->effort;
+    this->robot_state_.dtau_J[i] = joint->jerk;
 
-    this->robot_state_.q_d[i] = joint.position;
-    this->robot_state_.dq_d[i] = joint.velocity;
-    this->robot_state_.ddq_d[i] = joint.acceleration;
-    this->robot_state_.tau_J_d[i] = joint.effort;
+    this->robot_state_.q_d[i] = joint->position;
+    this->robot_state_.dq_d[i] = joint->velocity;
+    this->robot_state_.ddq_d[i] = joint->acceleration;
+    this->robot_state_.tau_J_d[i] = joint->effort;
 
     // For now we assume no flexible joints
-    this->robot_state_.theta[i] = joint.position;
-    this->robot_state_.dtheta[i] = joint.velocity;
+    this->robot_state_.theta[i] = joint->position;
+    this->robot_state_.dtheta[i] = joint->velocity;
 
     // TODO: Add configurable noise here?
     // TODO: Add filter
-    this->robot_state_.tau_ext_hat_filtered[i] = joint.effort - joint.command;
+    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command;
 
-    this->robot_state_.joint_contact[i] = joint.isInContact();
-    this->robot_state_.joint_collision[i] = joint.isInCollision();
+    this->robot_state_.joint_contact[i] = joint->isInContact();
+    this->robot_state_.joint_collision[i] = joint->isInCollision();
   }
 
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
 
   auto world_T_robot = this->robot_->WorldPose();
-  auto world_T_ee = this->joints_.at(6).handle->GetChild()->WorldCoGPose();
+  auto world_T_ee = this->joints_.at(this->names_.at(6))->handle->GetChild()->WorldCoGPose();
   auto robot_T_ee = world_T_robot - world_T_ee;
   auto t = robot_T_ee.Pos();
   auto q = robot_T_ee.Rot();
