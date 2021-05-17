@@ -40,8 +40,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   std::array<double, 3> readArray3(std::string values, std::string name = "");
 
  private:
+  std::string arm_id_;
   gazebo::physics::ModelPtr robot_;
-  std::vector<std::string> names_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
 
   hardware_interface::JointStateInterface jsi_;

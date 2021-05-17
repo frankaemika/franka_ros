@@ -25,6 +25,8 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           const urdf::Model* const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions) {
   this->robot_ = parent;
+  this->arm_id_ = robot_namespace;
+
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
 
@@ -101,6 +103,9 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
       }
 
+      //--------------------------------//
+      //     FrankaStateInterface       //
+      //--------------------------------//
       if (transmission.type_ == "franka_hw/FrankaStateInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
@@ -115,7 +120,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
         // Check if all joints defined in the <transmission> actually exist in the URDF
         for (auto& joint : transmission.joints_) {
-          if (this->joints_.count(joint.name_) == 0) {
+          if (not urdf->getJoint(joint.name_)) {
             ROS_ERROR_STREAM_NAMED(
                 "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface for robot '"
                                      << robot_namespace + "_robot' because the specified joint '"
@@ -125,13 +130,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
           }
           ROS_INFO_STREAM_NAMED("franka_hw_sim",
                                 "Found joint " << joint.name_ << " to belong to a Panda robot");
-          this->names_.push_back(joint.name_);
         }
         this->fsi_.registerHandle(
             franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
         continue;
       }
 
+      //--------------------------------//
+      //     FrankaModelInterface       //
+      //--------------------------------//
       if (transmission.type_ == "franka_hw/FrankaModelInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
@@ -145,7 +152,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
 
         for (auto& joint : transmission.joints_) {
-          if (this->joints_.count(joint.name_) == 0) {
+          if (not urdf->getJoint(joint.name_)) {
             ROS_ERROR_STREAM_NAMED(
                 "franka_hw_sim", "Cannot create franka_hw/FrankaModelInterface for robot '"
                                      << robot_namespace << "_model' because the specified joint '"
@@ -226,11 +233,10 @@ void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
     auto joint = pair.second;
     auto command = joint->command;
 
-    // Check if this joint is affected by gravity compensation. That is the case, if it is part
-    // of the list of joints of the FrankaStateInterface
-    auto index = std::find(this->names_.begin(), this->names_.end(), pair.first);
-    if (index != this->names_.end()) {
-      int i = index - this->names_.begin();
+    // Check if this joint is affected by gravity compensation
+    std::string prefix = this->arm_id_ + "_joint";
+    if (pair.first.rfind(prefix, 0) != std::string::npos) {
+      int i = std::stoi(pair.first.substr(prefix.size())) - 1;
       command += g.at(i);
     }
 
@@ -274,7 +280,7 @@ bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
     auto collision_thresholds = readArray<7>(colts, "collision_torque_thresholds");
     // TODO: Lookup the thresholds by name not index
     for (int i = 0; i < 7; i++) {
-      std::string name = this->names_.at(i);
+      std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
       this->joints_[name]->contact_threshold = contact_thresholds.at(i);
       this->joints_[name]->collision_threshold = collision_thresholds.at(i);
     }
@@ -302,11 +308,10 @@ bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
 
 void FrankaHWSim::updateRobotState(ros::Time time) {
   // This is ensured, because a FrankaStateInterface checks exactly for seven joints in the URDF
-  assert(this->names_.size() == 7);
   assert(this->joints_.size() == 7);
 
   for (int i = 0; i < 7; i++) {
-    std::string name = this->names_.at(i);
+    std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
     const auto& joint = this->joints_.at(name);
     this->robot_state_.q[i] = joint->position;
     this->robot_state_.dq[i] = joint->velocity;
