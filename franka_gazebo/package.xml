@@ -31,6 +31,9 @@
   <depend>urdf</depend>
   <depend>angles</depend>
 
+  <test_depend>gtest</test_depend>
+  <test_depend>rostest</test_depend>
+
   <export>
     <gazebo_ros_control plugin="${prefix}/franka_hw_sim_plugin.xml"/>
   </export>

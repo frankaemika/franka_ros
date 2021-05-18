@@ -77,6 +77,10 @@ add_dependencies(franka_hw_sim
   ${catkin_EXPORTED_TARGETS}
   )
 
+if(CATKIN_ENABLE_TESTING)
+  add_subdirectory(test)
+endif()
+
 ## Install
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
