@@ -11,7 +11,6 @@
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
-#include <franka/model.h>
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
@@ -27,6 +26,7 @@
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <franka_hw/model_base.h>
 #include <franka_hw/resource_helpers.h>
 
 namespace franka_hw {
@@ -522,7 +522,7 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   std::mutex robot_mutex_;
   std::unique_ptr<franka::Robot> robot_;
-  std::unique_ptr<franka::Model> model_;
+  std::unique_ptr<franka_hw::ModelBase> model_;
 
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;

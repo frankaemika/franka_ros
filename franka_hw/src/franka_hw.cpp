@@ -545,7 +545,7 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 
 void FrankaHW::initRobot() {
   connect();
-  model_ = std::make_unique<franka::Model>(robot_->loadModel());
+  model_ = std::make_unique<franka_hw::Model>(robot_->loadModel());
   update(robot_->readOnce());
 }
 
