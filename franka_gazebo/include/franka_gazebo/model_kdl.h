@@ -152,6 +152,9 @@ class ModelKDL : public franka_hw::ModelBase {
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const override;
 
  private:
+  static int segment(franka::Frame frame);
+  static std::string strError(const int error);
+
   std::unique_ptr<KDL::ChainDynParam> dynamicsSolver_;
   std::unique_ptr<KDL::ChainJntToJacSolver> jacobianSolver_;
   std::unique_ptr<KDL::ChainFkSolverPos> kinematicsSolver_;

@@ -10,7 +10,7 @@
 
 namespace franka_gazebo {
 
-int segment(const KDL::Chain& chain, franka::Frame frame) {
+int ModelKDL::segment(franka::Frame frame) {
   // clang-format off
   switch (frame) {
     case franka::Frame::kJoint1: return 1;
@@ -30,7 +30,7 @@ int segment(const KDL::Chain& chain, franka::Frame frame) {
 
 // Implementation copied from <kdl/isolveri.hpp> because
 // KDL::ChainDynSolver inherits *privately* from SolverI ... -.-'
-const std::string strError(const int error) {
+std::string ModelKDL::strError(const int error) {
   // clang-format off
   switch(error) {
   case KDL::SolverI::E_NOERROR:                 return "No error"; break;
@@ -76,7 +76,7 @@ std::array<double, 16> ModelKDL::pose(
   KDL::Frame kp;
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->kinematicsSolver_->JntToCart(kq, kp, segment(this->chain, frame));
+  int error = this->kinematicsSolver_->JntToCart(kq, kp, segment(frame));
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL forward kinematics pose calculation failed with error: " +
                            strError(error));
@@ -115,7 +115,7 @@ std::array<double, 42> ModelKDL::zeroJacobian(
   KDL::Jacobian J(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->jacobianSolver_->JntToJac(kq, J, segment(this->chain, frame));
+  int error = this->jacobianSolver_->JntToJac(kq, J, segment(frame));
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL zero jacobian calculation failed with error: " + strError(error));
   }
