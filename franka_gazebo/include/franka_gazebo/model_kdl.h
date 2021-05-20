@@ -158,7 +158,7 @@ class ModelKDL : public franka_hw::ModelBase {
   std::unique_ptr<KDL::ChainDynParam> dynamicsSolver_;
   std::unique_ptr<KDL::ChainJntToJacSolver> jacobianSolver_;
   std::unique_ptr<KDL::ChainFkSolverPos> kinematicsSolver_;
-  KDL::Chain chain;
+  KDL::Chain chain_;
 };
 
 }  // namespace franka_gazebo

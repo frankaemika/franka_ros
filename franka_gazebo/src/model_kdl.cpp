@@ -53,7 +53,7 @@ ModelKDL::ModelKDL(const urdf::Model& urdf, std::string root, std::string tip) {
     throw std::invalid_argument("Cannot contruct KDL tree from URDF");
   }
 
-  if (not tree.getChain(root, tip, this->chain)) {
+  if (not tree.getChain(root, tip, this->chain_)) {
     throw std::invalid_argument("Cannot find chain within URDF tree from root '" + root +
                                 "' to tip '" + tip + "'. Do these links exist?");
   }
@@ -61,9 +61,9 @@ ModelKDL::ModelKDL(const urdf::Model& urdf, std::string root, std::string tip) {
   ROS_INFO_STREAM("KDL Model initialized for chain from '" << root << "' -> '" << tip << "'");
 
   // TODO check if zero grav vector works. It seems unused anyways in the impl
-  this->dynamicsSolver_ = std::make_unique<KDL::ChainDynParam>(chain, KDL::Vector(0, 0, -9.81));
-  this->jacobianSolver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain);
-  this->kinematicsSolver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain);
+  this->dynamicsSolver_ = std::make_unique<KDL::ChainDynParam>(chain_, KDL::Vector(0, 0, -9.81));
+  this->jacobianSolver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
+  this->kinematicsSolver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
 }
 
 std::array<double, 16> ModelKDL::pose(
