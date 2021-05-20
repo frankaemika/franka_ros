@@ -12,8 +12,6 @@ add_dependencies(franka_hw_sim_test
   ${catkin_EXPORTED_TARGETS}
 )
 
-target_link_libraries(franka_hw_sim_test "/home/goll_th/.lib/libfcimodels/lib/libfcimodels.so")
-
 target_link_libraries(franka_hw_sim_test
   ${catkin_LIBRARIES}
   franka_hw_sim
@@ -21,5 +19,4 @@ target_link_libraries(franka_hw_sim_test
 
 target_include_directories(franka_hw_sim_test PUBLIC
   ${catkin_INCLUDE_DIRS}
-  /home/goll_th/.lib/libfcimodels/include
 )

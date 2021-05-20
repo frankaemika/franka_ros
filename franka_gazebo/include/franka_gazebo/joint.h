@@ -39,24 +39,24 @@ struct Joint {
   Eigen::Vector3d axis;
 
   /// The currently applied command from an actuator on this joint either in \f$N\f$ or \f$Nm\f$
-  double command;
+  double command = 0;
 
   /// The current position of this joint either in \f$m\f$ or \f$rad\f$
-  double position;
+  double position = 0;
 
   /// The current velocity of this joint either in \f$\frac{m}{s}\f$ or \f$\frac{rad}{s}\f$
-  double velocity;
+  double velocity = 0;
 
   /// The current total force or torque acting on this joint in either \f$N\f$ or \f$Nm\f$
-  double effort;
+  double effort = 0;
 
-  /// The currently acting jerk acting on this this joint in either \f$\frac{N}{s}\f$ or
-  /// \f$\frac{Nm}{s}\f$
-  double jerk;
+  /// The currently acting jerk acting on this this joint in either \f$\frac{m}{s^3}\f$ or
+  /// \f$\frac{rad}{s^3}\f$
+  double jerk = 0;
 
   /// The currenlty acting acceleration on this joint in either \f$\frac{m}{s^2}\f$ or
   /// \f$\frac{rad}{s^2}\f$
-  double acceleration;
+  double acceleration = 0;
 
   /// Above which threshold forces or torques will be interpreted as "contacts" by @ref isInContact
   double contact_threshold = std::numeric_limits<double>::infinity();
@@ -85,7 +85,7 @@ struct Joint {
 
  private:
   double lastVelocity = std::numeric_limits<double>::quiet_NaN();
-  double lastEffort = std::numeric_limits<double>::quiet_NaN();
+  double lastAcceleration = std::numeric_limits<double>::quiet_NaN();
 };
 
 }  // namespace franka_gazebo

@@ -29,7 +29,7 @@ class ModelKDL : public franka_hw::ModelBase {
    *
    * @throws std::invalid_argument when either `root` or `tip` cannot be found in the URDF
    */
-  ModelKDL(const urdf::Model& model, std::string root, std::string tip);
+  ModelKDL(const urdf::Model& model, const std::string& root, const std::string& tip);
 
   /**
    * Gets the 4x4 pose matrix for the given frame in base frame.

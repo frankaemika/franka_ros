@@ -5,7 +5,7 @@
       type="franka_gazebo::FrankaHWSim"
       base_class_type="gazebo_ros_control::RobotHWSim">
       <description>
-          TODO
+          A custom implementation of a gazebo_ros_control plugin, which is able to simulate franka interfaces in Gazebo.
       </description>
   </class>
 

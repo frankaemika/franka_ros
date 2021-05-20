@@ -32,11 +32,11 @@ void Joint::update(const ros::Duration& dt) {
   this->acceleration = (this->velocity - this->lastVelocity) / dt.toSec();
   this->lastVelocity = this->velocity;
 
-  if (std::isnan(this->lastEffort)) {
-    this->lastEffort = this->effort;
+  if (std::isnan(this->lastAcceleration)) {
+    this->lastAcceleration = this->acceleration;
   }
-  this->jerk = (this->effort - this->lastEffort) / dt.toSec();
-  this->lastEffort = this->effort;
+  this->jerk = (this->acceleration - this->lastAcceleration) / dt.toSec();
+  this->lastAcceleration = this->acceleration;
 }
 
 double Joint::getLinkMass() const {

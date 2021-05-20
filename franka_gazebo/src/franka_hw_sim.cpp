@@ -38,7 +38,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
 
   // Generate a list of franka_gazebo::Joint to store all relevant information
-  for (auto& transmission : transmissions) {
+  for (const auto& transmission : transmissions) {
     if (transmission.type_ != "transmission_interface/SimpleTransmission") {
       continue;
     }
@@ -126,7 +126,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
 
         // Check if all joints defined in the <transmission> actually exist in the URDF
-        for (auto& joint : transmission.joints_) {
+        for (const auto& joint : transmission.joints_) {
           if (not urdf->getJoint(joint.name_)) {
             ROS_ERROR_STREAM_NAMED(
                 "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface for robot '"
@@ -226,7 +226,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
-  for (auto& pair : this->joints_) {
+  for (const auto& pair : this->joints_) {
     auto joint = pair.second;
     joint->update(period);
   }
@@ -256,9 +256,9 @@ void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
   }
 }
 
-void FrankaHWSim::eStopActive(bool active) {}
+void FrankaHWSim::eStopActive(bool /* active */) {}
 
-bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
+bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
 
   try {
@@ -302,12 +302,12 @@ bool FrankaHWSim::readParameters(ros::NodeHandle nh) {
   this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
   this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
-  // Compute I_total by convert I_ee into load frame using Theorem of Steiner:
+  // Compute I_total by converting I_ee into load frame using Theorem of Steiner:
   // https://de.wikipedia.org/wiki/Steinerscher_Satz#Verallgemeinerung_auf_Tr%C3%A4gheitstensoren
   Eigen::Vector3d a(this->robot_state_.F_x_Cload.data());
-  Eigen::Matrix3d a_ = skewMatrix(a);
+  Eigen::Matrix3d A = skewMatrix(a);
   Eigen::Matrix3d Is(this->robot_state_.I_ee.data());
-  Eigen::Matrix3d I = Is + this->robot_state_.m_ee * a_.transpose() * a_;
+  Eigen::Matrix3d I = Is + this->robot_state_.m_ee * A.transpose() * A;
   Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) = I;
 
   return true;
