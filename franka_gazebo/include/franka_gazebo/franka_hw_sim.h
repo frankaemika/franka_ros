@@ -105,8 +105,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   void updateRobotState(ros::Time time);
 
   bool readParameters(ros::NodeHandle nh);
-  std::array<double, 9> readArray9(std::string values, std::string name = "");
-  std::array<double, 3> readArray3(std::string values, std::string name = "");
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
