@@ -33,12 +33,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   void eStopActive(const bool active) override;
 
-  void updateRobotState(ros::Time time);
-
-  bool readParameters(ros::NodeHandle nh);
-  std::array<double, 9> readArray9(std::string values, std::string name = "");
-  std::array<double, 3> readArray3(std::string values, std::string name = "");
-
  private:
   std::string arm_id_;
   gazebo::physics::ModelPtr robot_;
@@ -51,6 +45,12 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   franka::RobotState robot_state_;
   std::unique_ptr<franka_hw::ModelBase> model_;
+
+  void updateRobotState(ros::Time time);
+
+  bool readParameters(ros::NodeHandle nh);
+  std::array<double, 9> readArray9(std::string values, std::string name = "");
+  std::array<double, 3> readArray3(std::string values, std::string name = "");
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
