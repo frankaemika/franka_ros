@@ -9,6 +9,13 @@
 
 namespace franka_gazebo {
 
+/**
+ * Helper function for generating a skew symmetric matrix for a given input vector such  that:
+ * \f$\mathbf{0} = \mathbf{M} \cdot \mathrm{vec}\f$
+ *
+ * @param[in] vec the 3D input vector for which to generate the matrix for
+ * @return\f$\mathbf{M}\f$ i.e. a skew symmetric matrix for `vec`
+ */
 Eigen::Matrix3d skewMatrix(const Eigen::Vector3d& vec) {
   Eigen::Matrix3d vec_hat;
   // clang-format off
