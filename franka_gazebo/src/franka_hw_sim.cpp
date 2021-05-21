@@ -88,12 +88,9 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   // After the joint data containers have been fully initialized and their memory address don't
   // change anymore, get the respective addresses to pass them to the handles
-  for (auto& pair : this->joints_) {
-    auto joint = pair.second;
 
-    // Register the state interface
-    this->jsi_.registerHandle(hardware_interface::JointStateHandle(
-        joint->name, &joint->position, &joint->velocity, &joint->effort));
+  for (auto& pair : this->joints_) {
+    initJointStateHandle(pair.second);
   }
 
   // Register all supported command interfaces
@@ -104,117 +101,44 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                    << joint->name << "': " << interface);
         if (interface == "hardware_interface/EffortJointInterface") {
-          this->eji_.registerHandle(
-              hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+          initEffortCommandHandle(joint);
           continue;
         }
       }
 
-      //--------------------------------//
-      //     FrankaStateInterface       //
-      //--------------------------------//
       if (transmission.type_ == "franka_hw/FrankaStateInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
-        if (transmission.joints_.size() != 7) {
-          ROS_ERROR_STREAM_NAMED(
-              "franka_hw_sim",
-              "Cannot create franka_hw/FrankaStateInterface for robot '"
-                  << robot_namespace << "_robot' because " << transmission.joints_.size()
-                  << " joints were found beneath the <transmission> tag, but 7 are required.");
+        try {
+          initFrankaStateHandle(robot_namespace, *urdf, transmission);
+          continue;
+
+        } catch (const std::invalid_argument& e) {
+          ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
           return false;
         }
-
-        // Check if all joints defined in the <transmission> actually exist in the URDF
-        for (const auto& joint : transmission.joints_) {
-          if (not urdf->getJoint(joint.name_)) {
-            ROS_ERROR_STREAM_NAMED(
-                "franka_hw_sim", "Cannot create franka_hw/FrankaStateInterface for robot '"
-                                     << robot_namespace + "_robot' because the specified joint '"
-                                     << joint.name_
-                                     << "' in the <transmission> tag cannot be found in the URDF");
-            return false;
-          }
-          ROS_INFO_STREAM_NAMED("franka_hw_sim",
-                                "Found joint " << joint.name_ << " to belong to a Panda robot");
-        }
-        this->fsi_.registerHandle(
-            franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
-        continue;
       }
 
-      //--------------------------------//
-      //     FrankaModelInterface       //
-      //--------------------------------//
       if (transmission.type_ == "franka_hw/FrankaModelInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
-        if (transmission.joints_.size() != 2) {
-          ROS_ERROR_STREAM_NAMED(
-              "franka_hw_sim",
-              "Cannot create franka_hw/FrankaModelInterface for robot '"
-                  << robot_namespace << "_model' because " << transmission.joints_.size()
-                  << " joints were found beneath the <transmission> tag, but 2 are required.");
-          return false;
-        }
-
-        for (auto& joint : transmission.joints_) {
-          if (not urdf->getJoint(joint.name_)) {
-            ROS_ERROR_STREAM_NAMED(
-                "franka_hw_sim", "Cannot create franka_hw/FrankaModelInterface for robot '"
-                                     << robot_namespace << "_model' because the specified joint '"
-                                     << joint.name_
-                                     << "' in the <transmission> tag cannot be found in the URDF");
-            return false;
-          }
-        }
-        auto root = std::find_if(
-            transmission.joints_.begin(), transmission.joints_.end(),
-            [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
-        if (root == transmission.joints_.end()) {
-          ROS_ERROR_STREAM_NAMED(
-              "franka_hw_sim",
-              "Cannot create franka_hw/FrankaModelInterface for robot '"
-                  << robot_namespace
-                  << "_model' because no <joint> with <role>root</root> can be found "
-                     "in the <transmission>");
-          return false;
-        }
-        auto tip = std::find_if(
-            transmission.joints_.begin(), transmission.joints_.end(),
-            [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
-        if (tip == transmission.joints_.end()) {
-          ROS_ERROR_STREAM_NAMED(
-              "franka_hw_sim",
-              "Cannot create franka_hw/FrankaModelInterface for robot '"
-                  << robot_namespace
-                  << "_model' because no <joint> with <role>tip</role> can be found "
-                     "in the <transmission>");
-          return false;
-        }
         try {
-          auto rootLink = urdf->getJoint(root->name_)->parent_link_name;
-          auto tipLink = urdf->getJoint(tip->name_)->child_link_name;
+          initFrankaModelHandle(robot_namespace, *urdf, transmission);
+          continue;
 
-          this->model_ = std::make_unique<franka_gazebo::ModelKDL>(*urdf, rootLink, tipLink);
-
-          this->fmi_.registerHandle(franka_hw::FrankaModelHandle(
-              robot_namespace + "_model", *this->model_, this->robot_state_));
         } catch (const std::invalid_argument& e) {
-          ROS_ERROR_STREAM_NAMED("franka_hw_sim",
-                                 "Cannot create franka_hw/FrankaModelInterface for robot '"
-                                     << robot_namespace << "_model'. " << e.what());
+          ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
           return false;
         }
-        continue;
       }
       ROS_WARN_STREAM_NAMED("franka_hw_sim", "Unsupported transmission interface of joint '"
                                                  << joint->name << "': " << interface);
     }
   }
 
-  registerInterface(&this->jsi_);
+  // After all handles have been assigned to interfaces, register them
   registerInterface(&this->eji_);
+  registerInterface(&this->jsi_);
   registerInterface(&this->fsi_);
   registerInterface(&this->fmi_);
 
@@ -223,6 +147,95 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   }
 
   return true;
+}
+
+void FrankaHWSim::initJointStateHandle(std::shared_ptr<franka_gazebo::Joint> joint) {
+  this->jsi_.registerHandle(hardware_interface::JointStateHandle(joint->name, &joint->position,
+                                                                 &joint->velocity, &joint->effort));
+}
+
+void FrankaHWSim::initEffortCommandHandle(std::shared_ptr<franka_gazebo::Joint> joint) {
+  this->eji_.registerHandle(
+      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+}
+
+void FrankaHWSim::initFrankaStateHandle(
+    const std::string& robot_namespace,
+    const urdf::Model& urdf,
+    const transmission_interface::TransmissionInfo& transmission) {
+  if (transmission.joints_.size() != 7) {
+    throw std::invalid_argument(
+        "Cannot create franka_hw/FrankaStateInterface for robot '" + robot_namespace +
+        "_robot' because " + std::to_string(transmission.joints_.size()) +
+        " joints were found beneath the <transmission> tag, but 7 are required.");
+  }
+
+  // Check if all joints defined in the <transmission> actually exist in the URDF
+  for (const auto& joint : transmission.joints_) {
+    if (not urdf.getJoint(joint.name_)) {
+      throw std::invalid_argument("Cannot create franka_hw/FrankaStateInterface for robot '" +
+                                  robot_namespace + "_robot' because the specified joint '" +
+                                  joint.name_ +
+                                  "' in the <transmission> tag cannot be found in the URDF");
+    }
+    ROS_DEBUG_STREAM_NAMED("franka_hw_sim",
+                           "Found joint " << joint.name_ << " to belong to a Panda robot");
+  }
+  this->fsi_.registerHandle(
+      franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
+}
+
+void FrankaHWSim::initFrankaModelHandle(
+    const std::string& robot_namespace,
+    const urdf::Model& urdf,
+    const transmission_interface::TransmissionInfo& transmission) {
+  if (transmission.joints_.size() != 2) {
+    throw std::invalid_argument(
+        "Cannot create franka_hw/FrankaModelInterface for robot '" + robot_namespace +
+        "_model' because " + std::to_string(transmission.joints_.size()) +
+        " joints were found beneath the <transmission> tag, but 2 are required.");
+  }
+
+  for (auto& joint : transmission.joints_) {
+    if (not urdf.getJoint(joint.name_)) {
+      if (not urdf.getJoint(joint.name_)) {
+        throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
+                                    robot_namespace + "_model' because the specified joint '" +
+                                    joint.name_ +
+                                    "' in the <transmission> tag cannot be found in the URDF");
+      }
+    }
+    auto root =
+        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
+    if (root == transmission.joints_.end()) {
+      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
+                                  robot_namespace +
+                                  "_model' because no <joint> with <role>root</root> can be found "
+                                  "in the <transmission>");
+    }
+    auto tip =
+        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
+    if (tip == transmission.joints_.end()) {
+      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
+                                  robot_namespace +
+                                  "_model' because no <joint> with <role>tip</role> can be found "
+                                  "in the <transmission>");
+    }
+    try {
+      auto rootLink = urdf.getJoint(root->name_)->parent_link_name;
+      auto tipLink = urdf.getJoint(tip->name_)->child_link_name;
+
+      this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, rootLink, tipLink);
+
+    } catch (const std::invalid_argument& e) {
+      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
+                                  robot_namespace + "_model'. " + e.what());
+    }
+    this->fmi_.registerHandle(franka_hw::FrankaModelHandle(robot_namespace + "_model",
+                                                           *this->model_, this->robot_state_));
+  }
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {

@@ -102,6 +102,15 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   franka::RobotState robot_state_;
   std::unique_ptr<franka_hw::ModelBase> model_;
 
+  void initJointStateHandle(std::shared_ptr<franka_gazebo::Joint> joint);
+  void initEffortCommandHandle(std::shared_ptr<franka_gazebo::Joint> joint);
+  void initFrankaStateHandle(const std::string& robot_namespace,
+                             const urdf::Model& urdf,
+                             const transmission_interface::TransmissionInfo& transmission);
+  void initFrankaModelHandle(const std::string& robot_namespace,
+                             const urdf::Model& urdf,
+                             const transmission_interface::TransmissionInfo& transmission);
+
   void updateRobotState(ros::Time time);
 
   bool readParameters(const ros::NodeHandle& nh);
