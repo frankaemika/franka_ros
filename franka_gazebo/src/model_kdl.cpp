@@ -25,7 +25,7 @@ int ModelKDL::segment(franka::Frame frame) {
     case franka::Frame::kFlange: return 8;
     case franka::Frame::kEndEffector:
     case franka::Frame::kStiffness:
-      return -1;
+    default: return -1;
   }
   // clang-format on
 }
