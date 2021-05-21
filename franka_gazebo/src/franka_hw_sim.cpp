@@ -326,8 +326,6 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.theta[i] = joint->position;
     this->robot_state_.dtheta[i] = joint->velocity;
 
-    // TODO: Add configurable noise here?
-    // TODO: Add filter
     this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command;
 
     this->robot_state_.joint_contact[i] = joint->isInContact();
