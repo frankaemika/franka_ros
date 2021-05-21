@@ -1,6 +1,8 @@
-#include <franka/duration.h>
 #include <franka_gazebo/franka_hw_sim.h>
+
+#include <franka/duration.h>
 #include <franka_gazebo/model_kdl.h>
+#include <franka_hw/franka_hw.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <Eigen/Dense>
 #include <iostream>
@@ -14,8 +16,16 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           gazebo::physics::ModelPtr parent,
                           const urdf::Model* const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions) {
+  model_nh.param<std::string>("arm_id", this->arm_id_, robot_namespace);
+  if (this->arm_id_ != robot_namespace) {
+    ROS_WARN_STREAM_NAMED(
+        "franka_hw_sim",
+        "Caution: Robot names differ! Read 'arm_id: "
+            << this->arm_id_ << "' from parameter server but URDF defines '<robotNamespace>"
+            << robot_namespace << "</robotNamespace>'. Will use '" << this->arm_id_ << "'!");
+  }
+
   this->robot_ = parent;
-  this->arm_id_ = robot_namespace;
 
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
@@ -93,7 +103,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
         try {
-          initFrankaStateHandle(robot_namespace, *urdf, transmission);
+          initFrankaStateHandle(this->arm_id_, *urdf, transmission);
           continue;
 
         } catch (const std::invalid_argument& e) {
@@ -106,7 +116,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
         try {
-          initFrankaModelHandle(robot_namespace, *urdf, transmission);
+          initFrankaModelHandle(this->arm_id_, *urdf, transmission);
           continue;
 
         } catch (const std::invalid_argument& e) {
@@ -143,13 +153,13 @@ void FrankaHWSim::initEffortCommandHandle(std::shared_ptr<franka_gazebo::Joint> 
 }
 
 void FrankaHWSim::initFrankaStateHandle(
-    const std::string& robot_namespace,
+    const std::string& robot,
     const urdf::Model& urdf,
     const transmission_interface::TransmissionInfo& transmission) {
   if (transmission.joints_.size() != 7) {
     throw std::invalid_argument(
-        "Cannot create franka_hw/FrankaStateInterface for robot '" + robot_namespace +
-        "_robot' because " + std::to_string(transmission.joints_.size()) +
+        "Cannot create franka_hw/FrankaStateInterface for robot '" + robot + "_robot' because " +
+        std::to_string(transmission.joints_.size()) +
         " joints were found beneath the <transmission> tag, but 7 are required.");
   }
 
@@ -157,25 +167,23 @@ void FrankaHWSim::initFrankaStateHandle(
   for (const auto& joint : transmission.joints_) {
     if (not urdf.getJoint(joint.name_)) {
       throw std::invalid_argument("Cannot create franka_hw/FrankaStateInterface for robot '" +
-                                  robot_namespace + "_robot' because the specified joint '" +
-                                  joint.name_ +
+                                  robot + "_robot' because the specified joint '" + joint.name_ +
                                   "' in the <transmission> tag cannot be found in the URDF");
     }
     ROS_DEBUG_STREAM_NAMED("franka_hw_sim",
                            "Found joint " << joint.name_ << " to belong to a Panda robot");
   }
-  this->fsi_.registerHandle(
-      franka_hw::FrankaStateHandle(robot_namespace + "_robot", this->robot_state_));
+  this->fsi_.registerHandle(franka_hw::FrankaStateHandle(robot + "_robot", this->robot_state_));
 }
 
 void FrankaHWSim::initFrankaModelHandle(
-    const std::string& robot_namespace,
+    const std::string& robot,
     const urdf::Model& urdf,
     const transmission_interface::TransmissionInfo& transmission) {
   if (transmission.joints_.size() != 2) {
     throw std::invalid_argument(
-        "Cannot create franka_hw/FrankaModelInterface for robot '" + robot_namespace +
-        "_model' because " + std::to_string(transmission.joints_.size()) +
+        "Cannot create franka_hw/FrankaModelInterface for robot '" + robot + "_model' because " +
+        std::to_string(transmission.joints_.size()) +
         " joints were found beneath the <transmission> tag, but 2 are required.");
   }
 
@@ -183,8 +191,7 @@ void FrankaHWSim::initFrankaModelHandle(
     if (not urdf.getJoint(joint.name_)) {
       if (not urdf.getJoint(joint.name_)) {
         throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                    robot_namespace + "_model' because the specified joint '" +
-                                    joint.name_ +
+                                    robot + "_model' because the specified joint '" + joint.name_ +
                                     "' in the <transmission> tag cannot be found in the URDF");
       }
     }
@@ -193,7 +200,7 @@ void FrankaHWSim::initFrankaModelHandle(
                      [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
     if (root == transmission.joints_.end()) {
       throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot_namespace +
+                                  robot +
                                   "_model' because no <joint> with <role>root</root> can be found "
                                   "in the <transmission>");
     }
@@ -202,7 +209,7 @@ void FrankaHWSim::initFrankaModelHandle(
                      [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
     if (tip == transmission.joints_.end()) {
       throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot_namespace +
+                                  robot +
                                   "_model' because no <joint> with <role>tip</role> can be found "
                                   "in the <transmission>");
     }
@@ -214,10 +221,10 @@ void FrankaHWSim::initFrankaModelHandle(
 
     } catch (const std::invalid_argument& e) {
       throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot_namespace + "_model'. " + e.what());
+                                  robot + "_model'. " + e.what());
     }
-    this->fmi_.registerHandle(franka_hw::FrankaModelHandle(robot_namespace + "_model",
-                                                           *this->model_, this->robot_state_));
+    this->fmi_.registerHandle(
+        franka_hw::FrankaModelHandle(robot + "_model", *this->model_, this->robot_state_));
   }
 }
 
@@ -276,16 +283,19 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
                           "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
     this->robot_state_.F_T_EE = readArray<16>(F_T_EE, "F_T_EE");
 
-    std::string conts, colts;
-    nh.param<std::string>("contact_torque_thresholds", conts, "INF INF INF INF INF INF INF");
-    nh.param<std::string>("collision_torque_thresholds", colts, "INF INF INF INF INF INF INF");
-    auto contact_thresholds = readArray<7>(conts, "contact_torque_thresholds");
-    auto collision_thresholds = readArray<7>(colts, "collision_torque_thresholds");
-    // TODO: Lookup the thresholds by name not index
+    // Only nominal cases supported for now
+    std::vector<double> lower_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
+        "lower_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+
+    std::vector<double> upper_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
+        "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+
+    // TODO: Support force thresholds as well
+
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
-      this->joints_[name]->contact_threshold = contact_thresholds.at(i);
-      this->joints_[name]->collision_threshold = collision_thresholds.at(i);
+      this->joints_[name]->contact_threshold = lower_torque_thresholds.at(i);
+      this->joints_[name]->collision_threshold = upper_torque_thresholds.at(i);
     }
 
   } catch (const std::invalid_argument& e) {
