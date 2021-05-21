@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   transmission_interface
   pluginlib
   joint_limits_interface
+  eigen_conversions
   urdf
   angles
   franka_hw
@@ -38,6 +39,7 @@ catkin_package(
     hardware_interface
     transmission_interface
     joint_limits_interface
+    eigen_conversions
     urdf
     angles
     franka_hw

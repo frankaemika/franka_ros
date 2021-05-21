@@ -1,4 +1,6 @@
 #include <franka_gazebo/model_kdl.h>
+
+#include <eigen_conversions/eigen_kdl.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <kdl/chain.hpp>
@@ -80,17 +82,11 @@ std::array<double, 16> ModelKDL::pose(
     throw std::logic_error("KDL forward kinematics pose calculation failed with error: " +
                            strError(error));
   }
-  Eigen::Matrix4d p;
-  // clang-format off
-  p <<
-      kp(0,0), kp(0,1), kp(0,2), kp(0,3),
-      kp(1,0), kp(1,1), kp(1,2), kp(1,3),
-      kp(2,0), kp(2,1), kp(2,2), kp(2,3),
-      kp(3,0), kp(3,1), kp(3,2), kp(3,3);
-  // clang-format on
+  Eigen::Affine3d p;
+  tf::transformKDLToEigen(kp, p);
 
   std::array<double, 16> result;
-  Eigen::MatrixXd::Map(&result[0], 4, 4) = p;
+  Eigen::MatrixXd::Map(&result[0], 4, 4) = p.matrix();
 
   return result;
 }
