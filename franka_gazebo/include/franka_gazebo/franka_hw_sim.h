@@ -131,6 +131,45 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
                    [](std::string v) -> double { return std::stod(v); });
     return x;
   }
+
+  /**
+   * Helper function for generating a skew symmetric matrix for a given input vector such  that:
+   * \f$\mathbf{0} = \mathbf{M} \cdot \mathrm{vec}\f$
+   *
+   * @param[in] vec the 3D input vector for which to generate the matrix for
+   * @return\f$\mathbf{M}\f$ i.e. a skew symmetric matrix for `vec`
+   */
+  static Eigen::Matrix3d skewMatrix(const Eigen::Vector3d& vec) {
+    Eigen::Matrix3d vec_hat;
+    // clang-format off
+    vec_hat <<
+              0, -vec(2),  vec(1),
+         vec(2),      0, -vec(0),
+        -vec(1),  vec(0),       0;
+    // clang-format on
+    return vec_hat;
+  }
+
+  /**
+   * Shift the moment of inertia tensor by a given offset.
+   *
+   * This method is based on Steiner's [Parallel Axis
+   * Theorem](https://de.wikipedia.org/wiki/Steinerscher_Satz#Verallgemeinerung_auf_Tr%C3%A4gheitstensoren)
+   *
+   * \f$\mathbf{I^{(p)}} = \mathbf{I} + m \tilde{p}^\top \tilde{p}\f$
+   *
+   * where \f$\tilde{p}\f$ is the @ref skewMatrix of `p`
+   *
+   * @param[in] I the inertia tensor defined in the original frame or center or mass of `m`
+   * @param[in] m the mass of the body in \f$kg\f$
+   * @param[in] p the offset vector to move the inertia tensor along starting from center of mass
+   * @return the shifted inertia tensor \f$\mathbf{I^{\left( p \right)}}\f$
+   */
+  static Eigen::Matrix3d shiftInertiaTensor(Eigen::Matrix3d I, double m, Eigen::Vector3d p) {
+    Eigen::Matrix3d P = skewMatrix(p);
+    Eigen::Matrix3d Ip = I + m * P.transpose() * P;
+    return Ip;
+  }
 };
 
 }  // namespace franka_gazebo

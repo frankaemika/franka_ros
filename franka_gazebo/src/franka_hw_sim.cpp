@@ -9,23 +9,6 @@
 
 namespace franka_gazebo {
 
-/**
- * Helper function for generating a skew symmetric matrix for a given input vector such  that:
- * \f$\mathbf{0} = \mathbf{M} \cdot \mathrm{vec}\f$
- *
- * @param[in] vec the 3D input vector for which to generate the matrix for
- * @return\f$\mathbf{M}\f$ i.e. a skew symmetric matrix for `vec`
- */
-Eigen::Matrix3d skewMatrix(const Eigen::Vector3d& vec) {
-  Eigen::Matrix3d vec_hat;
-  // clang-format off
-  vec_hat <<      0, -vec(2),  vec(1),
-             vec(2),    0   , -vec(0),
-            -vec(1), vec(0) ,    0   ;
-  // clang-format on
-  return vec_hat;
-}
-
 bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           ros::NodeHandle model_nh,
                           gazebo::physics::ModelPtr parent,
@@ -315,13 +298,9 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
   this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
-  // Compute I_total by converting I_ee into load frame using Theorem of Steiner:
-  // https://de.wikipedia.org/wiki/Steinerscher_Satz#Verallgemeinerung_auf_Tr%C3%A4gheitstensoren
-  Eigen::Vector3d a(this->robot_state_.F_x_Cload.data());
-  Eigen::Matrix3d A = skewMatrix(a);
-  Eigen::Matrix3d Is(this->robot_state_.I_ee.data());
-  Eigen::Matrix3d I = Is + this->robot_state_.m_ee * A.transpose() * A;
-  Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) = I;
+  Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) =
+      shiftInertiaTensor(Eigen::Matrix3d(this->robot_state_.I_ee.data()), this->robot_state_.m_ee,
+                         Eigen::Vector3d(this->robot_state_.F_x_Cload.data()));
 
   return true;
 }
