@@ -7,9 +7,10 @@
 class FkFixture : public ::testing::Test {
  protected:
   std::unique_ptr<franka_gazebo::ModelKDL> model;
-  std::array<double, 16> identity = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  std::array<double, 16> identity;
 
   virtual void SetUp() {
+    identity = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     urdf::Model robot;
     robot.initParam("robot_description");
     EXPECT_GE(robot.joints_.size(), 7);

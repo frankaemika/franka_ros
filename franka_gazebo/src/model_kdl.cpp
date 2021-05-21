@@ -39,12 +39,15 @@ std::string ModelKDL::strError(const int error) {
   case KDL::SolverI::E_NO_CONVERGE:             return "Failed to converge"; break;
   case KDL::SolverI::E_UNDEFINED:               return "Undefined value"; break;
   case KDL::SolverI::E_DEGRADED:                return "Converged but degraded solution"; break;
+#if ROS_VERSION_MINIMUM(1, 15, 0)
+  // These were introduced in melodic
   case KDL::SolverI::E_NOT_UP_TO_DATE:          return "Internal data structures not up to date with Chain"; break;
   case KDL::SolverI::E_SIZE_MISMATCH:           return "The size of the input does not match the internal state"; break;
   case KDL::SolverI::E_MAX_ITERATIONS_EXCEEDED: return "The maximum number of iterations is exceeded"; break;
   case KDL::SolverI::E_OUT_OF_RANGE:            return "The requested index is out of range"; break;
   case KDL::SolverI::E_NOT_IMPLEMENTED:         return "The requested function is not yet implemented"; break;
   case KDL::SolverI::E_SVD_FAILED:              return "SVD failed"; break;
+#endif
   default: return "UNKNOWN ERROR";
   }
   // clang-format on

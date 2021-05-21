@@ -27,7 +27,12 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   this->robot_ = parent;
 
+#if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
+#else
+  gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->GetPhysicsEngine();
+#endif
+
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
 
   // Generate a list of franka_gazebo::Joint to store all relevant information

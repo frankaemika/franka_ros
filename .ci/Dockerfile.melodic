@@ -7,4 +7,5 @@ RUN apt-get update && apt-get install -y \
     ros-melodic-eigen-conversions \
     ros-melodic-gazebo-dev \
     ros-melodic-gazebo-ros-control \
+    ros-melodic-orocos-kdl \
     && rm -rf /var/lib/apt/lists/*

@@ -10,17 +10,29 @@ void Joint::update(const ros::Duration& dt) {
   }
 
   this->velocity = this->handle->GetVelocity(0);
+#if GAZEBO_MAJOR_VERSION >= 8
   double position = this->handle->Position(0);
+#else
+  double position = this->handle->GetAngle(0).Radian();
+#endif
   ignition::math::Vector3d f;
   switch (this->type) {
     case urdf::Joint::PRISMATIC:
       this->position = position;
+#if GAZEBO_MAJOR_VERSION >= 8
       f = this->handle->GetForceTorque(0).body2Force;
+#else
+      f = this->handle->GetForceTorque(0).body2Force.Ign();
+#endif
       break;
     case urdf::Joint::REVOLUTE:
     case urdf::Joint::CONTINUOUS:
       this->position += angles::shortest_angular_distance(this->position, position);
+#if GAZEBO_MAJOR_VERSION >= 8
       f = this->handle->GetForceTorque(0).body2Torque;
+#else
+      f = this->handle->GetForceTorque(0).body2Torque.Ign();
+#endif
       break;
   }
   this->effort = Eigen::Vector3d(f.X(), f.Y(), f.Z()).dot(this->axis);
@@ -43,7 +55,11 @@ double Joint::getLinkMass() const {
   if (not this->handle) {
     return std::numeric_limits<double>::quiet_NaN();
   }
+#if GAZEBO_MAJOR_VERSION >= 8
   return this->handle->GetChild()->GetInertial()->Mass();
+#else
+  return this->handle->GetChild()->GetInertial()->GetMass();
+#endif
 }
 
 bool Joint::isInCollision() const {

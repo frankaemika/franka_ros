@@ -7,10 +7,11 @@
 class GravityFixture : public ::testing::Test {
  protected:
   std::unique_ptr<franka_hw::ModelBase> model;
-  std::array<double, 3> F_x_Ctotal = {0, 0, 0};
+  std::array<double, 3> F_x_Ctotal;
   double m_total = 0;
 
   virtual void SetUp() {
+    F_x_Ctotal = {0, 0, 0};
     urdf::Model robot;
     robot.initParam("robot_description");
     EXPECT_GE(robot.joints_.size(), 7);
