@@ -1,8 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <franka/robot_state.h>
 #include <franka_gazebo/model_kdl.h>
-#include <libfcimodels.h>
 #include <Eigen/Dense>
 #include <string>
 

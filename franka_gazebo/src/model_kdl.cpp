@@ -174,9 +174,13 @@ std::array<double, 7> ModelKDL::gravity(
     const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const {
   KDL::JntArray kq, kg(7);
+  KDL::Vector grav(gravity_earth[0], gravity_earth[1], gravity_earth[2]);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->dynamicsSolver_->JntToGravity(kq, kg);
+  // Instantiate a new dynamic solver, since KDL offers no easy way to change
+  // gravity vector on the fly
+  KDL::ChainDynParam solver(chain_, grav);
+  int error = solver.JntToGravity(kq, kg);
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL gravity calculation failed with error: " + strError(error));
   }
