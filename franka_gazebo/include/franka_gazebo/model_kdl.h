@@ -149,7 +149,7 @@ class ModelKDL : public franka_hw::ModelBase {
       const std::array<double, 7>& q,
       double m_total,
       const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
-      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const override;
+      const std::array<double, 3>& gravity_earth) const override;
 
  private:
   static int segment(franka::Frame frame);

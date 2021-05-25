@@ -35,7 +35,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
     if (transmission.type_ != "transmission_interface/SimpleTransmission") {
       continue;
     }
-    if (transmission.joints_.size() == 0) {
+    if (transmission.joints_.empty()) {
       ROS_WARN_STREAM_NAMED("franka_hw_sim",
                             "Transmission " << transmission.name_ << " has no associated joints.");
       return false;
@@ -53,19 +53,19 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
     // Fill a 'Joint' struct which holds all necessary data
     auto joint = std::make_shared<franka_gazebo::Joint>();
     joint->name = transmission.joints_[0].name_;
-    if (not urdf) {
+    if (urdf == nullptr) {
       ROS_ERROR_STREAM_NAMED(
           "franka_hw_sim", "Could not find any URDF model. Was it loaded on the parameter server?");
       return false;
     }
-    const auto urdfJoint = urdf->getJoint(joint->name);
-    if (not urdfJoint) {
+    auto urdf_joint = urdf->getJoint(joint->name);
+    if (not urdf_joint) {
       ROS_ERROR_STREAM_NAMED("franka_hw_sim",
                              "Could not get joint '" << joint->name << "' from URDF");
       return false;
     }
-    joint->type = urdfJoint->type;
-    joint->axis = Eigen::Vector3d(urdfJoint->axis.x, urdfJoint->axis.y, urdfJoint->axis.z);
+    joint->type = urdf_joint->type;
+    joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
     // Get a handle to the underlying Gazebo Joint
     gazebo::physics::JointPtr handle = parent->GetJoint(joint->name);
@@ -88,12 +88,12 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   // Register all supported command interfaces
   for (auto& transmission : transmissions) {
-    for (const auto interface : transmission.joints_[0].hardware_interfaces_) {
+    for (const auto& k_interface : transmission.joints_[0].hardware_interfaces_) {
       auto joint = this->joints_[transmission.joints_[0].name_];
       if (transmission.type_ == "transmission_interface/SimpleTransmission") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
-                                                   << joint->name << "': " << interface);
-        if (interface == "hardware_interface/EffortJointInterface") {
+                                                   << joint->name << "': " << k_interface);
+        if (k_interface == "hardware_interface/EffortJointInterface") {
           initEffortCommandHandle(joint);
           continue;
         }
@@ -125,7 +125,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
       }
       ROS_WARN_STREAM_NAMED("franka_hw_sim", "Unsupported transmission interface of joint '"
-                                                 << joint->name << "': " << interface);
+                                                 << joint->name << "': " << k_interface);
     }
   }
 
@@ -135,19 +135,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   registerInterface(&this->fsi_);
   registerInterface(&this->fmi_);
 
-  if (not readParameters(model_nh)) {
-    return false;
-  }
-
-  return true;
+  return readParameters(model_nh);
 }
 
-void FrankaHWSim::initJointStateHandle(std::shared_ptr<franka_gazebo::Joint> joint) {
+void FrankaHWSim::initJointStateHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
   this->jsi_.registerHandle(hardware_interface::JointStateHandle(joint->name, &joint->position,
                                                                  &joint->velocity, &joint->effort));
 }
 
-void FrankaHWSim::initEffortCommandHandle(std::shared_ptr<franka_gazebo::Joint> joint) {
+void FrankaHWSim::initEffortCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
   this->eji_.registerHandle(
       hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
 }
@@ -214,10 +210,10 @@ void FrankaHWSim::initFrankaModelHandle(
                                   "in the <transmission>");
     }
     try {
-      auto rootLink = urdf.getJoint(root->name_)->parent_link_name;
-      auto tipLink = urdf.getJoint(tip->name_)->child_link_name;
+      auto root_link = urdf.getJoint(root->name_)->parent_link_name;
+      auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
 
-      this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, rootLink, tipLink);
+      this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
 
     } catch (const std::invalid_argument& e) {
       throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
@@ -236,7 +232,7 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   this->updateRobotState(time);
 }
 
-void FrankaHWSim::writeSim(ros::Time time, ros::Duration period) {
+void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
   auto g = this->model_->gravity(this->robot_state_);
 
   for (auto& pair : this->joints_) {
@@ -265,20 +261,20 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
 
   try {
-    std::string I_ee;
+    std::string I_ee;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("I_ee", I_ee, "0.001 0 0 0 0.0025 0 0 0 0.0017");
     this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
     nh.param<double>("m_load", this->robot_state_.m_load, 0);
 
-    std::string I_load;
+    std::string I_load;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("I_load", I_load, "0 0 0 0 0 0 0 0 0");
     this->robot_state_.I_load = readArray<9>(I_load, "I_load");
 
-    std::string F_x_Cload;
+    std::string F_x_Cload;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
     this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
 
-    std::string F_T_EE;
+    std::string F_T_EE;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("F_T_EE", F_T_EE,
                           "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
     this->robot_state_.F_T_EE = readArray<16>(F_T_EE, "F_T_EE");
@@ -290,7 +286,7 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     std::vector<double> upper_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
         "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
 
-    // TODO: Support force thresholds as well
+    // TODO(goll_th): Support force thresholds as well
 
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
@@ -338,8 +334,8 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
     this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command;
 
-    this->robot_state_.joint_contact[i] = joint->isInContact();
-    this->robot_state_.joint_collision[i] = joint->isInCollision();
+    this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
+    this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
   }
 
   this->robot_state_.control_command_success_rate = 1.0;

@@ -49,9 +49,9 @@ std::string ModelKDL::strError(const int error) {
   }
   // clang-format on
 }
-ModelKDL::ModelKDL(const urdf::Model& urdf, const std::string& root, const std::string& tip) {
+ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std::string& tip) {
   KDL::Tree tree;
-  if (not kdl_parser::treeFromUrdfModel(urdf, tree)) {
+  if (not kdl_parser::treeFromUrdfModel(model, tree)) {
     throw std::invalid_argument("Cannot construct KDL tree from URDF");
   }
 
@@ -70,8 +70,8 @@ ModelKDL::ModelKDL(const urdf::Model& urdf, const std::string& root, const std::
 std::array<double, 16> ModelKDL::pose(
     franka::Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
   KDL::Frame kp;
@@ -92,10 +92,10 @@ std::array<double, 16> ModelKDL::pose(
 }
 
 std::array<double, 42> ModelKDL::bodyJacobian(
-    franka::Frame frame,
-    const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
+    franka::Frame /*frame*/,
+    const std::array<double, 7>& /*q*/,
+    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
     const {
   throw std::runtime_error("Not implemented: bodyJacobian()");
 }
@@ -103,11 +103,11 @@ std::array<double, 42> ModelKDL::bodyJacobian(
 std::array<double, 42> ModelKDL::zeroJacobian(
     franka::Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
-  KDL::Jacobian J(7);
+  KDL::Jacobian J(7);  // NOLINT(readability-identifier-naming)
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   int error = this->jacobianSolver_->JntToJac(kq, J, segment(frame));
@@ -123,12 +123,12 @@ std::array<double, 42> ModelKDL::zeroJacobian(
 
 std::array<double, 49> ModelKDL::mass(
     const std::array<double, 7>& q,
-    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
-    double m_total,
-    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& /*I_total*/,  // NOLINT(readability-identifier-naming)
+    double /*m_total*/,
+    const std::array<double, 3>& /*F_x_Ctotal*/)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
-  KDL::JntSpaceInertiaMatrix M(7);
+  KDL::JntSpaceInertiaMatrix M(7);  // NOLINT(readability-identifier-naming)
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   int error = this->dynamicsSolver_->JntToMass(kq, M);
@@ -145,9 +145,9 @@ std::array<double, 49> ModelKDL::mass(
 std::array<double, 7> ModelKDL::coriolis(
     const std::array<double, 7>& q,
     const std::array<double, 7>& dq,
-    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
-    double m_total,
-    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& /*I_total*/,  // NOLINT(readability-identifier-naming)
+    double /*m_total*/,
+    const std::array<double, 3>& /*F_x_Ctotal*/)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq, kdq, kc(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
@@ -166,8 +166,8 @@ std::array<double, 7> ModelKDL::coriolis(
 
 std::array<double, 7> ModelKDL::gravity(
     const std::array<double, 7>& q,
-    double m_total,
-    const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
+    double /*m_total*/,
+    const std::array<double, 3>& /*F_x_Ctotal*/,  // NOLINT(readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const {
   KDL::JntArray kq, kg(7);
   KDL::Vector grav(gravity_earth[0], gravity_earth[1], gravity_earth[2]);

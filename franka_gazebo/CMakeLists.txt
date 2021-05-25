@@ -91,3 +91,21 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(FILES franka_hw_sim_plugins.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+
+## Tools
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/ClangTools.cmake OPTIONAL
+  RESULT_VARIABLE CLANG_TOOLS
+  )
+if(CLANG_TOOLS)
+  file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+  file(GLOB_RECURSE HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+    )
+  add_format_target(franka_gazebo FILES ${SOURCES} ${HEADERS})
+  add_tidy_target(franka_gazebo
+    FILES ${SOURCES}
+    DEPENDS franka_hw_sim
+    )
+endif()
