@@ -34,6 +34,8 @@ void Joint::update(const ros::Duration& dt) {
       f = this->handle->GetForceTorque(0).body2Torque.Ign();
 #endif
       break;
+    default:
+      throw std::logic_error("Unknown joint type: " + std::to_string(this->type));
   }
   this->effort = Eigen::Vector3d(f.X(), f.Y(), f.Z()).dot(this->axis);
 
