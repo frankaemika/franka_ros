@@ -305,6 +305,7 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   }
   this->robot_state_.m_total = this->robot_state_.m_ee + this->robot_state_.m_load;
 
+  // TODO(goll_th): Use user-defined values here, e.g. from service call or ROS param (SRR-1035)
   this->robot_state_.NE_T_EE = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
   this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
   this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
