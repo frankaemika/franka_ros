@@ -279,10 +279,18 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
     this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
 
-    std::string F_T_EE;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("F_T_EE", F_T_EE,
+    std::string F_T_NE;  // NOLINT [readability-identifier-naming]
+    nh.param<std::string>("F_T_NE", F_T_NE,
                           "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
-    this->robot_state_.F_T_EE = readArray<16>(F_T_EE, "F_T_EE");
+    this->robot_state_.F_T_NE = readArray<16>(F_T_NE, "F_T_NE");
+
+    std::string NE_T_EE;  // NOLINT [readability-identifier-naming]
+    nh.param<std::string>("NE_T_EE", NE_T_EE, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+    this->robot_state_.NE_T_EE = readArray<16>(NE_T_EE, "NE_T_EE");
+
+    std::string EE_T_K;  // NOLINT [readability-identifier-naming]
+    nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+    this->robot_state_.EE_T_K = readArray<16>(EE_T_K, "EE_T_K");
 
     // Only nominal cases supported for now
     std::vector<double> lower_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
@@ -305,10 +313,9 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   }
   this->robot_state_.m_total = this->robot_state_.m_ee + this->robot_state_.m_load;
 
-  // TODO(goll_th): Use user-defined values here, e.g. from service call or ROS param (SRR-1035)
-  this->robot_state_.NE_T_EE = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
-  this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  Eigen::Map<Eigen::Matrix4d>(this->robot_state_.F_T_EE.data()) =
+      Eigen::Matrix4d(this->robot_state_.F_T_NE.data()) *
+      Eigen::Matrix4d(this->robot_state_.NE_T_EE.data());
 
   Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) =
       shiftInertiaTensor(Eigen::Matrix3d(this->robot_state_.I_ee.data()), this->robot_state_.m_ee,
