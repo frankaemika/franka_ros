@@ -37,7 +37,8 @@
     </param>
 
     <rosparam file="$(find franka_control)/config/franka_control_node.yaml" />
-    <rosparam file="$(find franka_gazebo)/config/controllers.yaml" />
+    <rosparam file="$(find franka_control)/config/default_controllers.yaml" />
+    <rosparam file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
 
 
     <node name="$(arg arm_id)_model_spawner"
