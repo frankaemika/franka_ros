@@ -17,16 +17,16 @@ namespace franka_gazebo {
 int ModelKDL::segment(franka::Frame frame) {
   // clang-format off
   switch (frame) {
-    case franka::Frame::kJoint1: return 1;
-    case franka::Frame::kJoint2: return 2;
-    case franka::Frame::kJoint3: return 3;
-    case franka::Frame::kJoint4: return 4;
-    case franka::Frame::kJoint5: return 5;
-    case franka::Frame::kJoint6: return 6;
-    case franka::Frame::kJoint7: return 7;
-    case franka::Frame::kFlange: return 8;
-    case franka::Frame::kEndEffector:
-    case franka::Frame::kStiffness:
+    case franka::Frame::kJoint1:      return 1;
+    case franka::Frame::kJoint2:      return 2;
+    case franka::Frame::kJoint3:      return 3;
+    case franka::Frame::kJoint4:      return 4;
+    case franka::Frame::kJoint5:      return 5;
+    case franka::Frame::kJoint6:      return 6;
+    case franka::Frame::kJoint7:      return 7;
+    case franka::Frame::kFlange:      return 8;
+    case franka::Frame::kEndEffector: return 9;
+    case franka::Frame::kStiffness:   return 10;
     default: return -1;
   }
   // clang-format on
@@ -68,8 +68,6 @@ ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std:
   ROS_INFO_STREAM("KDL Model initialized for chain from '" << root << "' -> '" << tip << "'");
 
   this->dynamicsSolver_ = std::make_unique<KDL::ChainDynParam>(chain_, KDL::Vector(0, 0, -9.81));
-  this->jacobianSolver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
-  this->kinematicsSolver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
 }
 
 void ModelKDL::augmentFrame(KDL::Chain& chain, const std::array<double, 16>& transform) {
@@ -96,14 +94,22 @@ void ModelKDL::augmentFrame(KDL::Chain& chain,
 std::array<double, 16> ModelKDL::pose(
     franka::Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
   KDL::Frame kp;
+
+  // Agument the chain with the two new Frames 'EE' and 'K'
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame(chain, F_T_EE);
+  augmentFrame(chain, EE_T_K);
+
+  KDL::ChainFkSolverPos_recursive solver(chain);
+
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->kinematicsSolver_->JntToCart(kq, kp, segment(frame));
+  int error = solver.JntToCart(kq, kp, segment(frame));
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL forward kinematics pose calculation failed with error: " +
                            strError(error));
@@ -129,14 +135,21 @@ std::array<double, 42> ModelKDL::bodyJacobian(
 std::array<double, 42> ModelKDL::zeroJacobian(
     franka::Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
   KDL::Jacobian J(7);  // NOLINT(readability-identifier-naming)
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->jacobianSolver_->JntToJac(kq, J, segment(frame));
+  // Agument the chain with the two new Frames 'EE' and 'K'
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame(chain, F_T_EE);
+  augmentFrame(chain, EE_T_K);
+
+  KDL::ChainJntToJacSolver solver(chain);
+
+  int error = solver.JntToJac(kq, J, segment(frame));
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL zero jacobian calculation failed with error: " + strError(error));
   }
