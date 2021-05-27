@@ -39,7 +39,6 @@ void Joint::update(const ros::Duration& dt) {
   }
   this->effort = Eigen::Vector3d(f.X(), f.Y(), f.Z()).dot(this->axis);
 
-  // TODO(goll_th): filter derivatives? Maybe make it configurable?
   if (std::isnan(this->lastVelocity)) {
     this->lastVelocity = this->velocity;
   }
