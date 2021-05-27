@@ -3,6 +3,8 @@
 #include <eigen_conversions/eigen_kdl.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <algorithm>
+#include <array>
 #include <kdl/chain.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/frames.hpp>
@@ -68,6 +70,27 @@ ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std:
   this->dynamicsSolver_ = std::make_unique<KDL::ChainDynParam>(chain_, KDL::Vector(0, 0, -9.81));
   this->jacobianSolver_ = std::make_unique<KDL::ChainJntToJacSolver>(chain_);
   this->kinematicsSolver_ = std::make_unique<KDL::ChainFkSolverPos_recursive>(chain_);
+}
+
+void ModelKDL::augmentFrame(KDL::Chain& chain, const std::array<double, 16>& transform) {
+  Eigen::Affine3d t;
+  KDL::Frame f;
+  t.matrix() = Eigen::Matrix4d(transform.data());
+  tf::transformEigenToKDL(t, f);
+  chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::None), f));
+}
+
+void ModelKDL::augmentFrame(KDL::Chain& chain,
+                            const std::array<double, 3>& center_of_mass,
+                            double mass,
+                            const std::array<double, 9>& inertia) {
+  KDL::Vector kc;
+  KDL::RotationalInertia ki;
+  std::copy(center_of_mass.begin(), center_of_mass.end(), std::begin(kc.data));
+  std::copy(inertia.begin(), inertia.end(), std::begin(ki.data));
+
+  chain.addSegment(KDL::Segment(KDL::Joint(KDL::Joint::None), KDL::Frame(KDL::Vector::Zero()),
+                                KDL::RigidBodyInertia(mass, kc, ki)));
 }
 
 std::array<double, 16> ModelKDL::pose(
