@@ -12,6 +12,7 @@
   <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_description_with_marker.rviz"/>
   <node name="interactive_marker" pkg="franka_example_controllers" type="interactive_marker.py" required="true" output="screen">
     <param name="link_name" value="panda_link0" />
+    <remap from="equilibrium_pose" to="/cartesian_impedance_example_controller/equilibrium_pose" />
   </node>
   <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" />
 </launch>
