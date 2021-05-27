@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   urdf
   angles
   franka_hw
+  franka_msgs
 )
 
 find_package(Franka 0.7.0 REQUIRED)
@@ -43,6 +44,7 @@ catkin_package(
     urdf
     angles
     franka_hw
+    franka_msgs
   INCLUDE_DIRS include
   LIBRARIES franka_hw_sim
   DEPENDS Franka orocos_kdl

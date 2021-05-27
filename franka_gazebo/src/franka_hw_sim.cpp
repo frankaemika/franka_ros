@@ -3,6 +3,10 @@
 #include <franka/duration.h>
 #include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_msgs/SetEEFrame.h>
+#include <franka_msgs/SetForceTorqueCollisionBehavior.h>
+#include <franka_msgs/SetKFrame.h>
+#include <franka_msgs/SetLoad.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <Eigen/Dense>
 #include <iostream>
@@ -140,6 +144,9 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   registerInterface(&this->fsi_);
   registerInterface(&this->fmi_);
 
+  // Initialize ROS Services
+  initServices(model_nh);
+
   return readParameters(model_nh);
 }
 
@@ -229,6 +236,61 @@ void FrankaHWSim::initFrankaModelHandle(
   }
 }
 
+void FrankaHWSim::initServices(ros::NodeHandle& nh) {
+  this->service_set_ee_ =
+      nh.advertiseService<franka_msgs::SetEEFrame::Request, franka_msgs::SetEEFrame::Response>(
+          "set_EE_frame", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                                  this->arm_id_ << ": Setting NE_T_EE transformation");
+            std::copy(request.NE_T_EE.cbegin(), request.NE_T_EE.cend(),
+                      this->robot_state_.NE_T_EE.begin());
+            updateRobotStateDynamics();
+            response.success = true;
+            return true;
+          });
+  this->service_set_k_ =
+      nh.advertiseService<franka_msgs::SetKFrame::Request, franka_msgs::SetKFrame::Response>(
+          "set_K_frame", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                                  this->arm_id_ << ": Setting EE_T_K transformation");
+            std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
+                      this->robot_state_.EE_T_K.begin());
+            updateRobotStateDynamics();
+            response.success = true;
+            return true;
+          });
+  this->service_set_load_ =
+      nh.advertiseService<franka_msgs::SetLoad::Request, franka_msgs::SetLoad::Response>(
+          "set_load", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
+            this->robot_state_.m_load = request.mass;
+            std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
+                      this->robot_state_.F_x_Cload.begin());
+            std::copy(request.load_inertia.cbegin(), request.load_inertia.cend(),
+                      this->robot_state_.I_load.begin());
+            updateRobotStateDynamics();
+            response.success = true;
+            return true;
+          });
+  this->service_collision_behavior_ =
+      nh.advertiseService<franka_msgs::SetForceTorqueCollisionBehavior::Request,
+                          franka_msgs::SetForceTorqueCollisionBehavior::Response>(
+          "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Collision Behavior");
+
+            for (int i = 0; i < 7; i++) {
+              std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
+              this->joints_[name]->contact_threshold =
+                  request.lower_torque_thresholds_nominal.at(i);
+              this->joints_[name]->collision_threshold =
+                  request.upper_torque_thresholds_nominal.at(i);
+            }
+
+            response.success = true;
+            return true;
+          });
+}
+
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   for (const auto& pair : this->joints_) {
     auto joint = pair.second;
@@ -311,6 +373,11 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
     return false;
   }
+  updateRobotStateDynamics();
+  return true;
+}
+
+void FrankaHWSim::updateRobotStateDynamics() {
   this->robot_state_.m_total = this->robot_state_.m_ee + this->robot_state_.m_load;
 
   Eigen::Map<Eigen::Matrix4d>(this->robot_state_.F_T_EE.data()) =
@@ -320,8 +387,6 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
   Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) =
       shiftInertiaTensor(Eigen::Matrix3d(this->robot_state_.I_ee.data()), this->robot_state_.m_ee,
                          Eigen::Vector3d(this->robot_state_.F_x_Cload.data()));
-
-  return true;
 }
 
 void FrankaHWSim::updateRobotState(ros::Time time) {
