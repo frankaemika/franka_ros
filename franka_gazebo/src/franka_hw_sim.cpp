@@ -147,7 +147,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   // Initialize ROS Services
   initServices(model_nh);
 
-  return readParameters(model_nh);
+  return readParameters(model_nh, *urdf);
 }
 
 void FrankaHWSim::initJointStateHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
@@ -322,7 +322,7 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
 
 void FrankaHWSim::eStopActive(bool /* active */) {}
 
-bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
+bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf) {
   nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
 
   try {
@@ -339,9 +339,19 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
     this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
 
+    std::string def = "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1";
+    if (not nh.hasParam("F_T_NE")) {
+      // Try to guess a good default, depending if a Hand is present or not
+      const auto hand = urdf.getJoint(this->arm_id_ + "_hand_joint");
+      if (hand != nullptr) {
+        ROS_INFO_STREAM_NAMED(
+            "franka_hw_sim",
+            "Found '" << this->arm_id_ << "_hand_joint' in URDF, assuming it's defining F_T_NE");
+        def = "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1";
+      }
+    }
     std::string F_T_NE;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("F_T_NE", F_T_NE,
-                          "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
+    nh.param<std::string>("F_T_NE", F_T_NE, def);
     this->robot_state_.F_T_NE = readArray<16>(F_T_NE, "F_T_NE");
 
     std::string NE_T_EE;  // NOLINT [readability-identifier-naming]
