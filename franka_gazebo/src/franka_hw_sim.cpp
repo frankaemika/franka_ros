@@ -203,37 +203,35 @@ void FrankaHWSim::initFrankaModelHandle(
                                     "' in the <transmission> tag cannot be found in the URDF");
       }
     }
-    auto root =
-        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
-                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
-    if (root == transmission.joints_.end()) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot +
-                                  "_model' because no <joint> with <role>root</root> can be found "
-                                  "in the <transmission>");
-    }
-    auto tip =
-        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
-                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
-    if (tip == transmission.joints_.end()) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot +
-                                  "_model' because no <joint> with <role>tip</role> can be found "
-                                  "in the <transmission>");
-    }
-    try {
-      auto root_link = urdf.getJoint(root->name_)->parent_link_name;
-      auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
-
-      this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
-
-    } catch (const std::invalid_argument& e) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot + "_model'. " + e.what());
-    }
-    this->fmi_.registerHandle(
-        franka_hw::FrankaModelHandle(robot + "_model", *this->model_, this->robot_state_));
   }
+  auto root =
+      std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                   [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
+  if (root == transmission.joints_.end()) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model' because no <joint> with <role>root</root> can be found "
+                                "in the <transmission>");
+  }
+  auto tip =
+      std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                   [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
+  if (tip == transmission.joints_.end()) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model' because no <joint> with <role>tip</role> can be found "
+                                "in the <transmission>");
+  }
+  try {
+    auto root_link = urdf.getJoint(root->name_)->parent_link_name;
+    auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
+
+    this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
+
+  } catch (const std::invalid_argument& e) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model'. " + e.what());
+  }
+  this->fmi_.registerHandle(
+      franka_hw::FrankaModelHandle(robot + "_model", *this->model_, this->robot_state_));
 }
 
 void FrankaHWSim::initServices(ros::NodeHandle& nh) {
