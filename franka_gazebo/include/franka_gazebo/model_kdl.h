@@ -181,7 +181,6 @@ class ModelKDL : public franka_hw::ModelBase {
   static int segment(franka::Frame frame);
   static std::string strError(const int error);
 
-  std::unique_ptr<KDL::ChainDynParam> dynamicsSolver_;
   KDL::Chain chain_;
 };
 

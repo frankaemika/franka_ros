@@ -66,8 +66,6 @@ ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std:
   }
 
   ROS_INFO_STREAM("KDL Model initialized for chain from '" << root << "' -> '" << tip << "'");
-
-  this->dynamicsSolver_ = std::make_unique<KDL::ChainDynParam>(chain_, KDL::Vector(0, 0, -9.81));
 }
 
 void ModelKDL::augmentFrame(KDL::Chain& chain, const std::array<double, 16>& transform) {
@@ -162,15 +160,19 @@ std::array<double, 42> ModelKDL::zeroJacobian(
 
 std::array<double, 49> ModelKDL::mass(
     const std::array<double, 7>& q,
-    const std::array<double, 9>& /*I_total*/,  // NOLINT(readability-identifier-naming)
-    double /*m_total*/,
-    const std::array<double, 3>& /*F_x_Ctotal*/)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
+    double m_total,
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq;
   KDL::JntSpaceInertiaMatrix M(7);  // NOLINT(readability-identifier-naming)
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  int error = this->dynamicsSolver_->JntToMass(kq, M);
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame(chain, F_x_Ctotal, m_total, I_total);
+  KDL::ChainDynParam solver(chain, KDL::Vector(0, 0, -9.81));
+
+  int error = solver.JntToMass(kq, M);
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL mass calculation failed with error: " + strError(error));
   }
@@ -184,15 +186,19 @@ std::array<double, 49> ModelKDL::mass(
 std::array<double, 7> ModelKDL::coriolis(
     const std::array<double, 7>& q,
     const std::array<double, 7>& dq,
-    const std::array<double, 9>& /*I_total*/,  // NOLINT(readability-identifier-naming)
-    double /*m_total*/,
-    const std::array<double, 3>& /*F_x_Ctotal*/)  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
+    double m_total,
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
     const {
   KDL::JntArray kq, kdq, kc(7);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
   kdq.data = Eigen::Matrix<double, 7, 1>(dq.data());
 
-  int error = this->dynamicsSolver_->JntToCoriolis(kq, kdq, kc);
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame(chain, F_x_Ctotal, m_total, I_total);
+  KDL::ChainDynParam solver(chain, KDL::Vector(0, 0, -9.81));
+
+  int error = solver.JntToCoriolis(kq, kdq, kc);
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL coriolis calculation failed with error: " + strError(error));
   }
@@ -205,16 +211,17 @@ std::array<double, 7> ModelKDL::coriolis(
 
 std::array<double, 7> ModelKDL::gravity(
     const std::array<double, 7>& q,
-    double /*m_total*/,
-    const std::array<double, 3>& /*F_x_Ctotal*/,  // NOLINT(readability-identifier-naming)
+    double m_total,
+    const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const {
   KDL::JntArray kq, kg(7);
   KDL::Vector grav(gravity_earth[0], gravity_earth[1], gravity_earth[2]);
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  // Instantiate a new dynamic solver, since KDL offers no easy way to change
-  // gravity vector on the fly
-  KDL::ChainDynParam solver(chain_, grav);
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame(chain, F_x_Ctotal, m_total);
+  KDL::ChainDynParam solver(chain, grav);
+
   int error = solver.JntToGravity(kq, kg);
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL gravity calculation failed with error: " + strError(error));
