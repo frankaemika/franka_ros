@@ -323,12 +323,9 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
 void FrankaHWSim::eStopActive(bool /* active */) {}
 
 bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf) {
-  nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
-
   try {
-    std::string I_ee;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("I_ee", I_ee, "0.001 0 0 0 0.0025 0 0 0 0.0017");
-    this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
+    guessEndEffector(nh, urdf);
+
     nh.param<double>("m_load", this->robot_state_.m_load, 0);
 
     std::string I_load;  // NOLINT [readability-identifier-naming]
@@ -338,21 +335,6 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
     std::string F_x_Cload;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
     this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
-
-    std::string def = "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1";
-    if (not nh.hasParam("F_T_NE")) {
-      // Try to guess a good default, depending if a Hand is present or not
-      const auto hand = urdf.getJoint(this->arm_id_ + "_hand_joint");
-      if (hand != nullptr) {
-        ROS_INFO_STREAM_NAMED(
-            "franka_hw_sim",
-            "Found '" << this->arm_id_ << "_hand_joint' in URDF, assuming it's defining F_T_NE");
-        def = "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1";
-      }
-    }
-    std::string F_T_NE;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("F_T_NE", F_T_NE, def);
-    this->robot_state_.F_T_NE = readArray<16>(F_T_NE, "F_T_NE");
 
     std::string NE_T_EE;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("NE_T_EE", NE_T_EE, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
@@ -383,6 +365,68 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
   }
   updateRobotStateDynamics();
   return true;
+}
+
+void FrankaHWSim::guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf) {
+  auto hand_link = this->arm_id_ + "_hand";
+  auto hand = urdf.getLink(hand_link);
+  if (hand != nullptr) {
+    ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                          "Found link '" << hand_link
+                                         << "' in URDF. Assuming it is defining the kinematics & "
+                                            "inertias of a Franka Hand Gripper.");
+  }
+
+  // By absolute default unless URDF or ROS params say otherwise, assume no end-effector.
+  double def_m_ee = 0;
+  std::string def_i_ee = "0.001 0 0 0 0.001 0 0 0 0.001";
+  std::string def_f_x_cee = "0 0 0";
+  std::string def_f_t_ne = "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1";
+  if (not nh.hasParam("F_T_NE") and hand != nullptr) {
+    // NOTE: We cannot interprete the Joint pose from the URDF directly, because
+    // its <arm_id>_link is mounted at the flange directly and not at NE
+    def_f_t_ne = "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1";
+  }
+  std::string F_T_NE;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("F_T_NE", F_T_NE, def_f_t_ne);
+  this->robot_state_.F_T_NE = readArray<16>(F_T_NE, "F_T_NE");
+
+  if (not nh.hasParam("m_ee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    def_m_ee = hand->inertial->mass;
+  }
+  nh.param<double>("m_ee", this->robot_state_.m_ee, def_m_ee);
+
+  if (not nh.hasParam("I_ee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    // clang-format off
+    def_i_ee = std::to_string(hand->inertial->ixx) + " " + std::to_string(hand->inertial->ixy) + " " + std::to_string(hand->inertial->ixz) + " "
+             + std::to_string(hand->inertial->ixy) + " " + std::to_string(hand->inertial->iyy) + " " + std::to_string(hand->inertial->iyz) + " "
+             + std::to_string(hand->inertial->ixz) + " " + std::to_string(hand->inertial->iyz) + " " + std::to_string(hand->inertial->izz);
+    // clang-format on
+  }
+  std::string I_ee;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("I_ee", I_ee, def_i_ee);
+  this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
+
+  if (not nh.hasParam("F_x_Cee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    def_f_x_cee = std::to_string(hand->inertial->origin.position.x) + " " +
+                  std::to_string(hand->inertial->origin.position.y) + " " +
+                  std::to_string(hand->inertial->origin.position.z);
+  }
+  std::string F_x_Cee;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("F_x_Cee", F_x_Cee, def_f_x_cee);
+  this->robot_state_.F_x_Cee = readArray<3>(F_x_Cee, "F_x_Cee");
 }
 
 void FrankaHWSim::updateRobotStateDynamics() {
