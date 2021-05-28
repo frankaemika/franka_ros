@@ -242,7 +242,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
                                   this->arm_id_ << ": Setting NE_T_EE transformation");
             std::copy(request.NE_T_EE.cbegin(), request.NE_T_EE.cend(),
                       this->robot_state_.NE_T_EE.begin());
-            updateRobotStateDynamics();
+            this->updateRobotStateDynamics();
             response.success = true;
             return true;
           });
@@ -253,7 +253,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
                                   this->arm_id_ << ": Setting EE_T_K transformation");
             std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
                       this->robot_state_.EE_T_K.begin());
-            updateRobotStateDynamics();
+            this->updateRobotStateDynamics();
             response.success = true;
             return true;
           });
@@ -266,7 +266,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
                       this->robot_state_.F_x_Cload.begin());
             std::copy(request.load_inertia.cbegin(), request.load_inertia.cend(),
                       this->robot_state_.I_load.begin());
-            updateRobotStateDynamics();
+            this->updateRobotStateDynamics();
             response.success = true;
             return true;
           });
