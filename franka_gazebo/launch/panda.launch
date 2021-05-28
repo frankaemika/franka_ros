@@ -59,8 +59,7 @@
           type="spawner"
           name="$(arg arm_id)_controller_spawner"
           respawn="false" output="screen"
-          args="state_controller
-                franka_state_controller
+          args="franka_state_controller
                 cartesian_impedance_example_controller">
     </node>
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
