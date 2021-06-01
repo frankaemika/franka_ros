@@ -156,16 +156,20 @@ class ModelKDL : public franka_hw::ModelBase {
    *
    * @param[in] chain a reference to the kinematic chain which to augment. The segment will be added
    * to this chain, so if you want to keep your original chain, make a copy before
+   * @param[in] name the name of the frame. Must be unique in the `chain`
    * @param[in] transform the homogenous transformation of the frame relative to the tip of `chain`
    * which to add to the chain
    */
-  static void augmentFrame(KDL::Chain& chain, const std::array<double, 16>& transform);
+  static void augmentFrame(KDL::Chain& chain,
+                           const std::string& name,
+                           const std::array<double, 16>& transform);
 
   /**
    * Augment a kinematic chain by adding a virtual frame with an inertia to it.
    *
    * @param[in] chain a reference to the kinematic chain which to augment. The segment will be added
    * to this chain, so if you want to keep your original chain, make a copy before
+   * @param[in] name the name of the frame. Must be unique in the `chain`
    * @param[in] center_of_mass the position of the center of mass of the virtual frame which should
    * be added, relative to the tip of `chain`
    * @param[in] mass the mass in \f$[kg]\f$ of this virtual frame
@@ -173,6 +177,7 @@ class ModelKDL : public franka_hw::ModelBase {
    * `center_of_mass`.
    */
   static void augmentFrame(KDL::Chain& chain,
+                           const std::string& name,
                            const std::array<double, 3>& center_of_mass,
                            double mass,
                            const std::array<double, 9>& inertia = {1, 0, 0, 0, 1, 0, 0, 0, 1});
