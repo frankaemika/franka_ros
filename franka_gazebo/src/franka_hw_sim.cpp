@@ -3,6 +3,7 @@
 #include <franka/duration.h>
 #include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/services.h>
 #include <franka_msgs/SetEEFrame.h>
 #include <franka_msgs/SetForceTorqueCollisionBehavior.h>
 #include <franka_msgs/SetKFrame.h>
@@ -246,34 +247,30 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             response.success = true;
             return true;
           });
-  this->service_set_k_ =
-      nh.advertiseService<franka_msgs::SetKFrame::Request, franka_msgs::SetKFrame::Response>(
-          "set_K_frame", [&](auto& request, auto& response) {
-            ROS_INFO_STREAM_NAMED("franka_hw_sim",
-                                  this->arm_id_ << ": Setting EE_T_K transformation");
-            std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
-                      this->robot_state_.EE_T_K.begin());
-            this->updateRobotStateDynamics();
-            response.success = true;
-            return true;
-          });
-  this->service_set_load_ =
-      nh.advertiseService<franka_msgs::SetLoad::Request, franka_msgs::SetLoad::Response>(
-          "set_load", [&](auto& request, auto& response) {
-            ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
-            this->robot_state_.m_load = request.mass;
-            std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
-                      this->robot_state_.F_x_Cload.begin());
-            std::copy(request.load_inertia.cbegin(), request.load_inertia.cend(),
-                      this->robot_state_.I_load.begin());
-            this->updateRobotStateDynamics();
-            response.success = true;
-            return true;
-          });
+  this->service_set_k_ = franka_hw::advertiseService<franka_msgs::SetKFrame>(
+      nh, "set_K_frame", [&](auto& request, auto& response) {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting EE_T_K transformation");
+        std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
+                  this->robot_state_.EE_T_K.begin());
+        this->updateRobotStateDynamics();
+        response.success = true;
+        return true;
+      });
+  this->service_set_load_ = franka_hw::advertiseService<franka_msgs::SetLoad>(
+      nh, "set_load", [&](auto& request, auto& response) {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
+        this->robot_state_.m_load = request.mass;
+        std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
+                  this->robot_state_.F_x_Cload.begin());
+        std::copy(request.load_inertia.cbegin(), request.load_inertia.cend(),
+                  this->robot_state_.I_load.begin());
+        this->updateRobotStateDynamics();
+        response.success = true;
+        return true;
+      });
   this->service_collision_behavior_ =
-      nh.advertiseService<franka_msgs::SetForceTorqueCollisionBehavior::Request,
-                          franka_msgs::SetForceTorqueCollisionBehavior::Response>(
-          "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
+      franka_hw::advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
+          nh, "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
             ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Collision Behavior");
 
             for (int i = 0; i < 7; i++) {
