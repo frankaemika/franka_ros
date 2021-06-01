@@ -379,7 +379,7 @@ void FrankaHWSim::guessEndEffector(const ros::NodeHandle& nh, const urdf::Model&
 
   // By absolute default unless URDF or ROS params say otherwise, assume no end-effector.
   double def_m_ee = 0;
-  std::string def_i_ee = "0.001 0 0 0 0.001 0 0 0 0.001";
+  std::string def_i_ee = "0.0 0 0 0 0.0 0 0 0 0.0";
   std::string def_f_x_cee = "0 0 0";
   std::string def_f_t_ne = "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1";
   if (not nh.hasParam("F_T_NE") and hand != nullptr) {
