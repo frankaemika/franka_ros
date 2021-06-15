@@ -332,7 +332,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.q_d[i] = joint->position;
     this->robot_state_.dq_d[i] = joint->velocity;
     this->robot_state_.ddq_d[i] = joint->acceleration;
-    this->robot_state_.tau_J_d[i] = joint->effort;
+    this->robot_state_.tau_J_d[i] = joint->command;
 
     // For now we assume no flexible joints
     this->robot_state_.theta[i] = joint->position;
