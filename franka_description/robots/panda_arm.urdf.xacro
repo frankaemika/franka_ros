@@ -56,6 +56,7 @@
         <controlPeriod>0.001</controlPeriod>
         <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
       </plugin>
+      <self_collide>true</self_collide>
     </gazebo>
   </xacro:if>
 
