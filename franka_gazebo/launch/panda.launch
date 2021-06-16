@@ -30,11 +30,10 @@
 
   <group ns="$(arg arm_id)">
     <param name="robot_description"
-           command="xacro $(find franka_sim_description)/robots/panda.urdf.xacro
-                    arm_id:=$(arg arm_id)
-                    connected_to:=world
-                    use_franka_transmissions:=true
-                    use_gripper:=$(arg use_gripper)">
+           command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
+                    gazebo:=true
+                    hand:=$(arg use_gripper)
+                    arm_id:=$(arg arm_id)">
     </param>
 
     <rosparam file="$(find franka_control)/config/franka_control_node.yaml" />
