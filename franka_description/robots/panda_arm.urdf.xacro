@@ -1,5 +1,52 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
-  <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro" />
-  <xacro:panda_arm safety_distance="0.03"/>
+
+  <xacro:arg name="gazebo" default="false" />
+
+  <xacro:unless value="$(arg gazebo)">
+    <!-- Create a URDF for a real hardware -->
+    <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro" />
+    <xacro:panda_arm safety_distance="0.03"/>
+  </xacro:unless>
+
+  <xacro:if value="$(arg gazebo)">
+
+    <!-- Create a simulatable URDF -->
+    <xacro:include filename="$(find franka_description)/robots/utils.xacro" />
+    <xacro:include filename="$(find franka_description)/robots/panda_gazebo.xacro" />
+
+    <xacro:property name="arm_id" value="panda" />
+    <xacro:panda_arm arm_id="${arm_id}" />
+
+    <!-- Gazebo requires a joint to a link called "world" for statically mounted robots -->
+    <link name="world" />
+    <joint name="world_joint" type="fixed">
+      <parent link="world" />
+      <child  link="${arm_id}_link0" />
+    </joint>
+
+
+    <xacro:gazebo-joint joint="${arm_id}_joint1" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint2" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint3" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint4" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint5" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint6" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint7" transmission="hardware_interface/EffortJointInterface" />
+
+    <xacro:transmission-franka-state arm_id="${arm_id}" />
+    <xacro:transmission-franka-model arm_id="${arm_id}"
+       root="${arm_id}_joint1"
+       tip="${arm_id}_joint8"
+     />
+
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+        <robotNamespace>${arm_id}</robotNamespace>
+        <controlPeriod>0.001</controlPeriod>
+        <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
+      </plugin>
+    </gazebo>
+  </xacro:if>
+
 </robot>
