@@ -20,8 +20,10 @@
   <depend>gazebo_ros_control</depend>
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>controller_manager</depend>
+  <depend>controller_interface</depend>
   <depend>pluginlib</depend>
   <depend>kdl_parser</depend>
   <depend>hardware_interface</depend>
@@ -30,6 +32,7 @@
   <depend>eigen_conversions</depend>
   <depend>franka_hw</depend>
   <depend>franka_msgs</depend>
+  <depend>franka_gripper</depend>
   <depend>urdf</depend>
   <depend>angles</depend>
 
@@ -37,6 +40,7 @@
   <test_depend>rostest</test_depend>
 
   <export>
-    <gazebo_ros_control plugin="${prefix}/franka_hw_sim_plugin.xml"/>
+    <controller_interface plugin="${prefix}/franka_gripper_sim_plugin.xml"/>
+    <gazebo_ros_control   plugin="${prefix}/franka_hw_sim_plugin.xml"/>
   </export>
 </package>
