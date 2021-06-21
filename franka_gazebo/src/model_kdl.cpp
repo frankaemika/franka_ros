@@ -68,9 +68,9 @@ ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std:
   ROS_INFO_STREAM("KDL Model initialized for chain from '" << root << "' -> '" << tip << "'");
 }
 
-void ModelKDL::augmentFrame(KDL::Chain& chain,
-                            const std::string& name,
-                            const std::array<double, 16>& transform) {
+void ModelKDL::augmentFrame(const std::string& name,
+                            const std::array<double, 16>& transform,
+                            KDL::Chain& chain) {
   Eigen::Affine3d t;
   KDL::Frame f;
   t.matrix() = Eigen::Matrix4d(transform.data());
@@ -78,11 +78,11 @@ void ModelKDL::augmentFrame(KDL::Chain& chain,
   chain.addSegment(KDL::Segment(name, KDL::Joint(KDL::Joint::None), f));
 }
 
-void ModelKDL::augmentFrame(KDL::Chain& chain,
-                            const std::string& name,
+void ModelKDL::augmentFrame(const std::string& name,
                             const std::array<double, 3>& center_of_mass,
                             double mass,
-                            const std::array<double, 9>& inertia) {
+                            const std::array<double, 9>& inertia,
+                            KDL::Chain& chain) {
   KDL::Vector kc;
   KDL::RotationalInertia ki;
   std::copy(center_of_mass.begin(), center_of_mass.end(), std::begin(kc.data));
@@ -103,8 +103,8 @@ std::array<double, 16> ModelKDL::pose(
 
   // Agument the chain with the two new Frames 'EE' and 'K'
   KDL::Chain chain = this->chain_;  // copy
-  augmentFrame(chain, "EE", F_T_EE);
-  augmentFrame(chain, "K", EE_T_K);
+  augmentFrame("EE", F_T_EE, chain);
+  augmentFrame("K", EE_T_K, chain);
 
   KDL::ChainFkSolverPos_recursive solver(chain);
 
@@ -145,8 +145,8 @@ std::array<double, 42> ModelKDL::zeroJacobian(
 
   // Agument the chain with the two new Frames 'EE' and 'K'
   KDL::Chain chain = this->chain_;  // copy
-  augmentFrame(chain, "EE", F_T_EE);
-  augmentFrame(chain, "K", EE_T_K);
+  augmentFrame("EE", F_T_EE, chain);
+  augmentFrame("K", EE_T_K, chain);
 
   KDL::ChainJntToJacSolver solver(chain);
 
@@ -172,7 +172,7 @@ std::array<double, 49> ModelKDL::mass(
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   KDL::Chain chain = this->chain_;  // copy
-  augmentFrame(chain, "load", F_x_Ctotal, m_total, I_total);
+  augmentFrame("load", F_x_Ctotal, m_total, I_total, chain);
   KDL::ChainDynParam solver(chain, KDL::Vector(0, 0, -9.81));
 
   int error = solver.JntToMass(kq, M);
@@ -198,7 +198,7 @@ std::array<double, 7> ModelKDL::coriolis(
   kdq.data = Eigen::Matrix<double, 7, 1>(dq.data());
 
   KDL::Chain chain = this->chain_;  // copy
-  augmentFrame(chain, "load", F_x_Ctotal, m_total, I_total);
+  augmentFrame("load", F_x_Ctotal, m_total, I_total, chain);
   KDL::ChainDynParam solver(chain, KDL::Vector(0, 0, -9.81));
 
   int error = solver.JntToCoriolis(kq, kdq, kc);
@@ -222,7 +222,7 @@ std::array<double, 7> ModelKDL::gravity(
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
   KDL::Chain chain = this->chain_;  // copy
-  augmentFrame(chain, "load", F_x_Ctotal, m_total);
+  augmentFrame("load", F_x_Ctotal, m_total, {1, 0, 0, 0, 1, 0, 0, 0, 1}, chain);
   KDL::ChainDynParam solver(chain, grav);
 
   int error = solver.JntToGravity(kq, kg);
