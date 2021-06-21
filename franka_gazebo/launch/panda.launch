@@ -39,6 +39,7 @@
     </param>
 
     <rosparam file="$(find franka_control)/config/franka_control_node.yaml" />
+    <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" />
     <rosparam file="$(find franka_control)/config/default_controllers.yaml" />
     <rosparam file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
 
@@ -61,13 +62,14 @@
           name="$(arg arm_id)_controller_spawner"
           respawn="false" output="screen"
           args="franka_state_controller
+                franka_gripper
                 cartesian_impedance_example_controller">
     </node>
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
-      <rosparam param="source_list">[franka_state_controller/joint_states] </rosparam>
+      <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
       <param name="rate" value="30"/>
     </node>
 

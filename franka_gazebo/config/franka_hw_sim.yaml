@@ -1,0 +1,16 @@
+franka_gripper:
+  type:    franka_gazebo/FrankaGripperSim
+
+  finger1:
+    joint: panda_finger_joint1
+    gains: { p: 100, i: 25, d: 20 }
+
+  finger2:
+    joint: panda_finger_joint2
+    gains: { p: 100, i: 25, d: 20 }
+
+  move:
+    width_tolerance:     0.005   # [m] when width between fingers is below this, the move action succeeds
+  grasp:
+    resting_threshold:   0.001   # [m/s] below which speed the target width should be checked to abort or succeed the grasp action
+    consecutive_samples: 3       # how many times the speed has to drop below `resting_threshold` before the grasping will be evaluated
