@@ -5,6 +5,7 @@
   <arg name="paused"      default="true"  doc="Should the simulation directly be started?" />
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
+  <arg name="world"       default="worlds/empty.world" doc="Filename to a SDF World for gazebo to use" />
 
   <arg name="x"     default="0" />
   <arg name="y"     default="0" />
@@ -23,6 +24,7 @@
        />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world)"/>
     <arg name="paused" value="$(arg paused)"/>
     <arg name="gui" value="$(eval not arg('headless'))"/>
     <arg name="use_sim_time" value="true"/>
