@@ -25,6 +25,31 @@
     </transmission>
   </xacro:macro>
 
+  <xacro:macro name="gazebo-friction" params="joint mu">
+    <gazebo reference="${joint}">
+      <collision>
+        <max_contacts>10</max_contacts>
+        <surface>
+          <contact>
+            <ode>
+              <!-- These two parameter need application specific tuning. -->
+              <!-- Usually you want no "snap out" velocity and a generous -->
+              <!-- penetration depth to keep the grasping stable -->
+              <max_vel>0</max_vel>
+              <min_depth>0.003</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>${mu}</mu>
+              <mu2>${mu}</mu2>
+            </ode>
+          </friction>
+          <bounce/>
+        </surface>
+      </collision>
+    </gazebo>
+  </xacro:macro>
 
   <!-- ========================================================== -->
   <!-- Adds the required tags to provide a `FrankaStateInterface` -->
