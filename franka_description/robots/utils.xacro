@@ -25,8 +25,8 @@
     </transmission>
   </xacro:macro>
 
-  <xacro:macro name="gazebo-friction" params="joint mu">
-    <gazebo reference="${joint}">
+  <xacro:macro name="gazebo-friction" params="link mu">
+    <gazebo reference="${link}">
       <collision>
         <max_contacts>10</max_contacts>
         <surface>

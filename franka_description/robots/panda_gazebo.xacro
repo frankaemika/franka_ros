@@ -347,8 +347,8 @@
 
     <!-- Friction specific material for Rubber/Rubber contact -->
     <!-- See: -->
-    <xacro:gazebo-friction joint="${ns}_leftfinger" mu="1.13" />
-    <xacro:gazebo-friction joint="${ns}_rightfinger" mu="1.13" />
+    <xacro:gazebo-friction link="${ns}_leftfinger" mu="1.13" />
+    <xacro:gazebo-friction link="${ns}_rightfinger" mu="1.13" />
 
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
