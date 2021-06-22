@@ -3,6 +3,11 @@
 #include <franka/duration.h>
 #include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_hw.h>
+#include <franka_hw/services.h>
+#include <franka_msgs/SetEEFrame.h>
+#include <franka_msgs/SetForceTorqueCollisionBehavior.h>
+#include <franka_msgs/SetKFrame.h>
+#include <franka_msgs/SetLoad.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <Eigen/Dense>
 #include <iostream>
@@ -140,7 +145,10 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   registerInterface(&this->fsi_);
   registerInterface(&this->fmi_);
 
-  return readParameters(model_nh);
+  // Initialize ROS Services
+  initServices(model_nh);
+
+  return readParameters(model_nh, *urdf);
 }
 
 void FrankaHWSim::initJointStateHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
@@ -196,37 +204,86 @@ void FrankaHWSim::initFrankaModelHandle(
                                     "' in the <transmission> tag cannot be found in the URDF");
       }
     }
-    auto root =
-        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
-                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
-    if (root == transmission.joints_.end()) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot +
-                                  "_model' because no <joint> with <role>root</root> can be found "
-                                  "in the <transmission>");
-    }
-    auto tip =
-        std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
-                     [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
-    if (tip == transmission.joints_.end()) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot +
-                                  "_model' because no <joint> with <role>tip</role> can be found "
-                                  "in the <transmission>");
-    }
-    try {
-      auto root_link = urdf.getJoint(root->name_)->parent_link_name;
-      auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
-
-      this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
-
-    } catch (const std::invalid_argument& e) {
-      throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
-                                  robot + "_model'. " + e.what());
-    }
-    this->fmi_.registerHandle(
-        franka_hw::FrankaModelHandle(robot + "_model", *this->model_, this->robot_state_));
   }
+  auto root =
+      std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                   [&](const transmission_interface::JointInfo& i) { return i.role_ == "root"; });
+  if (root == transmission.joints_.end()) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model' because no <joint> with <role>root</root> can be found "
+                                "in the <transmission>");
+  }
+  auto tip =
+      std::find_if(transmission.joints_.begin(), transmission.joints_.end(),
+                   [&](const transmission_interface::JointInfo& i) { return i.role_ == "tip"; });
+  if (tip == transmission.joints_.end()) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model' because no <joint> with <role>tip</role> can be found "
+                                "in the <transmission>");
+  }
+  try {
+    auto root_link = urdf.getJoint(root->name_)->parent_link_name;
+    auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
+
+    this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
+
+  } catch (const std::invalid_argument& e) {
+    throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
+                                "_model'. " + e.what());
+  }
+  this->fmi_.registerHandle(
+      franka_hw::FrankaModelHandle(robot + "_model", *this->model_, this->robot_state_));
+}
+
+void FrankaHWSim::initServices(ros::NodeHandle& nh) {
+  this->service_set_ee_ =
+      nh.advertiseService<franka_msgs::SetEEFrame::Request, franka_msgs::SetEEFrame::Response>(
+          "set_EE_frame", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                                  this->arm_id_ << ": Setting NE_T_EE transformation");
+            std::copy(request.NE_T_EE.cbegin(), request.NE_T_EE.cend(),
+                      this->robot_state_.NE_T_EE.begin());
+            this->updateRobotStateDynamics();
+            response.success = true;
+            return true;
+          });
+  this->service_set_k_ = franka_hw::advertiseService<franka_msgs::SetKFrame>(
+      nh, "set_K_frame", [&](auto& request, auto& response) {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting EE_T_K transformation");
+        std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
+                  this->robot_state_.EE_T_K.begin());
+        this->updateRobotStateDynamics();
+        response.success = true;
+        return true;
+      });
+  this->service_set_load_ = franka_hw::advertiseService<franka_msgs::SetLoad>(
+      nh, "set_load", [&](auto& request, auto& response) {
+        ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
+        this->robot_state_.m_load = request.mass;
+        std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
+                  this->robot_state_.F_x_Cload.begin());
+        std::copy(request.load_inertia.cbegin(), request.load_inertia.cend(),
+                  this->robot_state_.I_load.begin());
+        this->updateRobotStateDynamics();
+        response.success = true;
+        return true;
+      });
+  this->service_collision_behavior_ =
+      franka_hw::advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
+          nh, "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
+            ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Collision Behavior");
+
+            for (int i = 0; i < 7; i++) {
+              std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
+              this->joints_[name]->contact_threshold =
+                  request.lower_torque_thresholds_nominal.at(i);
+              this->joints_[name]->collision_threshold =
+                  request.upper_torque_thresholds_nominal.at(i);
+            }
+
+            response.success = true;
+            return true;
+          });
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
@@ -262,13 +319,10 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
 
 void FrankaHWSim::eStopActive(bool /* active */) {}
 
-bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
-  nh.param<double>("m_ee", this->robot_state_.m_ee, 0.73);
-
+bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf) {
   try {
-    std::string I_ee;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("I_ee", I_ee, "0.001 0 0 0 0.0025 0 0 0 0.0017");
-    this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
+    guessEndEffector(nh, urdf);
+
     nh.param<double>("m_load", this->robot_state_.m_load, 0);
 
     std::string I_load;  // NOLINT [readability-identifier-naming]
@@ -279,10 +333,13 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     nh.param<std::string>("F_x_Cload", F_x_Cload, "0 0 0");
     this->robot_state_.F_x_Cload = readArray<3>(F_x_Cload, "F_x_Cload");
 
-    std::string F_T_EE;  // NOLINT [readability-identifier-naming]
-    nh.param<std::string>("F_T_EE", F_T_EE,
-                          "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1");
-    this->robot_state_.F_T_EE = readArray<16>(F_T_EE, "F_T_EE");
+    std::string NE_T_EE;  // NOLINT [readability-identifier-naming]
+    nh.param<std::string>("NE_T_EE", NE_T_EE, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+    this->robot_state_.NE_T_EE = readArray<16>(NE_T_EE, "NE_T_EE");
+
+    std::string EE_T_K;  // NOLINT [readability-identifier-naming]
+    nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+    this->robot_state_.EE_T_K = readArray<16>(EE_T_K, "EE_T_K");
 
     // Only nominal cases supported for now
     std::vector<double> lower_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
@@ -303,18 +360,82 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh) {
     ROS_ERROR_STREAM_NAMED("franka_hw_sim", e.what());
     return false;
   }
+  updateRobotStateDynamics();
+  return true;
+}
+
+void FrankaHWSim::guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf) {
+  auto hand_link = this->arm_id_ + "_hand";
+  auto hand = urdf.getLink(hand_link);
+  if (hand != nullptr) {
+    ROS_INFO_STREAM_NAMED("franka_hw_sim",
+                          "Found link '" << hand_link
+                                         << "' in URDF. Assuming it is defining the kinematics & "
+                                            "inertias of a Franka Hand Gripper.");
+  }
+
+  // By absolute default unless URDF or ROS params say otherwise, assume no end-effector.
+  double def_m_ee = 0;
+  std::string def_i_ee = "0.0 0 0 0 0.0 0 0 0 0.0";
+  std::string def_f_x_cee = "0 0 0";
+  std::string def_f_t_ne = "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1";
+  if (not nh.hasParam("F_T_NE") and hand != nullptr) {
+    // NOTE: We cannot interprete the Joint pose from the URDF directly, because
+    // its <arm_id>_link is mounted at the flange directly and not at NE
+    def_f_t_ne = "0.7071 -0.7071 0 0 0.7071 0.7071 0 0 0 0 1 0 0 0 0.1034 1";
+  }
+  std::string F_T_NE;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("F_T_NE", F_T_NE, def_f_t_ne);
+  this->robot_state_.F_T_NE = readArray<16>(F_T_NE, "F_T_NE");
+
+  if (not nh.hasParam("m_ee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    def_m_ee = hand->inertial->mass;
+  }
+  nh.param<double>("m_ee", this->robot_state_.m_ee, def_m_ee);
+
+  if (not nh.hasParam("I_ee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    // clang-format off
+    def_i_ee = std::to_string(hand->inertial->ixx) + " " + std::to_string(hand->inertial->ixy) + " " + std::to_string(hand->inertial->ixz) + " "
+             + std::to_string(hand->inertial->ixy) + " " + std::to_string(hand->inertial->iyy) + " " + std::to_string(hand->inertial->iyz) + " "
+             + std::to_string(hand->inertial->ixz) + " " + std::to_string(hand->inertial->iyz) + " " + std::to_string(hand->inertial->izz);
+    // clang-format on
+  }
+  std::string I_ee;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("I_ee", I_ee, def_i_ee);
+  this->robot_state_.I_ee = readArray<9>(I_ee, "I_ee");
+
+  if (not nh.hasParam("F_x_Cee") and hand != nullptr) {
+    if (hand->inertial == nullptr) {
+      throw std::invalid_argument("Trying to use inertia of " + hand_link +
+                                  " but this link has no <inertial> tag defined in it.");
+    }
+    def_f_x_cee = std::to_string(hand->inertial->origin.position.x) + " " +
+                  std::to_string(hand->inertial->origin.position.y) + " " +
+                  std::to_string(hand->inertial->origin.position.z);
+  }
+  std::string F_x_Cee;  // NOLINT [readability-identifier-naming]
+  nh.param<std::string>("F_x_Cee", F_x_Cee, def_f_x_cee);
+  this->robot_state_.F_x_Cee = readArray<3>(F_x_Cee, "F_x_Cee");
+}
+
+void FrankaHWSim::updateRobotStateDynamics() {
   this->robot_state_.m_total = this->robot_state_.m_ee + this->robot_state_.m_load;
 
-  // TODO(goll_th): Use user-defined values here, e.g. from service call or ROS param (SRR-1035)
-  this->robot_state_.NE_T_EE = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  this->robot_state_.F_T_NE = this->robot_state_.F_T_EE;
-  this->robot_state_.EE_T_K = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  Eigen::Map<Eigen::Matrix4d>(this->robot_state_.F_T_EE.data()) =
+      Eigen::Matrix4d(this->robot_state_.F_T_NE.data()) *
+      Eigen::Matrix4d(this->robot_state_.NE_T_EE.data());
 
   Eigen::Map<Eigen::Matrix3d>(this->robot_state_.I_total.data()) =
       shiftInertiaTensor(Eigen::Matrix3d(this->robot_state_.I_ee.data()), this->robot_state_.m_ee,
                          Eigen::Vector3d(this->robot_state_.F_x_Cload.data()));
-
-  return true;
 }
 
 void FrankaHWSim::updateRobotState(ros::Time time) {

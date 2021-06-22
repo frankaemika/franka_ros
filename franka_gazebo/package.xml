@@ -29,6 +29,7 @@
   <depend>joint_limits_interface</depend>
   <depend>eigen_conversions</depend>
   <depend>franka_hw</depend>
+  <depend>franka_msgs</depend>
   <depend>urdf</depend>
   <depend>angles</depend>
 
