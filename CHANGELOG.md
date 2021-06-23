@@ -15,6 +15,7 @@ Requires `libfranka` >= 0.8.0
     and defaults to the identity transformation.
   * Add `F_T_NE` and `NE_T_EE` to `franka_msgs/FrankaState`.
   * Extract Model Library in abstract base class interface. This allows users to implement their own model.
+  * **BREAKING** Remove `panda_arm_hand.urdf.xacro`. Use `panda_arm.urdf.xacro hand:=true` instead.
 
 ## 0.7.1 - 2020-10-22
 
