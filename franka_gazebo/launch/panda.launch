@@ -57,12 +57,19 @@
                 $(arg initial_joint_positions)">
     </node>
 
+    <!-- Spawn required ROS controllers -->
+    <node pkg="controller_manager"
+          type="spawner"
+          name="$(arg arm_id)_gripper_spawner"
+          if="$(arg use_gripper)"
+          args="franka_gripper"
+          respawn="false"
+    />
     <node pkg="controller_manager"
           type="spawner"
           name="$(arg arm_id)_controller_spawner"
           respawn="false" output="screen"
           args="franka_state_controller
-                franka_gripper
                 cartesian_impedance_example_controller">
     </node>
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
