@@ -6,6 +6,8 @@
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
   <arg name="world"       default="worlds/empty.world" doc="Filename to a SDF World for gazebo to use" />
+  <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {model,force,cartesian_impedance}_example_controller)" />
+
 
   <arg name="x"     default="0" />
   <arg name="y"     default="0" />
@@ -38,11 +40,8 @@
                     arm_id:=$(arg arm_id)">
     </param>
 
-    <rosparam file="$(find franka_control)/config/franka_control_node.yaml" />
-    <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" />
-    <rosparam file="$(find franka_control)/config/default_controllers.yaml" />
-    <rosparam file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
-
+    <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
+    <rosparam file="$(find franka_gazebo)/config/sim_controllers.yaml" subst_value="true" />
 
     <node name="$(arg arm_id)_model_spawner"
           pkg="gazebo_ros"
@@ -65,13 +64,14 @@
           args="franka_gripper"
           respawn="false"
     />
+
     <node pkg="controller_manager"
           type="spawner"
           name="$(arg arm_id)_controller_spawner"
           respawn="false" output="screen"
-          args="franka_state_controller
-                cartesian_impedance_example_controller">
-    </node>
+          args="franka_state_controller $(arg controller)"
+    />
+
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
