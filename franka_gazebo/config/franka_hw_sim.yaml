@@ -14,3 +14,6 @@ franka_gripper:
   grasp:
     resting_threshold:   0.001   # [m/s] below which speed the target width should be checked to abort or succeed the grasp action
     consecutive_samples: 3       # how many times the speed has to drop below `resting_threshold` before the grasping will be evaluated
+  gripper_action:
+    width_tolerance:     0.005   # [m] when width between fingers is below this, the move action succeeds
+    speed:               0.1     # [m/s] how fast shall the gripper execute gripper command actions?

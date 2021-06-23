@@ -1,6 +1,7 @@
 #pragma once
 
 #include <actionlib/server/simple_action_server.h>
+#include <control_msgs/GripperCommandAction.h>
 #include <control_toolbox/pid.h>
 #include <controller_interface/controller.h>
 #include <franka_gripper/GraspAction.h>
@@ -34,6 +35,7 @@ const double kMaxFingerWidth = 0.08;
  * - grasp:   Close the gripper until it stops because of a contact. If then the gripper width is
  *            within a user specified range a certain force is applied
  * - stop:    Stop any previous motion, or the excertion of forces on currently grasped objects
+ * - gripper_action: A standard gripper action recognized by MoveIt!
  *
  * NOTE: The `grasp` action has a bug, that it will not succeed nor abort if the target width
  *       lets the fingers open. This is because of missing the joint limits interface which
@@ -79,12 +81,15 @@ class FrankaGripperSim
   // Configurable by parameters
   int speed_samples_;
   double speed_threshold_;
+  double speed_default_;
   double tolerance_move_;
+  double tolerance_gripper_action_;
 
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::StopAction>> action_stop_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::HomingAction>> action_homing_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::MoveAction>> action_move_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::GraspAction>> action_grasp_;
+  std::unique_ptr<actionlib::SimpleActionServer<control_msgs::GripperCommandAction>> action_gc_;
 
   double control(hardware_interface::JointHandle& joint,
                  control_toolbox::Pid&,

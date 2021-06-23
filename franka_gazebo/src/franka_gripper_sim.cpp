@@ -7,6 +7,7 @@
 namespace franka_gazebo {
 
 using actionlib::SimpleActionServer;
+using control_msgs::GripperCommandAction;
 using franka_gripper::GraspAction;
 using franka_gripper::HomingAction;
 using franka_gripper::MoveAction;
@@ -27,6 +28,8 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   }
 
   nh.param<double>("move/width_tolerance", this->tolerance_move_, 0.005);
+  nh.param<double>("gripper_action/width_tolerance", this->tolerance_gripper_action_, 0.005);
+  nh.param<double>("gripper_action/speed", this->speed_default_, 0.1);
   nh.param<double>("grasp/resting_threshold", this->speed_threshold_, 0.005);
   nh.param<int>("grasp/consecutive_samples", this->speed_samples_, 3);
 
@@ -215,10 +218,56 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   });
   this->action_grasp_->start();
 
+  this->action_gc_ = std::make_unique<SimpleActionServer<GripperCommandAction>>(
+      nh, "gripper_action",
+      [&](auto&& goal) {
+        ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Gripper Command Action Goal received: "
+                                                      << goal->command.max_effort << "N");
+
+        // HACK: As one gripper finger is <mimic>, MoveIt!'s trajectory execution manager
+        // only sends us the width of one finger. Multiply by 2 to get the intended width.
+        double width = this->finger1_.getPosition() + this->finger2_.getPosition();
+        {
+          std::lock_guard<std::mutex> lock(this->mutex_);
+          // Don't use goal as desired width, because we have might have to go beyond until contact
+          this->width_desired_ = goal->command.position * 2.0 < width ? 0 : kMaxFingerWidth;
+          this->speed_desired_ = this->speed_default_;
+          this->force_desired_ = goal->command.max_effort;
+          this->tolerance_.inner = this->tolerance_gripper_action_;
+          this->tolerance_.outer = this->tolerance_gripper_action_;
+          this->state_ = State::GRASPING;
+        }
+
+        this->waitUntil(State::HOLDING);
+
+        double width_d = goal->command.position * 2.0;
+        width = this->finger1_.getPosition() + this->finger2_.getPosition();  // recalculate
+        bool inside_tolerance = width_d - this->tolerance_gripper_action_ < width and
+                                width < width_d + this->tolerance_gripper_action_;
+        control_msgs::GripperCommandResult result;
+        result.position = width;
+        result.effort = 0;
+        result.stalled = static_cast<decltype(result.stalled)>(false);
+        result.reached_goal = static_cast<decltype(result.reached_goal)>(inside_tolerance);
+        double speed = this->finger1_.getVelocity() + this->finger2_.getVelocity();
+        if (not inside_tolerance) {
+          std::lock_guard<std::mutex> lock(this->mutex_);
+          this->state_ = State::IDLE;
+        }
+        action_gc_->setSucceeded(result);
+      },
+      false);
+  this->action_gc_->registerPreemptCallback([&]() {
+    ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Gripper Command Action cancelled");
+    std::lock_guard<std::mutex> lock(this->mutex_);
+    this->state_ = State::IDLE;
+  });
+  this->action_gc_->start();
+
   return true;
 }
 
-void FrankaGripperSim::starting(const ros::Time&) {
+void FrankaGripperSim::starting(const ros::Time& /*unused*/) {
   this->pid1_.reset();
   this->pid2_.reset();
 }
