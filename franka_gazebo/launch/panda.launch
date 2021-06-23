@@ -37,7 +37,13 @@
            command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
                     gazebo:=true
                     hand:=$(arg use_gripper)
-                    arm_id:=$(arg arm_id)">
+                    arm_id:=$(arg arm_id)
+                    x:=$(arg x)
+                    y:=$(arg y)
+                    z:=$(arg z)
+                    R:=$(arg roll)
+                    P:=$(arg pitch)
+                    Y:=$(arg yaw) ">
     </param>
 
     <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
@@ -47,12 +53,6 @@
           pkg="gazebo_ros"
           type="spawn_model"
           args="-param robot_description -urdf -model $(arg arm_id)
-                -x $(arg x)
-                -y $(arg y)
-                -z $(arg z)
-                -R $(arg roll)
-                -P $(arg pitch)
-                -Y $(arg yaw)
                 $(arg initial_joint_positions)">
     </node>
 
