@@ -466,6 +466,22 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
   }
 
+  // Calculate estimated wrenches in Task frame from external joint torques with jacobians
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_ext(this->robot_state_.tau_ext_hat_filtered.data());
+  Eigen::MatrixXd j0_transpose_pinv;
+  Eigen::MatrixXd jk_transpose_pinv;
+  Eigen::Matrix<double, 6, 7> j0(
+      this->model_->zeroJacobian(franka::Frame::kStiffness, this->robot_state_).data());
+  Eigen::Matrix<double, 6, 7> jk(
+      this->model_->bodyJacobian(franka::Frame::kStiffness, this->robot_state_).data());
+  franka_example_controllers::pseudoInverse(j0.transpose(), j0_transpose_pinv);
+  franka_example_controllers::pseudoInverse(jk.transpose(), jk_transpose_pinv);
+
+  Eigen::VectorXd f_ext_0 = j0_transpose_pinv * tau_ext;
+  Eigen::VectorXd f_ext_k = jk_transpose_pinv * tau_ext;
+  Eigen::VectorXd::Map(&this->robot_state_.O_F_ext_hat_K[0], 6) = f_ext_0;
+  Eigen::VectorXd::Map(&this->robot_state_.K_F_ext_hat_K[0], 6) = f_ext_k;
+
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
