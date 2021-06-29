@@ -282,6 +282,13 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
                   request.upper_torque_thresholds_nominal.at(i);
             }
 
+            std::move(request.lower_force_thresholds_nominal.begin(),
+                      request.lower_force_thresholds_nominal.end(),
+                      this->lower_force_thresholds_nominal_.begin());
+            std::move(request.upper_force_thresholds_nominal.begin(),
+                      request.upper_force_thresholds_nominal.end(),
+                      this->upper_force_thresholds_nominal_.begin());
+
             response.success = true;
             return true;
           });
@@ -349,7 +356,10 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
     std::vector<double> upper_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
         "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
 
-    // TODO(goll_th): Support force thresholds as well
+    this->lower_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
+        "lower_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+    this->upper_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
+        "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
 
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
@@ -481,6 +491,15 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   Eigen::VectorXd f_ext_k = jk_transpose_pinv * tau_ext;
   Eigen::VectorXd::Map(&this->robot_state_.O_F_ext_hat_K[0], 6) = f_ext_0;
   Eigen::VectorXd::Map(&this->robot_state_.K_F_ext_hat_K[0], 6) = f_ext_k;
+
+  for (int i = 0; i < this->robot_state_.cartesian_contact.size(); i++) {
+    // Evaluate the cartesian contacts/collisions in K frame
+    double fi = std::abs(f_ext_k(i));
+    this->robot_state_.cartesian_contact[i] =
+        static_cast<double>(fi > this->lower_force_thresholds_nominal_.at(i));
+    this->robot_state_.cartesian_collision[i] =
+        static_cast<double>(fi > this->upper_force_thresholds_nominal_.at(i));
+  }
 
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);

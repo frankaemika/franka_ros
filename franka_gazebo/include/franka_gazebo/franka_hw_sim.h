@@ -107,6 +107,9 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   ros::ServiceServer service_set_load_;
   ros::ServiceServer service_collision_behavior_;
 
+  std::vector<double> lower_force_thresholds_nominal_;
+  std::vector<double> upper_force_thresholds_nominal_;
+
   void initJointStateHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
   void initEffortCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
   void initFrankaStateHandle(const std::string& robot,
