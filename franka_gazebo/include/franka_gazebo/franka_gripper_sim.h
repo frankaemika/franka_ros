@@ -125,5 +125,11 @@ class FrankaGripperSim
   void interrupt(const std::string& message, const State& except);
 
   void waitUntil(const State& state);
+
+  void onStopGoal(const franka_gripper::StopGoalConstPtr& goal);
+  void onHomingGoal(const franka_gripper::HomingGoalConstPtr& goal);
+  void onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal);
+  void onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal);
+  void onGripperActionGoal(const control_msgs::GripperCommandGoalConstPtr& goal);
 };
 }  // namespace franka_gazebo
