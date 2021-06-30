@@ -247,12 +247,14 @@ void FrankaGripperSim::interrupt(const std::string& message, const State& except
   }
 }
 
-void FrankaGripperSim::waitUntil(const State& state) {
+void FrankaGripperSim::waitUntilStateChange() {
+  const State original = this->state_;  // copy
+
   ros::Rate rate(30);
   while (ros::ok()) {
     {
       std::lock_guard<std::mutex> lock(this->mutex_);
-      if (this->state_ == state) {
+      if (this->state_ != original) {
         return;
       }
     }
@@ -290,9 +292,16 @@ void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& go
   transition(State::HOMING,
              Config{width_desired : 0, speed_desired : -0.02, force_desired : 0, tolerance : eps});
 
-  waitUntil(State::IDLE);
+  waitUntilStateChange();
 
   franka_gripper::HomingResult result;
+  if (this->state_ != State::IDLE) {
+    result.success = static_cast<decltype(result.success)>(false);
+    result.error = "Unexpected state transistion: The gripper not in IDLE as expected";
+    action_homing_->setAborted(result, result.error);
+    return;
+  }
+
   result.success = static_cast<decltype(result.success)>(true);
   action_homing_->setSucceeded(result);
 }
@@ -330,9 +339,16 @@ void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) 
     tolerance : eps
   });
 
-  waitUntil(State::IDLE);
+  waitUntilStateChange();
 
   franka_gripper::MoveResult result;
+  if (this->state_ != State::IDLE) {
+    result.success = static_cast<decltype(result.success)>(false);
+    result.error = "Unexpected state transistion: The gripper not in IDLE as expected";
+    action_move_->setAborted(result, result.error);
+    return;
+  }
+
   result.success = static_cast<decltype(result.success)>(true);
   action_move_->setSucceeded(result);
 }
@@ -368,10 +384,18 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
     force_desired : goal->force,
     tolerance : goal->epsilon
   });
-  waitUntil(State::HOLDING);
+
+  waitUntilStateChange();
+
+  franka_gripper::GraspResult result;
+  if (this->state_ != State::HOLDING) {
+    result.success = static_cast<decltype(result.success)>(false);
+    result.error = "Unexpected state transistion: The gripper not in HOLDING as expected";
+    action_grasp_->setAborted(result, result.error);
+    return;
+  }
 
   width = this->finger1_.getPosition() + this->finger2_.getPosition();  // recalculate
-  franka_gripper::GraspResult result;
   bool ok = goal->width - goal->epsilon.inner < width and width < goal->width + goal->epsilon.outer;
   result.success = static_cast<decltype(result.success)>(ok);
   double speed = this->finger1_.getVelocity() + this->finger2_.getVelocity();
@@ -408,13 +432,20 @@ void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoa
     tolerance : eps
   });
 
-  waitUntil(State::HOLDING);
+  waitUntilStateChange();
+
+  control_msgs::GripperCommandResult result;
+  if (this->state_ != State::HOLDING) {
+    result.reached_goal = static_cast<decltype(result.reached_goal)>(false);
+    std::string error = "Unexpected state transistion: The gripper not in HOLDING as expected";
+    action_gc_->setAborted(result, error);
+    return;
+  }
 
   double width_d = goal->command.position * 2.0;
   width = this->finger1_.getPosition() + this->finger2_.getPosition();  // recalculate
   bool inside_tolerance = width_d - this->tolerance_gripper_action_ < width and
                           width < width_d + this->tolerance_gripper_action_;
-  control_msgs::GripperCommandResult result;
   result.position = width;
   result.effort = 0;
   result.stalled = static_cast<decltype(result.stalled)>(false);

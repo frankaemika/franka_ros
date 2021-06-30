@@ -130,7 +130,7 @@ class FrankaGripperSim
    */
   void interrupt(const std::string& message, const State& except);
 
-  void waitUntil(const State& state);
+  void waitUntilStateChange();
 
   void onStopGoal(const franka_gripper::StopGoalConstPtr& goal);
   void onHomingGoal(const franka_gripper::HomingGoalConstPtr& goal);
