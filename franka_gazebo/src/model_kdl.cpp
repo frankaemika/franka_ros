@@ -125,12 +125,41 @@ std::array<double, 16> ModelKDL::pose(
 }
 
 std::array<double, 42> ModelKDL::bodyJacobian(
-    franka::Frame /*frame*/,
-    const std::array<double, 7>& /*q*/,
-    const std::array<double, 16>& /*F_T_EE*/,  // NOLINT(readability-identifier-naming)
-    const std::array<double, 16>& /*EE_T_K*/)  // NOLINT(readability-identifier-naming)
+    franka::Frame frame,
+    const std::array<double, 7>& q,
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
-  throw std::runtime_error("Not implemented: bodyJacobian()");
+  KDL::JntArray kq;
+  KDL::Jacobian J(7);  // NOLINT(readability-identifier-naming)
+  kq.data = Eigen::Matrix<double, 7, 1>(q.data());
+
+  // Augment the chain with the two virtual frames 'EE' and 'K'
+  KDL::Chain chain = this->chain_;  // copy
+  augmentFrame("EE", F_T_EE, chain);
+  augmentFrame("K", EE_T_K, chain);
+
+  KDL::ChainJntToJacSolver solver(chain);
+
+  int seg = segment(frame);
+  int error = solver.JntToJac(kq, J, seg);
+  if (error != KDL::SolverI::E_NOERROR) {
+    throw std::logic_error("KDL zero jacobian calculation failed with error: " + strError(error));
+  }
+
+  // Shift the zero jacobian to the "body" frame by using the rotation of the FK of that frame
+  KDL::Frame f = KDL::Frame::Identity();
+  auto transform = pose(frame, q, F_T_EE, EE_T_K);
+  Eigen::Affine3d t;
+  t.matrix() = Eigen::Matrix4d(transform.data());
+  tf::transformEigenToKDL(t, f);
+
+  J.changeBase(f.M.Inverse());
+
+  std::array<double, 42> result;
+  Eigen::MatrixXd::Map(&result[0], 6, 7) = J.data;
+
+  return result;
 }
 
 std::array<double, 42> ModelKDL::zeroJacobian(
@@ -143,7 +172,7 @@ std::array<double, 42> ModelKDL::zeroJacobian(
   KDL::Jacobian J(7);  // NOLINT(readability-identifier-naming)
   kq.data = Eigen::Matrix<double, 7, 1>(q.data());
 
-  // Agument the chain with the two new Frames 'EE' and 'K'
+  // Augment the chain with the two virtual frames 'EE' and 'K'
   KDL::Chain chain = this->chain_;  // copy
   augmentFrame("EE", F_T_EE, chain);
   augmentFrame("K", EE_T_K, chain);
