@@ -101,8 +101,7 @@ void FrankaGripperSim::starting(const ros::Time& /*unused*/) {
 }
 
 void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period) {
-  if (rate_trigger_()) {
-    std::lock_guard<std::mutex> lock(this->mutex_);
+  if (rate_trigger_() and pub_.trylock()) {
     pub_.msg_.header.stamp = now;
     pub_.msg_.position = {this->finger1_.getPosition(), this->finger2_.getPosition()};
     pub_.msg_.velocity = {this->finger1_.getVelocity(), this->finger2_.getVelocity()};
@@ -193,18 +192,15 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
   }
 }
 
-double FrankaGripperSim::control(hardware_interface::JointHandle& joint,
-                                 control_toolbox::Pid& pid,
-                                 double q_d,
-                                 double dq_d,
-                                 double f_d,
-                                 const ros::Duration& period) {
+void FrankaGripperSim::control(hardware_interface::JointHandle& joint,
+                               control_toolbox::Pid& pid,
+                               double q_d,
+                               double dq_d,
+                               double f_d,
+                               const ros::Duration& period) {
   double error = q_d - joint.getPosition();
   double derror = dq_d - joint.getVelocity();
-  double command = pid.computeCommand(error, derror, period);
-  command += f_d;
-  joint.setCommand(command);
-  return command;
+  joint.setCommand(pid.computeCommand(error, derror, period) + f_d);
 }
 
 void FrankaGripperSim::setState(const State&& state) {

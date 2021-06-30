@@ -115,12 +115,12 @@ class FrankaGripperSim
   void setConfig(const Config&& config);
   void transition(const State&& state, const Config&& config);
 
-  double control(hardware_interface::JointHandle& joint,
-                 control_toolbox::Pid&,
-                 double q_d,
-                 double dq_d,
-                 double f_d,
-                 const ros::Duration& period);
+  void control(hardware_interface::JointHandle& joint,
+               control_toolbox::Pid&,
+               double q_d,
+               double dq_d,
+               double f_d,
+               const ros::Duration& period);
 
   /**
    * Interrupt any running action server unless the gripper is currently in a specific state
