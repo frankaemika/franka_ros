@@ -1,8 +1,8 @@
+#include <cmath>
 #include <memory>
 
 #include <franka_gazebo/franka_gripper_sim.h>
 #include <pluginlib/class_list_macros.h>
-#include <cmath>
 
 namespace franka_gazebo {
 
@@ -27,11 +27,12 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
     return false;
   }
 
-  nh.param<double>("move/width_tolerance", this->tolerance_move_, 0.005);
-  nh.param<double>("gripper_action/width_tolerance", this->tolerance_gripper_action_, 0.005);
-  nh.param<double>("gripper_action/speed", this->speed_default_, 0.1);
-  nh.param<double>("grasp/resting_threshold", this->speed_threshold_, 0.005);
-  nh.param<int>("grasp/consecutive_samples", this->speed_samples_, 3);
+  nh.param<double>("move/width_tolerance", this->tolerance_move_, kDefaultMoveWidthTolerance);
+  nh.param<double>("gripper_action/width_tolerance", this->tolerance_gripper_action_,
+                   kDefaultGripperActionWidthTolerance);
+  nh.param<double>("gripper_action/speed", this->speed_default_, kDefaultGripperActionSpeed);
+  nh.param<double>("grasp/resting_threshold", this->speed_threshold_, kGraspRestingThreshold);
+  nh.param<int>("grasp/consecutive_samples", this->speed_samples_, kGraspConsecutiveSamples);
 
   try {
     this->finger1_ = hw->getHandle(finger1);

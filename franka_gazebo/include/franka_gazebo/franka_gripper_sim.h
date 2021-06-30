@@ -1,5 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <mutex>
+
 #include <actionlib/server/simple_action_server.h>
 #include <control_msgs/GripperCommandAction.h>
 #include <control_toolbox/pid.h>
@@ -15,25 +18,39 @@
 #include <realtime_tools/realtime_publisher.h>
 #include <ros/time.h>
 #include <sensor_msgs/JointState.h>
-#include <functional>
-#include <mutex>
 
 namespace franka_gazebo {
 
 const double kMaxFingerWidth = 0.08;
 
+/// When width between fingers is below this, the move action succeeds [m]
+const double kDefaultMoveWidthTolerance = 0.005;
+
+/// When width between fingers is below this, the gripper action succeeds [m]
+const double kDefaultGripperActionWidthTolerance = 0.005;
+
+/// How fast shall the gripper execute gripper command actions? [m/s]
+const double kDefaultGripperActionSpeed = 0.1;
+
+/// Below which speed the target width should be checked to abort or succeed the grasp action [m/s]
+const double kGraspRestingThreshold = 0.001;
+
+/// How many times the speed has to drop below resting threshold before the grasping will be checked
+const int kGraspConsecutiveSamples = 3;
+
 /**
  * Simulate the franka_gripper_node.
  *
- * Internally this done via ROS control. This controller assumes there are two finger joints in the
- * URDF which can be effort (force) controlled. It simulates the behavior of the real franka_gripper
- * by offering the same actions:
+ * Internally this is done via ROS control. This controller assumes there are two finger joints
+ * in the URDF which can be effort (force) controlled. It simulates the behavior of the real
+ * franka_gripper by offering the same actions:
  *
- * - homing:  Execute a homing motion, i.e.e open and close the gripper fully. This is only
- *            simulated, though, and has no effect on the other actions.
+ * - homing:  Execute a homing motion, i.e open and close the gripper fully. This is only
+ *            a mock implementation for the sake of offering the complete action interface
+ *            similar to franka_gripper
  * - move:    Move the gripper with a desired velocity to a certain width.
- * - grasp:   Close the gripper until it stops because of a contact. If then the gripper width is
- *            within a user specified range a certain force is applied
+ * - grasp:   Close the gripper until it stops because of a contact. If then the gripper width
+ * is within a user specified range a certain force is applied
  * - stop:    Stop any previous motion, or the excertion of forces on currently grasped objects
  * - gripper_action: A standard gripper action recognized by MoveIt!
  *
@@ -82,8 +99,9 @@ class FrankaGripperSim
   int speed_samples_;
   double speed_threshold_;
   double speed_default_;
-  double tolerance_move_;
-  double tolerance_gripper_action_;
+  double tolerance_move_;            ///< [m] inner + outer position tolerances used during grasp
+  double tolerance_gripper_action_;  ///< [m] inner + outer position tolerances used during gripper
+                                     ///< action
 
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::StopAction>> action_stop_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::HomingAction>> action_homing_;
@@ -98,6 +116,12 @@ class FrankaGripperSim
                  double f_d,
                  const ros::Duration& period);
 
+  /**
+   * Interrupt any running action server unless the gripper is currently in a specific state
+   *
+   * @param[in] message The message to send via the result of all running actions
+   * @param[in] except   If the gripper is currently in this state, don't interrupt any actions
+   */
   void interrupt(const std::string& message, const State& except);
 
   void waitUntil(const State& state);
