@@ -166,6 +166,14 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
         ROS_INFO_STREAM_NAMED("FrankaGripperSim",
                               "New Grasp Action Goal received: " << goal->force << "N");
 
+        if (goal->width >= kMaxFingerWidth or goal->width < 0) {
+          franka_gripper::GraspResult result;
+          result.success = static_cast<decltype(result.success)>(false);
+          result.error = "Can only grasp inside finger width from [0 .. " +
+                         std::to_string(kMaxFingerWidth) + "[";
+          action_grasp_->setAborted(result, result.error);
+          return;
+        }
         if (goal->speed < 0) {
           franka_gripper::GraspResult result;
           result.success = static_cast<decltype(result.success)>(false);
