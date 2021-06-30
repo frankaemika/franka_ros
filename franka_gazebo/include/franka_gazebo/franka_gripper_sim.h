@@ -73,12 +73,20 @@ class FrankaGripperSim
     HOMING     ///< Gripper opens fully and then closes again.
   };
 
+  struct Config {
+    double width_desired;  ///< Desired width between both fingers [m]
+    double speed_desired;  ///< Desired magnitude of the speed with which fingers should move [m/s]
+    double force_desired;  ///< Desired force with which to grasp objects, if grasps succeed [N]
+    franka_gripper::GraspEpsilon tolerance;  ///< Tolerance range to check if grasping succeeds
+  };
+
   bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle& nh) override;
   void starting(const ros::Time&) override;
   void update(const ros::Time& now, const ros::Duration& period) override;
 
  private:
   State state_ = State::IDLE;
+  Config config_;
 
   franka_hw::TriggerRate rate_trigger_{30.0};
   control_toolbox::Pid pid1_;
@@ -88,12 +96,6 @@ class FrankaGripperSim
   hardware_interface::JointHandle finger2_;
 
   std::mutex mutex_;
-
-  // Configurable by action goals
-  double width_desired_;
-  double speed_desired_;
-  double force_desired_;
-  franka_gripper::GraspEpsilon tolerance_;
 
   // Configurable by parameters
   int speed_samples_;
@@ -108,6 +110,10 @@ class FrankaGripperSim
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::MoveAction>> action_move_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::GraspAction>> action_grasp_;
   std::unique_ptr<actionlib::SimpleActionServer<control_msgs::GripperCommandAction>> action_gc_;
+
+  void setState(const State&& state);
+  void setConfig(const Config&& config);
+  void transition(const State&& state, const Config&& config);
 
   double control(hardware_interface::JointHandle& joint,
                  control_toolbox::Pid&,
