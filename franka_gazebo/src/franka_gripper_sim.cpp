@@ -285,6 +285,12 @@ void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& /*
 
   waitUntilStateChange();
 
+  if (not this->action_homing_->isActive()) {
+    // Homing Action was interrupted from another action goal callback and already preempted.
+    // Don't try to resend result now
+    return;
+  }
+
   franka_gripper::HomingResult result;
   if (this->state_ != State::IDLE) {
     result.success = static_cast<decltype(result.success)>(false);
@@ -330,6 +336,12 @@ void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) 
 
   waitUntilStateChange();
 
+  if (not this->action_move_->isActive()) {
+    // Move Action was interrupted from another action goal callback and already preempted.
+    // Don't try to resend result now
+    return;
+  }
+
   franka_gripper::MoveResult result;
   if (this->state_ != State::IDLE) {
     result.success = static_cast<decltype(result.success)>(false);
@@ -373,6 +385,12 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
                                      .tolerance = goal->epsilon});
 
   waitUntilStateChange();
+
+  if (not this->action_grasp_->isActive()) {
+    // Grasping Action was interrupted from another action goal callback and already preempted.
+    // Don't try to resend result now
+    return;
+  }
 
   franka_gripper::GraspResult result;
   if (this->state_ != State::HOLDING) {
@@ -418,6 +436,12 @@ void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoa
                     .tolerance = eps});
 
   waitUntilStateChange();
+
+  if (not this->action_gc_->isActive()) {
+    // Gripper Action was interrupted from another action goal callback and already preempted.
+    // Don't try to resend result now
+    return;
+  }
 
   control_msgs::GripperCommandResult result;
   if (this->state_ != State::HOLDING) {
