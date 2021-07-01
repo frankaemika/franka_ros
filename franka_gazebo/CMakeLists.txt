@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_parser
   control_toolbox
   controller_manager
+  controller_interface
   hardware_interface
   transmission_interface
   pluginlib
@@ -22,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   angles
   franka_hw
   franka_msgs
+  franka_gripper
 )
 
 find_package(Franka 0.7.0 REQUIRED)
@@ -35,6 +37,7 @@ catkin_package(
     gazebo_ros_control
     kdl_parser
     controller_manager
+    controller_interface
     control_toolbox
     pluginlib
     hardware_interface
@@ -45,8 +48,9 @@ catkin_package(
     angles
     franka_hw
     franka_msgs
+    franka_gripper
   INCLUDE_DIRS include
-  LIBRARIES franka_hw_sim
+  LIBRARIES franka_hw_sim franka_gripper_sim
   DEPENDS Franka orocos_kdl
 )
 
@@ -81,6 +85,20 @@ add_dependencies(franka_hw_sim
   ${catkin_EXPORTED_TARGETS}
   )
 
+add_library(franka_gripper_sim
+  src/franka_gripper_sim.cpp
+  )
+target_link_libraries(franka_gripper_sim
+  ${catkin_LIBRARIES}
+  )
+target_include_directories(franka_gripper_sim SYSTEM PUBLIC
+  ${catkin_INCLUDE_DIRS}
+  )
+add_dependencies(franka_gripper_sim
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+  )
+
 if(CATKIN_ENABLE_TESTING)
   add_subdirectory(test)
 endif()
@@ -90,7 +108,15 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
 )
 
-install(FILES franka_hw_sim_plugins.xml
+install(
+  FILES franka_hw_sim_plugin.xml
+        franka_gripper_sim_plugin.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+install(DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
