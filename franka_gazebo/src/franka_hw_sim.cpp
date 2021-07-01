@@ -1,6 +1,7 @@
 #include <franka_gazebo/franka_hw_sim.h>
 
 #include <franka/duration.h>
+#include <franka_example_controllers/pseudo_inversion.h>
 #include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
@@ -281,6 +282,13 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
                   request.upper_torque_thresholds_nominal.at(i);
             }
 
+            std::move(request.lower_force_thresholds_nominal.begin(),
+                      request.lower_force_thresholds_nominal.end(),
+                      this->lower_force_thresholds_nominal_.begin());
+            std::move(request.upper_force_thresholds_nominal.begin(),
+                      request.upper_force_thresholds_nominal.end(),
+                      this->upper_force_thresholds_nominal_.begin());
+
             response.success = true;
             return true;
           });
@@ -348,7 +356,10 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
     std::vector<double> upper_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
         "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
 
-    // TODO(goll_th): Support force thresholds as well
+    this->lower_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
+        "lower_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+    this->upper_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
+        "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
 
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
@@ -463,6 +474,31 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
     this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
     this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
+  }
+
+  // Calculate estimated wrenches in Task frame from external joint torques with jacobians
+  Eigen::Map<Eigen::Matrix<double, 7, 1>> tau_ext(this->robot_state_.tau_ext_hat_filtered.data());
+  Eigen::MatrixXd j0_transpose_pinv;
+  Eigen::MatrixXd jk_transpose_pinv;
+  Eigen::Matrix<double, 6, 7> j0(
+      this->model_->zeroJacobian(franka::Frame::kStiffness, this->robot_state_).data());
+  Eigen::Matrix<double, 6, 7> jk(
+      this->model_->bodyJacobian(franka::Frame::kStiffness, this->robot_state_).data());
+  franka_example_controllers::pseudoInverse(j0.transpose(), j0_transpose_pinv);
+  franka_example_controllers::pseudoInverse(jk.transpose(), jk_transpose_pinv);
+
+  Eigen::VectorXd f_ext_0 = j0_transpose_pinv * tau_ext;
+  Eigen::VectorXd f_ext_k = jk_transpose_pinv * tau_ext;
+  Eigen::VectorXd::Map(&this->robot_state_.O_F_ext_hat_K[0], 6) = f_ext_0;
+  Eigen::VectorXd::Map(&this->robot_state_.K_F_ext_hat_K[0], 6) = f_ext_k;
+
+  for (int i = 0; i < this->robot_state_.cartesian_contact.size(); i++) {
+    // Evaluate the cartesian contacts/collisions in K frame
+    double fi = std::abs(f_ext_k(i));
+    this->robot_state_.cartesian_contact[i] =
+        static_cast<double>(fi > this->lower_force_thresholds_nominal_.at(i));
+    this->robot_state_.cartesian_collision[i] =
+        static_cast<double>(fi > this->upper_force_thresholds_nominal_.at(i));
   }
 
   this->robot_state_.control_command_success_rate = 1.0;

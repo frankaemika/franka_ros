@@ -33,6 +33,7 @@
   <depend>franka_hw</depend>
   <depend>franka_msgs</depend>
   <depend>franka_gripper</depend>
+  <depend>franka_example_controllers</depend>
   <depend>urdf</depend>
   <depend>angles</depend>
 

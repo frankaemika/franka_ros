@@ -64,10 +64,10 @@ double Joint::getLinkMass() const {
 }
 
 bool Joint::isInCollision() const {
-  return this->effort - this->command > this->collision_threshold;
+  return std::abs(this->effort - this->command) > this->collision_threshold;
 }
 
 bool Joint::isInContact() const {
-  return this->effort - this->command > this->contact_threshold;
+  return std::abs(this->effort - this->command) > this->contact_threshold;
 }
 }  // namespace franka_gazebo
