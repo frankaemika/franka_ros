@@ -116,9 +116,7 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
   auto tolerance = this->config_.tolerance;
   double w_d = this->config_.width_desired;
   double dw_d = this->config_.speed_desired * std::copysign(1.0, w_d - width);
-  double f_d = -this->config_.force_desired / 2.0;
   this->mutex_.unlock();
-
   if (state == State::IDLE) {
     // Track position of other finger to simulate mimicked joints + high damping
     control(this->finger1_, this->pid1_, this->finger2_.getPosition(), 0, 0, period);
@@ -126,15 +124,22 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
     return;
   }
 
-  if (state != State::HOLDING) {
-    // Only in case when we hold we want to add the desired force, in any other state don't add
-    // anything extra to the command
-    f_d = 0;
-  }
-
   // Compute control signal and send to joints
   double w1_d = this->finger1_.getPosition() + 0.5 * dw_d * period.toSec();
   double w2_d = this->finger2_.getPosition() + 0.5 * dw_d * period.toSec();
+
+  // Only in case when we hold we want to add the desired force, in any other state don't add
+  // anything extra to the command
+  double f_d = 0;
+
+  if (state == State::HOLDING) {
+    // When an object is grasped, next to the force to apply, also track the other finger
+    // to not make both fingers drift away from middle simultaneously
+    w1_d = this->finger2_.getPosition();
+    w2_d = this->finger1_.getPosition();
+    std::lock_guard<std::mutex> lock(this->mutex_);
+    f_d = -this->config_.force_desired / 2.0;
+  }
 
   control(this->finger1_, this->pid1_, w1_d, 0.5 * dw_d, f_d, period);
   control(this->finger2_, this->pid2_, w2_d, 0.5 * dw_d, f_d, period);
@@ -177,7 +182,7 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
 
     if (speed_threshold_counter >= this->speed_samples_) {
       // Done with grasp motion, switch to holding, i.e. keep position & force
-      transition(State::HOLDING, Config{.width_desired = this->config_.width_desired,
+      transition(State::HOLDING, Config{.width_desired = width,
                                         .speed_desired = 0,
                                         .force_desired = this->config_.force_desired,
                                         .tolerance = this->config_.tolerance});
