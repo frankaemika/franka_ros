@@ -15,17 +15,15 @@ using franka_gripper::StopAction;
 
 bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle& nh) {
   std::string ns = nh.getNamespace();
-  std::string finger1, finger2;
-  if (not nh.getParam("finger1/joint", finger1)) {
+  std::string arm_id;
+
+  if (not nh.getParam("arm_id", arm_id)) {
     ROS_ERROR_STREAM_NAMED("FrankaGripperSim",
-                           "Could not find required parameter '" << ns << "/finger1/joint'");
+                           "Could not find required parameter '" << ns << "/arm_id'");
     return false;
   }
-  if (not nh.getParam("finger2/joint", finger2)) {
-    ROS_ERROR_STREAM_NAMED("FrankaGripperSim",
-                           "Could not find required parameter '" << ns << "/finger2/joint'");
-    return false;
-  }
+  std::string finger1 = arm_id + "_finger_joint1";
+  std::string finger2 = arm_id + "_finger_joint2";
 
   nh.param<double>("move/width_tolerance", this->tolerance_move_, kDefaultMoveWidthTolerance);
   nh.param<double>("gripper_action/width_tolerance", this->tolerance_gripper_action_,

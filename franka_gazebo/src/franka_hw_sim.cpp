@@ -450,8 +450,8 @@ void FrankaHWSim::updateRobotStateDynamics() {
 }
 
 void FrankaHWSim::updateRobotState(ros::Time time) {
-  // This is ensured, because a FrankaStateInterface checks exactly for seven joints in the URDF
-  assert(this->joints_.size() == 7);
+  // This is ensured, because a FrankaStateInterface checks for at least seven joints in the URDF
+  assert(this->joints_.size() >= 7);
 
   for (int i = 0; i < 7; i++) {
     std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);

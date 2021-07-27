@@ -20,6 +20,9 @@
 
   <xacro:if value="$(arg gazebo)">
 
+    <xacro:arg name="xyz" default="0 0 0" />
+    <xacro:arg name="rpy" default="0 0 0" />
+
     <!-- Create a simulatable URDF -->
     <xacro:include filename="$(find franka_description)/robots/utils.xacro" />
     <xacro:include filename="$(find franka_description)/robots/panda_gazebo.xacro" />
@@ -35,6 +38,7 @@
     <!-- Gazebo requires a joint to a link called "world" for statically mounted robots -->
     <link name="world" />
     <joint name="world_joint" type="fixed">
+      <origin xyz="$(arg xyz)" rpy="$(arg rpy)" />
       <parent link="world" />
       <child  link="${arm_id}_link0" />
     </joint>

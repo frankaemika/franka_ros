@@ -1,10 +1,11 @@
+arm_id: $(arg arm_id)
+
 franka_gripper:
   type:    franka_gazebo/FrankaGripperSim
+  arm_id:  $(arg arm_id)
 
   finger1:
-    joint: panda_finger_joint1
     gains: { p: 100, i: 25, d: 20 }
 
   finger2:
-    joint: panda_finger_joint2
     gains: { p: 100, i: 25, d: 20 }
