@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.4)
 project(franka_gazebo)
 
+execute_process(COMMAND uname -m
+  OUTPUT_VARIABLE ARCHITECTURE
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
+if(${ARCHITECTURE} STREQUAL "armv7l")
+  message(WARNING "franka_gazebo was never tested on ARM. Use at own risk!")
+endif()
+
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
