@@ -6,7 +6,7 @@
   <arg name="headless"    default="false" doc="Should the gazebo GUI be launched?" />
   <arg name="paused"      default="false" doc="Should the simulation directly be stopped at 0s?" />
   <arg name="world"       default="worlds/empty.world" doc="Filename to a SDF World for gazebo to use" />
-  <arg name="rviz"        default="true" doc="Should RVIz be launched?" />
+  <arg name="rviz"        default="false" doc="Should RVIz be launched?" />
 
   <!-- Robot Customization -->
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
