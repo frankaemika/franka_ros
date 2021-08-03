@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Gazebo & GUI Configuration -->
+  <arg name="gazebo"      default="true"  doc="Should the gazebo simulation be launched? Use false in case if you want to include this file and launch gazebo yourself" />
+  <arg name="headless"    default="false" doc="Should the gazebo GUI be launched?" />
+  <arg name="paused"      default="false" doc="Should the simulation directly be stopped at 0s?" />
+  <arg name="world"       default="worlds/empty.world" doc="Filename to a SDF World for gazebo to use" />
+  <arg name="rviz"        default="false" doc="Should RVIz be launched?" />
+
+  <!-- Robot Customization -->
+  <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
+  <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
+  <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force}_example_controller)" />
+  <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
+  <arg name="y"           default="0"     doc="How far leftwards to place the base of the robot in [m]?" />
+  <arg name="z"           default="0"     doc="How far upwards to place the base of the robot in [m]?" />
+  <arg name="roll"        default="0"     doc="How much to rotate the base of the robot around its X-axis in [rad]?" />
+  <arg name="pitch"       default="0"     doc="How much to rotate the base of the robot around its Y-axis in [rad]?" />
+  <arg name="yaw"         default="0"     doc="How much to rotate the base of the robot around its Z-axis in [rad]?" />
+  <arg name="initial_joint_positions"
+       doc="Initial joint configuration of the panda. Specify as a list of name/value pairs in form of '-J [name-of-joint] [value-in-rad]'. Default is a 90 degree bend in the elbow"
+       default="-J $(arg arm_id)_joint1 0
+                -J $(arg arm_id)_joint2 0
+                -J $(arg arm_id)_joint3 0
+                -J $(arg arm_id)_joint4 -1.57079632679
+                -J $(arg arm_id)_joint5 0
+                -J $(arg arm_id)_joint6 1.57079632679
+                -J $(arg arm_id)_joint7 0.785398163397"
+       />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg gazebo)">
+    <arg name="world_name" value="$(arg world)"/>
+    <arg name="paused" value="true"/>
+    <arg name="gui" value="$(eval not arg('headless'))"/>
+    <arg name="use_sim_time" value="true"/>
+  </include>
+
+  <group ns="$(arg arm_id)">
+    <param name="robot_description"
+           command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
+                    gazebo:=true
+                    hand:=$(arg use_gripper)
+                    arm_id:=$(arg arm_id)
+                    xyz:='$(arg x) $(arg y) $(arg z)'
+                    rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
+    </param>
+
+    <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
+    <rosparam file="$(find franka_gazebo)/config/sim_controllers.yaml" subst_value="true" />
+
+    <node name="$(arg arm_id)_model_spawner"
+          pkg="gazebo_ros"
+          type="spawn_model"
+          if="$(arg paused)"
+          args="-param robot_description -urdf -model $(arg arm_id)
+                $(arg initial_joint_positions)
+                ">
+    </node>
+    <node name="$(arg arm_id)_model_spawner"
+          pkg="gazebo_ros"
+          type="spawn_model"
+          unless="$(arg paused)"
+          args="-param robot_description -urdf -model $(arg arm_id) -unpause
+                $(arg initial_joint_positions)
+                ">
+    </node>
+
+
+    <!-- Spawn required ROS controllers -->
+    <node pkg="controller_manager"
+          type="spawner"
+          name="$(arg arm_id)_gripper_spawner"
+          if="$(arg use_gripper)"
+          args="franka_gripper"
+          respawn="false"
+    />
+
+    <node pkg="controller_manager"
+          type="spawner"
+          name="$(arg arm_id)_controller_spawner"
+          respawn="false" output="screen"
+          args="franka_state_controller $(arg controller)"
+    />
+
+    <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
+      <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
+      <param name="rate" value="30"/>
+    </node>
+
+    <!-- Start only if cartesian_impedance_example_controller -->
+    <node name="interactive_marker"
+          pkg="franka_example_controllers"
+          type="interactive_marker.py"
+          if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
+      <param name="link_name" value="$(arg arm_id)_link0" />
+    </node>
+
+  </group>
+
+  <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_gazebo)/config/franka_sim_description_with_marker.rviz" if="$(arg rviz)"/>
+
+</launch>

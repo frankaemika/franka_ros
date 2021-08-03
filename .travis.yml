@@ -8,6 +8,7 @@ matrix:
   include:
     - env: CI_ROS=kinetic
     - env: CI_ROS=melodic
+    - env: CI_ROS=noetic
 
 before_script:
   - mkdir -p ~/workspace/catkin_ws/src

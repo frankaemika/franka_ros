@@ -176,6 +176,35 @@ bool FrankaHW::initParameters(ros::NodeHandle& root_nh, ros::NodeHandle& robot_h
   return true;
 }
 
+void FrankaHW::connect() {
+  std::lock_guard<std::mutex> lock(robot_mutex_);
+  if (!robot_) {
+    robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
+    robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
+                                 collision_config_.upper_torque_thresholds_acceleration,
+                                 collision_config_.lower_torque_thresholds_nominal,
+                                 collision_config_.upper_torque_thresholds_nominal,
+                                 collision_config_.lower_force_thresholds_acceleration,
+                                 collision_config_.upper_force_thresholds_acceleration,
+                                 collision_config_.lower_force_thresholds_nominal,
+                                 collision_config_.upper_force_thresholds_nominal);
+  }
+}
+
+bool FrankaHW::disconnect() {
+  if (controllerActive()) {
+    ROS_ERROR("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(robot_mutex_);
+  robot_.reset();
+  return true;
+}
+
+bool FrankaHW::connected() {
+  return robot_ != nullptr;
+}
+
 void FrankaHW::update(const franka::RobotState& robot_state) {
   std::lock_guard<std::mutex> ros_lock(ros_state_mutex_);
   robot_state_ros_ = robot_state;
@@ -185,8 +214,12 @@ bool FrankaHW::controllerActive() const noexcept {
   return controller_active_;
 }
 
+std::mutex& FrankaHW::robotMutex() {
+  return robot_mutex_;
+}
+
 void FrankaHW::control(
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) {
   if (!initialized_) {
     ROS_ERROR("FrankaHW: Call to control before initialization!");
     return;
@@ -197,6 +230,7 @@ void FrankaHW::control(
 
   franka::Duration last_time = robot_state_ros_.time;
 
+  std::lock_guard<std::mutex> lock(robot_mutex_);
   run_function_(*robot_, [this, ros_callback, &last_time](const franka::RobotState& robot_state,
                                                           franka::Duration time_step) {
     if (last_time != robot_state.time) {
@@ -321,8 +355,9 @@ void FrankaHW::checkJointLimits() {
                               << k_joint_name << " for joint limit interfaces");
       }
     } catch (const hardware_interface::HardwareInterfaceException& ex) {
-      ROS_ERROR_STREAM_ONCE("FrankaHW: Could not get joint handle " << k_joint_name << " .\n"
-                                                                    << ex.what());
+      ROS_ERROR_STREAM_ONCE("FrankaHW::checkJointLimits Could not get joint handle " << k_joint_name
+                                                                                     << " .\n"
+                                                                                     << ex.what());
       return;
     }
   }
@@ -333,8 +368,9 @@ void FrankaHW::checkJointLimits() {
 
 franka::Robot& FrankaHW::robot() const {
   if (!initialized_ || !robot_) {
-    std::string error_message = "FrankaHW: Attempt to access robot before initialization!";
-    ROS_ERROR("%s", error_message.c_str());
+    std::string error_message = !initialized_
+                                    ? "FrankaHW: Attempt to access robot before initialization!"
+                                    : "FrankaHW: Attempt to access disconnected robot!";
     throw std::logic_error(error_message);
   }
   return *robot_;
@@ -508,16 +544,8 @@ void FrankaHW::initROSInterfaces(ros::NodeHandle& /*robot_hw_nh*/) {
 }
 
 void FrankaHW::initRobot() {
-  robot_ = std::make_unique<franka::Robot>(robot_ip_, realtime_config_);
-  model_ = std::make_unique<franka::Model>(robot_->loadModel());
-  robot_->setCollisionBehavior(collision_config_.lower_torque_thresholds_acceleration,
-                               collision_config_.upper_torque_thresholds_acceleration,
-                               collision_config_.lower_torque_thresholds_nominal,
-                               collision_config_.upper_torque_thresholds_nominal,
-                               collision_config_.lower_force_thresholds_acceleration,
-                               collision_config_.upper_force_thresholds_acceleration,
-                               collision_config_.lower_force_thresholds_nominal,
-                               collision_config_.upper_force_thresholds_nominal);
+  connect();
+  model_ = std::make_unique<franka_hw::Model>(robot_->loadModel());
   update(robot_->readOnce());
 }
 
@@ -571,7 +599,7 @@ bool FrankaHW::commandHasNaN(const franka::CartesianVelocities& command) {
 }
 
 std::vector<double> FrankaHW::getCollisionThresholds(const std::string& name,
-                                                     ros::NodeHandle& robot_hw_nh,
+                                                     const ros::NodeHandle& robot_hw_nh,
                                                      const std::vector<double>& defaults) {
   std::vector<double> thresholds;
   if (!robot_hw_nh.getParam("collision_config/" + name, thresholds) ||

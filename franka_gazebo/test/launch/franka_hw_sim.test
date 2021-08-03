@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="robot_description" textfile="$(find franka_gazebo)/test/launch/panda-gazebo.urdf" />
+  <test test-name="franka_hw_sim_test" pkg="franka_gazebo" type="franka_hw_sim_test" />
+
+</launch>

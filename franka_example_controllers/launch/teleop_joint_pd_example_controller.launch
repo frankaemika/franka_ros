@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="leader_ip" />
+  <arg name="follower_ip" />
+
+  <arg name="robot_id" default="panda_teleop" />
+  <arg name="debug" default="false" />
+  <arg name="rviz" default="true" />
+  <arg name="load_gripper" default="false" />
+  <arg name="gripper_homed" default="false" />
+
+  <remap from="dyn_reconf_teleop_param_node" to="$(arg robot_id)/dyn_reconf_teleop_param_node" />
+  <remap from="$(arg robot_id)/dyn_reconf_teleop_param_node/leader_contact_force_threshold" to="$(arg robot_id)/teleop_joint_pd_example_controller/leader/contact_force_threshold" />
+  <remap from="$(arg robot_id)/dyn_reconf_teleop_param_node/follower_contact_force_threshold" to="$(arg robot_id)/teleop_joint_pd_example_controller/follower/contact_force_threshold" />
+
+  <include file="$(find franka_control)/launch/franka_combined_control.launch" >
+    <arg name="robot_id" value="$(arg robot_id)" />
+    <arg name="robot_ips" value="{panda_1/robot_ip: $(arg leader_ip), panda_2/robot_ip: $(arg follower_ip)}" />
+    <arg name="hw_config_file" value="$(find franka_example_controllers)/config/teleop_joint_pd_example_control_node.yaml" />
+  </include>
+
+  <group ns="$(arg robot_id)">
+    <include file="$(find franka_example_controllers)/launch/teleop_gripper.launch" if="$(arg load_gripper)">
+      <arg name="leader_ip" value="$(arg leader_ip)" />
+      <arg name="follower_ip" value="$(arg follower_ip)" />
+      <arg name="leader_id" value="panda_1" />
+      <arg name="follower_id" value="panda_2" />
+      <arg name="gripper_homed" value="$(arg gripper_homed)" />
+    </include>
+
+    <rosparam command="load" file="$(find franka_example_controllers)/config/franka_example_controllers.yaml" />
+    <rosparam param="teleop_joint_pd_example_controller/debug" subst_value="true">$(arg debug)</rosparam>
+    <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen"  args="teleop_joint_pd_example_controller" />
+
+    <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(eval arg('debug') or arg('load_gripper'))" />
+
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/teleop_joint_pd_example.rviz" if="$(arg rviz)" />
+  </group>
+</launch>

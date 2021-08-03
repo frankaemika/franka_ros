@@ -1,12 +1,44 @@
 # CHANGELOG
 
-## 0.7.0 - UNRELEASED
+## 0.8.0 - 2021-08-03
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_hw`, `franka_combinable_hw`, `franka_combined_hw`: Added service interface to disconnect
+    and reconnect when no controller is active. This allows mixing FCI- and DESK-based application
+    without stopping the according hardware nodes.
+  * **BREAKING** `franka_hw`, `franka_combinable_hw` method control() now is non-const to allow
+    locking a mutex member variable.
+  * **BREAKING** Change behavior of `franka_msgs/SetEEFrame`. Previously, this method would set
+    the flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
+    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `franka_ros` with `SetEEFrame`
+    and defaults to the identity transformation.
+  * Add `F_T_NE` and `NE_T_EE` to `franka_msgs/FrankaState`.
+  * _Franka Gazebo Integration_: Now you can simulate Panda robots in Gazebo including:
+    * gravity compensation
+    * non-realtime commands like `setEEFrame` or `setLoad`
+    * gripper simulation with the _same_ action interface as `franka_gripper`
+    * estimated inertias in the URDF
+    * no need to change existing ROS controllers
+    * only torque control supported in this version
+  * Extract Model Library in abstract base class interface. This allows users to implement their own model.
+  * **BREAKING** Remove `panda_arm_hand.urdf.xacro`. Use `panda_arm.urdf.xacro hand:=true` instead.
+
+## 0.7.1 - 2020-10-22
+
+Requires `libfranka` >= 0.7.0
+
+  * `franka_example_controllers`: Added example for dual-arm teleoperation based on `franka_combinable_hw`.
+  * `franka_gripper`: Made stopping on shutdown optional.
+  * `franka_hw`: Added `franka_control_services` install instruction.
+
+## 0.7.0 - 2020-07-15
 
 Requires `libfranka` >= 0.7.0
 
   * **BREAKING** moved services and action from `franka_control` to `franka_msgs`.
   * **BREAKING** moved Service container from `franka_control` to `franka_hw`.
-  * `franka_example_controllers` : Added example for dual-arm control based on franka_combinable_hw.
+  * `franka_example_controllers`: Added example for dual-arm control based on `franka_combinable_hw`.
   * `franka_description` :
     - Added an example urdf with two panda arms.
     - **BREAKING** Updated collision volumes.
@@ -31,6 +63,7 @@ Requires `libfranka` >= 0.7.0
   * Raised minimum CMake version to 3.4 to match `libfranka`.
   * Add rosparam to choose value of `franka::RealtimeConfig`.
   * Fix unused parameter bugs in `FrankaModelHandle` (#78).
+  * Added (experimental) support for ROS Noetic Ninjemys.
 
 ## 0.6.0 - 2018-08-08
 

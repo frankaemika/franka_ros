@@ -2,6 +2,9 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka_hw/franka_combinable_hw.h>
 
+#include <chrono>
+#include <thread>
+
 #include <hardware_interface/joint_command_interface.h>
 #include <joint_limits_interface/joint_limits_interface.h>
 #include <pluginlib/class_list_macros.h>
@@ -9,9 +12,16 @@
 
 #include <franka_hw/services.h>
 
+using namespace std::chrono_literals;
+
 namespace franka_hw {
 
 FrankaCombinableHW::FrankaCombinableHW() : has_error_(false), error_recovered_(false) {}
+
+bool FrankaCombinableHW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
+  robot_hw_nh_ = robot_hw_nh;
+  return FrankaHW::init(root_nh, robot_hw_nh);
+}
 
 void FrankaCombinableHW::initROSInterfaces(ros::NodeHandle& robot_hw_nh) {
   setupJointStateInterface(robot_state_ros_);
@@ -54,18 +64,23 @@ void FrankaCombinableHW::controlLoop() {
                            arm_id_.c_str());
       }
 
-      checkJointLimits();
-
+      if (initialized_) {
+        checkJointLimits();
+      }
       {
-        std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
-        std::lock_guard<std::mutex> libfranka_state_lock(libfranka_state_mutex_);
-        robot_state_libfranka_ = robot_->readOnce();
-        robot_state_ros_ = robot_->readOnce();
+        std::lock_guard<std::mutex> robot_lock(robot_mutex_);
+        if (connected()) {
+          std::lock_guard<std::mutex> ros_state_lock(ros_state_mutex_);
+          std::lock_guard<std::mutex> libfranka_state_lock(libfranka_state_mutex_);
+          robot_state_libfranka_ = robot_->readOnce();
+          robot_state_ros_ = robot_->readOnce();
+        }
       }
 
       if (!ros::ok()) {
         return;
       }
+      std::this_thread::sleep_for(1ms);
     }
     ROS_INFO("FrankaCombinableHW::%s::control_loop(): controller is active.", arm_id_.c_str());
 
@@ -76,7 +91,9 @@ void FrankaCombinableHW::controlLoop() {
     }
 
     try {
-      control();
+      if (connected()) {
+        control();
+      }
     } catch (const franka::ControlException& e) {
       // Reflex could be caught and it needs to wait for automatic error recovery
       ROS_ERROR("%s: %s", arm_id_.c_str(), e.what());
@@ -87,30 +104,63 @@ void FrankaCombinableHW::controlLoop() {
 }
 
 void FrankaCombinableHW::setupServicesAndActionServers(ros::NodeHandle& node_handle) {
-  setupServices(*robot_, node_handle, services_);
-  recovery_action_server_ =
-      std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
-          node_handle, "error_recovery",
-          [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
-            try {
-              robot_->automaticErrorRecovery();
-              // error recovered => reset controller
-              if (has_error_) {
-                error_recovered_ = true;
+  if (!connected()) {
+    ROS_ERROR(
+        "FrankaCombinableHW::setupServicesAndActionServers: Cannot create services without "
+        "connected robot.");
+    return;
+  }
+
+  services_ = std::make_unique<ServiceContainer>();
+  setupServices(*robot_, robot_mutex_, node_handle, *services_);
+
+  if (!recovery_action_server_) {
+    recovery_action_server_ =
+        std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
+            node_handle, "error_recovery",
+            [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
+              if (connected()) {
+                try {
+                  std::lock_guard<std::mutex> lock(robot_mutex_);
+                  robot_->automaticErrorRecovery();
+                  // error recovered => reset controller
+                  if (has_error_) {
+                    error_recovered_ = true;
+                  }
+                  has_error_ = false;
+                  publishErrorState(has_error_);
+                  recovery_action_server_->setSucceeded();
+                } catch (const franka::Exception& ex) {
+                  recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(),
+                                                      ex.what());
+                }
+              } else {
+                recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(),
+                                                    "Cannot recovery robot while disconnected.");
               }
-              has_error_ = false;
-              publishErrorState(has_error_);
-              recovery_action_server_->setSucceeded();
-            } catch (const franka::Exception& ex) {
-              recovery_action_server_->setAborted(franka_msgs::ErrorRecoveryResult(), ex.what());
-            }
-          },
-          false);
-  recovery_action_server_->start();
+            },
+            false);
+    recovery_action_server_->start();
+  }
+}
+
+void FrankaCombinableHW::connect() {
+  FrankaHW::connect();
+  setupServicesAndActionServers(robot_hw_nh_);
+}
+
+bool FrankaCombinableHW::disconnect() {
+  if (controllerActive()) {
+    ROS_ERROR("FrankaHW: Rejected attempt to disconnect while controller is still running!");
+    return false;
+  }
+  recovery_action_server_.reset();
+  services_.reset();
+  return FrankaHW::disconnect();
 }
 
 void FrankaCombinableHW::control(  // NOLINT (google-default-arguments)
-    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) const {
+    const std::function<bool(const ros::Time&, const ros::Duration&)>& /*ros_callback*/) {
   if (!controller_active_) {
     return;
   }
@@ -176,7 +226,9 @@ bool FrankaCombinableHW::hasError() const noexcept {
 }
 
 void FrankaCombinableHW::resetError() {
-  robot_->automaticErrorRecovery();
+  if (connected()) {
+    robot_->automaticErrorRecovery();
+  }
   // error recovered => reset controller
   if (has_error_) {
     error_recovered_ = true;
@@ -201,6 +253,7 @@ bool FrankaCombinableHW::setRunFunction(const ControlMode& requested_control_mod
   if (requested_control_mode == ControlMode::JointTorque) {
     run_function_ = [this, limit_rate, cutoff_frequency](franka::Robot& robot,
                                                          Callback /*callback*/) {
+      std::lock_guard<std::mutex> lock(robot_mutex_);
       robot.control(std::bind(&FrankaCombinableHW::libfrankaUpdateCallback<franka::Torques>, this,
                               std::cref(effort_joint_command_libfranka_), std::placeholders::_1,
                               std::placeholders::_2),

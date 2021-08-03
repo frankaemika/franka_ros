@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_ros</name>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
   <description>franka_ros is a metapackage for all Franka Emika ROS packages</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>

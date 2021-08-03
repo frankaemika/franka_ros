@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_gripper</name>
-  <version>0.7.0</version>
+  <version>0.8.0</version>
   <description>This package implements the franka gripper of type Franka Hand for the use in ros</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>

@@ -1,0 +1,371 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
+
+  <!-- =============================================================== -->
+  <!-- || This file does not contain official inertial properties   || -->
+  <!-- || of panda robot. The values are from the identification    || -->
+  <!-- || results published in: Identification of the Franka Emika  || -->
+  <!-- || PandaRobot With Retrieval of Feasible Parameters Using    || -->
+  <!-- || Penalty-Based Optimization                                || -->
+  <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,         || -->
+  <!-- || Paolo Robuffo Giordano, Alessandro de Lucaa               || -->
+  <!-- =============================================================== -->
+
+  <xacro:macro name="panda_arm" params="arm_id:='panda'">
+    <link name="${arm_id}_link0">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link0.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link0.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <!-- Estimated guesses from CAD -->
+        <origin rpy="0 0 0" xyz="-0.041018 -0.00014 0.049974"/>
+        <mass value="0.629769"/>
+        <inertia ixx="0.00315" ixy="8.2904E-07" ixz="0.00015"
+                               iyy="0.00388"    iyz="8.2299E-06"
+                                                izz="0.004285" />
+      </inertial>
+    </link>
+
+    <link name="${arm_id}_link1">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link1.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link1.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0.003875 0.002081 -0.04762"/>
+        <mass value="4.970684"/>
+        <inertia ixx="0.70337" ixy="-0.00013900" ixz="0.0067720"
+                               iyy="0.70661"     iyz="0.019169"
+                                                 izz="0.0091170" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint1" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="0 0 0" xyz="0 0 0.333"/>
+      <parent link="${arm_id}_link0"/>
+      <child link="${arm_id}_link1"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="15" lower="-2.9671" effort="87" upper="2.9671" velocity="2.5"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link2">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link2.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link2.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz=" -0.003141 -0.02872  0.003495"/>
+        <mass value="0.646926"/>
+        <inertia ixx="0.0079620" ixy="-3.9250e-3" ixz="1.0254e-02"
+                                 iyy="2.8110e-02" iyz="7.0400e-04"
+                                                  izz="2.5995e-02" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint2" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
+      <origin rpy="${-pi/2} 0 0" xyz="0 0 0"/>
+      <parent link="${arm_id}_link1"/>
+      <child link="${arm_id}_link2"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="7.5" lower="-1.8326" effort="87" upper="1.8326" velocity="2.5"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link3">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link3.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link3.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="2.7518e-02 3.9252e-02 -6.6502e-02"/>
+        <mass value="3.228604"/>
+        <inertia ixx="3.7242e-02" ixy="-4.7610e-03" ixz="-1.1396e-02"
+                                  iyy="3.6155e-02"  iyz="-1.2805e-02"
+                                                    izz="1.0830e-02" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint3" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 -0.316 0"/>
+      <parent link="${arm_id}_link2"/>
+      <child link="${arm_id}_link3"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="12.5" lower="-2.9671" effort="87" upper="2.9671" velocity="2.5"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link4">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link4.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link4.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="-5.317e-02 1.04419e-01 2.7454e-02"/>
+        <mass value="3.587895"/>
+        <inertia ixx="2.5853e-02" ixy="7.7960e-03" ixz="-1.3320e-03"
+                                  iyy="1.9552e-02" iyz="8.6410e-03"
+                                                   izz="2.8323e-02" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint4" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0"/>
+      <parent link="${arm_id}_link3"/>
+      <child link="${arm_id}_link4"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="12.5" lower="-3.1416" effort="87" upper="-0.4" velocity="2.5"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link5">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link5.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link5.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="-1.1953e-02 4.1065e-02 -3.8437e-02"/>
+        <mass value="1.225946"/>
+        <inertia ixx="3.5549e-02" ixy="-2.1170e-03" ixz="-4.0370e-03"
+                                  iyy="2.9474e-02"  iyz="2.2900e-04"
+                                                    izz="8.6270e-03" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint5" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${-pi/2} 0 0" xyz="-0.0825 0.384 0"/>
+      <parent link="${arm_id}_link4"/>
+      <child link="${arm_id}_link5"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="15" lower="-2.9671" effort="12" upper="2.9671" velocity="3"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link6">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link6.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link6.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="6.0149e-02 -1.4117e-02 -1.0517e-02"/>
+        <mass value="1.666555"/>
+        <inertia ixx="1.9640e-03" ixy="1.0900e-04" ixz="-1.1580e-03"
+                                  iyy="4.3540e-03" iyz="3.4100e-04"
+                                                   izz="5.4330e-03" />
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint6" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
+      <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+      <parent link="${arm_id}_link5"/>
+      <child link="${arm_id}_link6"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="20" lower="-0.0873" effort="12" upper="3.8223" velocity="3"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link7">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/link7.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/link7.stl"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="1.0517e-02 -4.252e-03 6.1597e-02"/>
+        <mass value="7.35522e-01"/>
+        <inertia ixx="1.2516e-02" ixy="-4.2800e-04" ixz="-1.1960e-03"
+                                  iyy="1.0027e-02"  iyz="-7.4100e-04"
+                                                    izz="4.8150e-03"/>
+      </inertial>
+    </link>
+
+    <joint name="${arm_id}_joint7" type="revolute">
+      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+      <origin rpy="${pi/2} 0 0" xyz="0.088 0 0"/>
+      <parent link="${arm_id}_link6"/>
+      <child link="${arm_id}_link7"/>
+      <axis xyz="0 0 1"/>
+      <limit acceleration="20" lower="-2.9671" effort="12" upper="2.9671" velocity="3"/>
+      <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
+    </joint>
+
+    <link name="${arm_id}_link8" />
+
+    <joint name="${arm_id}_joint8" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 0.107"/>
+      <parent link="${arm_id}_link7"/>
+      <child link="${arm_id}_link8"/>
+      <axis xyz="0 0 0"/>
+    </joint>
+
+  </xacro:macro>
+
+  <xacro:macro name="hand" params="connected_to:='' ns:='' xyz:='0 0 0' rpy:='0 0 0'">
+    <xacro:include filename="$(find franka_description)/robots/utils.xacro"/>
+
+    <xacro:unless value="${connected_to == ''}">
+      <joint name="${ns}_hand_joint" type="fixed">
+        <parent link="${connected_to}"/>
+        <child link="${ns}_hand"/>
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+      </joint>
+    </xacro:unless>
+
+    <link name="${ns}_hand">
+      <visual>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0.0 0 0.0375" rpy="0 ${pi/2} ${pi/2}"/>
+        <geometry>
+          <box size="0.055 0.04 0.198"  />
+        </geometry>
+      </collision>
+      <inertial>
+        <mass value="0.73" />
+        <origin xyz="-0.01 0 0.03" />
+        <inertia ixx="0.001" ixy="0"      ixz="0"
+                             iyy="0.0025" iyz="0"
+                                          izz="0.0017" />
+      </inertial>
+    </link>
+
+    <link name="${ns}_leftfinger">
+      <xacro:inertia-cylinder mass="15e-3" radius="0.01" h="0.04"/>
+      <visual>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 0.015 0.03" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.005 0.047" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0.007 0.045" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.015 0.017" />
+        </geometry>
+      </collision>
+    </link>
+
+    <link name="${ns}_rightfinger">
+      <xacro:inertia-cylinder mass="15e-3" radius="0.01" h="0.04"/>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
+        </geometry>
+      </visual>
+      <collision>
+        <origin xyz="0 -0.015 0.03" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.005 0.047" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 -0.007 0.045" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.03 0.015 0.017" />
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Friction specific material for Rubber/Rubber contact -->
+    <!-- See: -->
+    <xacro:gazebo-friction link="${ns}_leftfinger" mu="1.13" />
+    <xacro:gazebo-friction link="${ns}_rightfinger" mu="1.13" />
+
+    <joint name="${ns}_finger_joint1" type="prismatic">
+      <parent link="${ns}_hand"/>
+      <child link="${ns}_leftfinger"/>
+      <origin xyz="0 0 0.0584" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
+      <dynamics damping="0.3"/>
+    </joint>
+
+    <joint name="${ns}_finger_joint2" type="prismatic">
+      <parent link="${ns}_hand"/>
+      <child link="${ns}_rightfinger"/>
+      <origin xyz="0 0 0.0584" rpy="0 0 0"/>
+      <axis xyz="0 -1 0"/>
+      <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
+      <dynamics damping="0.3"/>
+    </joint>
+  </xacro:macro>
+</robot>
