@@ -11,7 +11,6 @@
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
-#include <franka/model.h>
 #include <franka/rate_limiting.h>
 #include <franka/robot.h>
 #include <franka/robot_state.h>
@@ -27,6 +26,7 @@
 #include <franka_hw/franka_cartesian_command_interface.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
+#include <franka_hw/model_base.h>
 #include <franka_hw/resource_helpers.h>
 
 namespace franka_hw {
@@ -87,6 +87,25 @@ class FrankaHW : public hardware_interface::RobotHW {
   virtual void setupParameterCallbacks(ros::NodeHandle& robot_hw_nh);
 
   /**
+   * Create a libfranka robot, connecting the hardware class to the master controller.
+   * Note: While the robot is connected, no DESK based tasks can be executed.
+   */
+  virtual void connect();
+
+  /**
+   * Tries to disconnect the hardware class from the robot, freeing it for e.g. DESK-based tasks.
+   * Note: Disconnecting is only possible when no controller is actively running.
+   * @return true if successfully disconnected, false otherwise.
+   */
+  virtual bool disconnect();
+
+  /**
+   * Checks whether the hardware class is connected to a robot.
+   * @return true if connected, false otherwise.
+   */
+  virtual bool connected();
+
+  /**
    * Runs the currently active controller in a realtime loop.
    *
    * If no controller is active, the function immediately exits. When running a controller,
@@ -102,7 +121,7 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @throw franka::RealtimeException if realtime priority cannot be set for the current thread.
    */
   virtual void control(
-      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback) const;
+      const std::function<bool(const ros::Time&, const ros::Duration&)>& ros_callback);
 
   /**
    * Updates the controller interfaces from the given robot state.
@@ -205,8 +224,16 @@ class FrankaHW : public hardware_interface::RobotHW {
 
   /**
    * Getter for the libfranka robot instance.
+   * @throw std::logic_error in case the robot is not connected or the class in not initialized
    */
   virtual franka::Robot& robot() const;
+
+  /**
+   * Getter for the mutex protecting access to the libfranka::robot class. This enables thread-safe
+   * access to robot().
+   * @return A reference to the robot mutex.
+   */
+  virtual std::mutex& robotMutex();
 
   /**
    * Checks a command for NaN values.
@@ -252,6 +279,21 @@ class FrankaHW : public hardware_interface::RobotHW {
    * @return True if the command contains NaN, false otherwise.
    */
   static bool commandHasNaN(const franka::CartesianVelocities& command);
+
+  /**
+   * Parses a set of collision thresholds from the parameter server. The methods returns
+   * the default values if no parameter was found or the size of the array did not match
+   * the defaults dimension.
+   *
+   * @param[in] name The name of the parameter to look for.
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   * @param[in] defaults A set of default values that also specify the size the parameter must have
+   * to be valid.
+   * @return A set parsed parameters if valid parameters where found, the default values otherwise.
+   */
+  static std::vector<double> getCollisionThresholds(const std::string& name,
+                                                    const ros::NodeHandle& robot_hw_nh,
+                                                    const std::vector<double>& defaults);
 
  protected:
   /**
@@ -435,21 +477,6 @@ class FrankaHW : public hardware_interface::RobotHW {
    */
   virtual void initRobot();
 
-  /**
-   * Parses a set of collision thresholds from the parameter server. The methods returns
-   * the default values if no parameter was found or the size of the array did not match
-   * the defaults dimension.
-   *
-   * @param[in] name The name of the parameter to look for.
-   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
-   * @param[in] defaults A set of default values that also specify the size the parameter must have
-   * to be valid.
-   * @return A set parsed parameters if valid parameters where found, the default values otherwise.
-   */
-  static std::vector<double> getCollisionThresholds(const std::string& name,
-                                                    ros::NodeHandle& robot_hw_nh,
-                                                    const std::vector<double>& defaults);
-
   struct CollisionConfig {
     std::array<double, 7> lower_torque_thresholds_acceleration;
     std::array<double, 7> upper_torque_thresholds_acceleration;
@@ -493,8 +520,9 @@ class FrankaHW : public hardware_interface::RobotHW {
   franka::CartesianPose pose_cartesian_command_ros_;
   franka::CartesianVelocities velocity_cartesian_command_ros_;
 
+  std::mutex robot_mutex_;
   std::unique_ptr<franka::Robot> robot_;
-  std::unique_ptr<franka::Model> model_;
+  std::unique_ptr<franka_hw::ModelBase> model_;
 
   std::array<std::string, 7> joint_names_;
   std::string arm_id_;

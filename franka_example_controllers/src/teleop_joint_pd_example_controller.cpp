@@ -278,8 +278,7 @@ bool TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
   // Get state interface.
   auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (state_interface == nullptr) {
-    ROS_ERROR_STREAM(
-        "PandaJointImpedanceControllerImpl: Error getting state interface from hardware");
+    ROS_ERROR_STREAM("TeleopJointPDExampleController: Error getting state interface from hardware");
     return false;
   }
   try {
@@ -287,7 +286,7 @@ bool TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
         state_interface->getHandle(arm_id + "_robot"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     ROS_ERROR_STREAM(
-        "PandaJointImpedanceControllerImpl: Exception getting state handle from interface: "
+        "TeleopJointPDExampleController: Exception getting state handle from interface: "
         << ex.what());
     return false;
   }

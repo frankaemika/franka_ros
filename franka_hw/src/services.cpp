@@ -2,39 +2,54 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka_hw/services.h>
 
+#include <mutex>
+
 namespace franka_hw {
 
-void setupServices(franka::Robot& robot, ros::NodeHandle& node_handle, ServiceContainer& services) {
+void setupServices(franka::Robot& robot,
+                   std::mutex& robot_mutex,
+                   ros::NodeHandle& node_handle,
+                   ServiceContainer& services) {
   services
-      .advertiseService<franka_msgs::SetJointImpedance>(node_handle, "set_joint_impedance",
-                                                        [&robot](auto&& req, auto&& res) {
-                                                          return franka_hw::setJointImpedance(
-                                                              robot, req, res);
-                                                        })
+      .advertiseService<franka_msgs::SetJointImpedance>(
+          node_handle, "set_joint_impedance",
+          [&robot, &robot_mutex](auto&& req, auto&& res) {
+            std::lock_guard<std::mutex> lock(robot_mutex);
+            return franka_hw::setJointImpedance(robot, req, res);
+          })
       .advertiseService<franka_msgs::SetCartesianImpedance>(
           node_handle, "set_cartesian_impedance",
-          [&robot](auto&& req, auto&& res) {
+          [&robot, &robot_mutex](auto&& req, auto&& res) {
+            std::lock_guard<std::mutex> lock(robot_mutex);
             return franka_hw::setCartesianImpedance(robot, req, res);
           })
-      .advertiseService<franka_msgs::SetEEFrame>(
-          node_handle, "set_EE_frame",
-          [&robot](auto&& req, auto&& res) { return franka_hw::setEEFrame(robot, req, res); })
-      .advertiseService<franka_msgs::SetKFrame>(
-          node_handle, "set_K_frame",
-          [&robot](auto&& req, auto&& res) { return franka_hw::setKFrame(robot, req, res); })
+      .advertiseService<franka_msgs::SetEEFrame>(node_handle, "set_EE_frame",
+                                                 [&robot, &robot_mutex](auto&& req, auto&& res) {
+                                                   std::lock_guard<std::mutex> lock(robot_mutex);
+                                                   return franka_hw::setEEFrame(robot, req, res);
+                                                 })
+      .advertiseService<franka_msgs::SetKFrame>(node_handle, "set_K_frame",
+                                                [&robot, &robot_mutex](auto&& req, auto&& res) {
+                                                  std::lock_guard<std::mutex> lock(robot_mutex);
+                                                  return franka_hw::setKFrame(robot, req, res);
+                                                })
       .advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
           node_handle, "set_force_torque_collision_behavior",
-          [&robot](auto&& req, auto&& res) {
+          [&robot, &robot_mutex](auto&& req, auto&& res) {
+            std::lock_guard<std::mutex> lock(robot_mutex);
             return franka_hw::setForceTorqueCollisionBehavior(robot, req, res);
           })
       .advertiseService<franka_msgs::SetFullCollisionBehavior>(
           node_handle, "set_full_collision_behavior",
-          [&robot](auto&& req, auto&& res) {
+          [&robot, &robot_mutex](auto&& req, auto&& res) {
+            std::lock_guard<std::mutex> lock(robot_mutex);
             return franka_hw::setFullCollisionBehavior(robot, req, res);
           })
-      .advertiseService<franka_msgs::SetLoad>(
-          node_handle, "set_load",
-          [&robot](auto&& req, auto&& res) { return franka_hw::setLoad(robot, req, res); });
+      .advertiseService<franka_msgs::SetLoad>(node_handle, "set_load",
+                                              [&robot, &robot_mutex](auto&& req, auto&& res) {
+                                                std::lock_guard<std::mutex> lock(robot_mutex);
+                                                return franka_hw::setLoad(robot, req, res);
+                                              });
 }
 
 void setCartesianImpedance(franka::Robot& robot,
@@ -57,9 +72,9 @@ void setJointImpedance(franka::Robot& robot,
 void setEEFrame(franka::Robot& robot,
                 const franka_msgs::SetEEFrame::Request& req,
                 franka_msgs::SetEEFrame::Response& /* res */) {
-  std::array<double, 16> F_T_EE;  // NOLINT [readability-identifier-naming]
-  std::copy(req.F_T_EE.cbegin(), req.F_T_EE.cend(), F_T_EE.begin());
-  robot.setEE(F_T_EE);
+  std::array<double, 16> NE_T_EE;  // NOLINT [readability-identifier-naming]
+  std::copy(req.NE_T_EE.cbegin(), req.NE_T_EE.cend(), NE_T_EE.begin());
+  robot.setEE(NE_T_EE);
 }
 
 void setKFrame(franka::Robot& robot,

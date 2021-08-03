@@ -34,6 +34,16 @@ class FrankaCombinableHW : public FrankaHW {
    */
   FrankaCombinableHW();
 
+  /*
+   * Initializes the hardware class. That includes parsing parameters, connecting to the robot,
+   * setting up ros_control interfaces ans ROS services and actions.
+   *
+   * @param[in] root_nh A node handle in the root namespace of the control node.
+   * @param[in] robot_hw_nh A node handle in the namespace of the robot hardware.
+   * @return True if successful, false otherwise.
+   */
+  bool init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) override;
+
   /**
    * Initializes the class in terms of ros_control interfaces.
    * Note: You have to call initParameters beforehand. Use the complete initialization routine
@@ -43,6 +53,19 @@ class FrankaCombinableHW : public FrankaHW {
    * @return True if successful, false otherwise.
    */
   void initROSInterfaces(ros::NodeHandle& robot_hw_nh) override;
+
+  /**
+   * Create a libfranka robot, connecting the hardware class to the master controller.
+   * Note: While the robot is connected, no DESK based tasks can be executed.
+   */
+  void connect() override;
+
+  /**
+   * Tries to disconnect the hardware class from the robot, freeing it for e.g. DESK-based tasks.
+   * Note: Disconnecting is only possible when no controller is actively running.
+   * @return true if successfully disconnected, false otherwise.
+   */
+  bool disconnect() override;
 
   /**
    * Runs the currently active controller in a realtime loop. If no controller is active, the
@@ -59,7 +82,7 @@ class FrankaCombinableHW : public FrankaHW {
                    ros_callback =  // NOLINT (google-default-arguments)
                [](const ros::Time&, const ros::Duration&) {
                  return true;
-               }) const override;  // NOLINT (google-default-arguments)
+               }) override;  // NOLINT (google-default-arguments)
 
   /**
    * Checks whether a requested controller can be run, based on the resources and interfaces it
@@ -158,13 +181,14 @@ class FrankaCombinableHW : public FrankaHW {
   void controlLoop();
 
   std::unique_ptr<std::thread> control_loop_thread_;
-  ServiceContainer services_;
+  std::unique_ptr<ServiceContainer> services_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>
       recovery_action_server_;
   std::atomic_bool has_error_{false};
   ros::Publisher has_error_pub_;
   std::atomic_bool error_recovered_{false};
   std::atomic_bool controller_needs_reset_{false};
+  ros::NodeHandle robot_hw_nh_;
 };
 
 }  // namespace franka_hw

@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   tf
   tf2_msgs
+  std_srvs
 )
 
 find_package(Franka 0.7.0 REQUIRED)
@@ -34,6 +35,7 @@ catkin_package(
     roscpp
     sensor_msgs
     tf2_msgs
+    std_srvs
   DEPENDS Franka
 )
 

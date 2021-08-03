@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>franka_gazebo</name>
+  <version>0.8.0</version>
+  <description>This package offers the FrankaHWSim Class to simulate a Franka Robot in Gazebo</description>
+
+  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <url type="website">http://wiki.ros.org/franka_gazebo</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>Franka Emika GmbH</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>gazebo_dev</build_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <depend>gazebo_ros_control</depend>
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>control_msgs</depend>
+  <depend>control_toolbox</depend>
+  <depend>controller_manager</depend>
+  <depend>controller_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>kdl_parser</depend>
+  <depend>hardware_interface</depend>
+  <depend>transmission_interface</depend>
+  <depend>joint_limits_interface</depend>
+  <depend>eigen_conversions</depend>
+  <depend>franka_hw</depend>
+  <depend>franka_msgs</depend>
+  <depend>franka_gripper</depend>
+  <depend>franka_example_controllers</depend>
+  <depend>urdf</depend>
+  <depend>angles</depend>
+
+  <test_depend>gtest</test_depend>
+  <test_depend>rostest</test_depend>
+
+  <export>
+    <controller_interface plugin="${prefix}/franka_gripper_sim_plugin.xml"/>
+    <gazebo_ros_control   plugin="${prefix}/franka_hw_sim_plugin.xml"/>
+  </export>
+</package>

@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 0.8.0 - 2021-08-03
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_hw`, `franka_combinable_hw`, `franka_combined_hw`: Added service interface to disconnect
+    and reconnect when no controller is active. This allows mixing FCI- and DESK-based application
+    without stopping the according hardware nodes.
+  * **BREAKING** `franka_hw`, `franka_combinable_hw` method control() now is non-const to allow
+    locking a mutex member variable.
+  * **BREAKING** Change behavior of `franka_msgs/SetEEFrame`. Previously, this method would set
+    the flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
+    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `franka_ros` with `SetEEFrame`
+    and defaults to the identity transformation.
+  * Add `F_T_NE` and `NE_T_EE` to `franka_msgs/FrankaState`.
+  * _Franka Gazebo Integration_: Now you can simulate Panda robots in Gazebo including:
+    * gravity compensation
+    * non-realtime commands like `setEEFrame` or `setLoad`
+    * gripper simulation with the _same_ action interface as `franka_gripper`
+    * estimated inertias in the URDF
+    * no need to change existing ROS controllers
+    * only torque control supported in this version
+  * Extract Model Library in abstract base class interface. This allows users to implement their own model.
+  * **BREAKING** Remove `panda_arm_hand.urdf.xacro`. Use `panda_arm.urdf.xacro hand:=true` instead.
+
 ## 0.7.1 - 2020-10-22
 
 Requires `libfranka` >= 0.7.0

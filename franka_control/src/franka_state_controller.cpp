@@ -195,21 +195,27 @@ bool FrankaStateController::init(hardware_interface::RobotHW* robot_hardware,
   {
     std::lock_guard<realtime_tools::RealtimePublisher<tf2_msgs::TFMessage>> lock(
         publisher_transforms_);
-    publisher_transforms_.msg_.transforms.resize(2);
+    publisher_transforms_.msg_.transforms.resize(3);
     tf::Quaternion quaternion(0.0, 0.0, 0.0, 1.0);
     tf::Vector3 translation(0.0, 0.0, 0.05);
     tf::Transform transform(quaternion, translation);
     tf::StampedTransform stamped_transform(transform, ros::Time::now(), arm_id_ + "_link8",
-                                           arm_id_ + "_EE");
+                                           arm_id_ + "_NE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
+
     translation = tf::Vector3(0.0, 0.0, 0.0);
     transform = tf::Transform(quaternion, translation);
     stamped_transform =
-        tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_EE", arm_id_ + "_K");
+        tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_NE", arm_id_ + "_EE");
     transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[1] = transform_message;
+
+    stamped_transform =
+        tf::StampedTransform(transform, ros::Time::now(), arm_id_ + "_EE", arm_id_ + "_K");
+    transformStampedTFToMsg(stamped_transform, transform_message);
+    publisher_transforms_.msg_.transforms[2] = transform_message;
   }
   {
     std::lock_guard<realtime_tools::RealtimePublisher<geometry_msgs::WrenchStamped>> lock(
@@ -320,6 +326,10 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
 
     static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.F_T_EE),
                   "Robot state transforms do not have same size");
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.F_T_NE),
+                  "Robot state transforms do not have same size");
+    static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.NE_T_EE),
+                  "Robot state transforms do not have same size");
     static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.EE_T_K),
                   "Robot state transforms do not have same size");
     static_assert(sizeof(robot_state_.O_T_EE) == sizeof(robot_state_.O_T_EE_d),
@@ -329,6 +339,8 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
     for (size_t i = 0; i < robot_state_.O_T_EE.size(); i++) {
       publisher_franka_states_.msg_.O_T_EE[i] = robot_state_.O_T_EE[i];
       publisher_franka_states_.msg_.F_T_EE[i] = robot_state_.F_T_EE[i];
+      publisher_franka_states_.msg_.F_T_NE[i] = robot_state_.F_T_NE[i];
+      publisher_franka_states_.msg_.NE_T_EE[i] = robot_state_.NE_T_EE[i];
       publisher_franka_states_.msg_.EE_T_K[i] = robot_state_.EE_T_K[i];
       publisher_franka_states_.msg_.O_T_EE_d[i] = robot_state_.O_T_EE_d[i];
       publisher_franka_states_.msg_.O_T_EE_c[i] = robot_state_.O_T_EE_c[i];
@@ -429,15 +441,21 @@ void FrankaStateController::publishJointStates(const ros::Time& time) {
 
 void FrankaStateController::publishTransforms(const ros::Time& time) {
   if (publisher_transforms_.trylock()) {
-    tf::StampedTransform stamped_transform(convertArrayToTf(robot_state_.F_T_EE), time,
-                                           arm_id_ + "_link8", arm_id_ + "_EE");
+    tf::StampedTransform stamped_transform(convertArrayToTf(robot_state_.F_T_NE), time,
+                                           arm_id_ + "_link8", arm_id_ + "_NE");
     geometry_msgs::TransformStamped transform_message;
     transformStampedTFToMsg(stamped_transform, transform_message);
     publisher_transforms_.msg_.transforms[0] = transform_message;
+
+    stamped_transform = tf::StampedTransform(convertArrayToTf(robot_state_.NE_T_EE), time,
+                                             arm_id_ + "_NE", arm_id_ + "_EE");
+    transformStampedTFToMsg(stamped_transform, transform_message);
+    publisher_transforms_.msg_.transforms[1] = transform_message;
+
     stamped_transform = tf::StampedTransform(convertArrayToTf(robot_state_.EE_T_K), time,
                                              arm_id_ + "_EE", arm_id_ + "_K");
     transformStampedTFToMsg(stamped_transform, transform_message);
-    publisher_transforms_.msg_.transforms[1] = transform_message;
+    publisher_transforms_.msg_.transforms[2] = transform_message;
     publisher_transforms_.unlockAndPublish();
   }
 }
