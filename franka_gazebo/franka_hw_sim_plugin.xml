@@ -1,0 +1,12 @@
+<library path="lib/libfranka_hw_sim">
+
+  <class
+      name="franka_gazebo/FrankaHWSim"
+      type="franka_gazebo::FrankaHWSim"
+      base_class_type="gazebo_ros_control::RobotHWSim">
+      <description>
+          A custom implementation of a gazebo_ros_control plugin, which is able to simulate franka interfaces in Gazebo.
+      </description>
+  </class>
+
+</library>

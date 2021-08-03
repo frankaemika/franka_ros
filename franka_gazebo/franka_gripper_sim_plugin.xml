@@ -1,0 +1,12 @@
+<library path="lib/libfranka_gripper_sim">
+
+  <class
+      name="franka_gazebo/FrankaGripperSim"
+      type="franka_gazebo::FrankaGripperSim"
+      base_class_type="controller_interface::ControllerBase">
+      <description>
+          A controller that controls two finger joints of the a panda hand and offers a similar action interface to franka_gripper
+      </description>
+  </class>
+
+</library>

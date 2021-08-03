@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="panda">
+  <!-- =============================================================== -->
+  <!-- || This file does not contain official inertial properties   || -->
+  <!-- || of panda robot. The values are from the identification    || -->
+  <!-- || results published in: Identification of the Franka Emika  || -->
+  <!-- || PandaRobot With Retrieval of Feasible Parameters Using    || -->
+  <!-- || Penalty-Based Optimization                                || -->
+  <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,         || -->
+  <!-- || Paolo Robuffo Giordano,Alessandro de Lucaa third-party    || -->
+  <!-- =============================================================== -->
+  <link name="world"/>
+  <joint name="panda_joint_panda_mount" type="fixed">
+    <parent link="panda_mount"/>
+    <child link="panda_link0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+  <link name="panda_link0">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-0.0410181918537986 -0.000143266349590146 0.0499742749991159"/>
+      <mass value="0.629769273993887"/>
+      <inertia ixx="0.0031531502307724" ixy="8.29043977620386E-07" ixz="0.000153878135879635" iyy="0.00388160500528917" iyz="8.22996985150111E-06" izz="0.00428506837339653"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link0.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link0.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="panda_link1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0.003875 0.002081 -0.04762"/>
+      <mass value="4.970684"/>
+      <inertia ixx="0.70337" ixy="-0.00013900" ixz="0.0067720" iyy="0.70661" iyz="0.019169" izz="0.0091170"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link1.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link1.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint1" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="0 0 0" xyz="0 0 0.333"/>
+    <parent link="panda_link0"/>
+    <child link="panda_link1"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="15" effort="87" lower="-2.9671" upper="2.9671" velocity="2.5"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link2">
+    <inertial>
+      <origin rpy="0 0 0" xyz=" -0.003141 -0.02872  0.003495"/>
+      <mass value="0.646926"/>
+      <inertia ixx="0.0079620" ixy="-3.9250e-3" ixz="1.0254e-02" iyy="2.8110e-02" iyz="7.0400e-04" izz="2.5995e-02"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link2.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link2.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint2" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
+    <origin rpy="-1.57079632679 0 0" xyz="0 0 0"/>
+    <parent link="panda_link1"/>
+    <child link="panda_link2"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="7.5" effort="87" lower="-1.8326" upper="1.8326" velocity="2.5"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link3">
+    <inertial>
+      <origin rpy="0 0 0" xyz="2.7518e-02 3.9252e-02 -6.6502e-02"/>
+      <mass value="3.228604"/>
+      <inertia ixx="3.7242e-02" ixy="-4.7610e-03" ixz="-1.1396e-02" iyy="3.6155e-02" iyz="-1.2805e-02" izz="1.0830e-02"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link3.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link3.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint3" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="1.57079632679 0 0" xyz="0 -0.316 0"/>
+    <parent link="panda_link2"/>
+    <child link="panda_link3"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="12.5" effort="87" lower="-2.9671" upper="2.9671" velocity="2.5"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link4">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-5.317e-02 1.04419e-01 2.7454e-02"/>
+      <mass value="3.587895"/>
+      <inertia ixx="2.5853e-02" ixy="7.7960e-03" ixz="-1.3320e-03" iyy="1.9552e-02" iyz="8.6410e-03" izz="2.8323e-02"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link4.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link4.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint4" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
+    <origin rpy="1.57079632679 0 0" xyz="0.0825 0 0"/>
+    <parent link="panda_link3"/>
+    <child link="panda_link4"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="12.5" effort="87" lower="-3.1416" upper="-0.4" velocity="2.5"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link5">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-1.1953e-02 4.1065e-02 -3.8437e-02"/>
+      <mass value="1.225946"/>
+      <inertia ixx="3.5549e-02" ixy="-2.1170e-03" ixz="-4.0370e-03" iyy="2.9474e-02" iyz="2.2900e-04" izz="8.6270e-03"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link5.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link5.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint5" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="-1.57079632679 0 0" xyz="-0.0825 0.384 0"/>
+    <parent link="panda_link4"/>
+    <child link="panda_link5"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="15" effort="12" lower="-2.9671" upper="2.9671" velocity="3"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link6">
+    <inertial>
+      <origin rpy="0 0 0" xyz="6.0149e-02 -1.4117e-02 -1.0517e-02"/>
+      <mass value="1.666555"/>
+      <inertia ixx="1.9640e-03" ixy="1.0900e-04" ixz="-1.1580e-03" iyy="4.3540e-03" iyz="3.4100e-04" izz="5.4330e-03"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link6.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link6.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint6" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
+    <origin rpy="1.57079632679 0 0" xyz="0 0 0"/>
+    <parent link="panda_link5"/>
+    <child link="panda_link6"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="20" effort="12" lower="-0.0873" upper="3.8223" velocity="3"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link7">
+    <inertial>
+      <origin rpy="0 0 0" xyz="1.0517e-02 -4.252e-03 6.1597e-02"/>
+      <mass value="7.35522e-01"/>
+      <inertia ixx="1.2516e-02" ixy="-4.2800e-04" ixz="-1.1960e-03" iyy="1.0027e-02" iyz="-7.4100e-04" izz="4.8150e-03"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/visual/link7.dae"/>
+      </geometry>
+      <material name="">
+        <color rgba="1 1 1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="package://franka_description/meshes/collision/link7.stl"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_joint7" type="revolute">
+    <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
+    <origin rpy="1.57079632679 0 0" xyz="0.088 0 0"/>
+    <parent link="panda_link6"/>
+    <child link="panda_link7"/>
+    <axis xyz="0 0 1"/>
+    <limit acceleration="20" effort="12" lower="-2.9671" upper="2.9671" velocity="3"/>
+    <dynamics D="1" K="7000" damping="0.003" friction="0.06" mu_coulomb="0" mu_viscous="16"/>
+  </joint>
+  <link name="panda_link8">
+    <inertial>
+      <mass value="1e-10"/>
+      <inertia ixx="1e-10" ixy="0.0" ixz="0.0" iyy="1e-10" iyz="0.0" izz="1e-10"/>
+    </inertial>
+  </link>
+  <joint name="panda_joint8" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.107"/>
+    <parent link="panda_link7"/>
+    <child link="panda_link8"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <gazebo reference="panda_joint1">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint2">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint3">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint4">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint5">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint6">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_joint7">
+    <implicitSpringDamper>true</implicitSpringDamper>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="panda_link1">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link2">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link3">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link4">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link5">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link6">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <gazebo reference="panda_link7">
+    <dampingFactor>0.01</dampingFactor>
+  </gazebo>
+  <transmission name="panda_joint1_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint1">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint1_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint2_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint2">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint2_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint3_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint3">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint3_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint4_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint4">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint4_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint5_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint5">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint5_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint6_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint6">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint6_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_joint7_transmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="panda_joint7">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint7_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_franka_state">
+    <type>franka_hw/FrankaStateInterface</type>
+    <joint name="panda_joint1">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint2">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint3">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint4">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint5">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint6">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint7">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_motor1">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor2">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor3">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor4">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor5">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor6">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_motor7">
+      <hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <transmission name="panda_franka_model">
+    <type>franka_hw/FrankaModelInterface</type>
+    <joint name="panda_joint1">
+      <role>root</role>
+      <hardwareInterface>franka_hw/FrankaModelInterface</hardwareInterface>
+    </joint>
+    <joint name="panda_joint8">
+      <role>tip</role>
+      <hardwareInterface>franka_hw/FrankaModelInterface</hardwareInterface>
+    </joint>
+    <actuator name="panda_joint1_motor_root">
+      <hardwareInterface>franka_hw/FrankaModelInterface</hardwareInterface>
+    </actuator>
+    <actuator name="panda_joint8_motor_tip">
+      <hardwareInterface>franka_hw/FrankaModelInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <link name="panda_mount">
+    <visual>
+      <origin xyz="0 0 0.0"/>
+      <geometry>
+        <cylinder length="0" radius="0.2"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0"/>
+      <geometry>
+        <cylinder length="0" radius="0.2"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="panda_mount_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="world"/>
+    <child link="panda_mount"/>
+  </joint>
+  <gazebo>
+    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
+      <robotNamespace>panda</robotNamespace>
+      <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
+    </plugin>
+  </gazebo>
+</robot>
