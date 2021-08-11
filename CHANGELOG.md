@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.x - UNRELEASED
+
+* Add `joint_state_desired` publisher to `franka_gazebo`
+
 ## 0.8.1 - 2021-09-08
 
 Requires `libfranka` >= 0.8.0
