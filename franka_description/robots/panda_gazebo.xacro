@@ -288,9 +288,8 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0.0 0 0.0375" rpy="0 ${pi/2} ${pi/2}"/>
         <geometry>
-          <box size="0.055 0.04 0.198"  />
+          <mesh filename="package://franka_description/meshes/collision/hand.stl" />
         </geometry>
       </collision>
       <inertial>
@@ -310,15 +309,8 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0.015 0.03" rpy="0 0 0"/>
         <geometry>
-          <box size="0.03 0.005 0.047" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.007 0.045" rpy="0 0 0"/>
-        <geometry>
-          <box size="0.03 0.015 0.017" />
+          <mesh filename="package://franka_description/meshes/collision/finger.stl" />
         </geometry>
       </collision>
     </link>
@@ -332,15 +324,9 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 -0.015 0.03" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
         <geometry>
-          <box size="0.03 0.005 0.047" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 -0.007 0.045" rpy="0 0 0"/>
-        <geometry>
-          <box size="0.03 0.015 0.017" />
+          <mesh filename="package://franka_description/meshes/collision/finger.stl" />
         </geometry>
       </collision>
     </link>
