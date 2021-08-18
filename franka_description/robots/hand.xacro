@@ -16,39 +16,21 @@
         </geometry>
       </visual>
       <collision>
-        <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.04+safety_distance}" length="0.1" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 -0.05 0.04" rpy="0 0 0"/>
+        <origin xyz="0 0.065 0.027" rpy="0 0 0"/>
         <geometry>
           <sphere radius="${0.04+safety_distance}"  />
         </geometry>
       </collision>
       <collision>
-        <origin xyz="0 0.05 0.04" rpy="0 0 0"/>
+        <origin xyz="0 0 0.027" rpy="0 ${pi/2} ${pi/2}"/>
+        <geometry>
+          <cylinder radius="${0.04+safety_distance}" length="0.135" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 -0.065 0.027" rpy="0 0 0"/>
         <geometry>
           <sphere radius="${0.04+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.1" rpy="0 ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.02+safety_distance}" length="0.1" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 -0.05 0.1" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.02+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.05 0.1" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.02+safety_distance}"  />
         </geometry>
       </collision>
     </link>
@@ -58,6 +40,24 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
+      <collision>
+        <origin xyz="0 0.0184 0.0101" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.014+safety_distance} ${0.0177+safety_distance}" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0.01655 0.02755" rpy="${3.257/(2*pi)} 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.00686+safety_distance} 0.0237" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0.0073 0.045" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.0147+safety_distance} ${0.0178+safety_distance}" />
+        </geometry>
+      </collision>
     </link>
     <link name="${ns}_rightfinger">
       <visual>
@@ -66,7 +66,25 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
-   </link>
+      <collision>
+        <origin xyz="0 -0.0184 0.0101" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.014+safety_distance} ${0.0177+safety_distance}" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 -0.01655 0.02755" rpy="${-3.257/(2*pi)} 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.00686+safety_distance} 0.0237" />
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 -0.0073 0.045" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.022+safety_distance} ${0.0147+safety_distance} ${0.0178+safety_distance}" />
+        </geometry>
+      </collision>
+    </link>
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
       <child link="${ns}_leftfinger"/>
