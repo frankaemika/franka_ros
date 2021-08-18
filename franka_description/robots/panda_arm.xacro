@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- arm_id: Namespace of the panda arm. Serves to differentiate between arms in case of multiple instances. -->
-  <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0">
+  <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0 use_collision_mesh:=false">
     <xacro:unless value="${not connected_to}">
       <joint name="${arm_id}_joint_${connected_to}" type="fixed">
         <parent link="${connected_to}"/>
@@ -16,24 +16,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link0.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="-0.075 0 0.06" rpy="0 ${pi/2} 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.03" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="-0.06 0 0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="-0.09 0 0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link0.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="-0.075 0 0.06" rpy="0 ${pi/2} 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.03" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.06 0 0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="-0.09 0 0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <link name="${arm_id}_link1">
       <visual>
@@ -41,24 +52,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link1.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 -0.1915" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.2830" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.333" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.05" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link1.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 -0.1915" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.2830" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.333" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.05" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint1" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -74,24 +96,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link2.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.12" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link2.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.12" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint2" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
@@ -107,24 +140,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link3.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 -0.145" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.15" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.22" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.07" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link3.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 -0.145" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.15" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.22" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.07" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint3" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -140,24 +184,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link4.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.12" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link4.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.12" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint4" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
@@ -173,42 +228,53 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link5.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 -0.26" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.06+safety_distance}" length="0.1" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.31" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.21" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.06+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.08 -0.13" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.025+safety_distance}" length="0.14" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.08 -0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.025+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.08 -0.20" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.025+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link5.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 -0.26" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.06+safety_distance}" length="0.1" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.31" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.21" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.06+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.08 -0.13" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.025+safety_distance}" length="0.14" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.08 -0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.025+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.08 -0.20" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.025+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
 
     </link>
     <joint name="${arm_id}_joint5" type="revolute">
@@ -225,24 +291,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link6.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 -0.03" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.05+safety_distance}" length="0.08" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.01" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.05+safety_distance}" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.07" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.05+safety_distance}" />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link6.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 -0.03" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.05+safety_distance}" length="0.08" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 0.01" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.05+safety_distance}" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.07" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.05+safety_distance}" />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint6" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
@@ -258,24 +335,35 @@
           <mesh filename="package://${description_pkg}/meshes/visual/link7.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 0.01" rpy="0 0 0"/>
-        <geometry>
-          <cylinder radius="${0.04+safety_distance}" length="0.14" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.08" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.04+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 -0.06" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.04+safety_distance}"  />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/link7.stl"/>
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 0.01" rpy="0 0 0"/>
+          <geometry>
+            <cylinder radius="${0.04+safety_distance}" length="0.14" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 0.08" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.04+safety_distance}"  />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.04+safety_distance}"  />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint7" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
@@ -286,24 +374,26 @@
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
     </joint>
     <link name="${arm_id}_link8">
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.0250" rpy="${pi} ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.03+safety_distance}"  length="0.01" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.02" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.03+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.03" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.03+safety_distance}"  />
-        </geometry>
-      </collision>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0.0424 0.0424 -0.0250" rpy="${pi} ${pi/2} ${pi/2}"/>
+          <geometry>
+            <cylinder radius="${0.03+safety_distance}"  length="0.01" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.0424 0.0424 -0.02" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.03+safety_distance}"  />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0.0424 0.0424 -0.03" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.03+safety_distance}"  />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <joint name="${arm_id}_joint8" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.107"/>

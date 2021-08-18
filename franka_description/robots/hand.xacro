@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
-  <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0">
+  <xacro:macro name="hand" params="connected_to:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 use_collision_mesh:=false">
     <xacro:unless value="${connected_to == ''}">
       <joint name="${ns}_hand_joint" type="fixed">
         <parent link="${connected_to}"/>
@@ -15,42 +15,52 @@
           <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
         </geometry>
       </visual>
-      <collision>
-        <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.04+safety_distance}" length="0.1" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 -0.05 0.04" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.04+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.05 0.04" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.04+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0 0.1" rpy="0 ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.02+safety_distance}" length="0.1" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 -0.05 0.1" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.02+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0 0.05 0.1" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.02+safety_distance}"  />
-        </geometry>
-      </collision>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/hand.stl" />
+          </geometry>
+        </collision>
+      </xacro:if>
+      <xacro:unless value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
+          <geometry>
+            <cylinder radius="${0.04+safety_distance}" length="0.1" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 -0.05 0.04" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.04+safety_distance}"  />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.05 0.04" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.04+safety_distance}"  />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0 0.1" rpy="0 ${pi/2} ${pi/2}"/>
+          <geometry>
+            <cylinder radius="${0.02+safety_distance}" length="0.1" />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 -0.05 0.1" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.02+safety_distance}"  />
+          </geometry>
+        </collision>
+        <collision>
+          <origin xyz="0 0.05 0.1" rpy="0 0 0"/>
+          <geometry>
+            <sphere radius="${0.02+safety_distance}"  />
+          </geometry>
+        </collision>
+      </xacro:unless>
     </link>
     <link name="${ns}_leftfinger">
       <visual>
@@ -58,6 +68,14 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/finger.stl" />
+          </geometry>
+        </collision>
+      </xacro:if>
     </link>
     <link name="${ns}_rightfinger">
       <visual>
@@ -66,6 +84,15 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
+
+      <xacro:if value="$(arg use_collision_mesh)">
+        <collision>
+          <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+          <geometry>
+            <mesh filename="package://franka_description/meshes/collision/finger.stl" />
+          </geometry>
+        </collision>
+      </xacro:if>
    </link>
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
