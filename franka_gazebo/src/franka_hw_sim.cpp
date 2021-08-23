@@ -107,6 +107,12 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         if (k_interface == "hardware_interface/EffortJointInterface") {
           initEffortCommandHandle(joint);
           continue;
+        } else if (k_interface == "hardware_interface/PositionJointInterface") {
+          initPositionCommandHandle(joint);
+          continue;
+        } else if (k_interface == "hardware_interface/VelocityJointInterface") {
+          initVelocityCommandHandle(joint);
+          continue;
         }
       }
 
@@ -142,6 +148,8 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   // After all handles have been assigned to interfaces, register them
   registerInterface(&this->eji_);
+  registerInterface(&this->pji_);
+  registerInterface(&this->vji_);
   registerInterface(&this->jsi_);
   registerInterface(&this->fsi_);
   registerInterface(&this->fmi_);
@@ -159,6 +167,16 @@ void FrankaHWSim::initJointStateHandle(const std::shared_ptr<franka_gazebo::Join
 
 void FrankaHWSim::initEffortCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
   this->eji_.registerHandle(
+      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+}
+
+void FrankaHWSim::initPositionCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
+  this->pji_.registerHandle(
+      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+}
+
+void FrankaHWSim::initVelocityCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
+  this->vji_.registerHandle(
       hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
 }
 

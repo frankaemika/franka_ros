@@ -12,6 +12,7 @@
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
   <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force}_example_controller)" />
+  <arg name="transmission" default="hardware_interface/EffortJointInterface" doc="Which transmission should be used for the panda joints? (One of hardware_interface/{EffortJointInterface,PositionJointInterface,VelocityJointInterface})" />
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
   <arg name="y"           default="0"     doc="How far leftwards to place the base of the robot in [m]?" />
   <arg name="z"           default="0"     doc="How far upwards to place the base of the robot in [m]?" />
@@ -42,6 +43,7 @@
                     gazebo:=true
                     hand:=$(arg use_gripper)
                     arm_id:=$(arg arm_id)
+                    transmission:=$(arg transmission)
                     xyz:='$(arg x) $(arg y) $(arg z)'
                     rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
     </param>
