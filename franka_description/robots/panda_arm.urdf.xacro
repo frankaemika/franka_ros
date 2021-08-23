@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
 
-  <!-- Name of this panda -->
-  <xacro:arg name="arm_id" default="panda" />
-  <!-- Should a franka_gripper be mounted at the flange?" -->
-  <xacro:arg name="hand" default="false" />
-  <!-- Is the robot being simulated in gazebo?" -->
-  <xacro:arg name="gazebo" default="false" />
+  <xacro:arg name="arm_id" default="panda" /> <!-- Name of this panda -->
+  <xacro:arg name="hand"   default="false" /> <!-- Should a franka_gripper be mounted at the flange?" -->
+  <xacro:arg name="gazebo" default="false" /> <!-- Is the robot being simulated in gazebo?" -->
+  <xacro:arg name="transmission" default="hardware_interface/EffortJointInterface" /> <!-- The transmission that is used in the gazebo joints -->
+
+  <xacro:property name="arm_id" value="$(arg arm_id)" />
+  <xacro:property name="transmission" value="$(arg transmission)" />
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
@@ -45,13 +46,13 @@
     </joint>
 
 
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint1" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint2" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint3" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint4" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint5" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint6" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint7" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:gazebo-joint joint="${arm_id}_joint1" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint2" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint3" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint4" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint5" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint6" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="${arm_id}_joint7" transmission="${transmission}" />
 
     <xacro:transmission-franka-state arm_id="$(arg arm_id)" />
     <xacro:transmission-franka-model arm_id="$(arg arm_id)"
