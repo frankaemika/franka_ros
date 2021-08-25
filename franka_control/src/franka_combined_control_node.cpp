@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     } else {
       ROS_INFO_THROTTLE(2,
                         "franka_combined_control_node: The HW is in error state."
-                        "To recover, call the recovery action..");
+                        "To recover, call the recovery action.");
     }
   }
 
