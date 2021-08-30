@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<launch>
+  <arg name="robot_ip" />
+  <arg name="stop_at_shutdown" default="false" />
+  <arg name="arm_id"      default="panda" />
+
+  <node name="franka_vacuum_gripper" pkg="franka_vacuum_gripper" type="franka_vacuum_gripper_node" output="screen">
+    <param name="robot_ip" value="$(arg robot_ip)"/>
+    <param name="stop_at_shutdown" value="$(arg stop_at_shutdown)" />
+    <rosparam command="load" file="$(find franka_vacuum_gripper)/config/franka_vacuum_gripper_node.yaml" />
+  </node>
+
+</launch>

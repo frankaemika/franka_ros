@@ -1,0 +1,5 @@
+int8 timeout
+---
+bool success
+string error
+---

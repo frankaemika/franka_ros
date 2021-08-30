@@ -1,0 +1,6 @@
+int8 vacuum # [10 mbar]
+int8 timeout # [ms]
+---
+bool success
+string error
+---
