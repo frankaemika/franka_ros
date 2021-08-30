@@ -3,12 +3,13 @@
   <name>franka_vacuum_gripper</name>
   <version>0.8.0</version>
   <description>This package implements the Schmalz cobot vacuum pump for the use in ros</description>
-  <maintainer email="s.d.bonhof@gmail.com">Stefan Bonhof</maintainer>
+  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
 
-  <url type="repository">https://github.com/SDBonhof/franka_vacuum_gripper</url>
-  <url type="bugtracker">https://github.com/SDBonhof/franka_vacuum_gripper/issues</url>
-  <author>Stefan Bonhof</author>
+  <url type="website">http://wiki.ros.org/franka_gripper</url>
+  <url type="repository">https://github.com/frankaemika/franka_ros</url>
+  <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
+  <author>Franka Emika GmbH</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
