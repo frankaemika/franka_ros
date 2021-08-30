@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
     if (!franka_control.hasError()) {
       franka_control.write(now, period);
     } else {
-      ROS_INFO_THROTTLE(2,
-                        "franka_combined_control_node: The HW is in error state."
-                        "To recover, call the recovery action.");
+      ROS_DEBUG_THROTTLE(5,
+                         "franka_combined_control_node: The HW is in error state."
+                         "To recover, call the recovery action.");
     }
   }
 
