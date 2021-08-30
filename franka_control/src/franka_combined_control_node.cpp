@@ -38,8 +38,8 @@ int main(int argc, char** argv) {
     rate.sleep();
     ros::Time now = ros::Time::now();
     franka_control.read(now, period);
+    cm.update(now, period, franka_control.controllerNeedsReset());
     if (!franka_control.hasError()) {
-      cm.update(now, period, franka_control.controllerNeedsReset());
       franka_control.write(now, period);
     } else {
       ROS_INFO_THROTTLE(2,
