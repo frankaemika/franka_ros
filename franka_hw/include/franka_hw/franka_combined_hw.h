@@ -61,7 +61,7 @@ class FrankaCombinedHW : public combined_robot_hw::CombinedRobotHW {
   bool disconnect();
 
   /**
-   * Checks whether on the robots is in error or reflex mode.
+   * Checks whether the robots are in error or reflex mode.
    * @return true if in error state, false otherwise.
    */
   bool hasError();
