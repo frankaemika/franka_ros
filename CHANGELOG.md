@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.8.1 - 2021-09-08
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_hw`:
+    - Add `bool hasError()` member function to `FrankaCombinableHW`
+    - Only execute controller update in `franka_combined_control_node` when not in error state
+    - Reset command buffer upon recover in `FrankaCombinableHW`
+
 ## 0.8.0 - 2021-08-03
 
 Requires `libfranka` >= 0.8.0
