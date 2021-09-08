@@ -86,8 +86,10 @@ void FrankaCombinableHW::controlLoop() {
 
     // Reset commands
     {
-      std::lock_guard<std::mutex> command_lock(libfranka_cmd_mutex_);
+      std::lock_guard<std::mutex> libfranka_command_lock(libfranka_cmd_mutex_);
+      std::lock_guard<std::mutex> ros_command_lock(ros_cmd_mutex_);
       effort_joint_command_libfranka_ = franka::Torques({0., 0., 0., 0., 0., 0., 0.});
+      effort_joint_command_ros_ = franka::Torques({0., 0., 0., 0., 0., 0., 0.});
     }
 
     try {

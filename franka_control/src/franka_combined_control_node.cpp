@@ -39,7 +39,13 @@ int main(int argc, char** argv) {
     ros::Time now = ros::Time::now();
     franka_control.read(now, period);
     cm.update(now, period, franka_control.controllerNeedsReset());
-    franka_control.write(now, period);
+    if (!franka_control.hasError()) {
+      franka_control.write(now, period);
+    } else {
+      ROS_DEBUG_THROTTLE(5,
+                         "franka_combined_control_node: The HW is in error state."
+                         "To recover, call the recovery action.");
+    }
   }
 
   return 0;
