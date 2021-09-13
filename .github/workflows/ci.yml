@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+    - kinetic-devel
+    - melodic-devel
+    - noetic-devel
+    - develop
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ros_distro: [ kinetic, melodic, noetic ]
+    steps:
+    - name: Prepare
+      # Keep the compilation outputs persitant outside the docker container to use for the other steps
+      run: |
+        mkdir -p ${{github.workspace}}/src       # where the repo will be cloned into
+        mkdir -p ${{github.workspace}}/build     # compilation cache for formatter & linter
+        mkdir -p ${{github.workspace}}/devel     # compilation cache for formatter & linter
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: src/franka_ros
+
+    - name: Parse ROS Distro
+      run:  echo "FLAVOR=$(echo ${{ github.event.pull_request.base.ref }} | sed 's/-devel//')" >> $GITHUB_ENV
+
+    - name: Build Docker Image
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: docker/build-push-action@v2
+      with:
+        tags: franka_ros:${{matrix.ros_distro}}
+        file: .ci/Dockerfile.${{matrix.ros_distro}}
+        push: false
+
+    - name: Compile with Catkin Tools
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}/src:/ros/src/  # only mount source here
+        run: |
+          catkin config --workspace /ros/ --init --extend /opt/ros/${{matrix.ros_distro}} --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          catkin build --workspace /ros/ --interleave-output --verbose
+
+    - name: Compile with Catkin Make
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros
+        shell:    bash
+        run: |
+          source /opt/ros/${{matrix.ros_distro}}/setup.bash
+          catkin_init_workspace /ros/src
+          cd /ros
+          catkin_make -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Check Format
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cmake --build /ros/build --target check-format
+
+    - name: Check Linting
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cmake --build /ros/build --target check-format
+
+    - name: Run Tests
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cd /ros
+          catkin_make run_tests
+
+    - name: Upload Tests to Artifacts
+      uses: actions/upload-artifact@v2
+      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      with:
+        name: test-results
+        path: build/test_results/*/rosunit-*.xml
