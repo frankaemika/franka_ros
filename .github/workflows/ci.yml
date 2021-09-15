@@ -97,6 +97,7 @@ jobs:
           source /ros/devel/setup.bash
           cd /ros
           catkin_make run_tests
+          catkin_test_results
 
     - name: Upload Tests to Artifacts
       uses: actions/upload-artifact@v2
