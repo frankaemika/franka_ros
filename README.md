@@ -1,6 +1,7 @@
 # ROS integration for Franka Emika research robots
 
-[![Build](https://github.com/frankaemika/franka_ros/actions/workflows/ci.yml/badge.svg)](https://github.com/gollth/franka_ros/actions)
+[![CI](https://github.com/frankaemika/franka_ros/actions/workflows/ci.yml/badge.svg)](https://github.com/frankaemika/franka_ros/actions/workflows/ci.yml)
+
 
 See the [Franka Control Interface (FCI) documentation][fci-docs] for more information.
 
