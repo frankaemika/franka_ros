@@ -421,19 +421,33 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
 }
 
 void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoalConstPtr& goal) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Gripper Command Action Goal received: "
-                                                << goal->command.max_effort << "N");
+  ROS_INFO_STREAM_NAMED("FrankaGripperSim",
+                        "New Gripper Command Action Goal received: "
+                            << goal->command.position * 2.0 << "m, " << goal->command.max_effort
+                            << "N");
+
+  control_msgs::GripperCommandResult result;
 
   // HACK: As one gripper finger is <mimic>, MoveIt!'s trajectory execution manager
   // only sends us the width of one finger. Multiply by 2 to get the intended width.
   double width = this->finger1_.getPosition() + this->finger2_.getPosition();
+  double width_d = goal->command.position * 2.0;
+
+  if (width_d > kMaxFingerWidth || width_d < 0.0) {
+    ROS_ERROR_STREAM_NAMED("FrankaGripperSim", "Commanding out of range width! max_width = "
+                                                   << kMaxFingerWidth << " command = " << width_d);
+    std::string error = "Commanding out of range width";
+    result.reached_goal = static_cast<decltype(result.reached_goal)>(false);
+    action_gc_->setAborted(result, error);
+    return;
+  }
 
   franka_gripper::GraspEpsilon eps;
   eps.inner = this->tolerance_gripper_action_;
   eps.outer = this->tolerance_gripper_action_;
 
   transition(State::GRASPING,
-             Config{.width_desired = goal->command.position * 2.0 < width ? 0 : kMaxFingerWidth,
+             Config{.width_desired = goal->command.position * 2.0,
                     .speed_desired = this->speed_default_,
                     .force_desired = goal->command.max_effort,
                     .tolerance = eps});
@@ -446,7 +460,6 @@ void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoa
     return;
   }
 
-  control_msgs::GripperCommandResult result;
   if (this->state_ != State::HOLDING) {
     result.reached_goal = static_cast<decltype(result.reached_goal)>(false);
     std::string error = "Unexpected state transistion: The gripper not in HOLDING as expected";
@@ -454,7 +467,6 @@ void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoa
     return;
   }
 
-  double width_d = goal->command.position * 2.0;
   width = this->finger1_.getPosition() + this->finger2_.getPosition();  // recalculate
   bool inside_tolerance = width_d - this->tolerance_gripper_action_ < width and
                           width < width_d + this->tolerance_gripper_action_;
