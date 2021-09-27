@@ -63,7 +63,6 @@ node {
 }
 
 parallel(
-  'kinetic': getStages('kinetic', 'xenial'),
   'melodic': getStages('melodic', 'bionic'),
   'noetic': getStages('noetic', 'focal'),
 )

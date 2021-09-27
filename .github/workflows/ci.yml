@@ -7,7 +7,6 @@ on:
 
   pull_request:
     branches:
-    - kinetic-devel
     - melodic-devel
     - noetic-devel
     - develop
@@ -17,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ros_distro: [ kinetic, melodic, noetic ]
+        ros_distro: [ melodic, noetic ]
     steps:
     - name: Prepare
       # Keep the compilation outputs persitant outside the docker container to use for the other steps
