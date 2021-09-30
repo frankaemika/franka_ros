@@ -26,10 +26,15 @@ class ModelKDL : public franka_hw::ModelBase {
    * @param[in] model the URDF from which to interprete the kinematic chain
    * @param[in] root the link name of the root of the chain
    * @param[in] tip the link name of the tip of the chain
+   * @param[in] singularity_threshold below which lowest singular value of SVD(J x J^T)
+   *            a warning should be printed. Use -1 to disable.
    *
    * @throws std::invalid_argument when either `root` or `tip` cannot be found in the URDF
    */
-  ModelKDL(const urdf::Model& model, const std::string& root, const std::string& tip);
+  ModelKDL(const urdf::Model& model,
+           const std::string& root,
+           const std::string& tip,
+           double singularity_threshold = -1);
 
   /**
    * Gets the 4x4 pose matrix for the given frame in base frame.
@@ -185,8 +190,10 @@ class ModelKDL : public franka_hw::ModelBase {
  private:
   static int segment(franka::Frame frame);
   static std::string strError(const int error);
+  bool isCloseToSingularity(const KDL::Jacobian& jacobian) const;
 
   KDL::Chain chain_;
+  double singularity_threshold_;
 };
 
 }  // namespace franka_gazebo

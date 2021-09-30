@@ -126,8 +126,10 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       if (transmission.type_ == "franka_hw/FrankaModelInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
+        double singularity_threshold;
+        model_nh.param<double>("singularity_warning_threshold", singularity_threshold, -1);
         try {
-          initFrankaModelHandle(this->arm_id_, *urdf, transmission);
+          initFrankaModelHandle(this->arm_id_, *urdf, transmission, singularity_threshold);
           continue;
 
         } catch (const std::invalid_argument& e) {
@@ -189,7 +191,8 @@ void FrankaHWSim::initFrankaStateHandle(
 void FrankaHWSim::initFrankaModelHandle(
     const std::string& robot,
     const urdf::Model& urdf,
-    const transmission_interface::TransmissionInfo& transmission) {
+    const transmission_interface::TransmissionInfo& transmission,
+    double singularity_threshold) {
   if (transmission.joints_.size() != 2) {
     throw std::invalid_argument(
         "Cannot create franka_hw/FrankaModelInterface for robot '" + robot + "_model' because " +
@@ -226,7 +229,8 @@ void FrankaHWSim::initFrankaModelHandle(
     auto root_link = urdf.getJoint(root->name_)->parent_link_name;
     auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
 
-    this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
+    this->model_ =
+        std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link, singularity_threshold);
 
   } catch (const std::invalid_argument& e) {
     throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
