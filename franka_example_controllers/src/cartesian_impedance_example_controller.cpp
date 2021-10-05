@@ -184,7 +184,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d(i));
   }
-  
+
   // update parameters changed online either through dynamic reconfigure or through the interactive
   // target by filtering
   cartesian_stiffness_ =
@@ -193,9 +193,9 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       filter_params_ * cartesian_damping_target_ + (1.0 - filter_params_) * cartesian_damping_;
   nullspace_stiffness_ =
       filter_params_ * nullspace_stiffness_target_ + (1.0 - filter_params_) * nullspace_stiffness_;
-  std::lock_guard<std::mutex> position_d_target_mutex_lock(position_d_target_mutex_);
+  std::lock_guard<std::mutex> position_d_target_mutex_lock(
+      position_and_orientation_d_target_mutex_);
   position_d_ = filter_params_ * position_d_target_ + (1.0 - filter_params_) * position_d_;
-  std::lock_guard<std::mutex> orientation_d_target_mutex_lock(orientation_d_target_mutex_);
   orientation_d_ = orientation_d_.slerp(filter_params_, orientation_d_target_);
 }
 
@@ -230,9 +230,9 @@ void CartesianImpedanceExampleController::complianceParamCallback(
 
 void CartesianImpedanceExampleController::equilibriumPoseCallback(
     const geometry_msgs::PoseStampedConstPtr& msg) {
-  std::lock_guard<std::mutex> position_d_target_mutex_lock(position_d_target_mutex_);
+  std::lock_guard<std::mutex> position_d_target_mutex_lock(
+      position_and_orientation_d_target_mutex_);
   position_d_target_ << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
-  std::lock_guard<std::mutex> orientation_d_target_mutex_lock(orientation_d_target_mutex_);
   Eigen::Quaterniond last_orientation_d_target(orientation_d_target_);
   orientation_d_target_.coeffs() << msg->pose.orientation.x, msg->pose.orientation.y,
       msg->pose.orientation.z, msg->pose.orientation.w;

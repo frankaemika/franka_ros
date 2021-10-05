@@ -3,9 +3,9 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <mutex>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <dynamic_reconfigure/server.h>
@@ -52,9 +52,8 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   Eigen::Matrix<double, 7, 1> q_d_nullspace_;
   Eigen::Vector3d position_d_;
   Eigen::Quaterniond orientation_d_;
-  std::mutex position_d_target_mutex_;
+  std::mutex position_and_orientation_d_target_mutex_;
   Eigen::Vector3d position_d_target_;
-  std::mutex orientation_d_target_mutex_;
   Eigen::Quaterniond orientation_d_target_;
 
   // Dynamic reconfigure
