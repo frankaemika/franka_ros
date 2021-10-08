@@ -41,6 +41,11 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
 
+  // Retrieve initial gravity vector from Gazebo
+  // NOTE: Can be overwritten by the user via the 'gravity_vector' ROS parameter.
+  auto gravity = physics->World()->Gravity();
+  this->gravity_earth_ = {gravity.X(), gravity.Y(), gravity.Z()};
+
   // Generate a list of franka_gazebo::Joint to store all relevant information
   for (const auto& transmission : transmissions) {
     if (transmission.type_ != "transmission_interface/SimpleTransmission") {
@@ -200,7 +205,7 @@ void FrankaHWSim::initFrankaModelHandle(
         " joints were found beneath the <transmission> tag, but 2 are required.");
   }
 
-  for (auto& joint : transmission.joints_) {
+  for (const auto& joint : transmission.joints_) {
     if (not urdf.getJoint(joint.name_)) {
       if (not urdf.getJoint(joint.name_)) {
         throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
@@ -307,7 +312,7 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
 }
 
 void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
-  auto g = this->model_->gravity(this->robot_state_);
+  auto g = this->model_->gravity(this->robot_state_, this->gravity_earth_);
 
   for (auto& pair : this->joints_) {
     auto joint = pair.second;
@@ -352,6 +357,11 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
     std::string EE_T_K;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
     this->robot_state_.EE_T_K = readArray<16>(EE_T_K, "EE_T_K");
+
+    std::string gravity_vector;
+    if (nh.getParam("gravity_vector", gravity_vector)) {
+      this->gravity_earth_ = readArray<3>(gravity_vector, "gravity_vector");
+    }
 
     // Only nominal cases supported for now
     std::vector<double> lower_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
