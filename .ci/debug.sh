@@ -18,4 +18,5 @@ cmake --build . --target tests
 ctest -V
 
 cmake --build . --target check-format
+cmake --build . --target check-pyformat
 cmake --build . --target check-tidy

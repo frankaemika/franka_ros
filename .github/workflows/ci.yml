@@ -74,6 +74,7 @@ jobs:
         run: |
           source /ros/devel/setup.bash
           cmake --build /ros/build --target check-format
+          cmake --build /ros/build --target check-pyformat
 
     - name: Check Linting
       if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
@@ -84,7 +85,7 @@ jobs:
         shell:    bash
         run: |
           source /ros/devel/setup.bash
-          cmake --build /ros/build --target check-format
+          cmake --build /ros/build --target check-tidy
 
     - name: Run Tests
       if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}

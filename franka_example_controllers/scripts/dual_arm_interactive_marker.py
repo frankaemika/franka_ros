@@ -82,7 +82,8 @@ def right_franka_state_callback(msg):
 
 def centering_pose_callback(msg):
     """
-    This callback function sets the marker pose to the current centering pose from a subscribed topic.
+    This callback function sets the marker pose to the current centering pose from a subscribed
+    topic.
     :return: None
     """
     global centering_frame_ready
@@ -116,7 +117,8 @@ def reset_marker_pose_blocking():
 
 def process_feedback(feedback):
     """
-    This callback function clips the marker_pose inside a predefined box to prevent misuse of the marker.
+    This callback function clips the marker_pose inside a predefined box to prevent misuse of the
+    marker.
     :param feedback: feedback data of interactive marker
     :return: None
     """
@@ -148,10 +150,10 @@ if __name__ == "__main__":
 
     # Initialize subscribers for error states of the arms
     left_state_sub = rospy.Subscriber(left_arm_id + "_state_controller/franka_states",
-                                 FrankaState, left_franka_state_callback)
+                                      FrankaState, left_franka_state_callback)
 
     right_state_sub = rospy.Subscriber(right_arm_id + "_state_controller/franka_states",
-                                 FrankaState, right_franka_state_callback)
+                                       FrankaState, right_franka_state_callback)
 
     # Set marker pose to be the current "middle pose" of both EEs
     reset_marker_pose_blocking()
