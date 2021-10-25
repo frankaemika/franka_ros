@@ -1,9 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="panda">
 
-  <xacro:arg name="arm_id" default="panda" /> <!-- Name of this panda -->
-  <xacro:arg name="hand"   default="false" /> <!-- Should a franka_gripper be mounted at the flange?" -->
-  <xacro:arg name="gazebo" default="false" /> <!-- Is the robot being simulated in gazebo?" -->
+  <!-- Name of this panda -->
+  <xacro:arg name="arm_id" default="panda" />
+  <!-- Should a franka_gripper be mounted at the flange?" -->
+  <xacro:arg name="hand" default="false" />
+  <!-- Is the robot being simulated in gazebo?" -->
+  <xacro:arg name="gazebo" default="false" />
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
