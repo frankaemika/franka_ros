@@ -43,6 +43,7 @@
                     gazebo:=true
                     hand:=$(arg use_gripper)
                     arm_id:=$(arg arm_id)
+                    ns:=$(arg arm_id)
                     xyz:='$(arg x) $(arg y) $(arg z)'
                     rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
     </param>

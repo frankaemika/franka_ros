@@ -7,6 +7,8 @@
   <xacro:arg name="hand" default="false" />
   <!-- Is the robot being simulated in gazebo?" -->
   <xacro:arg name="gazebo" default="false" />
+  <!-- Namespace of robot in Gazebo/ROS (default: empty) -->
+  <xacro:arg name="ns" default="" />
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
@@ -61,7 +63,7 @@
 
     <gazebo>
       <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>$(arg arm_id)</robotNamespace>
+        <robotNamespace>$(arg ns)</robotNamespace>
         <controlPeriod>0.001</controlPeriod>
         <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
       </plugin>
