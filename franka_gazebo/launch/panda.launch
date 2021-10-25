@@ -76,8 +76,6 @@
           args="franka_state_controller $(arg controller)"
     />
 
-    <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
-
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
       <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
@@ -95,6 +93,7 @@
           type="interactive_marker.py"
           if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
       <param name="link_name" value="$(arg arm_id)_link0" />
+      <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
     </node>
 
   </group>
