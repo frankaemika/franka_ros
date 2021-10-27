@@ -31,6 +31,7 @@
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg gazebo)">
     <arg name="world_name" value="$(arg world)"/>
+    <!-- Always start in paused mode, and only unpause when spawning the model -->
     <arg name="paused" value="true"/>
     <arg name="gui" value="$(eval not arg('headless'))"/>
     <arg name="use_sim_time" value="true"/>
@@ -51,23 +52,13 @@
 
     <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
 
+    <arg name="unpause" value="$(eval '' if arg('paused') else '-unpause')" />
     <node name="$(arg arm_id)_model_spawner"
           pkg="gazebo_ros"
           type="spawn_model"
-          if="$(arg paused)"
-          args="-param robot_description -urdf -model $(arg arm_id)
+          args="-param robot_description -urdf -model $(arg arm_id) $(arg unpause)
                 $(arg initial_joint_positions)
-                ">
-    </node>
-    <node name="$(arg arm_id)_model_spawner"
-          pkg="gazebo_ros"
-          type="spawn_model"
-          unless="$(arg paused)"
-          args="-param robot_description -urdf -model $(arg arm_id) -unpause
-                $(arg initial_joint_positions)
-                ">
-    </node>
-
+                "/>
 
     <!-- Spawn required ROS controllers -->
     <node pkg="controller_manager"
