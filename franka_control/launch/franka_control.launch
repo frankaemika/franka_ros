@@ -22,10 +22,4 @@
     <rosparam unless="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states] </rosparam>
     <param name="rate" value="30"/>
   </node>
-  <node name="joint_state_desired_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-    <rosparam if="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states_desired, franka_gripper/joint_states] </rosparam>
-    <rosparam unless="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states_desired] </rosparam>
-    <param name="rate" value="30"/>
-    <remap from="/joint_states" to="/joint_states_desired" />
-  </node>
 </launch>
