@@ -4,6 +4,7 @@ RUN apt-get update -y && apt-get install -y \
     clang-format-6.0 \
     clang-tidy-6.0 \
     pycodestyle \
+    git \
     liborocos-kdl-dev \
     python3-catkin-tools \
     ros-noetic-libfranka \
