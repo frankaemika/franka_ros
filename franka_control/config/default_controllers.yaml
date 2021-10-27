@@ -1,4 +1,4 @@
-position_joint_trajectory_controller:
+joint_trajectory_controller:
   type: position_controllers/JointTrajectoryController
   joints:
     - panda_joint1
