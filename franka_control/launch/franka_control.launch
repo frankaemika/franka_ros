@@ -5,6 +5,10 @@
 
   <param name="robot_description" command="$(find xacro)/xacro $(find franka_description)/robots/panda_arm.urdf.xacro hand:=$(arg load_gripper)" />
 
+  <!-- Remap both, arm and gripper joint states to default ROS topic joint_states -->
+  <remap from="franka_state_controller/joint_states" to="joint_states" />
+  <remap from="franka_gripper/joint_states" to="joint_states" />
+
   <include file="$(find franka_gripper)/launch/franka_gripper.launch" if="$(arg load_gripper)">
     <arg name="robot_ip" value="$(arg robot_ip)" />
   </include>
@@ -17,9 +21,4 @@
   <rosparam command="load" file="$(find franka_control)/config/default_controllers.yaml" />
   <node name="state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="franka_state_controller"/>
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
-  <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-    <rosparam if="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
-    <rosparam unless="$(arg load_gripper)" param="source_list">[franka_state_controller/joint_states] </rosparam>
-    <param name="rate" value="30"/>
-  </node>
 </launch>
