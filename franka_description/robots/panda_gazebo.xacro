@@ -382,6 +382,7 @@
       <axis xyz="0 -1 0"/>
       <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
       <dynamics friction="0.0" damping="0.03"/>
+      <mimic joint="${ns}_finger_joint1" />
     </joint>
   </xacro:macro>
 </robot>
