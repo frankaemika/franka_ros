@@ -58,6 +58,11 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/finger.stl" />
+        </geometry>
+      </collision>
     </link>
     <link name="${ns}_rightfinger">
       <visual>
@@ -66,6 +71,12 @@
           <mesh filename="package://franka_description/meshes/visual/finger.dae"/>
         </geometry>
       </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 ${pi}" />
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/finger.stl" />
+        </geometry>
+      </collision>
    </link>
     <joint name="${ns}_finger_joint1" type="prismatic">
       <parent link="${ns}_hand"/>
