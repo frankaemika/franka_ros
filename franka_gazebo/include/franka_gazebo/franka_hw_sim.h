@@ -117,7 +117,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
                              const transmission_interface::TransmissionInfo& transmission);
   void initFrankaModelHandle(const std::string& robot,
                              const urdf::Model& urdf,
-                             const transmission_interface::TransmissionInfo& transmission);
+                             const transmission_interface::TransmissionInfo& transmission,
+                             double singularity_threshold);
   void initServices(ros::NodeHandle& nh);
 
   void updateRobotState(ros::Time time);

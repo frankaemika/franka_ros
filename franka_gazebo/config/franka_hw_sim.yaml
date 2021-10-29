@@ -1,6 +1,6 @@
-arm_id: $(arg arm_id)
+arm_id:                           $(arg arm_id)
+singularity_warning_threshold:    0.0001               # print a warning if the smallest singular value of J x J^T drops below this value (use -1 to disable)
 
-m_ee:  0.76
 franka_gripper:
   type:    franka_gazebo/FrankaGripperSim
   arm_id:  $(arg arm_id)
