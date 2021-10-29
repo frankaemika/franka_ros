@@ -300,6 +300,11 @@
                                           izz="0.0017" />
       </inertial>
     </link>
+    <link name="${ns}_hand_coarse" />
+    <joint name="${ns}_hand_coarse_joint" type="fixed">
+      <parent link="${ns}_hand" />
+      <child link="${ns}_hand_coarse" />
+    </joint>
 
     <link name="${ns}_leftfinger">
       <xacro:inertia-cylinder mass="15e-3" radius="0.01" h="0.04"/>

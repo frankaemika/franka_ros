@@ -12,9 +12,16 @@
     <link name="${ns}_hand">
       <visual>
         <geometry>
-          <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
+          <mesh filename="package://franka_description/meshes/visual/hand.dae" />
         </geometry>
       </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/hand.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <link name="${ns}_hand_coarse">
       <collision>
         <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
         <geometry>
@@ -52,6 +59,10 @@
         </geometry>
       </collision>
     </link>
+    <joint name="${ns}_hand_coarse_joint" type="fixed">
+      <parent link="${ns}_hand" />
+      <child link="${ns}_hand_coarse" />
+    </joint>
     <link name="${ns}_leftfinger">
       <visual>
         <geometry>
