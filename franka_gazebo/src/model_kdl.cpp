@@ -171,7 +171,9 @@ std::array<double, 42> ModelKDL::bodyJacobian(
   J.changeBase(f.M.Inverse());
 
   // Singularity check
-  ROS_WARN_STREAM_COND(isCloseToSingularity(J), "Body Jacobian close to singularity");
+  if (isCloseToSingularity(J)) {
+    ROS_WARN_STREAM_THROTTLE(1, "Body Jacobian close to singularity");
+  }
 
   std::array<double, 42> result;
   Eigen::MatrixXd::Map(&result[0], 6, 7) = J.data;
@@ -202,7 +204,9 @@ std::array<double, 42> ModelKDL::zeroJacobian(
   }
 
   // Singularity Check
-  ROS_WARN_STREAM_COND(isCloseToSingularity(J), "Zero Jacobian close to singularity");
+  if (isCloseToSingularity(J)) {
+    ROS_WARN_STREAM_THROTTLE(1, "Zero Jacobian close to singularity");
+  }
 
   std::array<double, 42> result;
   Eigen::MatrixXd::Map(&result[0], 6, 7) = J.data;
