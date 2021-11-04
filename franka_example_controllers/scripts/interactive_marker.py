@@ -65,7 +65,7 @@ if __name__ == "__main__":
     link_name = rospy.get_param("~link_name")
 
     # Get initial pose for the interactive marker
-    while not initial_pose_found and rospy.is_shutdown():
+    while not initial_pose_found and not rospy.is_shutdown():
         rospy.sleep(1)
     state_sub.unregister()
 

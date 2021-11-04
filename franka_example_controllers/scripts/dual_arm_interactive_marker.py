@@ -109,7 +109,7 @@ def reset_marker_pose_blocking():
         PoseStamped, centering_pose_callback)
 
     # Get initial pose for the interactive marker
-    while not centering_frame_ready:
+    while not centering_frame_ready and not rospy.is_shutdown():
         rospy.sleep(0.1)
 
     centering_frame_pose_sub.unregister()
