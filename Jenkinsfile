@@ -69,7 +69,7 @@ node ('docker'){
     }
     stage("Check public/local commit history sync") {
       sh """
-        src/franka_ros/.ci/checkgithistory.sh
+        src/franka_ros/.ci/checkgithistory.sh https://github.com/frankaemika/franka_ros.git develop
       """
     }
   } catch (e) {

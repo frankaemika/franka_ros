@@ -1,10 +1,16 @@
 #!/bin/sh
+set -e
 
-# the script check if the public repo and the local repo commit history are sync, otherwise it fail
+# the script checks if the public repo and the local repo commit history are sync, otherwise it fails
+if [ $# -ne 2 ]; then
+    >&2 echo "Not enough argument supplied. Usage: checkgithistory.sh public_url develop_branch_name"
+    exit 1
+fi
+
 cd src/franka_ros
-public_url="https://github.com/frankaemika/franka_ros.git"
+public_url=$1
 public_remote_name=$(git remote -v | grep ${public_url} | head -n 1 | sed -e 's/\s.*$//')
-develop_branch_name="develop"
+develop_branch_name=$2
 
 if [ -z "$public_remote_name" ]; then
     public_remote_name="public"
