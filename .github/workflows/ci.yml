@@ -34,7 +34,7 @@ jobs:
       run:  echo "FLAVOR=$(echo ${{ github.event.pull_request.base.ref }} | sed 's/-devel//')" >> $GITHUB_ENV
 
     - name: Build Docker Image
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: docker/build-push-action@v2
       with:
         tags: franka_ros:${{matrix.ros_distro}}
@@ -42,7 +42,7 @@ jobs:
         push: false
 
     - name: Compile with Catkin Tools
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
         image:    franka_ros:${{matrix.ros_distro}}
@@ -52,7 +52,7 @@ jobs:
           catkin build --workspace /ros/ --interleave-output --verbose
 
     - name: Compile with Catkin Make
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
         image:    franka_ros:${{matrix.ros_distro}}
@@ -65,7 +65,7 @@ jobs:
           catkin_make -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
     - name: Check Format
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
         image:    franka_ros:${{matrix.ros_distro}}
@@ -77,7 +77,7 @@ jobs:
           cmake --build /ros/build --target check-pyformat
 
     - name: Check Linting
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
         image:    franka_ros:${{matrix.ros_distro}}
@@ -88,7 +88,7 @@ jobs:
           cmake --build /ros/build --target check-tidy
 
     - name: Run Tests
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
         image:    franka_ros:${{matrix.ros_distro}}
@@ -102,7 +102,7 @@ jobs:
 
     - name: Upload Tests to Artifacts
       uses: actions/upload-artifact@v2
-      if:   ${{env.FLAVOR == 'develop' || env.FLAVOR == matrix.ros_distro}}
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       with:
         name: test-results
         path: build/test_results/*/rosunit-*.xml
