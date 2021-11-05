@@ -62,6 +62,22 @@ node {
   step([$class: 'StashNotifier'])
 }
 
+node ('docker'){
+  try {
+    dir('src/franka_ros') {
+      checkout scm
+    }
+    stage("Check public/local commit history sync") {
+      sh """
+        src/franka_ros/.ci/checkgithistory.sh https://github.com/frankaemika/franka_ros.git develop
+      """
+    }
+  } catch (e) {
+    currentBuild.result = 'FAILED'
+    step([$class: 'StashNotifier'])
+  }
+}
+
 parallel(
   'melodic': getStages('melodic', 'bionic'),
   'noetic': getStages('noetic', 'focal'),
