@@ -11,7 +11,7 @@ franka_state_controller:
     - $(arg arm_id)_joint6
     - $(arg arm_id)_joint7
 
-joint_trajectory_controller:
+effort_joint_trajectory_controller: &default_trajectory_controller
   type: effort_controllers/JointTrajectoryController
   joints:
     - $(arg arm_id)_joint1
@@ -30,6 +30,8 @@ joint_trajectory_controller:
     $(arg arm_id)_joint6: { p: 150, d: 10, i: 0 }
     $(arg arm_id)_joint7: { p:  50, d:  5, i: 0 }
 
+# define default controller for panda_moveit_config:
+joint_trajectory_controller: *default_trajectory_controller
 
 model_example_controller:
   type: franka_example_controllers/ModelExampleController

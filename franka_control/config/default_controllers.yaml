@@ -1,4 +1,4 @@
-joint_trajectory_controller:
+position_joint_trajectory_controller: &default_trajectory_controller
   type: position_controllers/JointTrajectoryController
   joints:
     - panda_joint1
@@ -24,6 +24,9 @@ joint_trajectory_controller:
       goal: 0.05
     panda_joint7:
       goal: 0.05
+
+# define default controller for panda_moveit_config:
+joint_trajectory_controller: *default_trajectory_controller
 
 franka_state_controller:
   type: franka_control/FrankaStateController
