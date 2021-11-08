@@ -309,6 +309,8 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
 void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
   auto g = this->model_->gravity(this->robot_state_);
 
+  ROS_WARN_STREAM("=======================================");
+  double sum = 0;
   for (auto& pair : this->joints_) {
     auto joint = pair.second;
     auto command = joint->command;
@@ -317,7 +319,25 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
     std::string prefix = this->arm_id_ + "_joint";
     if (pair.first.rfind(prefix, 0) != std::string::npos) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
+      double error = joint->effort + g.at(i);
+      sum += error;
+      auto f = joint->handle->GetForceTorque(0).body2Torque;
+      auto a = joint->handle->GlobalAxis(0);
+      auto b = joint->handle->LocalAxis(0);
+      auto c = joint->axis;
+      ROS_WARN_STREAM(pair.first << ": Error:  " << std::fixed << error);
+      ROS_WARN_STREAM(pair.first << ": Total Effort:       " << std::fixed << joint->effort);
+      ROS_WARN_STREAM(pair.first << ": KDL GravComp:       " << std::fixed << g.at(i));
+      ROS_WARN_STREAM(pair.first << ": Gazebo body2Torque: [" << std::fixed << f.X() << ", "
+                                 << f.Y() << ", " << f.Z() << "]");
+      ROS_WARN_STREAM(pair.first << ": Global Axis: [" << std::fixed << a.X() << ", " << a.Y()
+                                 << ", " << a.Z() << "]");
+      ROS_WARN_STREAM(pair.first << ": Local Axis:  [" << std::fixed << b.X() << ", " << b.Y()
+                                 << ", " << b.Z() << "]");
+      ROS_WARN_STREAM(pair.first << ": URDF Axis:   [" << c(0) << ", " << c(1) << ", " << c(2)
+                                 << "]");
       command += g.at(i);
+      ROS_WARN_STREAM("---------------------------------------");
     }
 
     if (std::isnan(command)) {
@@ -327,6 +347,7 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
     }
     joint->handle->SetForce(0, command);
   }
+  ROS_WARN_STREAM("TOTAL: " << std::fixed << sum);
 }
 
 void FrankaHWSim::eStopActive(bool /* active */) {}
