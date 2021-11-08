@@ -61,7 +61,6 @@
 
     <gazebo>
       <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-        <robotNamespace>$(arg arm_id)</robotNamespace>
         <controlPeriod>0.001</controlPeriod>
         <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
       </plugin>
