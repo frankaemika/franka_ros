@@ -2,7 +2,7 @@
 
 ## 0.x - UNRELEASED
 
-* Prevent interactive marker server from not shutting down when not initialized
+* Fix: Allow interactive marker server to shut down if not initialized
 * Add realistic hand/finger collision geometries to the Gazebo robot description
 * Add `joint_state_desired` publisher to `franka_gazebo`
 * No further ROS Kinetic support, since [End-of-Life was in April 2021](http://wiki.ros.org/Distributions)
