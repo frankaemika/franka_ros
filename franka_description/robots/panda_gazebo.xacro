@@ -8,7 +8,7 @@
   <!-- || PandaRobot With Retrieval of Feasible Parameters Using    || -->
   <!-- || Penalty-Based Optimization                                || -->
   <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,         || -->
-  <!-- || Paolo Robuffo Giordano, Alessandro de Lucaa               || -->
+  <!-- || Paolo Robuffo Giordano, Alessandro de Luca                || -->
   <!-- =============================================================== -->
 
   <xacro:macro name="panda_arm" params="arm_id:='panda'">
