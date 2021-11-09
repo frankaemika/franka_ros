@@ -467,6 +467,17 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   // This is ensured, because a FrankaStateInterface checks for at least seven joints in the URDF
   assert(this->joints_.size() >= 7);
 
+  std::array<double, 7> g;
+  static bool state_initialized = false;
+  if (state_initialized) {
+    g = this->model_->gravity(this->robot_state_);
+  } else {
+    for (auto& x : g) {
+      x = 0;
+    }
+    state_initialized = true;
+  }
+
   for (int i = 0; i < 7; i++) {
     std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
     const auto& joint = this->joints_.at(name);
@@ -484,7 +495,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.theta[i] = joint->position;
     this->robot_state_.dtheta[i] = joint->velocity;
 
-    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command;
+    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command + g.at(i);
 
     this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
     this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
