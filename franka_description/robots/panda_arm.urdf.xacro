@@ -13,11 +13,11 @@
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
-    <xacro:include filename="$(find franka_description)/robots/arm.xacro" />
+    <xacro:include filename="arm.xacro" />
     <xacro:arm safety_distance="0.03" />
 
     <xacro:if value="$(arg hand)">
-      <xacro:include filename="$(find franka_description)/robots/hand.xacro"/>
+      <xacro:include filename="hand.xacro"/>
       <xacro:hand rpy="0 0 ${-pi/4}" connected_to="${prefix}link8" safety_distance="0.03"/>
     </xacro:if>
   </xacro:unless>
@@ -28,8 +28,8 @@
     <xacro:arg name="rpy" default="0 0 0" />
 
     <!-- Create a simulatable URDF -->
-    <xacro:include filename="$(find franka_description)/robots/utils.xacro" />
-    <xacro:include filename="$(find franka_description)/robots/panda_gazebo.xacro" />
+    <xacro:include filename="utils.xacro" />
+    <xacro:include filename="panda_gazebo.xacro" />
 
     <xacro:arm />
 

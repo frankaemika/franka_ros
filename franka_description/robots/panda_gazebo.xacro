@@ -271,7 +271,7 @@
   </xacro:macro>
 
   <xacro:macro name="hand" params="connected_to:='' ns:='' xyz:='0 0 0' rpy:='0 0 0'">
-    <xacro:include filename="$(find franka_description)/robots/utils.xacro"/>
+    <xacro:include filename="utils.xacro"/>
 
     <xacro:unless value="${connected_to == ''}">
       <joint name="${ns}_hand_joint" type="fixed">
