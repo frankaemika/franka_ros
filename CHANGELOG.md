@@ -8,6 +8,7 @@
 * No further ROS Kinetic support, since [End-of-Life was in April 2021](http://wiki.ros.org/Distributions)
 * Make position + orientation targets threadsafe in cartesian example controller
 * Add singularity warning to `franka_gazebo` if Jacobian becomes singular
+* **BREAKING** Make `/panda` namespace of `franka_gazebo` optional
 
 ## 0.8.1 - 2021-09-08
 
