@@ -9,6 +9,7 @@
 * Make position + orientation targets threadsafe in cartesian example controller
 * Add singularity warning to `franka_gazebo` if Jacobian becomes singular
 * **BREAKING** Make `/panda` namespace of `franka_gazebo` optional
+* Add effort joint trajectory controller to be used by MoveIT
 
 ## 0.8.1 - 2021-09-08
 
