@@ -38,3 +38,31 @@ cartesian_impedance_example_controller:
     - $(arg arm_id)_joint5
     - $(arg arm_id)_joint6
     - $(arg arm_id)_joint7
+
+effort_joint_trajectory_controller:
+  type: effort_controllers/JointTrajectoryController
+  joints:
+    - $(arg arm_id)_joint1
+    - $(arg arm_id)_joint2
+    - $(arg arm_id)_joint3
+    - $(arg arm_id)_joint4
+    - $(arg arm_id)_joint5
+    - $(arg arm_id)_joint6
+    - $(arg arm_id)_joint7
+  gains:
+    $(arg arm_id)_joint1: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint2: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint3: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint4: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint5: { p: 250, d: 10, i: 0 }
+    $(arg arm_id)_joint6: { p: 150, d: 10, i: 0 }
+    $(arg arm_id)_joint7: { p: 50, d: 5, i: 0 }
+  constraints:
+    goal_time: 0.5
+    $(arg arm_id)_joint1: { goal: 0.05 }
+    $(arg arm_id)_joint2: { goal: 0.05 }
+    $(arg arm_id)_joint3: { goal: 0.05 }
+    $(arg arm_id)_joint4: { goal: 0.05 }
+    $(arg arm_id)_joint5: { goal: 0.05 }
+    $(arg arm_id)_joint6: { goal: 0.05 }
+    $(arg arm_id)_joint7: { goal: 0.05 }
