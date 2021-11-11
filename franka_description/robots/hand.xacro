@@ -52,6 +52,13 @@
         </geometry>
       </collision>
     </link>
+    <!-- Define the hand_tcp frame -->
+    <link name="${ns}_hand_tcp" />
+    <joint name="${ns}_hand_tcp_joint" type="fixed">
+      <origin xyz="0 0 0.1034" rpy="0 0 0" />
+      <parent link="${ns}_hand" />
+      <child link="${ns}_hand_tcp" />
+    </joint>
     <link name="${ns}_leftfinger">
       <visual>
         <geometry>
