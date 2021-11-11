@@ -7,6 +7,7 @@
   * `franka_control`: Configurable `arm_id` in launch & config files
   * `franka_description`: URDF now contains `$(arm_id)_linkN_sc` links containing the capsule collision modules used for self-collision avoidance (MoveIt).
   * `franka_gazebo`: Fix motion generator config respects `arm_id`
+  *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
 
 ## 0.9.0 - 2022-03-29
 
