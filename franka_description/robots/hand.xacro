@@ -50,6 +50,13 @@
       </collision>
       </self_collision_geometries>
     </xacro:link>
+    <!-- Define the hand_tcp frame -->
+    <link name="${prefix}hand_tcp" />
+    <joint name="${prefix}hand_tcp_joint" type="fixed">
+      <origin xyz="0 0 0.1034" rpy="0 0 0" />
+      <parent link="${prefix}hand" />
+      <child link="${prefix}hand_tcp" />
+    </joint>
     <link name="${prefix}leftfinger">
       <visual>
         <geometry>
