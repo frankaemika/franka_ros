@@ -267,7 +267,8 @@
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
-    <link name="${prefix}link8">
+    <link name="${prefix}link8"/>
+    <link name="${prefix}link8_sc">
       <collision>
         <origin xyz="0.0424 0.0424 -0.0250" rpy="${pi} ${pi/2} ${pi/2}"/>
         <geometry>
@@ -287,6 +288,10 @@
         </geometry>
       </collision>
     </link>
+    <joint name="${prefix}link8_sc_joint" type="fixed">
+      <parent link="${prefix}link8" />
+      <child link="${prefix}link8_sc" />
+    </joint>
     <joint name="${prefix}joint8" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.107"/>
       <parent link="${prefix}link7"/>
