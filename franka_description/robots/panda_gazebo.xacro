@@ -11,8 +11,8 @@
   <!-- || Paolo Robuffo Giordano, Alessandro de Luca                || -->
   <!-- =============================================================== -->
 
-  <xacro:macro name="arm" params="arm_id:='panda'">
-    <link name="${arm_id}_link0">
+  <xacro:macro name="arm" params="prefix:=^|">
+    <link name="${prefix}link0">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -35,7 +35,7 @@
       </inertial>
     </link>
 
-    <link name="${arm_id}_link1">
+    <link name="${prefix}link1">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -57,17 +57,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint1" type="revolute">
+    <joint name="${prefix}joint1" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
       <origin rpy="0 0 0" xyz="0 0 0.333"/>
-      <parent link="${arm_id}_link0"/>
-      <child link="${arm_id}_link1"/>
+      <parent link="${prefix}link0"/>
+      <child link="${prefix}link1"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="15" lower="-2.9671" effort="87" upper="2.9671" velocity="2.5"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link2">
+    <link name="${prefix}link2">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -89,17 +89,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint2" type="revolute">
+    <joint name="${prefix}joint2" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628"/>
       <origin rpy="${-pi/2} 0 0" xyz="0 0 0"/>
-      <parent link="${arm_id}_link1"/>
-      <child link="${arm_id}_link2"/>
+      <parent link="${prefix}link1"/>
+      <child link="${prefix}link2"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="7.5" lower="-1.8326" effort="87" upper="1.8326" velocity="2.5"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link3">
+    <link name="${prefix}link3">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -121,17 +121,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint3" type="revolute">
+    <joint name="${prefix}joint3" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
       <origin rpy="${pi/2} 0 0" xyz="0 -0.316 0"/>
-      <parent link="${arm_id}_link2"/>
-      <child link="${arm_id}_link3"/>
+      <parent link="${prefix}link2"/>
+      <child link="${prefix}link3"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="12.5" lower="-2.9671" effort="87" upper="2.9671" velocity="2.5"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link4">
+    <link name="${prefix}link4">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -153,17 +153,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint4" type="revolute">
+    <joint name="${prefix}joint4" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698"/>
       <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0"/>
-      <parent link="${arm_id}_link3"/>
-      <child link="${arm_id}_link4"/>
+      <parent link="${prefix}link3"/>
+      <child link="${prefix}link4"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="12.5" lower="-3.1416" effort="87" upper="-0.4" velocity="2.5"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link5">
+    <link name="${prefix}link5">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -185,17 +185,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint5" type="revolute">
+    <joint name="${prefix}joint5" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
       <origin rpy="${-pi/2} 0 0" xyz="-0.0825 0.384 0"/>
-      <parent link="${arm_id}_link4"/>
-      <child link="${arm_id}_link5"/>
+      <parent link="${prefix}link4"/>
+      <child link="${prefix}link5"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="15" lower="-2.9671" effort="12" upper="2.9671" velocity="3"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link6">
+    <link name="${prefix}link6">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -217,17 +217,17 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint6" type="revolute">
+    <joint name="${prefix}joint6" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525"/>
       <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
-      <parent link="${arm_id}_link5"/>
-      <child link="${arm_id}_link6"/>
+      <parent link="${prefix}link5"/>
+      <child link="${prefix}link6"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="20" lower="-0.0873" effort="12" upper="3.8223" velocity="3"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link7">
+    <link name="${prefix}link7">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -249,22 +249,22 @@
       </inertial>
     </link>
 
-    <joint name="${arm_id}_joint7" type="revolute">
+    <joint name="${prefix}joint7" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
       <origin rpy="${pi/2} 0 0" xyz="0.088 0 0"/>
-      <parent link="${arm_id}_link6"/>
-      <child link="${arm_id}_link7"/>
+      <parent link="${prefix}link6"/>
+      <child link="${prefix}link7"/>
       <axis xyz="0 0 1"/>
       <limit acceleration="20" lower="-2.9671" effort="12" upper="2.9671" velocity="3"/>
       <dynamics D="1" K="7000" mu_coulomb="0" mu_viscous="16" damping="0.003" friction="0.0"/>
     </joint>
 
-    <link name="${arm_id}_link8" />
+    <link name="${prefix}link8" />
 
-    <joint name="${arm_id}_joint8" type="fixed">
+    <joint name="${prefix}joint8" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.107"/>
-      <parent link="${arm_id}_link7"/>
-      <child link="${arm_id}_link8"/>
+      <parent link="${prefix}link7"/>
+      <child link="${prefix}link8"/>
       <axis xyz="0 0 0"/>
     </joint>
 

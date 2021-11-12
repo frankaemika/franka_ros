@@ -55,26 +55,26 @@
   <!-- Adds the required tags to provide a `FrankaStateInterface` -->
   <!-- when simulating with franka_hw_sim plugin                  -->
   <!--                                                            -->
-  <!-- arm_id - Arm ID of the panda to simulate (default 'panda') -->
+  <!-- prefix - prefix used for joint and link names              -->
   <!-- ========================================================== -->
-  <xacro:macro name="transmission-franka-state" params="arm_id:=panda">
-    <transmission name="${arm_id}_franka_state">
+  <xacro:macro name="transmission-franka-state" params="prefix:=^|">
+    <transmission name="${prefix}franka_state">
       <type>franka_hw/FrankaStateInterface</type>
-      <joint name="${arm_id}_joint1"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint2"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint3"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint4"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint5"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint6"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
-      <joint name="${arm_id}_joint7"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint1"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint2"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint3"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint4"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint5"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint6"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
+      <joint name="${prefix}joint7"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></joint>
 
-      <actuator name="${arm_id}_motor1"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor2"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor3"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor4"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor5"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor6"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
-      <actuator name="${arm_id}_motor7"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor1"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor2"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor3"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor4"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor5"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor6"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
+      <actuator name="${prefix}motor7"><hardwareInterface>franka_hw/FrankaStateInterface</hardwareInterface></actuator>
     </transmission>
   </xacro:macro>
 
@@ -82,12 +82,12 @@
   <!-- Adds the required tags to provide a `FrankaModelInterface`   -->
   <!-- when simulating with franka_hw_sim plugin                    -->
   <!--                                                              -->
-  <!-- arm_id - Arm ID of the panda to simulate (default 'panda')   -->
+  <!-- prefix - prefix for joint and link names                     -->
   <!-- root   - Joint name of the base of the robot                 -->
   <!-- tip    - Joint name of the tip of the robot (flange or hand) -->
   <!-- ============================================================ -->
-  <xacro:macro name="transmission-franka-model" params="arm_id:=panda root:=panda_joint1 tip:=panda_joint7">
-    <transmission name="${arm_id}_franka_model">
+  <xacro:macro name="transmission-franka-model" params="root tip prefix:=^|">
+    <transmission name="${prefix}franka_model">
       <type>franka_hw/FrankaModelInterface</type>
       <joint name="${root}">
         <role>root</role>
