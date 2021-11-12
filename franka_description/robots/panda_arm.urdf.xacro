@@ -10,8 +10,8 @@
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
-    <xacro:include filename="$(find franka_description)/robots/panda_arm.xacro" />
-    <xacro:panda_arm arm_id="$(arg arm_id)" safety_distance="0.03"/>
+    <xacro:include filename="$(find franka_description)/robots/arm.xacro" />
+    <xacro:arm arm_id="$(arg arm_id)" safety_distance="0.03" />
 
     <xacro:if value="$(arg hand)">
       <xacro:include filename="$(find franka_description)/robots/hand.xacro"/>
@@ -28,7 +28,7 @@
     <xacro:include filename="$(find franka_description)/robots/utils.xacro" />
     <xacro:include filename="$(find franka_description)/robots/panda_gazebo.xacro" />
 
-    <xacro:panda_arm arm_id="$(arg arm_id)" />
+    <xacro:arm arm_id="$(arg arm_id)" />
 
     <xacro:if value="$(arg hand)">
       <xacro:hand ns="$(arg arm_id)" rpy="0 0 ${-pi/4}" connected_to="$(arg arm_id)_link8" />
