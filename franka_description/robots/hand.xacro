@@ -61,6 +61,7 @@
           <mesh filename="package://franka_description/meshes/collision/finger.stl" />
         </geometry>
       </collision>
+      <xacro:inertial name="leftfinger" />
     </link>
     <link name="${prefix}rightfinger">
       <visual>
@@ -75,6 +76,7 @@
           <mesh filename="package://franka_description/meshes/collision/finger.stl" />
         </geometry>
       </collision>
+      <xacro:inertial name="rightfinger" />
    </link>
     <joint name="${prefix}finger_joint1" type="prismatic">
       <parent link="${prefix}hand"/>

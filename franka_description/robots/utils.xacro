@@ -1,5 +1,26 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- ============================================================ -->
+  <!-- Macro to add an <interial> tag based on yaml-load properties -->
+  <!--                                                              -->
+  <!-- name:     Name of the robot link (without prefix)            -->
+  <!-- inertial: Dictionary of inertia properties                   -->
+  <!-- ============================================================ -->
+  <xacro:macro name="inertial" params="inertial:=^ name:=^">
+    <xacro:if value="$(arg gazebo)">
+      <xacro:unless value="${inertial.get(name, None)}">${xacro.warning('No inertia properties defined for: ' + name)}</xacro:unless>
+      <xacro:if value="${inertial.get(name, None)}">
+        <!-- Access inertia properties of link 'name' -->
+        <xacro:property name="inertial" value="${inertial[name]}" lazy_eval="false" />
+        <inertial>
+          <origin rpy="${inertial.origin.rpy}" xyz="${inertial.origin.xyz}" />
+          <mass value="${inertial.mass}" />
+          <xacro:property name="I" value="${inertial.inertia}" />
+          <inertia ixx="${I.xx}" ixy="${I.xy}" ixz="${I.xz}" iyy="${I.yy}" iyz="${I.yz}" izz="${I.zz}" />
+        </inertial>
+      </xacro:if>
+    </xacro:if>
+  </xacro:macro>
 
   <!-- ========================================================== -->
   <!-- Macro to add a single link, both with                      -->
@@ -22,6 +43,7 @@
           <mesh filename="package://franka_description/meshes/collision/${name}.stl" />
         </geometry>
       </collision>
+      <xacro:inertial />
     </link>
     <!-- sub-link defining coarse geometries of real robot's internal self-collision -->
     <link name="${prefix}${name}_sc">

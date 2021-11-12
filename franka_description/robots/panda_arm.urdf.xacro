@@ -10,35 +10,24 @@
 
   <!-- Name prefix used for joints and links. Property is implicitly passed to macros. -->
   <xacro:property name="prefix" value="$(arg arm_id)_" />
+  <!-- Load interial properties. Property is implicitly passed to macros. -->
+  <xacro:property name="inertial" value="${xacro.load_yaml('inertial.yaml')}" />
 
-  <xacro:unless value="$(arg gazebo)">
-    <!-- Create a URDF for a real hardware -->
-    <xacro:include filename="utils.xacro" />
-    <xacro:include filename="arm.xacro" />
-    <xacro:arm safety_distance="0.03" />
+  <xacro:include filename="utils.xacro" />
+  <xacro:include filename="arm.xacro" />
 
-    <xacro:if value="$(arg hand)">
-      <xacro:include filename="hand.xacro"/>
-      <xacro:hand rpy="0 0 ${-pi/4}" connected_to="${prefix}link8" safety_distance="0.03"/>
-    </xacro:if>
-  </xacro:unless>
+  <xacro:arm safety_distance="0.03" />
 
+  <xacro:if value="$(arg hand)">
+    <xacro:include filename="hand.xacro"/>
+    <xacro:hand rpy="0 0 ${-pi/4}" connected_to="${prefix}link8" safety_distance="0.03"/>
+  </xacro:if>
+
+  <!-- Define additional Gazebo tags -->
   <xacro:if value="$(arg gazebo)">
 
     <xacro:arg name="xyz" default="0 0 0" />
     <xacro:arg name="rpy" default="0 0 0" />
-
-    <!-- Create a simulatable URDF -->
-    <xacro:include filename="utils.xacro" />
-    <xacro:include filename="panda_gazebo.xacro" />
-
-    <xacro:arm />
-
-    <xacro:if value="$(arg hand)">
-      <xacro:hand rpy="0 0 ${-pi/4}" connected_to="${prefix}link8" />
-      <xacro:gazebo-joint joint="${prefix}finger_joint1" transmission="hardware_interface/EffortJointInterface" />
-      <xacro:gazebo-joint joint="${prefix}finger_joint2" transmission="hardware_interface/EffortJointInterface" />
-    </xacro:if>
 
     <!-- Gazebo requires a joint to a link called "world" for statically mounted robots -->
     <link name="world" />
@@ -48,7 +37,6 @@
       <child  link="${prefix}link0" />
     </joint>
 
-
     <xacro:gazebo-joint joint="${prefix}joint1" transmission="hardware_interface/EffortJointInterface" />
     <xacro:gazebo-joint joint="${prefix}joint2" transmission="hardware_interface/EffortJointInterface" />
     <xacro:gazebo-joint joint="${prefix}joint3" transmission="hardware_interface/EffortJointInterface" />
@@ -56,6 +44,14 @@
     <xacro:gazebo-joint joint="${prefix}joint5" transmission="hardware_interface/EffortJointInterface" />
     <xacro:gazebo-joint joint="${prefix}joint6" transmission="hardware_interface/EffortJointInterface" />
     <xacro:gazebo-joint joint="${prefix}joint7" transmission="hardware_interface/EffortJointInterface" />
+
+    <xacro:if value="$(arg hand)">
+      <xacro:gazebo-joint joint="${prefix}finger_joint1" transmission="hardware_interface/EffortJointInterface" />
+      <xacro:gazebo-joint joint="${prefix}finger_joint2" transmission="hardware_interface/EffortJointInterface" />
+      <!-- Friction specific material for Rubber/Rubber contact -->
+      <xacro:gazebo-friction link="${prefix}leftfinger" mu="1.13" />
+      <xacro:gazebo-friction link="${prefix}rightfinger" mu="1.13" />
+    </xacro:if>
 
     <xacro:transmission-franka-state />
     <xacro:transmission-franka-model root="${prefix}joint1" tip="${prefix}joint8" />
