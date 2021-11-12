@@ -1,6 +1,40 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- ========================================================== -->
+  <!-- Macro to add a single link, both with                      -->
+  <!--  * detailed meshes for environmental collision checking    -->
+  <!--  * and coarse geometry models for self-collision checking  -->
+  <!--                                                            -->
+  <!-- name:  Name of the robot link (without prefix)             -->
+  <!-- self_collision_geometries:  self <collision> models        -->
+  <!-- ========================================================== -->
+  <xacro:macro name="link" params="name prefix=${arm_id}_ **self_collision_geometries">
+    <!-- sub-link defining detailed meshes for collision with environment -->
+    <link name="${prefix}${name}">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/${name}.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/${name}.stl" />
+        </geometry>
+      </collision>
+    </link>
+    <!-- sub-link defining coarse geometries of real robot's internal self-collision -->
+    <link name="${prefix}${name}_sc">
+      <xacro:unless value="$(arg gazebo)">
+        <xacro:insert_block name="self_collision_geometries" />
+      </xacro:unless>
+    </link>
+    <!-- fixed joint between both sub-links -->
+    <joint name="${prefix}${name}_sc_joint" type="fixed">
+      <parent link="${prefix}${name}" />
+      <child link="${prefix}${name}_sc" />
+    </joint>
+  </xacro:macro>
 
   <!-- ========================================================== -->
   <!-- Adds the required tags to simulate one joint in gazebo     -->

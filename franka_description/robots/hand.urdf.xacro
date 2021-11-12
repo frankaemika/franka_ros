@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
+  <xacro:include filename="utils.xacro" />
   <xacro:include filename="hand.xacro"/>
   <xacro:hand arm_id="panda" safety_distance="0.03"/>
 </robot>
