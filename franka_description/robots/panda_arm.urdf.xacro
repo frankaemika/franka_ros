@@ -13,6 +13,7 @@
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
+    <xacro:include filename="utils.xacro" />
     <xacro:include filename="arm.xacro" />
     <xacro:arm safety_distance="0.03" />
 

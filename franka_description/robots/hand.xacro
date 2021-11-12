@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- prefix: used for joint and link names. Needed to distinguish joints and TFs in case of multiple arm instances. -->
-  <xacro:macro name="hand" params="connected_to:='' prefix:=^| rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0">
+  <xacro:macro name="hand" params="connected_to:='' prefix:=^| rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 description_pkg:=franka_description">
     <xacro:unless value="${connected_to == ''}">
       <joint name="${prefix}hand_joint" type="fixed">
         <parent link="${connected_to}"/>
@@ -10,12 +10,8 @@
         <origin xyz="${xyz}" rpy="${rpy}"/>
       </joint>
     </xacro:unless>
-    <link name="${prefix}hand">
-      <visual>
-        <geometry>
-          <mesh filename="package://franka_description/meshes/visual/hand.dae"/>
-        </geometry>
-      </visual>
+    <xacro:link name="hand">
+      <self_collision_geometries>
       <collision>
         <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}"/>
         <geometry>
@@ -52,7 +48,8 @@
           <sphere radius="${0.02+safety_distance}"  />
         </geometry>
       </collision>
-    </link>
+      </self_collision_geometries>
+    </xacro:link>
     <link name="${prefix}leftfinger">
       <visual>
         <geometry>
