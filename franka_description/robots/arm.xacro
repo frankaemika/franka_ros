@@ -61,6 +61,7 @@
       <child link="${prefix}link1"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link2">
       <self_collision_geometries>
@@ -91,6 +92,7 @@
       <child link="${prefix}link2"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-1.7628" upper="1.7628" velocity="2.1750"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link3">
       <self_collision_geometries>
@@ -121,6 +123,7 @@
       <child link="${prefix}link3"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-2.8973" upper="2.8973" velocity="2.1750"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link4">
       <self_collision_geometries>
@@ -151,6 +154,7 @@
       <child link="${prefix}link4"/>
       <axis xyz="0 0 1"/>
       <limit effort="87" lower="-3.0718" upper="-0.0698" velocity="2.1750"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link5">
       <self_collision_geometries>
@@ -199,6 +203,7 @@
       <child link="${prefix}link5"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link6">
       <self_collision_geometries>
@@ -229,6 +234,7 @@
       <child link="${prefix}link6"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-0.0175" upper="3.7525" velocity="2.6100"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <xacro:link name="link7">
       <self_collision_geometries>
@@ -259,6 +265,7 @@
       <child link="${prefix}link7"/>
       <axis xyz="0 0 1"/>
       <limit effort="12" lower="-2.8973" upper="2.8973" velocity="2.6100"/>
+      <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
     <link name="${prefix}link8">
       <collision>
