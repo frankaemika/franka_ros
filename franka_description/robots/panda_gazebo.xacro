@@ -387,7 +387,7 @@
       <origin xyz="0 0 0.0584" rpy="0 0 0"/>
       <axis xyz="0 1 0"/>
       <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
-      <dynamics damping="0.3"/>
+      <dynamics friction="0.0" damping="0.03"/>
     </joint>
 
     <joint name="${ns}_finger_joint2" type="prismatic">
@@ -396,7 +396,7 @@
       <origin xyz="0 0 0.0584" rpy="0 0 0"/>
       <axis xyz="0 -1 0"/>
       <limit effort="20" lower="0.0" upper="0.04" velocity="0.2"/>
-      <dynamics damping="0.3"/>
+      <dynamics friction="0.0" damping="0.03"/>
     </joint>
   </xacro:macro>
 </robot>
