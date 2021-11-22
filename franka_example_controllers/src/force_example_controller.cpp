@@ -106,15 +106,16 @@ void ForceExampleController::update(const ros::Time& /*time*/, const ros::Durati
       robot_state.tau_J_d.data());
   Eigen::Map<Eigen::Matrix<double, 7, 1>> gravity(gravity_array.data());
 
-  Eigen::VectorXd tau_d(7), desired_force_torque(6), tau_cmd(7), tau_ext(7);
+  Eigen::Matrix<double, 7, 1> tau_d, tau_cmd, tau_ext;
+  Eigen::Matrix<double, 6, 1> desired_force_torque;
   desired_force_torque.setZero();
   desired_force_torque(2) = desired_mass_ * -9.81;
   tau_ext = tau_measured - gravity - tau_ext_initial_;
-  tau_d << jacobian.transpose() * desired_force_torque;
+  tau_d = jacobian.transpose() * desired_force_torque;
   tau_error_ = tau_error_ + period.toSec() * (tau_d - tau_ext);
   // FF + PI control (PI gains are initially all 0)
   tau_cmd = tau_d + k_p_ * (tau_d - tau_ext) + k_i_ * tau_error_;
-  tau_cmd << saturateTorqueRate(tau_cmd, tau_J_d);
+  tau_cmd = saturateTorqueRate(tau_cmd, tau_J_d);
 
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_cmd(i));

@@ -1,8 +1,8 @@
 FROM osrf/ros:noetic-desktop-focal
 RUN apt-get update -y && apt-get install -y \
-    clang-6.0 \
-    clang-format-6.0 \
-    clang-tidy-6.0 \
+    clang-7 \
+    clang-format-7 \
+    clang-tidy-7 \
     pycodestyle \
     liborocos-kdl-dev \
     python3-catkin-tools \
