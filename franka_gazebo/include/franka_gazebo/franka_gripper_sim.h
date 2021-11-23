@@ -36,7 +36,7 @@ const double kDefaultGripperActionSpeed = 0.1;
 const double kGraspRestingThreshold = 0.003;
 
 /// How many times the speed has to drop below resting threshold before the grasping will be checked
-const int kGraspConsecutiveSamples = 3;
+const int kGraspConsecutiveSamples = 10;
 
 /**
  * Simulate the franka_gripper_node.
