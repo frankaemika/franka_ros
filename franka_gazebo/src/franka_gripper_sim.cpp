@@ -138,7 +138,7 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
     w1_d = this->finger2_.getPosition();
     w2_d = this->finger1_.getPosition();
     std::lock_guard<std::mutex> lock(this->mutex_);
-    f_d = -this->config_.force_desired / 2.0;
+    f_d = this->config_.force_desired / 2.0;
   }
 
   control(this->finger1_, this->pid1_, w1_d, 0.5 * dw_d, f_d, period);
@@ -382,9 +382,10 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
   }
 
   double width = this->finger1_.getPosition() + this->finger2_.getPosition();
+  float direction = std::copysign(1.0, goal->width - width);
   transition(State::GRASPING, Config{.width_desired = goal->width < width ? 0 : kMaxFingerWidth,
                                      .speed_desired = goal->speed,
-                                     .force_desired = goal->force,
+                                     .force_desired = direction * goal->force,
                                      .tolerance = goal->epsilon});
 
   waitUntilStateChange();

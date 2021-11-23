@@ -24,7 +24,7 @@ namespace franka_gazebo {
 const double kMaxFingerWidth = 0.08;
 
 /// When width between fingers is below this, the move action succeeds [m]
-const double kDefaultMoveWidthTolerance = 0.005;
+const double kDefaultMoveWidthTolerance = 0.001;
 
 /// When width between fingers is below this, the gripper action succeeds [m]
 const double kDefaultGripperActionWidthTolerance = 0.005;
@@ -33,10 +33,10 @@ const double kDefaultGripperActionWidthTolerance = 0.005;
 const double kDefaultGripperActionSpeed = 0.1;
 
 /// Below which speed the target width should be checked to abort or succeed the grasp action [m/s]
-const double kGraspRestingThreshold = 0.001;
+const double kGraspRestingThreshold = 0.003;
 
 /// How many times the speed has to drop below resting threshold before the grasping will be checked
-const int kGraspConsecutiveSamples = 3;
+const int kGraspConsecutiveSamples = 10;
 
 /**
  * Simulate the franka_gripper_node.
