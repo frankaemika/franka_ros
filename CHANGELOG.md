@@ -13,6 +13,7 @@
 * Make finger collisions primitive in `franka_gazebo`
 * add 'gravity_vector' gravity ROS parameter to FrankaHWSim
 * Fix "Failed to create robot simulation interface loader" bug when installing from APT
+* Improve Gazebo 'stone' world objects
 
 ## 0.8.1 - 2021-09-08
 
