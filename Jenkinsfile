@@ -48,6 +48,17 @@ pipeline {
                 }
             }
         }
+        stage('Check public/local commit history sync') {
+            agent {
+                dockerfile {
+                    filename '.ci/Dockerfile.noetic'
+                    dir 'src/franka_ros'
+                }
+            }
+            steps {
+                sh 'src/franka_ros/.ci/checkgithistory.sh https://github.com/frankaemika/franka_ros.git develop'
+            }
+        }
     }
     post {
         always {
