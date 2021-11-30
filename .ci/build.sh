@@ -15,7 +15,6 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ../src
 
 cmake --build . -- -j$(nproc)
 cmake --build . --target tests -- -j$(nproc)
-ctest -V -j1
 
 cmake --build . --target check-format
 cmake --build . --target check-pyformat
