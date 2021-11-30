@@ -1,89 +1,60 @@
-#!groovy
-
-buildResult = 'NOT_BUILT'
-
-def getStages(rosDistribution, ubuntuVersion) {
-  return {
-    node('docker') {
-      step([$class: 'StashNotifier'])
-
-      try {
-        dir('src/franka_ros') {
-          checkout scm
-        }
-
-        sh 'rm -rf dist'
-        dir('dist') {
-          try {
-            step([$class: 'CopyArtifact',
-                  filter: "libfranka-*-amd64-${ubuntuVersion}.tar.gz",
-                  fingerprintArtifacts: true,
-                  projectName: "SWDEV/libfranka/${java.net.URLEncoder.encode(env.BRANCH_NAME, "UTF-8")}",
-                  selector: [$class: 'StatusBuildSelector', stable: false]])
-          } catch (e) {
-            // Fall back to develop branch.
-            step([$class: 'CopyArtifact',
-                  filter: "libfranka-*-amd64-${ubuntuVersion}.tar.gz",
-                  fingerprintArtifacts: true,
-                  projectName: "SWDEV/libfranka/develop",
-                  selector: [$class: 'StatusBuildSelector', stable: false]])
-          }
-          sh """
-            tar xfz libfranka-*-amd64-${ubuntuVersion}.tar.gz
-            ln -sf libfranka-*-amd64 libfranka
-          """
-        }
-
-        docker.build("franka_ros-ci-worker:${rosDistribution}",
-                     "-f src/franka_ros/.ci/Dockerfile.${rosDistribution} src/franka_ros/.ci").inside('-e MAKEFLAGS') {
-          withEnv(["CMAKE_PREFIX_PATH+=${env.WORKSPACE}/dist/libfranka/lib/cmake/Franka",
-                   "ROS_HOME=${env.WORKSPACE}/ros-home"]) {
-            stage("${rosDistribution}: Build & Lint (Debug)") {
-              sh """
-                . /opt/ros/${rosDistribution}/setup.sh
-                src/franka_ros/.ci/debug.sh
-              """
-              junit 'build-debug/test_results/**/*.xml'
+pipeline {
+    agent any
+    triggers {
+        pollSCM('H/5 * * * *')
+    }
+    options {
+        checkoutToSubdirectory('src/franka_ros')
+    }
+    stages {
+        stage('Run on noetic') {
+             agent {
+                 dockerfile {
+                     filename '.ci/Dockerfile.noetic'
+                     dir 'src/franka_ros'
+                 }
+             }
+            steps {
+                script {
+                    notifyBitbucket()
+                }
+                sh ''' . /opt/ros/noetic/setup.sh
+                    export HOME=$(pwd)
+                    ./src/franka_ros/.ci/debug.sh
+                '''
             }
-          }
+            post {
+                always {
+                    junit 'build-debug/test_results/**/*.xml'
+                }
+            }
         }
-
-        if (buildResult != 'FAILED') {
-          buildResult = 'SUCCESS'
+        stage('Run on melodic') {
+            agent{
+                dockerfile {
+                     filename '.ci/Dockerfile.melodic'
+                      dir 'src/franka_ros'
+                 }
+            }
+            steps {
+                 sh ''' . /opt/ros/melodic/setup.sh
+                     export HOME=$(pwd)
+                     ./src/franka_ros/.ci/debug.sh
+                 '''
+            }
+            post {
+                always {
+                    junit 'build-debug/test_results/**/*.xml'
+                }
+            }
         }
-      } catch (e) {
-        buildResult = 'FAILED'
-      }
     }
-  }
-}
-
-node {
-  step([$class: 'StashNotifier'])
-}
-
-node ('docker'){
-  try {
-    dir('src/franka_ros') {
-      checkout scm
+    post {
+        always {
+            cleanWs()
+            script {
+                notifyBitbucket()
+            }
+        }
     }
-    stage("Check public/local commit history sync") {
-      sh """
-        src/franka_ros/.ci/checkgithistory.sh https://github.com/frankaemika/franka_ros.git develop
-      """
-    }
-  } catch (e) {
-    currentBuild.result = 'FAILED'
-    step([$class: 'StashNotifier'])
-  }
-}
-
-parallel(
-  'melodic': getStages('melodic', 'bionic'),
-  'noetic': getStages('noetic', 'focal'),
-)
-
-node {
-  currentBuild.result = buildResult
-  step([$class: 'StashNotifier'])
 }
