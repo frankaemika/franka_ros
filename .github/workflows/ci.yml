@@ -97,7 +97,7 @@ jobs:
         run: |
           source /ros/devel/setup.bash
           cd /ros
-          catkin_make run_tests
+          catkin_make run_tests -j1 # gazebo tests cannot run in parallel
           catkin_test_results
 
     - name: Upload Tests to Artifacts
