@@ -5,86 +5,129 @@ pipeline {
     }
     options {
         checkoutToSubdirectory('src/franka_ros')
+        parallelsAlwaysFailFast()
+    }
+    environment
+    {
+        CMAKE_BUILD_PARALLEL_LEVEL=sh(script: 'nproc', returnStdout: true).trim().toInteger()
     }
     stages {
-        stage('Check commit history sync') {
-            agent {
-                dockerfile {
-                    filename '.ci/Dockerfile.noetic'
-                    dir 'src/franka_ros'
-                }
-            }
-            steps {
-                sh """
-                cd src/franka_ros
-                .ci/checkgithistory.sh https://github.com/frankaemika/franka_ros.git develop
-                """
-            }
-        }
         stage('Build & Test') {
-            parallel {
-                stage('Melodic') {
-                    agent {
-                        dockerfile {
-                            filename '.ci/Dockerfile.melodic'
-                            dir 'src/franka_ros'
-                        }
-                    }
-                    stages {
-                        stage('Build') {
-                            steps {
-                                script {
-                                    notifyBitbucket()
-                                }
-                                sh ''' . /opt/ros/melodic/setup.sh
-                                    ./src/franka_ros/.ci/build.sh
-                                '''
-                            }
-                        }
-                        stage('Test') {
-                            steps {
-                                sh ''' . /opt/ros/melodic/setup.sh
-                                    export HOME=$(pwd)
-                                    ./src/franka_ros/.ci/test.sh
-                                '''
-                            }
-                            post {
-                                always {
-                                    junit 'build-debug/test_results/**/*.xml'
-                                }
-                            }
-                        }
+            matrix {
+                agent {
+                    dockerfile {
+                        filename ".ci/Dockerfile.${env.DISTRO}"
+                        dir 'src/franka_ros'
                     }
                 }
-                stage('Noetic') {
-                    agent {
-                        dockerfile {
-                            filename '.ci/Dockerfile.noetic'
-                            dir 'src/franka_ros'
+                axes {
+                    axis {
+                        name 'DISTRO'
+                        values 'melodic', 'noetic'
+                    }
+                    axis {
+                        name 'BUILD_TOOL'
+                        values 'catkin_make', 'catkin build'
+                    }
+                }
+                stages {
+                    stage('Check commit history sync') {
+                        when {
+                            allOf {
+                                environment name: 'DISTRO', value: 'noetic'
+                                environment name: 'BUILD_TOOL', value: 'catkin_make'
+                            }
+                        }
+                        steps {
+                            sh """
+                                cd src/franka_ros
+                                .ci/checkgithistory.sh \\
+                                    https://github.com/frankaemika/franka_ros.git develop
+                            """
                         }
                     }
-                    stages {
-                        stage('Build') {
-                            steps {
-                                script {
-                                    notifyBitbucket()
-                                }
-                                sh ''' . /opt/ros/noetic/setup.sh
-                                    ./src/franka_ros/.ci/build.sh
-                                '''
+                    stage('Notify Stash') {
+                        when {
+                            allOf {
+                                environment name: 'DISTRO', value: 'noetic'
+                                environment name: 'BUILD_TOOL', value: 'catkin_make'
                             }
                         }
-                        stage('Test') {
-                            steps {
-                                sh ''' . /opt/ros/noetic/setup.sh
-                                    export HOME=$(pwd)
-                                    ./src/franka_ros/.ci/test.sh
-                                '''
+                        steps {
+                            script {
+                                notifyBitbucket()
                             }
-                            post {
-                                always {
-                                    junit 'build-debug/test_results/**/*.xml'
-                                }
+                        }
+                    }
+                    stage('Build w/ Catkin Make') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin_make'
+                        }
+                        steps {
+                            sh '''
+                                . /opt/ros/${DISTRO}/setup.sh
+                                rm -rf src/CMakeLists.txt build devel
+                                catkin_init_workspace src
+                                ${BUILD_TOOL} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+                            '''
+                        }
+                    }
+                    stage('Build w/ Catkin Tools') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin build'
+                        }
+                        environment {
+                            HOME=sh(script: 'pwd', returnStdout: true).trim()
+                            SPACE_SUFFIX='_catkin_tools'
+                        }
+                        steps {
+                            sh '''
+                                . /opt/ros/${DISTRO}/setup.sh
+                                rm -rf *${SPACE_SUFFIX}
+                                catkin config --workspace . --init --extend /opt/ros/${DISTRO} \\
+                                    --space-suffix ${SPACE_SUFFIX}
+                                ${BUILD_TOOL} --no-status
+                            '''
+                        }
+                    }
+                    stage('Check Format') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin_make'
+                        }
+                        steps {
+                            sh '''
+                                cmake --build build --target check-format
+                            '''
+                        }
+                    }
+                    stage('Check Linting') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin_make'
+                        }
+                        steps {
+                            sh '''
+                                . /opt/ros/${DISTRO}/setup.sh
+                                cmake --build build --target check-tidy
+                            '''
+                        }
+                    }
+                    stage('Test') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin_make'
+                        }
+                        environment {
+                            HOME=sh(script: 'pwd', returnStdout: true).trim()
+                        }
+                        steps {
+                            sh ''' 
+                                . /opt/ros/${DISTRO}/setup.sh
+                                ${BUILD_TOOL} run_tests
+                                catkin_test_results
+                            '''
+                        }
+                        post {
+                            always {
+                                junit 'build/test_results/**/*.xml'
                             }
                         }
                     }
