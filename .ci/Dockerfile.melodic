@@ -1,5 +1,6 @@
 FROM osrf/ros:melodic-desktop-bionic
 RUN apt-get update -y && apt-get install -y \
+    git \
     clang-7 \
     clang-format-7 \
     clang-tidy-7 \
