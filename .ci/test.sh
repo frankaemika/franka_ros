@@ -18,4 +18,4 @@ fi
 . devel/setup.sh
 
 # testing
-ctest -V -j1
+ctest -V
