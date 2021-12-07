@@ -2,6 +2,10 @@
 
 ## 0.x - UNRELEASED
 
+* `franka_gazebo`:
+  - Fix: homing action works again
+  - Fix: move action can fail instead of blocking indefinitely
+  - Fix: align behavior of grasping action with `franka_gripper`
 * Fix: Allow interactive marker server to shut down if not initialized
 * Add realistic hand/finger collision geometries to the Gazebo robot description
 * Add `joint_state_desired` publisher to `franka_gazebo`
