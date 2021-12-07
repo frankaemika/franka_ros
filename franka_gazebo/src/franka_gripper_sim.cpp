@@ -324,7 +324,7 @@ void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) 
     return;
   }
 
-  if (goal->width < 0 or goal->width > kMaxFingerWidth) {
+  if (goal->width < 0 or goal->width > kMaxFingerWidth or not std::isfinite(goal->width)) {
     franka_gripper::MoveResult result;
     result.success = static_cast<decltype(result.success)>(false);
     result.error = "Target width has to lie between 0 .. " + std::to_string(kMaxFingerWidth);

@@ -242,7 +242,7 @@ INSTANTIATE_TEST_CASE_P(  // NOLINT(cert-err58-cpp)
     GripperFailMoveFixtureTest,
     GripperFailMoveFixtureTest,
     ::testing::Values(std::make_tuple(0.09, 0.1),
-                      // std::make_tuple(std::numeric_limits<double>::quiet_NaN(), 0.1),
+                       std::make_tuple(std::numeric_limits<double>::quiet_NaN(), 0.1),
                       std::make_tuple(-0.08, 0.1),
                       std::make_tuple(-0.0001, 0.1)));
 
