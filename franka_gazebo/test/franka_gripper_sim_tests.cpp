@@ -108,127 +108,126 @@ TEST_P(GripperMoveFixtureTest, CanPerformMove) {  // NOLINT(cert-err58-cpp)
   EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
 }
 
+TEST_P(GripperHomingFixtureTest, CanPerformHoming) {  // NOLINT(cert-err58-cpp)
+  double desired_width = GetParam();
+  double desired_velocity = 0.01;
 
- TEST_P(GripperHomingFixtureTest, CanPerformHoming) {  // NOLINT(cert-err58-cpp)
-   double desired_width = GetParam();
-   double desired_velocity = 0.01;
+  auto move_goal = franka_gripper::MoveGoal();
 
-   auto move_goal = franka_gripper::MoveGoal();
+  move_goal.width = desired_width;
+  move_goal.speed = desired_velocity;
 
-   move_goal.width = desired_width;
-   move_goal.speed = desired_velocity;
+  move_client->sendGoal(move_goal);
+  bool finished_before_timeout = move_client->waitForResult(ros::Duration(10.0));
 
-   move_client->sendGoal(move_goal);
-   bool finished_before_timeout = move_client->waitForResult(ros::Duration(10.0));
+  homing_client->sendGoal(franka_gripper::HomingGoal());
+  homing_client->waitForResult(ros::Duration(15.));
+  ros::spinOnce();
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_TRUE(homing_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_TRUE(homing_client->getResult()->success);
+  EXPECT_NEAR(finger_1_pos * 2, 0.08, kAllowedPositionError);
+  EXPECT_NEAR(finger_2_pos * 2, 0.08, kAllowedPositionError);
+}
 
-   homing_client->sendGoal(franka_gripper::HomingGoal());
-   homing_client->waitForResult(ros::Duration(15.));
-   ros::spinOnce();
-   EXPECT_TRUE(finished_before_timeout);
-   EXPECT_TRUE(homing_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-   EXPECT_TRUE(homing_client->getResult()->success);
-   EXPECT_NEAR(finger_1_pos * 2, 0.08, kAllowedPositionError);
-   EXPECT_NEAR(finger_2_pos * 2, 0.08, kAllowedPositionError);
- }
+TEST_P(GripperGraspFixtureTest, CanFailGraspGoToClosedState) {  // NOLINT(cert-err58-cpp)
+  double start_width = 0.08;
+  auto move_goal = franka_gripper::MoveGoal();
+  move_goal.width = start_width;
+  move_goal.speed = 0.1;
+  this->move_client->sendGoal(move_goal);
+  this->move_client->waitForResult(ros::Duration(10.0));
+  double desired_width = std::get<0>(GetParam());
+  double desired_velocity = std::get<1>(GetParam());
+  double desired_force = std::get<2>(GetParam());
 
-//TEST_P(GripperGraspFixtureTest, CanFailGraspGoToClosedState) {  // NOLINT(cert-err58-cpp)
-//  double start_width = 0.08;
-//  auto move_goal = franka_gripper::MoveGoal();
-//  move_goal.width = start_width;
-//  move_goal.speed = 0.1;
-//  this->move_client->sendGoal(move_goal);
-//  this->move_client->waitForResult(ros::Duration(10.0));
-//  double desired_width = std::get<0>(GetParam());
-//  double desired_velocity = std::get<1>(GetParam());
-//  double desired_force = std::get<2>(GetParam());
-//
-//  double expected_duration = start_width / desired_velocity;
-//  auto grasp_goal = franka_gripper::GraspGoal();
-//  grasp_goal.width = desired_width;
-//  grasp_goal.speed = desired_velocity;
-//  grasp_goal.force = desired_force;
-//  grasp_goal.epsilon.inner = 0.005;
-//  grasp_goal.epsilon.outer = 0.005;
-//  auto start_time = ros::Time::now();
-//  this->grasp_client->sendGoal(grasp_goal);
-//  bool finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
-//  auto stop_time = ros::Time::now();
-//  double duration = (stop_time - start_time).toSec();
-//  ros::spinOnce();
-//  EXPECT_TRUE(finished_before_timeout);
-//  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-//  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::ABORTED);
-//  EXPECT_FALSE(grasp_client->getResult()->success);
-//}
-//
-//TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoToClosedState) {  // NOLINT(cert-err58-cpp)
-//  double start_width = 0.08;
-//  auto move_goal = franka_gripper::MoveGoal();
-//  move_goal.width = start_width;
-//  move_goal.speed = 0.1;
-//  move_client->sendGoal(move_goal);
-//  EXPECT_TRUE(move_client->waitForResult(ros::Duration(10.0)));
-//  ros::Duration(0.1).sleep();
-//  double desired_width = std::get<0>(GetParam());
-//  double desired_velocity = std::get<1>(GetParam());
-//  double desired_force = std::get<2>(GetParam());
-//
-//  double expected_duration = start_width / desired_velocity;
-//  auto grasp_goal = franka_gripper::GraspGoal();
-//  grasp_goal.width = desired_width;
-//  grasp_goal.speed = desired_velocity;
-//  grasp_goal.force = desired_force;
-//  grasp_goal.epsilon.inner = 0.005;
-//  grasp_goal.epsilon.outer = 0.005;
-//  auto start_time = ros::Time::now();
-//  grasp_client->sendGoal(grasp_goal);
-//  bool finished_before_timeout = grasp_client->waitForResult(ros::Duration(10.0));
-//  auto stop_time = ros::Time::now();
-//  double duration = (stop_time - start_time).toSec();
-//  ros::spinOnce();
-//  EXPECT_TRUE(finished_before_timeout);
-//  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-//  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-//  EXPECT_TRUE(grasp_client->getResult()->success);
-//}
-//
-//// NOLINTNEXTLINE(cert-err58-cpp)
-//TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoToClosedStateWithoutDelay) {
-//  double start_width = 0.08;
-//  auto move_goal = franka_gripper::MoveGoal();
-//  move_goal.width = start_width;
-//  move_goal.speed = 0.1;
-//  move_client->sendGoal(move_goal);
-//  EXPECT_TRUE(move_client->waitForResult(ros::Duration(10.0)));
-//
-//  double desired_width = std::get<0>(GetParam());
-//  double desired_velocity = std::get<1>(GetParam());
-//  double desired_force = std::get<2>(GetParam());
-//
-//  double expected_duration = start_width / desired_velocity;
-//  auto grasp_goal = franka_gripper::GraspGoal();
-//  grasp_goal.width = desired_width;
-//  grasp_goal.speed = desired_velocity;
-//  grasp_goal.force = desired_force;
-//  grasp_goal.epsilon.inner = 0.005;
-//  grasp_goal.epsilon.outer = 0.005;
-//  auto start_time = ros::Time::now();
-//  grasp_client->sendGoal(grasp_goal);
-//  bool finished_before_timeout = grasp_client->waitForResult(ros::Duration(10.0));
-//  auto stop_time = ros::Time::now();
-//  double duration = (stop_time - start_time).toSec();
-//  ros::spinOnce();
-//  EXPECT_TRUE(finished_before_timeout);
-//  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
-//  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-//  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-//  EXPECT_TRUE(grasp_client->getResult()->success);
-//}
+  double expected_duration = start_width / desired_velocity;
+  auto grasp_goal = franka_gripper::GraspGoal();
+  grasp_goal.width = desired_width;
+  grasp_goal.speed = desired_velocity;
+  grasp_goal.force = desired_force;
+  grasp_goal.epsilon.inner = 0.005;
+  grasp_goal.epsilon.outer = 0.005;
+  auto start_time = ros::Time::now();
+  this->grasp_client->sendGoal(grasp_goal);
+  bool finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
+  auto stop_time = ros::Time::now();
+  double duration = (stop_time - start_time).toSec();
+  ros::spinOnce();
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::ABORTED);
+  EXPECT_FALSE(grasp_client->getResult()->success);
+}
+
+TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoToClosedState) {  // NOLINT(cert-err58-cpp)
+  double start_width = 0.08;
+  auto move_goal = franka_gripper::MoveGoal();
+  move_goal.width = start_width;
+  move_goal.speed = 0.1;
+  move_client->sendGoal(move_goal);
+  EXPECT_TRUE(move_client->waitForResult(ros::Duration(10.0)));
+  ros::Duration(0.1).sleep();
+  double desired_width = std::get<0>(GetParam());
+  double desired_velocity = std::get<1>(GetParam());
+  double desired_force = std::get<2>(GetParam());
+
+  double expected_duration = start_width / desired_velocity;
+  auto grasp_goal = franka_gripper::GraspGoal();
+  grasp_goal.width = desired_width;
+  grasp_goal.speed = desired_velocity;
+  grasp_goal.force = desired_force;
+  grasp_goal.epsilon.inner = 0.005;
+  grasp_goal.epsilon.outer = 0.005;
+  auto start_time = ros::Time::now();
+  grasp_client->sendGoal(grasp_goal);
+  bool finished_before_timeout = grasp_client->waitForResult(ros::Duration(10.0));
+  auto stop_time = ros::Time::now();
+  double duration = (stop_time - start_time).toSec();
+  ros::spinOnce();
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_TRUE(grasp_client->getResult()->success);
+}
+
+// NOLINTNEXTLINE(cert-err58-cpp)
+TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoToClosedStateWithoutDelay) {
+  double start_width = 0.08;
+  auto move_goal = franka_gripper::MoveGoal();
+  move_goal.width = start_width;
+  move_goal.speed = 0.1;
+  move_client->sendGoal(move_goal);
+  EXPECT_TRUE(move_client->waitForResult(ros::Duration(10.0)));
+
+  double desired_width = std::get<0>(GetParam());
+  double desired_velocity = std::get<1>(GetParam());
+  double desired_force = std::get<2>(GetParam());
+
+  double expected_duration = start_width / desired_velocity;
+  auto grasp_goal = franka_gripper::GraspGoal();
+  grasp_goal.width = desired_width;
+  grasp_goal.speed = desired_velocity;
+  grasp_goal.force = desired_force;
+  grasp_goal.epsilon.inner = 0.005;
+  grasp_goal.epsilon.outer = 0.005;
+  auto start_time = ros::Time::now();
+  grasp_client->sendGoal(grasp_goal);
+  bool finished_before_timeout = grasp_client->waitForResult(ros::Duration(10.0));
+  auto stop_time = ros::Time::now();
+  double duration = (stop_time - start_time).toSec();
+  ros::spinOnce();
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
+  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_TRUE(grasp_client->getResult()->success);
+}
 
 INSTANTIATE_TEST_CASE_P(GripperMoveFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperMoveFixtureTest,
@@ -247,7 +246,6 @@ INSTANTIATE_TEST_CASE_P(  // NOLINT(cert-err58-cpp)
                       std::make_tuple(-0.08, 0.1),
                       std::make_tuple(-0.0001, 0.1)));
 
-/// these are all broken currently, but the 0.0 is "more broken"
 INSTANTIATE_TEST_CASE_P(GripperHomingFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperHomingFixtureTest,
                         ::testing::Values(0.06, 0.01, 0.03, 0.08, 0.0));

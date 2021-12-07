@@ -154,19 +154,6 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
                                      .tolerance = this->config_.tolerance});
       return;
     }
-
-    if (state == State::HOMING) {
-      if (this->config_.width_desired == 0) {
-        // Finger now open, first part of homing done, switch direction
-        setConfig(Config{.width_desired = kMaxFingerWidth,
-                         .speed_desired = this->config_.speed_desired,
-                         .force_desired = this->config_.force_desired,
-                         .tolerance = this->config_.tolerance});
-      } else {
-        // Finger now closed again, homing finished
-        setState(State::IDLE);
-      }
-    }
   }
 
   if (state == State::GRASPING or state == State::MOVING) {
@@ -292,11 +279,22 @@ void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& /*
   eps.inner = this->tolerance_move_;
   eps.outer = this->tolerance_move_;
   transition(
-      State::HOMING,
-      Config{.width_desired = 0, .speed_desired = -0.02, .force_desired = 0, .tolerance = eps});
+      State::MOVING,
+      Config{.width_desired = 0, .speed_desired = 0.02, .force_desired = 0, .tolerance = eps});
 
   waitUntilStateChange();
 
+  if (not this->action_homing_->isActive()) {
+    // Homing Action was interrupted from another action goal callback and already preempted.
+    // Don't try to resend result now
+    return;
+  }
+  transition(State::MOVING, Config{.width_desired = kMaxFingerWidth,
+                                   .speed_desired = 0.02,
+                                   .force_desired = 0,
+                                   .tolerance = eps});
+
+  waitUntilStateChange();
   if (not this->action_homing_->isActive()) {
     // Homing Action was interrupted from another action goal callback and already preempted.
     // Don't try to resend result now
