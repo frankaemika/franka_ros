@@ -152,6 +152,7 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
                                      .speed_desired = 0,
                                      .force_desired = 0,
                                      .tolerance = this->config_.tolerance});
+      return;
     }
 
     if (state == State::HOMING) {
@@ -168,7 +169,7 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
     }
   }
 
-  if (state == State::GRASPING) {
+  if (state == State::GRASPING or state == State::MOVING) {
     // Since the velocity signal is noisy it can easily happen that one sample is below the
     // threshold To avoid abortion because of noise, we have to read at least N consecutive number
     // of samples before interpreting something was grasped (or not)
@@ -181,11 +182,19 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
     }
 
     if (speed_threshold_counter >= this->speed_samples_) {
-      // Done with grasp motion, switch to holding, i.e. keep position & force
-      transition(State::HOLDING, Config{.width_desired = width,
-                                        .speed_desired = 0,
-                                        .force_desired = this->config_.force_desired,
-                                        .tolerance = this->config_.tolerance});
+      if (state == State::GRASPING) {
+        // Done with grasp motion, switch to holding, i.e. keep position & force
+        transition(State::HOLDING, Config{.width_desired = width,
+                                          .speed_desired = 0,
+                                          .force_desired = this->config_.force_desired,
+                                          .tolerance = this->config_.tolerance});
+      } else {
+        // Moving failed due to object between fingers. Switch to idle.
+        transition(State::IDLE, Config{.width_desired = width,
+                                       .speed_desired = 0,
+                                       .force_desired = 0,
+                                       .tolerance = this->config_.tolerance});
+      }
       speed_threshold_counter = 0;
     }
   }
@@ -352,8 +361,9 @@ void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) 
     action_move_->setAborted(result, result.error);
     return;
   }
-
-  result.success = static_cast<decltype(result.success)>(true);
+  double width = this->finger1_.getPosition() + this->finger2_.getPosition();  // recalculate
+  bool ok = goal->width - eps.inner < width and width < goal->width + eps.outer;
+  result.success = static_cast<decltype(result.success)>(ok);
   action_move_->setSucceeded(result);
 }
 

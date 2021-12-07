@@ -54,28 +54,27 @@ class GripperFailGraspFixtureTest
     : public GripperSimTest,
       public testing::WithParamInterface<std::tuple<double, double, double>> {};
 
-/// this one currently fails
-// TEST_F(GripperSimTest, FailMove) {  // NOLINT(cert-err58-cpp)
-//   double desired_width = 0;
-//   double desired_velocity = 0.1;
-//
-//   auto move_goal = franka_gripper::MoveGoal();
-//   move_goal.width = desired_width;
-//   move_goal.speed = desired_velocity;
-//   move_client->sendGoal(move_goal);
-//
-//   bool finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
-//   EXPECT_TRUE(finished_before_timeout);
-//   EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::ABORTED);
-//   EXPECT_FALSE(move_client->getResult()->success);
-//
-//   move_goal.width = 0.08;
-//   move_client->sendGoal(move_goal);
-//   finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
-//   EXPECT_TRUE(finished_before_timeout);
-//   EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-//   EXPECT_TRUE(move_client->getResult()->success);
-// }
+TEST_F(GripperSimTest, FailMove) {  // NOLINT(cert-err58-cpp)
+  double desired_width = 0;
+  double desired_velocity = 0.1;
+
+  auto move_goal = franka_gripper::MoveGoal();
+  move_goal.width = desired_width;
+  move_goal.speed = desired_velocity;
+  move_client->sendGoal(move_goal);
+
+  bool finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_FALSE(move_client->getResult()->success);
+
+  move_goal.width = 0.08;
+  move_client->sendGoal(move_goal);
+  finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_TRUE(move_client->getResult()->success);
+}
 
 TEST_P(GripperGraspFixtureTest, CanGraspWithoutDelay) {  // NOLINT(cert-err58-cpp)
   double start_width = 0.08;
