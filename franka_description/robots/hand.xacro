@@ -2,6 +2,11 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <xacro:macro name="hand" params="connected_to:='' prefix:='' ns:='' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0">
+    <xacro:if value="${ns != ''}">
+      ${xacro.warning("xacro:hand: argument ns is deprecated. Use prefix instead.")}
+      <xacro:property name="prefix" value="${ns}"/>
+    </xacro:if>
+
     <xacro:unless value="${connected_to == ''}">
       <joint name="${prefix}_hand_joint" type="fixed">
         <parent link="${connected_to}"/>

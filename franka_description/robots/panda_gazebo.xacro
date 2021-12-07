@@ -273,6 +273,11 @@
   <xacro:macro name="hand" params="connected_to:='' prefix:='' ns:='' xyz:='0 0 0' rpy:='0 0 0'">
     <xacro:include filename="$(find franka_description)/robots/utils.xacro"/>
 
+    <xacro:if value="${ns != ''}">
+      ${xacro.warning("xacro:hand: argument ns is deprecated. Use prefix instead.")}
+      <xacro:property name="prefix" value="${ns}" />
+    </xacro:if>
+
     <xacro:unless value="${connected_to == ''}">
       <joint name="${prefix}_hand_joint" type="fixed">
         <parent link="${connected_to}"/>
