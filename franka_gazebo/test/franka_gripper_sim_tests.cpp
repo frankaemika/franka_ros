@@ -158,7 +158,7 @@ TEST_P(GripperGraspFixtureTest, CanFailGraspGoToClosedState) {  // NOLINT(cert-e
   EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::ABORTED);
+  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_FALSE(grasp_client->getResult()->success);
 }
 

@@ -421,9 +421,7 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
                    " m/s the width between the fingers was not at " + std::to_string(goal->width) +
                    "m (-" + std::to_string(goal->epsilon.inner) + "m/+" +
                    std::to_string(goal->epsilon.outer) + "m) but at " + std::to_string(width) + "m";
-    action_grasp_->setAborted(result, result.error);
     setState(State::IDLE);
-    return;
   }
 
   action_grasp_->setSucceeded(result);
