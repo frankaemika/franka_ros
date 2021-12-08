@@ -7,8 +7,7 @@ pipeline {
         checkoutToSubdirectory('src/franka_ros')
         parallelsAlwaysFailFast()
     }
-    environment
-    {
+    environment {
         CMAKE_BUILD_PARALLEL_LEVEL=sh(script: 'nproc', returnStdout: true).trim().toInteger()
     }
     stages {
@@ -31,21 +30,6 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Check commit history sync') {
-                        when {
-                            allOf {
-                                environment name: 'DISTRO', value: 'noetic'
-                                environment name: 'BUILD_TOOL', value: 'catkin_make'
-                            }
-                        }
-                        steps {
-                            sh """
-                                cd src/franka_ros
-                                .ci/checkgithistory.sh \\
-                                    https://github.com/frankaemika/franka_ros.git develop
-                            """
-                        }
-                    }
                     stage('Notify Stash') {
                         when {
                             allOf {
@@ -129,6 +113,21 @@ pipeline {
                             always {
                                 junit 'build/test_results/**/*.xml'
                             }
+                        }
+                    }
+                    stage('Check commit history sync') {
+                        when {
+                            allOf {
+                                environment name: 'DISTRO', value: 'noetic'
+                                environment name: 'BUILD_TOOL', value: 'catkin_make'
+                            }
+                        }
+                        steps {
+                            sh """
+                                cd src/franka_ros
+                                .ci/checkgithistory.sh \\
+                                    https://github.com/frankaemika/franka_ros.git develop
+                            """
                         }
                     }
                 }
