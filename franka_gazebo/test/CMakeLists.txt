@@ -24,6 +24,8 @@ target_include_directories(franka_hw_sim_test PUBLIC
 
 add_rostest_gtest(franka_gripper_sim_test launch/gazebo_gripper_sim.test
   franka_gripper_sim_tests.cpp
+  gripper_sim_test_setup.cpp
+  gripper_sim_test_setup.h
 )
 
 add_dependencies(franka_gripper_sim_test
@@ -43,6 +45,8 @@ target_include_directories(franka_gripper_sim_test PUBLIC
 add_rostest_gtest(franka_gripper_sim_test_with_object
   launch/gazebo_gripper_sim_with_object.test
   franka_gripper_sim_tests_with_object.cpp
+  gripper_sim_test_setup.cpp
+  gripper_sim_test_setup.h
 )
 
 add_dependencies(franka_gripper_sim_test_with_object
