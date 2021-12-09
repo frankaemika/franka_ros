@@ -138,6 +138,6 @@ INSTANTIATE_TEST_CASE_P(
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "franka_gripper_sim_test");
+  ros::init(argc, argv, "franka_gripper_sim_test_with_object");
   return RUN_ALL_TESTS();
 }
