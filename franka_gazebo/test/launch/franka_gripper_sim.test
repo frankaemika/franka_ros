@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-    <include file="$(find franka_gazebo)/launch/panda.launch">
-        <arg name="controller" value="cartesian_impedance_example_controller"/>
-        <arg name="headless" value="true"/> <!-- Set this to false for debugging -->
-    </include>
-    <test test-name="franka_gripper_sim_test" pkg="franka_gazebo" type="franka_gripper_sim_test" time-limit="600.0"/>
+  <include file="$(find franka_gazebo)/launch/panda.launch">
+    <arg name="controller" value="cartesian_impedance_example_controller"/>
+    <arg name="headless" value="true"/> <!-- Set this to false for debugging -->
+  </include>
+  <test test-name="franka_gripper_sim_test" pkg="franka_gazebo" type="franka_gripper_sim_test" time-limit="600.0"/>
 </launch>
