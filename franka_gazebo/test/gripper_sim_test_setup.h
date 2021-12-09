@@ -15,6 +15,8 @@ class GripperSimTestSetup : public ::testing::Test {
   ros::NodeHandle n;
   double finger_1_pos = 0.;
   double finger_2_pos = 0.;
+  double finger_1_force = 0.;
+  double finger_2_force = 0.;
   void SetUp() override;
-  void UpdateFingerPositions();
+  void UpdateFingerState();
 };

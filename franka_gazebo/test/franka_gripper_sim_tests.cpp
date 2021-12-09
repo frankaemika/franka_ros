@@ -85,7 +85,7 @@ TEST_P(GripperMoveFixtureTest, CanPerformMove) {  // NOLINT(cert-err58-cpp)
   bool finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
-  UpdateFingerPositions();
+  UpdateFingerState();
 
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
@@ -106,7 +106,7 @@ TEST_P(GripperHomingFixtureTest, CanPerformHoming) {  // NOLINT(cert-err58-cpp)
 
   homing_client->sendGoal(franka_gripper::HomingGoal());
   homing_client->waitForResult(ros::Duration(15.));
-  UpdateFingerPositions();
+  UpdateFingerState();
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_TRUE(homing_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_TRUE(homing_client->getResult()->success);
@@ -135,7 +135,7 @@ TEST_P(GripperGraspFixtureTest, CanFailGraspGoesToClosedState) {  // NOLINT(cert
   finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
-  UpdateFingerPositions();
+  UpdateFingerState();
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
@@ -166,7 +166,7 @@ TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoesToClosedState) {  // NOLI
   finished_before_timeout = grasp_client->waitForResult(ros::Duration(10.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
-  UpdateFingerPositions();
+  UpdateFingerState();
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
