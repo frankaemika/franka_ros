@@ -46,6 +46,6 @@
 
     <!--Export gazebo models and worlds-->
     <gazebo_ros gazebo_model_path="${prefix}/models"/>
-    <gazebo_ros gazebo_resource_path="${prefix}/worlds"/>
+    <gazebo_ros gazebo_resource_path="${prefix}/world"/>
   </export>
 </package>

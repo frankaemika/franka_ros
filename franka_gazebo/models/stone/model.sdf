@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
-<sdf version='1.7'>
+<sdf version='1.6'>
   <model name='stone'>
     <link name='link'>
-      <pose>0.0 0.0 0.032 0 -0 0</pose>
+      <pose>0.0 0.0 0.0 0 -0 0</pose>
       <inertial>
         <!--NOTE: Uses limestone density (i.e 2000 kg/m^3) to calculate the mass
         see https://en.wikipedia.org/wiki/Limestone
