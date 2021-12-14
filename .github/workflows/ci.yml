@@ -64,7 +64,7 @@ jobs:
           cd /ros
           catkin_make -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-    - name: Check Format
+    - name: Check C++ Format
       if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
       uses: addnab/docker-run-action@v3
       with:
@@ -74,6 +74,16 @@ jobs:
         run: |
           source /ros/devel/setup.bash
           cmake --build /ros/build --target check-format
+    
+    - name: Check Python Format
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
           cmake --build /ros/build --target check-pyformat
 
     - name: Check Linting

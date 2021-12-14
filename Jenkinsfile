@@ -74,13 +74,23 @@ pipeline {
                             '''
                         }
                     }
-                    stage('Check Format') {
+                    stage('Check C++ Format') {
                         when {
                             environment name: 'BUILD_TOOL', value: 'catkin_make'
                         }
                         steps {
                             sh '''
                                 cmake --build build --target check-format
+                            '''
+                        }
+                    }
+                    stage('Check Python Format') {
+                        when {
+                            environment name: 'BUILD_TOOL', value: 'catkin_make'
+                        }
+                        steps {
+                            sh '''
+                                cmake --build build --target check-pyformat
                             '''
                         }
                     }
