@@ -3,6 +3,7 @@
 
 #include <franka_gazebo/franka_gripper_sim.h>
 #include <pluginlib/class_list_macros.h>
+#include <boost/assign.hpp>
 
 namespace franka_gazebo {
 
@@ -31,6 +32,20 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   nh.param<double>("gripper_action/speed", this->speed_default_, kDefaultGripperActionSpeed);
   nh.param<double>("grasp/resting_threshold", this->speed_threshold_, kGraspRestingThreshold);
   nh.param<int>("grasp/consecutive_samples", this->speed_samples_, kGraspConsecutiveSamples);
+  nh.param<std::string>("log_level", this->log_level_, kLogLevel);
+  this->log_level_[0] = toupper(this->log_level_[0]);
+
+  // Set the plugin log level
+  std::map<std::string, ros::console::levels::Level> level_map =
+      boost::assign::map_list_of("Debug", ros::console::levels::Debug)(
+          "Info", ros::console::levels::Info)("Warn", ros::console::levels::Warn)(
+          "Error", ros::console::levels::Error)("Fatal", ros::console::levels::Fatal);
+  const ros::console::levels::Level kLogLevelEnum =
+      (level_map.find(this->log_level_) != level_map.end()) ? level_map[this->log_level_]
+                                                            : ros::console::levels::Info;
+  if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, kLogLevelEnum)) {
+    ros::console::notifyLoggerLevelsChanged();
+  }
 
   try {
     this->finger1_ = hw->getHandle(finger1);

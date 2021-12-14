@@ -16,6 +16,7 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <realtime_tools/realtime_publisher.h>
+#include <ros/console.h>
 #include <ros/time.h>
 #include <sensor_msgs/JointState.h>
 
@@ -37,6 +38,9 @@ const double kGraspRestingThreshold = 0.003;
 
 /// How many times the speed has to drop below resting threshold before the grasping will be checked
 const int kGraspConsecutiveSamples = 10;
+
+/// The log level used by the 'franka_gripper_sim' Gazebo plugin
+const std::string kLogLevel = "Info";
 
 /**
  * Simulate the franka_gripper_node.
@@ -104,6 +108,7 @@ class FrankaGripperSim
   double tolerance_move_;            ///< [m] inner + outer position tolerances used during grasp
   double tolerance_gripper_action_;  ///< [m] inner + outer position tolerances used during gripper
                                      ///< action
+  std::string log_level_;            /// The log level that is used
 
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::StopAction>> action_stop_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_gripper::HomingAction>> action_homing_;
