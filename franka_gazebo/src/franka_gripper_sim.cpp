@@ -59,7 +59,7 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   this->action_homing_ = std::make_unique<SimpleActionServer<HomingAction>>(
       nh, "homing", boost::bind(&FrankaGripperSim::onHomingGoal, this, _1), false);
   this->action_homing_->registerPreemptCallback([&]() {
-    ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Homing Action cancelled");
+    ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "Homing Action cancelled");
     this->setState(State::IDLE);
   });
   this->action_homing_->start();
@@ -67,7 +67,7 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   this->action_move_ = std::make_unique<SimpleActionServer<MoveAction>>(
       nh, "move", boost::bind(&FrankaGripperSim::onMoveGoal, this, _1), false);
   this->action_move_->registerPreemptCallback([&]() {
-    ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Moving Action cancelled");
+    ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "Moving Action cancelled");
     this->setState(State::IDLE);
   });
   this->action_move_->start();
@@ -75,7 +75,7 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   this->action_grasp_ = std::make_unique<SimpleActionServer<GraspAction>>(
       nh, "grasp", boost::bind(&FrankaGripperSim::onGraspGoal, this, _1), false);
   this->action_grasp_->registerPreemptCallback([&]() {
-    ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Grasping Action cancelled");
+    ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "Grasping Action cancelled");
     this->setState(State::IDLE);
   });
   this->action_grasp_->start();
@@ -83,7 +83,7 @@ bool FrankaGripperSim::init(hardware_interface::EffortJointInterface* hw, ros::N
   this->action_gc_ = std::make_unique<SimpleActionServer<GripperCommandAction>>(
       nh, "gripper_action", boost::bind(&FrankaGripperSim::onGripperActionGoal, this, _1), false);
   this->action_gc_->registerPreemptCallback([&]() {
-    ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Gripper Command Action cancelled");
+    ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "Gripper Command Action cancelled");
     this->setState(State::IDLE);
   });
   this->action_gc_->start();
@@ -258,7 +258,7 @@ void FrankaGripperSim::waitUntilStateChange() {
 }
 
 void FrankaGripperSim::onStopGoal(const franka_gripper::StopGoalConstPtr& /*goal*/) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim", "Stop Action goal received");
+  ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "Stop Action goal received");
 
   interrupt("Command interrupted, because stop action was called", State::IDLE);
 
@@ -273,7 +273,7 @@ void FrankaGripperSim::onStopGoal(const franka_gripper::StopGoalConstPtr& /*goal
 }
 
 void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& /*goal*/) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Homing Action goal received");
+  ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "New Homing Action goal received");
 
   if (this->state_ != State::IDLE) {
     this->interrupt("Command interrupted, because new homing action called", State::HOMING);
@@ -307,8 +307,8 @@ void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& /*
 }
 
 void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim",
-                        "New Move Action Goal received: " << goal->width << " m");
+  ROS_DEBUG_STREAM_NAMED("FrankaGripperSim",
+                         "New Move Action Goal received: " << goal->width << " m");
   if (goal->speed < 0) {
     franka_gripper::MoveResult result;
     result.success = static_cast<decltype(result.success)>(false);
@@ -358,8 +358,8 @@ void FrankaGripperSim::onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal) 
 }
 
 void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim",
-                        "New Grasp Action Goal received: " << goal->force << "N");
+  ROS_DEBUG_STREAM_NAMED("FrankaGripperSim",
+                         "New Grasp Action Goal received: " << goal->force << "N");
 
   if (goal->width >= kMaxFingerWidth or goal->width < 0) {
     franka_gripper::GraspResult result;
@@ -422,8 +422,8 @@ void FrankaGripperSim::onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal
 }
 
 void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoalConstPtr& goal) {
-  ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Gripper Command Action Goal received: "
-                                                << goal->command.max_effort << "N");
+  ROS_DEBUG_STREAM_NAMED("FrankaGripperSim", "New Gripper Command Action Goal received: "
+                                                 << goal->command.max_effort << "N");
 
   // HACK: As one gripper finger is <mimic>, MoveIt!'s trajectory execution manager
   // only sends us the width of one finger. Multiply by 2 to get the intended width.
