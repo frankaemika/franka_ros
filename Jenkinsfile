@@ -6,6 +6,7 @@ pipeline {
     options {
         checkoutToSubdirectory('src/franka_ros')
         parallelsAlwaysFailFast()
+        disableConcurrentBuilds()
     }
     environment {
         CMAKE_BUILD_PARALLEL_LEVEL=sh(script: 'nproc', returnStdout: true).trim().toInteger()
