@@ -45,14 +45,14 @@ TEST_F(GripperSimTestSetup, FailMove) {  // NOLINT(cert-err58-cpp)
 
   bool finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
   EXPECT_TRUE(finished_before_timeout);
-  EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_EQ(move_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_FALSE(move_client->getResult()->success);
 
   move_goal.width = 0.08;
   move_client->sendGoal(move_goal);
   finished_before_timeout = move_client->waitForResult(ros::Duration(15.0));
   EXPECT_TRUE(finished_before_timeout);
-  EXPECT_TRUE(move_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_EQ(move_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_TRUE(move_client->getResult()->success);
 }
 
@@ -80,7 +80,7 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
   double duration = (stop_time - start_time).toSec();
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_TRUE(grasp_client->getResult()->success);
   for (int i = 0; i < 40; i++) {
     ros::Duration(0.1).sleep();
@@ -120,7 +120,7 @@ TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
   EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, kStoneWidth, kAllowedPositionError);
   EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_FALSE(grasp_client->getResult()->success);
 }
 
