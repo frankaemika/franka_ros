@@ -87,9 +87,11 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
     updateFingerState();
     EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
     EXPECT_NEAR(finger_2_pos, finger_1_pos, kAllowedPositionError);
-    double expected_force = desired_force / 2.0;
-    EXPECT_NEAR(finger_1_force, expected_force, kAllowedForceError);
-    EXPECT_NEAR(finger_2_force, expected_force, kAllowedForceError);
+    if (ROS_VERSION_MINIMUM(1, 15, 0)) {  // only test forces in noetic and later versions
+      double expected_force = desired_force / 2.0;
+      EXPECT_NEAR(finger_1_force, expected_force, kAllowedForceError);
+      EXPECT_NEAR(finger_2_force, expected_force, kAllowedForceError);
+    }
   }
 }
 
