@@ -21,4 +21,5 @@ class GripperSimTestSetup : public ::testing::Test {
   void SetUp() override;
   void updateFingerState();
   void resetStone();
+  void setRealTimeUpdateRate(double rate);
 };
