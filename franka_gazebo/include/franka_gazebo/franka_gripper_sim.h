@@ -70,7 +70,6 @@ class FrankaGripperSim
     GRASPING,  ///< Gripper is tracking a desired position and velocity. On contact it switches to
                ///< `HOLDING` if inside the epsilon of the desired grasping width otherwise back to
                ///< `IDLE`
-    HOMING     ///< Gripper opens fully and then closes again.
   };
 
   struct Config {

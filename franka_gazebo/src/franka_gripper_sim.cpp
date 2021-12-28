@@ -229,7 +229,7 @@ void FrankaGripperSim::interrupt(const std::string& message, const State& except
     result.error = message;
     this->action_grasp_->setAborted(result, result.error);
   }
-  if (except != State::HOMING and this->action_homing_ != nullptr and
+  if (except != State::MOVING and this->action_homing_ != nullptr and
       this->action_homing_->isActive()) {
     franka_gripper::HomingResult result;
     result.success = static_cast<decltype(result.success)>(false);
@@ -272,7 +272,7 @@ void FrankaGripperSim::onHomingGoal(const franka_gripper::HomingGoalConstPtr& /*
   ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Homing Action goal received");
 
   if (this->state_ != State::IDLE) {
-    this->interrupt("Command interrupted, because new homing action called", State::HOMING);
+    this->interrupt("Command interrupted, because new homing action called", State::MOVING);
   }
 
   franka_gripper::GraspEpsilon eps;
