@@ -14,6 +14,7 @@
 * add 'gravity_vector' gravity ROS parameter to FrankaHWSim
 * Fix "Failed to create robot simulation interface loader" bug when installing from APT
 * Improve Gazebo 'stone' world objects
+* Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
 
 ## 0.8.1 - 2021-09-08
 
