@@ -11,7 +11,15 @@
   <!-- || Paolo Robuffo Giordano, Alessandro de Luca                || -->
   <!-- =============================================================== -->
 
-  <xacro:macro name="panda_arm" params="arm_id:='panda'">
+  <xacro:macro name="panda_arm" params="arm_id:='panda' connected_to:='' xyz:='0 0 0' rpy:='0 0 0'">
+    <xacro:unless value="${not connected_to}">
+      <joint name="${arm_id}_joint_${connected_to}" type="fixed">
+        <parent link="${connected_to}"/>
+        <child link="${arm_id}_link0"/>
+        <origin rpy="${rpy}" xyz="${xyz}"/>
+      </joint>
+    </xacro:unless>
+
     <link name="${arm_id}_link0">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -318,7 +326,7 @@
       </collision>
       <!-- diagonal finger -->
       <collision>
-	      <origin xyz="0 ${sign}15.9e-3 28.35e-3" rpy="${sign}${pi/6} 0 0"/>
+        <origin xyz="0 ${sign}15.9e-3 28.35e-3" rpy="${sign}${pi/6} 0 0"/>
         <geometry>
           <box size="17.5e-3 7e-3 23.5e-3" />
         </geometry>
