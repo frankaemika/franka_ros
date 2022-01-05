@@ -9,47 +9,53 @@
 #include "gripper_sim_test_setup.h"
 
 static const double kAllowedPositionError = 5e-3;
-static const double kAllowedRelativeDurationError = 0.2;
 
-class GripperMoveFixtureTest : public GripperSimTestSetup,
-                               public testing::WithParamInterface<std::tuple<double, double>> {
- protected:
-  void SetUp() override {
-    GripperSimTestSetup::SetUp();
-    std::tie(desired_width, desired_velocity) = GetParam();
-  }
-
-  double desired_width{0};
-  double desired_velocity{0};
-};
-
-class GripperGraspFixtureTest
+class GripperMoveFixtureTest
     : public GripperSimTestSetup,
       public testing::WithParamInterface<std::tuple<double, double, double>> {
  protected:
   void SetUp() override {
     GripperSimTestSetup::SetUp();
-    std::tie(desired_width, desired_velocity, desired_force) = GetParam();
+    std::tie(desired_width, desired_velocity, allowed_absolute_duration_error) = GetParam();
+  }
+
+  double desired_width{0};
+  double desired_velocity{0};
+  double allowed_absolute_duration_error{0};
+};
+
+class GripperGraspFixtureTest
+    : public GripperSimTestSetup,
+      public testing::WithParamInterface<std::tuple<double, double, double, double>> {
+ protected:
+  void SetUp() override {
+    GripperSimTestSetup::SetUp();
+    std::tie(desired_width, desired_velocity, desired_force, allowed_absolute_duration_error) =
+        GetParam();
   }
 
   double desired_width{0};
   double desired_velocity{0};
   double desired_force{0};
+  double allowed_absolute_duration_error{0};
 };
 
 class GripperGraspZeroFixtureTest
     : public GripperSimTestSetup,
-      public testing::WithParamInterface<std::tuple<std::tuple<double, double, double>, double>> {
+      public testing::WithParamInterface<
+          std::tuple<std::tuple<double, double, double, double>, double>> {
  protected:
   void SetUp() override {
     GripperSimTestSetup::SetUp();
-    std::tie(desired_width, desired_velocity, desired_force) = std::get<0>(GetParam());
+    std::tie(desired_width, desired_velocity, desired_force, allowed_absolute_duration_error) =
+        std::get<0>(GetParam());
     desired_sleep = std::get<1>(GetParam());
   }
 
   double desired_width{0};
   double desired_velocity{0};
   double desired_force{0};
+  double allowed_absolute_duration_error{0};
   double desired_sleep{0};
 };
 
@@ -92,7 +98,7 @@ TEST_P(GripperMoveFixtureTest, CanPerformMove) {  // NOLINT(cert-err58-cpp)
   EXPECT_TRUE(move_client->getResult()->success);
   EXPECT_NEAR(finger_1_pos * 2, desired_width, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, desired_width, kAllowedPositionError);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_NEAR(duration, expected_duration, allowed_absolute_duration_error);
 }
 
 TEST_P(GripperHomingFixtureTest, CanPerformHoming) {  // NOLINT(cert-err58-cpp)
@@ -139,7 +145,7 @@ TEST_P(GripperGraspFixtureTest, CanFailGraspGoesToClosedState) {  // NOLINT(cert
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_NEAR(duration, expected_duration, allowed_absolute_duration_error);
   EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_FALSE(grasp_client->getResult()->success);
 }
@@ -170,27 +176,27 @@ TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoesToClosedState) {  // NOLI
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, 0, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, 0, kAllowedPositionError);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_NEAR(duration, expected_duration, allowed_absolute_duration_error);
   EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_TRUE(grasp_client->getResult()->success);
 }
 
 INSTANTIATE_TEST_CASE_P(GripperMoveFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperMoveFixtureTest,
-                        ::testing::Values(std::make_tuple(0.06, 0.1),
-                                          std::make_tuple(0.01, 0.1),
-                                          std::make_tuple(0.07, 0.1),
-                                          std::make_tuple(0.03, 0.01),
-                                          std::make_tuple(0.07, 0.01),
-                                          std::make_tuple(0.0, 0.01)));
+                        ::testing::Values(std::make_tuple(0.06, 0.1, 0.1),
+                                          std::make_tuple(0.01, 0.1, 0.1),
+                                          std::make_tuple(0.07, 0.1, 0.1),
+                                          std::make_tuple(0.03, 0.01, 0.6),
+                                          std::make_tuple(0.07, 0.01, 0.6),
+                                          std::make_tuple(0.0, 0.01, 0.6)));
 
 INSTANTIATE_TEST_CASE_P(  // NOLINT(cert-err58-cpp)
     GripperFailMoveFixtureTest,
     GripperFailMoveFixtureTest,
-    ::testing::Values(std::make_tuple(0.09, 0.1),
-                      std::make_tuple(std::numeric_limits<double>::quiet_NaN(), 0.1),
-                      std::make_tuple(-0.08, 0.1),
-                      std::make_tuple(-0.0001, 0.1)));
+    ::testing::Values(std::make_tuple(0.09, 0.1, 0),
+                      std::make_tuple(std::numeric_limits<double>::quiet_NaN(), 0.1, 0),
+                      std::make_tuple(-0.08, 0.1, 0),
+                      std::make_tuple(-0.0001, 0.1, 0)));
 
 INSTANTIATE_TEST_CASE_P(GripperHomingFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperHomingFixtureTest,
@@ -198,18 +204,18 @@ INSTANTIATE_TEST_CASE_P(GripperHomingFixtureTest,  // NOLINT(cert-err58-cpp)
 
 INSTANTIATE_TEST_CASE_P(GripperGraspFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperGraspFixtureTest,
-                        ::testing::Values(std::make_tuple(0.03, 0.1, 0.),
-                                          std::make_tuple(0.02, 0.1, 5.),
-                                          std::make_tuple(0.03, 0.01, 0.),
-                                          std::make_tuple(0.07, 0.01, 5.)));
+                        ::testing::Values(std::make_tuple(0.03, 0.1, 0., 0.1),
+                                          std::make_tuple(0.02, 0.1, 5., 0.1),
+                                          std::make_tuple(0.03, 0.01, 0., 0.6),
+                                          std::make_tuple(0.07, 0.01, 5., 0.6)));
 
 INSTANTIATE_TEST_CASE_P(GripperGraspZeroFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperGraspZeroFixtureTest,
-                        ::testing::Combine(::testing::Values(std::make_tuple(0.0, 0.1, 0.),
-                                                             std::make_tuple(0.0, 0.1, 5.),
-                                                             std::make_tuple(0.0, 0.01, 0.),
-                                                             std::make_tuple(0.0, 0.01, 50.),
-                                                             std::make_tuple(0.0, 0.01, 100.)),
+                        ::testing::Combine(::testing::Values(std::make_tuple(0.0, 0.1, 0., 0.1),
+                                                             std::make_tuple(0.0, 0.1, 5., 0.1),
+                                                             std::make_tuple(0.0, 0.01, 0., 0.6),
+                                                             std::make_tuple(0.0, 0.01, 50., 0.6),
+                                                             std::make_tuple(0.0, 0.01, 100., 0.6)),
 
                                            ::testing::Values(0., 0.1)));
 

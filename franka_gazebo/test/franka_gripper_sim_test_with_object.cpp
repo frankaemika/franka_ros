@@ -9,18 +9,17 @@
 
 static const double kAllowedPositionError = 5e-3;
 static const double kAllowedForceError = 3;
-static const double kAllowedRelativeDurationError = 0.2;
 static const double kStoneWidth = 0.032;
 
 class GripperGraspFixtureTest
     : public GripperSimTestSetup,
       public testing::WithParamInterface<
-          std::tuple<std::tuple<double, double, double, double, double>, double>> {
+          std::tuple<std::tuple<double, double, double, double, double, double>, double>> {
  protected:
   void SetUp() override {
     GripperSimTestSetup::SetUp();
     std::tie(desired_width, desired_velocity, desired_force, desired_epsilon_inner,
-             desired_epsilon_outer) = std::get<0>(GetParam());
+             desired_epsilon_outer, allowed_absolute_duration_error) = std::get<0>(GetParam());
     desired_sleep = std::get<1>(GetParam());
   }
 
@@ -29,6 +28,7 @@ class GripperGraspFixtureTest
   double desired_force{0};
   double desired_epsilon_inner{0};
   double desired_epsilon_outer{0};
+  double allowed_absolute_duration_error{0};
   double desired_sleep{0};
 };
 
@@ -79,7 +79,7 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
   EXPECT_TRUE(finished_before_timeout);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_NEAR(duration, expected_duration, allowed_absolute_duration_error);
   EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_TRUE(grasp_client->getResult()->success);
   for (int i = 0; i < 40; i++) {
@@ -121,7 +121,7 @@ TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, kStoneWidth, kAllowedPositionError);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_NEAR(duration, expected_duration, allowed_absolute_duration_error);
   EXPECT_EQ(grasp_client->getState(), actionlib::SimpleClientGoalState::SUCCEEDED);
   EXPECT_FALSE(grasp_client->getResult()->success);
 }
@@ -129,18 +129,18 @@ TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
 INSTANTIATE_TEST_CASE_P(
     GripperFailGraspFixtureTest,  // NOLINT(cert-err58-cpp)
     GripperFailGraspFixtureTest,
-    ::testing::Combine(::testing::Values(std::make_tuple(0.04, 0.1, 0., 0.005, 0.005),
-                                         std::make_tuple(0.02, 0.1, 2., 0.01, 0.01),
-                                         std::make_tuple(0.03, 0.1, 2, 0.001, 0.001)),
+    ::testing::Combine(::testing::Values(std::make_tuple(0.04, 0.1, 0., 0.005, 0.005, 0.1),
+                                         std::make_tuple(0.02, 0.1, 2., 0.01, 0.01, 0.1),
+                                         std::make_tuple(0.03, 0.1, 2, 0.001, 0.001, 0.1)),
                        ::testing::Values(0, 0.1)));
 
 INSTANTIATE_TEST_CASE_P(
     GripperGraspFixtureTest,  // NOLINT(cert-err58-cpp)
     GripperGraspFixtureTest,
-    ::testing::Combine(::testing::Values(std::make_tuple(0.032, 0.1, 100., 0.01, 0.01),
-                                         std::make_tuple(0.03, 0.1, 30., 0.005, 0.005),
-                                         std::make_tuple(0.0325, 0.01, 30., 0.003, 0.003),
-                                         std::make_tuple(0.034, 0.01, 30., 0.005, 0.005)),
+    ::testing::Combine(::testing::Values(std::make_tuple(0.032, 0.1, 100., 0.01, 0.01, 0.1),
+                                         std::make_tuple(0.03, 0.1, 30., 0.005, 0.005, 0.1),
+                                         std::make_tuple(0.0325, 0.01, 30., 0.003, 0.003, 0.6),
+                                         std::make_tuple(0.034, 0.01, 30., 0.005, 0.005, 0.6)),
                        ::testing::Values(0, 0.1)));
 
 int main(int argc, char** argv) {
