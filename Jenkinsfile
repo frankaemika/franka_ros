@@ -105,7 +105,7 @@ pipeline {
                         steps {
                             sh ''' 
                                 . /opt/ros/${DISTRO}/setup.sh
-                                ${BUILD_TOOL} run_tests
+                                ${BUILD_TOOL} run_tests -j1
                                 catkin_test_results
                             '''
                         }
