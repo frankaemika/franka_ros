@@ -1,4 +1,5 @@
 #pragma once
+
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <franka_gripper/GraspAction.h>
@@ -18,6 +19,6 @@ class GripperSimTestSetup : public ::testing::Test {
   double finger_1_force = 0.;
   double finger_2_force = 0.;
   void SetUp() override;
-  void UpdateFingerState();
+  void updateFingerState();
   void resetStone();
 };

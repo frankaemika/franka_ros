@@ -14,10 +14,10 @@ void GripperSimTestSetup::SetUp() {
   move_client->waitForServer();
   grasp_client->waitForServer();
   resetStone();
-  UpdateFingerState();
+  updateFingerState();
 }
 
-void GripperSimTestSetup::UpdateFingerState() {
+void GripperSimTestSetup::updateFingerState() {
   auto msg = ros::topic::waitForMessage<sensor_msgs::JointState>("/franka_gripper/joint_states", n);
   finger_1_pos = msg->position.at(0);
   finger_2_pos = msg->position.at(1);

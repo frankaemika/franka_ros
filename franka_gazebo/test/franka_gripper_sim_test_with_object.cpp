@@ -33,7 +33,7 @@ class GripperGraspFixtureTest
 };
 
 class GripperFailGraspFixtureTest : public GripperGraspFixtureTest {};
-//
+
 TEST_F(GripperSimTestSetup, FailMove) {  // NOLINT(cert-err58-cpp)
   double desired_width = 0;
   double desired_velocity = 0.1;
@@ -78,18 +78,18 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
   finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
+  EXPECT_TRUE(finished_before_timeout);
+  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+  EXPECT_TRUE(grasp_client->getResult()->success);
   for (int i = 0; i < 40; i++) {
     ros::Duration(0.1).sleep();
-    UpdateFingerState();
-    EXPECT_TRUE(finished_before_timeout);
+    updateFingerState();
     EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
     EXPECT_NEAR(finger_2_pos, finger_1_pos, kAllowedPositionError);
-    EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
     double expected_force = desired_force / 2.0;
     EXPECT_NEAR(finger_1_force, expected_force, kAllowedForceError);
     EXPECT_NEAR(finger_2_force, expected_force, kAllowedForceError);
-    EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-    EXPECT_TRUE(grasp_client->getResult()->success);
   }
 }
 
@@ -115,7 +115,7 @@ TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
   finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
-  UpdateFingerState();
+  updateFingerState();
   EXPECT_TRUE(finished_before_timeout);
   EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
   EXPECT_NEAR(finger_2_pos * 2, kStoneWidth, kAllowedPositionError);
