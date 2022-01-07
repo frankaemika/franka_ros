@@ -19,4 +19,5 @@ class GripperSimTestSetup : public ::testing::Test {
   double finger_2_force = 0.;
   void SetUp() override;
   void UpdateFingerState();
+  void resetStone();
 };

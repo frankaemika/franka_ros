@@ -9,7 +9,7 @@
 #include "gripper_sim_test_setup.h"
 
 static const double kAllowedPositionError = 5e-3;
-static const double kAllowedRelativeDurationError = 0.1;
+static const double kAllowedRelativeDurationError = 0.2;
 
 class GripperMoveFixtureTest : public GripperSimTestSetup,
                                public testing::WithParamInterface<std::tuple<double, double>> {

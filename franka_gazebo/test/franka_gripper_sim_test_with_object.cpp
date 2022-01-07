@@ -8,7 +8,7 @@
 #include "gripper_sim_test_setup.h"
 
 static const double kAllowedPositionError = 5e-3;
-static const double kAllowedForceError = 0.1;
+static const double kAllowedForceError = 3;
 static const double kAllowedRelativeDurationError = 0.2;
 static const double kStoneWidth = 0.032;
 
@@ -33,7 +33,7 @@ class GripperGraspFixtureTest
 };
 
 class GripperFailGraspFixtureTest : public GripperGraspFixtureTest {};
-
+//
 TEST_F(GripperSimTestSetup, FailMove) {  // NOLINT(cert-err58-cpp)
   double desired_width = 0;
   double desired_velocity = 0.1;
@@ -63,6 +63,7 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
   move_goal.speed = 0.1;
   this->move_client->sendGoal(move_goal);
   bool finished_before_timeout = move_client->waitForResult(ros::Duration(10.0));
+  resetStone();
   EXPECT_TRUE(finished_before_timeout);
   ros::Duration(desired_sleep).sleep();
   double expected_duration = (start_width - kStoneWidth) / desired_velocity;
@@ -77,16 +78,19 @@ TEST_P(GripperGraspFixtureTest, CanGrasp) {  // NOLINT(cert-err58-cpp)
   finished_before_timeout = this->grasp_client->waitForResult(ros::Duration(10.0));
   auto stop_time = ros::Time::now();
   double duration = (stop_time - start_time).toSec();
-  UpdateFingerState();
-  EXPECT_TRUE(finished_before_timeout);
-  EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
-  EXPECT_NEAR(finger_2_pos * 2, kStoneWidth, kAllowedPositionError);
-  EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
-  double expected_force = desired_force / 2.0;
-  EXPECT_NEAR(finger_1_force, expected_force, kAllowedForceError);
-  EXPECT_NEAR(finger_2_force, expected_force, kAllowedForceError);
-  EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
-  EXPECT_TRUE(grasp_client->getResult()->success);
+  for (int i = 0; i < 40; i++) {
+    ros::Duration(0.1).sleep();
+    UpdateFingerState();
+    EXPECT_TRUE(finished_before_timeout);
+    EXPECT_NEAR(finger_1_pos * 2, kStoneWidth, kAllowedPositionError);
+    EXPECT_NEAR(finger_2_pos, finger_1_pos, kAllowedPositionError);
+    EXPECT_NEAR(duration, expected_duration, expected_duration * kAllowedRelativeDurationError);
+    double expected_force = desired_force / 2.0;
+    EXPECT_NEAR(finger_1_force, expected_force, kAllowedForceError);
+    EXPECT_NEAR(finger_2_force, expected_force, kAllowedForceError);
+    EXPECT_TRUE(grasp_client->getState() == actionlib::SimpleClientGoalState::SUCCEEDED);
+    EXPECT_TRUE(grasp_client->getResult()->success);
+  }
 }
 
 TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
@@ -97,6 +101,7 @@ TEST_P(GripperFailGraspFixtureTest, CanFailGrasp) {  // NOLINT(cert-err58-cpp)
   this->move_client->sendGoal(move_goal);
   bool finished_before_timeout = move_client->waitForResult(ros::Duration(10.0));
   EXPECT_TRUE(finished_before_timeout);
+  resetStone();
   ros::Duration(desired_sleep).sleep();
   double expected_duration = (start_width - kStoneWidth) / desired_velocity;
   auto grasp_goal = franka_gripper::GraspGoal();
@@ -130,10 +135,10 @@ INSTANTIATE_TEST_CASE_P(
 INSTANTIATE_TEST_CASE_P(
     GripperGraspFixtureTest,  // NOLINT(cert-err58-cpp)
     GripperGraspFixtureTest,
-    ::testing::Combine(::testing::Values(std::make_tuple(0.032, 0.1, 0., 0.01, 0.01),
-                                         std::make_tuple(0.03, 0.1, 5., 0.005, 0.005),
-                                         std::make_tuple(0.0325, 0.01, 0., 0.001, 0.001),
-                                         std::make_tuple(0.034, 0.01, 5., 0.005, 0.005)),
+    ::testing::Combine(::testing::Values(std::make_tuple(0.032, 0.1, 100., 0.01, 0.01),
+                                         std::make_tuple(0.03, 0.1, 30., 0.005, 0.005),
+                                         std::make_tuple(0.0325, 0.01, 30., 0.003, 0.003),
+                                         std::make_tuple(0.034, 0.01, 30., 0.005, 0.005)),
                        ::testing::Values(0, 0.1)));
 
 int main(int argc, char** argv) {
