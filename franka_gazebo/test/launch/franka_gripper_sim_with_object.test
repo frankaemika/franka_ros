@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="debug" default="false" doc="Bringup Gazebo GUI during the test?" />
+  <include file="$(find franka_gazebo)/launch/panda.launch">
+    <arg name="controller" value="cartesian_impedance_example_controller"/>
+    <arg name="arm_id" value="panda"/>
+    <arg name="x" value="-0.5"/>
+    <arg name="initial_joint_positions" value="-J panda_joint1 -0.19527705289323283
+                                               -J panda_joint2 -0.052076355800292795
+                                               -J panda_joint3 -0.21871194101577007
+                                               -J panda_joint4 -1.7385710529124117
+                                               -J panda_joint5 -0.0075931389374561675
+                                               -J panda_joint6 1.689458722104157
+                                               -J panda_joint7 0.38038371774119994
+                                               -J panda_finger_joint1 0.035
+                                               -J panda_finger_joint2 0.035"/>
+    <arg name="world" value="$(find franka_gazebo)/world/stone.sdf"/>
+    <arg name="headless" value="$(eval not arg('debug'))"/>
+  </include>
+  <test test-name="franka_gripper_sim_test_with_object" pkg="franka_gazebo" type="franka_gripper_sim_test_with_object"
+        time-limit="600.0"/>
+</launch>

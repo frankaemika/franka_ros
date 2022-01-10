@@ -9,12 +9,12 @@
         -->
         <mass>0.08192</mass>
         <inertia>
-          <ixx>3.49525333e-05</ixx>
+          <ixx>0.01</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>3.06926933e-05</iyy>
+          <iyy>0.01</iyy>
           <iyz>0</iyz>
-          <izz>9.72117333e-06</izz>
+          <izz>0.01</izz>
         </inertia>
         <pose>0 0 0 0 -0 0</pose>
       </inertial>
@@ -25,7 +25,7 @@
       <visual name='visual'>
         <geometry>
           <box>
-            <size>0.02 0.032 0.064</size>
+            <size>0.025 0.032 0.064</size>
           </box>
         </geometry>
         <material>
@@ -45,7 +45,7 @@
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.02 0.032 0.064</size>
+            <size>0.025 0.032 0.064</size>
           </box>
         </geometry>
         <surface>
