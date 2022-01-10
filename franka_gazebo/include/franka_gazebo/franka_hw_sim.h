@@ -90,6 +90,9 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   void eStopActive(const bool active) override;
 
  private:
+  /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
+  bool efforts_initialized_;
+
   std::array<double, 3> gravity_earth_;
 
   std::string arm_id_;
