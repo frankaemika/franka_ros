@@ -2,6 +2,10 @@
 
 ## 0.x - UNRELEASED
 
+* `franka_gazebo`:
+  - Fix: homing action works again
+  - Fix: move action can fail instead of blocking indefinitely
+  - Fix: align behavior of grasping action with `franka_gripper`
 * Fix: Allow interactive marker server to shut down if not initialized
 * Add realistic hand/finger collision geometries to the Gazebo robot description
 * Add `joint_state_desired` publisher to `franka_gazebo`
@@ -10,6 +14,11 @@
 * Add singularity warning to `franka_gazebo` if Jacobian becomes singular
 * **BREAKING** Make `/panda` namespace of `franka_gazebo` optional
 * Add effort joint trajectory controller to be used by MoveIT
+* Make finger collisions primitive in `franka_gazebo`
+* add 'gravity_vector' gravity ROS parameter to FrankaHWSim
+* Fix "Failed to create robot simulation interface loader" bug when installing from APT
+* Improve Gazebo 'stone' world objects
+* Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
 
 ## 0.8.1 - 2021-09-08
 

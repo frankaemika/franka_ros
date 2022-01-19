@@ -90,6 +90,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   void eStopActive(const bool active) override;
 
  private:
+  std::array<double, 3> gravity_earth_;
+
   std::string arm_id_;
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;

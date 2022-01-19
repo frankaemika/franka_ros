@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<launch>
+  <arg name="debug" default="false" doc="Bringup Gazebo GUI during the test?" />
+  <include file="$(find franka_gazebo)/launch/panda.launch">
+    <arg name="controller" value="cartesian_impedance_example_controller"/>
+    <arg name="arm_id" value="panda"/>
+    <arg name="x" value="-0.5"/>
+    <arg name="world" value="$(find franka_gazebo)/world/stone.sdf"/>
+    <arg name="headless" value="$(eval not arg('debug'))"/>
+  </include>
+  <test test-name="franka_gripper_sim_test" pkg="franka_gazebo" type="franka_gripper_sim_test" time-limit="600.0"/>
+</launch>

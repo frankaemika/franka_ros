@@ -39,9 +39,14 @@
 
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
+  <test_depend>sensor_msgs</test_depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_gripper_sim_plugin.xml"/>
     <gazebo_ros_control   plugin="${prefix}/franka_hw_sim_plugin.xml"/>
+
+    <!--Export gazebo models and worlds-->
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_resource_path="${prefix}/world"/>
   </export>
 </package>

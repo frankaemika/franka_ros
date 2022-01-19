@@ -6,7 +6,7 @@ franka_gripper:
   arm_id:  $(arg arm_id)
 
   finger1:
-    gains: { p: 100, i: 25, d: 20 }
+    gains: { p: 100, i: 0, d: 1.0 }
 
   finger2:
-    gains: { p: 100, i: 25, d: 20 }
+    gains: { p: 100, i: 0, d: 1.0 }
