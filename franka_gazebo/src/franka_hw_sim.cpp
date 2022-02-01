@@ -480,9 +480,11 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.tau_J[i] = joint->effort;
     this->robot_state_.dtau_J[i] = joint->jerk;
 
-    this->robot_state_.q_d[i] = joint->position;
-    this->robot_state_.dq_d[i] = joint->velocity;
-    this->robot_state_.ddq_d[i] = joint->acceleration;
+    // since we don't support position or velocity interface yet, we set the desired joint
+    // trajectory to zero indicating we are in torque control mode
+    this->robot_state_.q_d[i] = joint->position;  // special case for resetting motion generators
+    this->robot_state_.dq_d[i] = 0;
+    this->robot_state_.ddq_d[i] = 0;
     this->robot_state_.tau_J_d[i] = joint->command;
 
     // For now we assume no flexible joints
