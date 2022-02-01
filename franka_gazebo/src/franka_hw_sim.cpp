@@ -47,6 +47,9 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   auto gravity = physics->World()->Gravity();
   this->gravity_earth_ = {gravity.X(), gravity.Y(), gravity.Z()};
 
+  model_nh.param<double>("tau_ext_lowpass_filter", this->tau_ext_lowpass_filter_,
+                         kDefaultTauExtLowpassFilter);
+
   // Generate a list of franka_gazebo::Joint to store all relevant information
   for (const auto& transmission : transmissions) {
     if (transmission.type_ != "transmission_interface/SimpleTransmission") {
@@ -487,7 +490,12 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.dtheta[i] = joint->velocity;
 
     if (this->efforts_initialized_) {
-      this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command + joint->gravity;
+      double tau_ext = joint->effort - joint->command + joint->gravity;
+
+      // Exponential moving average filter from tau_ext -> tau_ext_hat_filtered
+      this->robot_state_.tau_ext_hat_filtered[i] =
+          this->tau_ext_lowpass_filter_ * tau_ext +
+          (1 - this->tau_ext_lowpass_filter_) * this->robot_state_.tau_ext_hat_filtered[i];
     }
 
     this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
