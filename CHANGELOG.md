@@ -19,6 +19,7 @@
 * Fix "Failed to create robot simulation interface loader" bug when installing from APT
 * Improve Gazebo 'stone' world objects
 * Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
+* Rename `ns` -> `arm_id` in `hand.xacro` macros to be consistent with the other xacro files
 
 ## 0.8.1 - 2021-09-08
 
