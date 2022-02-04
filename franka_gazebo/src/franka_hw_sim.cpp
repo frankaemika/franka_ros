@@ -316,14 +316,15 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
 
   for (auto& pair : this->joints_) {
     auto joint = pair.second;
-    auto command = joint->command;
 
     // Check if this joint is affected by gravity compensation
     std::string prefix = this->arm_id_ + "_joint";
     if (pair.first.rfind(prefix, 0) != std::string::npos) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
-      command += g.at(i);
+      joint->gravity = g.at(i);
     }
+
+    auto command = joint->command + joint->gravity;
 
     if (std::isnan(command)) {
       ROS_WARN_STREAM_NAMED("franka_hw_sim",
@@ -495,7 +496,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.theta[i] = joint->position;
     this->robot_state_.dtheta[i] = joint->velocity;
 
-    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command + g.at(i);
+    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command + joint->gravity;
 
     this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
     this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
