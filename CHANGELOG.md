@@ -20,6 +20,7 @@
 * Improve Gazebo 'stone' world objects
 * Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
 * Rename `ns` -> `arm_id` in `hand.xacro` macros to be consistent with the other xacro files
+* Introduce new `tau_ext_lowpass_filter` parameter for `franka_gazebo` to configure the filtering of `tau_ext_hat_filtered`
 
 ## 0.8.1 - 2021-09-08
 

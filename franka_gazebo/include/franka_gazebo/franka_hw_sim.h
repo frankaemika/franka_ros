@@ -20,6 +20,8 @@
 
 namespace franka_gazebo {
 
+const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of tau_ext_hat_filtered
+
 /**
  * A custom implementation of a [gazebo_ros_control](http://wiki.ros.org/gazebo_ros_control) plugin,
  * which is able to simulate franka interfaces in Gazebo.
@@ -90,6 +92,9 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   void eStopActive(const bool active) override;
 
  private:
+  /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
+  bool efforts_initialized_;
+
   std::array<double, 3> gravity_earth_;
 
   std::string arm_id_;
@@ -103,6 +108,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   franka::RobotState robot_state_;
   std::unique_ptr<franka_hw::ModelBase> model_;
+
+  double tau_ext_lowpass_filter_;
 
   ros::ServiceServer service_set_ee_;
   ros::ServiceServer service_set_k_;
