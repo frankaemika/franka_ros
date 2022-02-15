@@ -11,3 +11,26 @@ franka_gripper:
 
   finger2:
     gains: { p: 100, i: 0, d: 1.0 }
+
+# Motion generators PID gains
+# NOTE: Needed since the gazebo_ros_control currently only directly support effort hardware
+# interfaces (see #161).
+motion_generators:
+  position:
+    gains:
+      panda_joint1: { p: 600, d: 30, i: 0 }
+      panda_joint2: { p: 600, d: 30, i: 0 }
+      panda_joint3: { p: 600, d: 30, i: 0 }
+      panda_joint4: { p: 600, d: 30, i: 0 }
+      panda_joint5: { p: 250, d: 10, i: 0 }
+      panda_joint6: { p: 150, d: 10, i: 0 }
+      panda_joint7: { p:  50, d:  5, i: 0 }
+  velocity:
+    gains:
+      panda_joint1: { p: 600, d: 30, i: 0 }
+      panda_joint2: { p: 600, d: 30, i: 0 }
+      panda_joint3: { p: 600, d: 30, i: 0 }
+      panda_joint4: { p: 600, d: 30, i: 0 }
+      panda_joint5: { p: 250, d: 10, i: 0 }
+      panda_joint6: { p: 150, d: 10, i: 0 }
+      panda_joint7: { p:  50, d:  5, i: 0 }
