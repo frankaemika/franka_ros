@@ -1,6 +1,7 @@
 #pragma once
 
 #include <angles/angles.h>
+#include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <gazebo/physics/Joint.hh>
@@ -34,6 +35,10 @@ struct Joint {
   /// The type of joint, i.e. revolute, prismatic, ... @see
   /// http://docs.ros.org/en/diamondback/api/urdf/html/classurdf_1_1Joint.html
   int type;
+
+  /// Joint limits @see
+  /// https://docs.ros.org/en/diamondback/api/urdf/html/classurdf_1_1JointLimits.html
+  joint_limits_interface::JointLimits limits;
 
   /// The axis of rotation/translation of this joint in local coordinates
   Eigen::Vector3d axis;
