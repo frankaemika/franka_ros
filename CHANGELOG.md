@@ -16,6 +16,7 @@ Requires `libfranka` >= 0.8.0
     - Improve Gazebo 'stone' world objects
     - Introduce new `tau_ext_lowpass_filter` parameter for `franka_gazebo` to configure the filtering of `tau_ext_hat_filtered`
     - Add realistic hand/finger collision geometries to the Gazebo robot description
+    - Add `set_franka_model_configuration` service.
   * Fix: Allow interactive marker server to shut down if not initialized
   * No further ROS Kinetic support, since [End-of-Life was in April 2021](http://wiki.ros.org/Distributions)
   * Make position + orientation targets threadsafe in cartesian example controller

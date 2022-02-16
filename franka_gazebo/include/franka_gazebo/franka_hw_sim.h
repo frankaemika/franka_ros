@@ -115,6 +115,9 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   ros::ServiceServer service_set_k_;
   ros::ServiceServer service_set_load_;
   ros::ServiceServer service_collision_behavior_;
+  ros::ServiceServer service_set_model_configuration_;
+
+  ros::ServiceClient gazebo_set_model_configuration_client_;
 
   std::vector<double> lower_force_thresholds_nominal_;
   std::vector<double> upper_force_thresholds_nominal_;
