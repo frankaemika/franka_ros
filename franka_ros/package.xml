@@ -20,6 +20,7 @@
   <exec_depend>franka_hw</exec_depend>
   <exec_depend>franka_msgs</exec_depend>
   <exec_depend>franka_visualization</exec_depend>
+  <exec_depend>franka_gazebo</exec_depend>
   <exec_depend>panda_moveit_config</exec_depend>
 
   <export>
