@@ -136,5 +136,23 @@ class FrankaGripperSim
   void onMoveGoal(const franka_gripper::MoveGoalConstPtr& goal);
   void onGraspGoal(const franka_gripper::GraspGoalConstPtr& goal);
   void onGripperActionGoal(const control_msgs::GripperCommandGoalConstPtr& goal);
+
+  /**
+   * libfranka-like method to grasp an object with the gripper
+   * @param width Size of the object to grasp. [m]
+   * @param speed Closing speed. [m/s]
+   * @param force Grasping force. [N]
+   * @param epsilon Maximum tolerated deviation between the commanded width and the desired width
+   * @return True if the object could be grasped, false otherwise
+   */
+  bool grasp(double width, double speed, double force, franka_gripper::GraspEpsilon epsilon);
+
+  /**
+   * libfranka-like method to move the gripper to a certain position
+   * @param width Intended opening width. [m]
+   * @param speed Closing speed. [m/s]
+   * @return True if the command was successful, false otherwise.
+   */
+  bool move(double width, double speed);
 };
 }  // namespace franka_gazebo

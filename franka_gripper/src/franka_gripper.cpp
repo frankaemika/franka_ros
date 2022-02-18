@@ -48,7 +48,8 @@ void gripperCommandExecuteCallback(
     if (std::abs(target_width - state.width) < kSamePositionThreshold) {
       return true;
     }
-    if (target_width >= state.width) {
+    constexpr double kMinimumGraspForce = 1e-4;
+    if (std::abs(goal->command.max_effort) < kMinimumGraspForce or target_width >= state.width) {
       return gripper.move(target_width, default_speed);
     }
     return gripper.grasp(target_width, default_speed, goal->command.max_effort, grasp_epsilon.inner,
