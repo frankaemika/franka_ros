@@ -9,6 +9,13 @@ void Joint::update(const ros::Duration& dt) {
     return;
   }
 
+  // Set joint position to requested joint position
+  // NOTE: Implemented like this to prevent racing conditions.
+  if (this->setPositionRequested_) {
+    this->position = this->requestedPosition_;
+    this->setPositionRequested_ = false;
+  }
+
   this->velocity = this->handle->GetVelocity(0);
 #if GAZEBO_MAJOR_VERSION >= 8
   double position = this->handle->Position(0);
@@ -70,4 +77,10 @@ bool Joint::isInCollision() const {
 bool Joint::isInContact() const {
   return std::abs(this->effort - this->command) > this->contact_threshold;
 }
+
+void Joint::setJointPosition(const double joint_position) {
+  this->requestedPosition_ = joint_position;
+  this->setPositionRequested_ = true;
+}
+
 }  // namespace franka_gazebo

@@ -92,9 +92,18 @@ struct Joint {
    */
   bool isInCollision() const;
 
+  /**
+   * Sets the joint position.
+   */
+  void setJointPosition(const double joint_position);
+
  private:
   double lastVelocity = std::numeric_limits<double>::quiet_NaN();
   double lastAcceleration = std::numeric_limits<double>::quiet_NaN();
+
+  // Used to track whether the user requested a joint position to be set.
+  bool setPositionRequested_ = false;
+  double requestedPosition_ = 0.0;
 };
 
 }  // namespace franka_gazebo

@@ -1,0 +1,4 @@
+sensor_msgs/JointState configuration
+---
+bool success
+string error
