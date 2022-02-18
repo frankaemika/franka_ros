@@ -7,6 +7,8 @@
   <xacro:arg name="hand" default="false" />
   <!-- Is the robot being simulated in gazebo?" -->
   <xacro:arg name="gazebo" default="false" />
+  <!-- The transmission type that is used to control arm joints in gazebo: position, velocity, or effort -->
+  <xacro:arg name="transmission" default="effort" />
 
   <xacro:unless value="$(arg gazebo)">
     <!-- Create a URDF for a real hardware -->
@@ -45,13 +47,20 @@
     </joint>
 
 
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint1" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint2" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint3" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint4" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint5" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint6" transmission="hardware_interface/EffortJointInterface" />
-    <xacro:gazebo-joint joint="$(arg arm_id)_joint7" transmission="hardware_interface/EffortJointInterface" />
+    <xacro:property name="transmission" value="$(arg transmission)" />
+    <!-- sanity check -->
+    <xacro:if value="${transmission.lower() not in ['position', 'velocity', 'effort']}" >
+      ${xacro.fatal("transmission:=" + transmission + " is not one of position, velocity, or effort")}
+    </xacro:if>
+    <!-- Unify transmission argument into title case and expand to full name -->
+    <xacro:property name="transmission" value="hardware_interface/${transmission.title()}JointInterface" lazy_eval="false" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint1" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint2" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint3" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint4" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint5" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint6" transmission="${transmission}" />
+    <xacro:gazebo-joint joint="$(arg arm_id)_joint7" transmission="${transmission}" />
 
     <xacro:transmission-franka-state arm_id="$(arg arm_id)" />
     <xacro:transmission-franka-model arm_id="$(arg arm_id)"
