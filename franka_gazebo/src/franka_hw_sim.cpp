@@ -10,6 +10,7 @@
 #include <franka_msgs/SetKFrame.h>
 #include <franka_msgs/SetLoad.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 #include <Eigen/Dense>
 #include <iostream>
 #include <sstream>
@@ -85,6 +86,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       return false;
     }
     joint->type = urdf_joint->type;
+    joint_limits_interface::getJointLimits(urdf_joint, joint->limits);
     joint->axis = Eigen::Vector3d(urdf_joint->axis.x, urdf_joint->axis.y, urdf_joint->axis.z);
 
     // Get a handle to the underlying Gazebo Joint
@@ -492,7 +494,9 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.dtheta[i] = joint->velocity;
 
     if (this->efforts_initialized_) {
-      double tau_ext = joint->effort - joint->command + joint->gravity;
+      // NOTE: Here we use the clamped command to filter out the internal controller
+      // force when the joint is in its limits.
+      double tau_ext = joint->effort - joint->clamped_command + joint->gravity;
 
       // Exponential moving average filter from tau_ext -> tau_ext_hat_filtered
       this->robot_state_.tau_ext_hat_filtered[i] =

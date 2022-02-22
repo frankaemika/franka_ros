@@ -1,6 +1,7 @@
 #pragma once
 
 #include <angles/angles.h>
+#include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <gazebo/physics/Joint.hh>
@@ -35,12 +36,21 @@ struct Joint {
   /// http://docs.ros.org/en/diamondback/api/urdf/html/classurdf_1_1Joint.html
   int type;
 
+  /// Joint limits @see
+  /// https://docs.ros.org/en/diamondback/api/urdf/html/classurdf_1_1JointLimits.html
+  joint_limits_interface::JointLimits limits;
+
   /// The axis of rotation/translation of this joint in local coordinates
   Eigen::Vector3d axis;
 
   /// The currently applied command from a controller acting on this joint either in \f$N\f$ or
   /// \f$Nm\f$ without gravity
   double command = 0;
+
+  /// The currently CLAMPED applied command from the controller acting on this joint either in \f$N\f$ or
+  /// \f$Nm\f$ without gravity.
+  /// NOTE: Clamped to zero when the joint is in its limits.
+  double clamped_command = 0;
 
   /// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
   double gravity = 0;
