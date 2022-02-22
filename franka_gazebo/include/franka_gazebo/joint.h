@@ -47,6 +47,11 @@ struct Joint {
   /// \f$Nm\f$ without gravity
   double command = 0;
 
+  /// The currently CLAMPED applied command from the controller acting on this joint either in \f$N\f$ or
+  /// \f$Nm\f$ without gravity.
+  /// NOTE: Clamped to zero when the joint is in its limits.
+  double clamped_command = 0;
+
   /// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
   double gravity = 0;
 

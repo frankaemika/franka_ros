@@ -57,6 +57,13 @@ void Joint::update(const ros::Duration& dt) {
   }
   this->jerk = (this->acceleration - this->lastAcceleration) / dt.toSec();
   this->lastAcceleration = this->acceleration;
+
+  // Store the clamped command
+  // NOTE: Clamped to zero when joint is in its joint limits.
+  this->clamped_command =
+      (this->position > this->limits.min_position && this->position < this->limits.max_position)
+          ? this->command
+          : 0.0;
 }
 
 double Joint::getLinkMass() const {
@@ -71,11 +78,11 @@ double Joint::getLinkMass() const {
 }
 
 bool Joint::isInCollision() const {
-  return std::abs(this->effort - this->command) > this->collision_threshold;
+  return std::abs(this->effort - this->clamped_command + this->gravity) > this->collision_threshold;
 }
 
 bool Joint::isInContact() const {
-  return std::abs(this->effort - this->command) > this->contact_threshold;
+  return std::abs(this->effort - this->clamped_command + this->gravity) > this->contact_threshold;
 }
 
 void Joint::setJointPosition(const double joint_position) {

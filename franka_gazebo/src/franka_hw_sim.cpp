@@ -688,7 +688,9 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.dtheta[i] = joint->velocity;
 
     if (this->efforts_initialized_) {
-      double tau_ext = joint->effort - joint->command + joint->gravity;
+      // NOTE: Here we use the clamped command to filter out the internal controller
+      // force when the joint is in its limits.
+      double tau_ext = joint->effort - joint->clamped_command + joint->gravity;
 
       // Exponential moving average filter from tau_ext -> tau_ext_hat_filtered
       this->robot_state_.tau_ext_hat_filtered[i] =
