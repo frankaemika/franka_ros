@@ -32,6 +32,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   }
 
   this->robot_ = parent;
+  this->efforts_initialized_ = false;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -40,6 +41,14 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 #endif
 
   ROS_INFO_STREAM_NAMED("franka_hw_sim", "Using physics type " << physics->GetType());
+
+  // Retrieve initial gravity vector from Gazebo
+  // NOTE: Can be overwritten by the user via the 'gravity_vector' ROS parameter.
+  auto gravity = physics->World()->Gravity();
+  this->gravity_earth_ = {gravity.X(), gravity.Y(), gravity.Z()};
+
+  model_nh.param<double>("tau_ext_lowpass_filter", this->tau_ext_lowpass_filter_,
+                         kDefaultTauExtLowpassFilter);
 
   // Generate a list of franka_gazebo::Joint to store all relevant information
   for (const auto& transmission : transmissions) {
@@ -126,8 +135,10 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       if (transmission.type_ == "franka_hw/FrankaModelInterface") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim",
                               "Found transmission interface '" << transmission.type_ << "'");
+        double singularity_threshold;
+        model_nh.param<double>("singularity_warning_threshold", singularity_threshold, -1);
         try {
-          initFrankaModelHandle(this->arm_id_, *urdf, transmission);
+          initFrankaModelHandle(this->arm_id_, *urdf, transmission, singularity_threshold);
           continue;
 
         } catch (const std::invalid_argument& e) {
@@ -189,7 +200,8 @@ void FrankaHWSim::initFrankaStateHandle(
 void FrankaHWSim::initFrankaModelHandle(
     const std::string& robot,
     const urdf::Model& urdf,
-    const transmission_interface::TransmissionInfo& transmission) {
+    const transmission_interface::TransmissionInfo& transmission,
+    double singularity_threshold) {
   if (transmission.joints_.size() != 2) {
     throw std::invalid_argument(
         "Cannot create franka_hw/FrankaModelInterface for robot '" + robot + "_model' because " +
@@ -197,7 +209,7 @@ void FrankaHWSim::initFrankaModelHandle(
         " joints were found beneath the <transmission> tag, but 2 are required.");
   }
 
-  for (auto& joint : transmission.joints_) {
+  for (const auto& joint : transmission.joints_) {
     if (not urdf.getJoint(joint.name_)) {
       if (not urdf.getJoint(joint.name_)) {
         throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" +
@@ -226,7 +238,8 @@ void FrankaHWSim::initFrankaModelHandle(
     auto root_link = urdf.getJoint(root->name_)->parent_link_name;
     auto tip_link = urdf.getJoint(tip->name_)->child_link_name;
 
-    this->model_ = std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link);
+    this->model_ =
+        std::make_unique<franka_gazebo::ModelKDL>(urdf, root_link, tip_link, singularity_threshold);
 
   } catch (const std::invalid_argument& e) {
     throw std::invalid_argument("Cannot create franka_hw/FrankaModelInterface for robot '" + robot +
@@ -303,18 +316,19 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
 }
 
 void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration /*period*/) {
-  auto g = this->model_->gravity(this->robot_state_);
+  auto g = this->model_->gravity(this->robot_state_, this->gravity_earth_);
 
   for (auto& pair : this->joints_) {
     auto joint = pair.second;
-    auto command = joint->command;
 
     // Check if this joint is affected by gravity compensation
     std::string prefix = this->arm_id_ + "_joint";
     if (pair.first.rfind(prefix, 0) != std::string::npos) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
-      command += g.at(i);
+      joint->gravity = g.at(i);
     }
+
+    auto command = joint->command + joint->gravity;
 
     if (std::isnan(command)) {
       ROS_WARN_STREAM_NAMED("franka_hw_sim",
@@ -348,6 +362,11 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
     std::string EE_T_K;  // NOLINT [readability-identifier-naming]
     nh.param<std::string>("EE_T_K", EE_T_K, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
     this->robot_state_.EE_T_K = readArray<16>(EE_T_K, "EE_T_K");
+
+    std::string gravity_vector;
+    if (nh.getParam("gravity_vector", gravity_vector)) {
+      this->gravity_earth_ = readArray<3>(gravity_vector, "gravity_vector");
+    }
 
     // Only nominal cases supported for now
     std::vector<double> lower_torque_thresholds = franka_hw::FrankaHW::getCollisionThresholds(
@@ -461,16 +480,25 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.tau_J[i] = joint->effort;
     this->robot_state_.dtau_J[i] = joint->jerk;
 
-    this->robot_state_.q_d[i] = joint->position;
-    this->robot_state_.dq_d[i] = joint->velocity;
-    this->robot_state_.ddq_d[i] = joint->acceleration;
+    // since we don't support position or velocity interface yet, we set the desired joint
+    // trajectory to zero indicating we are in torque control mode
+    this->robot_state_.q_d[i] = joint->position;  // special case for resetting motion generators
+    this->robot_state_.dq_d[i] = 0;
+    this->robot_state_.ddq_d[i] = 0;
     this->robot_state_.tau_J_d[i] = joint->command;
 
     // For now we assume no flexible joints
     this->robot_state_.theta[i] = joint->position;
     this->robot_state_.dtheta[i] = joint->velocity;
 
-    this->robot_state_.tau_ext_hat_filtered[i] = joint->effort - joint->command;
+    if (this->efforts_initialized_) {
+      double tau_ext = joint->effort - joint->command + joint->gravity;
+
+      // Exponential moving average filter from tau_ext -> tau_ext_hat_filtered
+      this->robot_state_.tau_ext_hat_filtered[i] =
+          this->tau_ext_lowpass_filter_ * tau_ext +
+          (1 - this->tau_ext_lowpass_filter_) * this->robot_state_.tau_ext_hat_filtered[i];
+    }
 
     this->robot_state_.joint_contact[i] = static_cast<double>(joint->isInContact());
     this->robot_state_.joint_collision[i] = static_cast<double>(joint->isInCollision());
@@ -504,6 +532,8 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
+
+  this->efforts_initialized_ = true;
 }
 
 }  // namespace franka_gazebo

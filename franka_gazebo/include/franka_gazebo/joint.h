@@ -38,8 +38,12 @@ struct Joint {
   /// The axis of rotation/translation of this joint in local coordinates
   Eigen::Vector3d axis;
 
-  /// The currently applied command from an actuator on this joint either in \f$N\f$ or \f$Nm\f$
+  /// The currently applied command from a controller acting on this joint either in \f$N\f$ or
+  /// \f$Nm\f$ without gravity
   double command = 0;
+
+  /// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
+  double gravity = 0;
 
   /// The current position of this joint either in \f$m\f$ or \f$rad\f$
   double position = 0;

@@ -32,7 +32,7 @@
     <rosparam command="load" file="$(arg hw_config_file)" />
     <!-- Add or overwrite manually configured ips -->
     <rosparam subst_value="True">$(arg robot_ips)</rosparam>
-    <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
+    <param name="robot_description" command="xacro $(arg robot) $(arg args)" />
   </node>
 
   <group ns="$(arg robot_id)">
@@ -43,7 +43,7 @@
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen"/>
     <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-      <param name="robot_description" command="xacro --inorder $(arg robot) $(arg args)" />
+      <param name="robot_description" command="xacro $(arg robot) $(arg args)" />
       <rosparam param="source_list"  subst_value="true">$(arg joint_states_source_list)</rosparam>
       <param name="rate" value="30"/>
     </node>

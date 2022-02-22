@@ -26,81 +26,72 @@
                 -J $(arg arm_id)_joint4 -1.57079632679
                 -J $(arg arm_id)_joint5 0
                 -J $(arg arm_id)_joint6 1.57079632679
-                -J $(arg arm_id)_joint7 0.785398163397"
+                -J $(arg arm_id)_joint7 0.785398163397
+                -J $(arg arm_id)_finger_joint1 0.001
+                -J $(arg arm_id)_finger_joint2 0.001"
        />
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg gazebo)">
     <arg name="world_name" value="$(arg world)"/>
+    <!-- Always start in paused mode, and only unpause when spawning the model -->
     <arg name="paused" value="true"/>
     <arg name="gui" value="$(eval not arg('headless'))"/>
     <arg name="use_sim_time" value="true"/>
   </include>
 
-  <group ns="$(arg arm_id)">
-    <param name="robot_description"
-           command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
-                    gazebo:=true
-                    hand:=$(arg use_gripper)
-                    arm_id:=$(arg arm_id)
-                    xyz:='$(arg x) $(arg y) $(arg z)'
-                    rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
-    </param>
+  <param name="robot_description"
+         command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
+                  gazebo:=true
+                  hand:=$(arg use_gripper)
+                  arm_id:=$(arg arm_id)
+                  xyz:='$(arg x) $(arg y) $(arg z)'
+                  rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
+  </param>
 
-    <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
-    <rosparam file="$(find franka_gazebo)/config/sim_controllers.yaml" subst_value="true" />
+  <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
+  <rosparam file="$(find franka_gazebo)/config/sim_controllers.yaml" subst_value="true" />
 
-    <node name="$(arg arm_id)_model_spawner"
-          pkg="gazebo_ros"
-          type="spawn_model"
-          if="$(arg paused)"
-          args="-param robot_description -urdf -model $(arg arm_id)
-                $(arg initial_joint_positions)
-                ">
-    </node>
-    <node name="$(arg arm_id)_model_spawner"
-          pkg="gazebo_ros"
-          type="spawn_model"
-          unless="$(arg paused)"
-          args="-param robot_description -urdf -model $(arg arm_id) -unpause
-                $(arg initial_joint_positions)
-                ">
-    </node>
+  <param name="m_ee" value="0.76" if="$(arg use_gripper)" />
 
+  <arg name="unpause" value="$(eval '' if arg('paused') else '-unpause')" />
+  <node name="$(arg arm_id)_model_spawner"
+        pkg="gazebo_ros"
+        type="spawn_model"
+        args="-param robot_description -urdf -model $(arg arm_id) $(arg unpause)
+              $(arg initial_joint_positions)
+              "/>
 
-    <!-- Spawn required ROS controllers -->
-    <node pkg="controller_manager"
-          type="spawner"
-          name="$(arg arm_id)_gripper_spawner"
-          if="$(arg use_gripper)"
-          args="franka_gripper"
-          respawn="false"
-    />
+  <!-- Spawn required ROS controllers -->
+  <node pkg="controller_manager"
+        type="spawner"
+        name="$(arg arm_id)_gripper_spawner"
+        if="$(arg use_gripper)"
+        args="franka_gripper"
+        respawn="false"
+  />
 
-    <node pkg="controller_manager"
-          type="spawner"
-          name="$(arg arm_id)_controller_spawner"
-          respawn="false" output="screen"
-          args="franka_state_controller $(arg controller)"
-    />
+  <node pkg="controller_manager"
+        type="spawner"
+        name="$(arg arm_id)_controller_spawner"
+        respawn="false" output="screen"
+        args="franka_state_controller $(arg controller)"
+  />
 
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
+    <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
+    <param name="rate" value="30"/>
+  </node>
+
+  <!-- Start only if cartesian_impedance_example_controller -->
+  <node name="interactive_marker"
+        pkg="franka_example_controllers"
+        type="interactive_marker.py"
+        if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
+    <param name="link_name" value="$(arg arm_id)_link0" />
     <remap to="cartesian_impedance_example_controller/equilibrium_pose" from="equilibrium_pose" />
+  </node>
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-    <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher">
-      <rosparam param="source_list">[franka_state_controller/joint_states, franka_gripper/joint_states] </rosparam>
-      <param name="rate" value="30"/>
-    </node>
-
-    <!-- Start only if cartesian_impedance_example_controller -->
-    <node name="interactive_marker"
-          pkg="franka_example_controllers"
-          type="interactive_marker.py"
-          if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
-      <param name="link_name" value="$(arg arm_id)_link0" />
-    </node>
-
-  </group>
-
-  <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_gazebo)/config/franka_sim_description_with_marker.rviz" if="$(arg rviz)"/>
+  <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_description_with_marker.rviz" if="$(arg rviz)"/>
 
 </launch>

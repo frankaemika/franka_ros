@@ -16,8 +16,6 @@ from geometry_msgs.msg import PoseStamped
 
 marker_pose = PoseStamped()
 
-centering_frame_ready = False
-
 has_error = False
 left_has_error = False
 right_has_error = False
@@ -80,43 +78,21 @@ def right_franka_state_callback(msg):
     has_error = left_has_error or right_has_error
 
 
-def centering_pose_callback(msg):
-    """
-    This callback function sets the marker pose to the current centering pose from a subscribed topic.
-    :return: None
-    """
-    global centering_frame_ready
-    global marker_pose
-
-    marker_pose = msg
-    centering_frame_ready = True
-
-
 def reset_marker_pose_blocking():
     """
     This function resets the marker pose to current "middle pose" of left and right arm EEs.
     :return: None
     """
 
-    global centering_frame_ready
     global marker_pose
-
-    centering_frame_ready = False
-
-    centering_frame_pose_sub = rospy.Subscriber(
-        "dual_arm_cartesian_impedance_example_controller/centering_frame",
-        PoseStamped, centering_pose_callback)
-
-    # Get initial pose for the interactive marker
-    while not centering_frame_ready:
-        rospy.sleep(0.1)
-
-    centering_frame_pose_sub.unregister()
+    marker_pose = rospy.wait_for_message(
+        "dual_arm_cartesian_impedance_example_controller/centering_frame", PoseStamped)
 
 
 def process_feedback(feedback):
     """
-    This callback function clips the marker_pose inside a predefined box to prevent misuse of the marker.
+    This callback function clips the marker_pose inside a predefined box to prevent misuse of the
+    marker.
     :param feedback: feedback data of interactive marker
     :return: None
     """
@@ -148,10 +124,10 @@ if __name__ == "__main__":
 
     # Initialize subscribers for error states of the arms
     left_state_sub = rospy.Subscriber(left_arm_id + "_state_controller/franka_states",
-                                 FrankaState, left_franka_state_callback)
+                                      FrankaState, left_franka_state_callback)
 
     right_state_sub = rospy.Subscriber(right_arm_id + "_state_controller/franka_states",
-                                 FrankaState, right_franka_state_callback)
+                                       FrankaState, right_franka_state_callback)
 
     # Set marker pose to be the current "middle pose" of both EEs
     reset_marker_pose_blocking()

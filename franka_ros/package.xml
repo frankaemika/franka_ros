@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_ros</name>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
   <description>franka_ros is a metapackage for all Franka Emika ROS packages</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -15,10 +15,13 @@
 
   <exec_depend>franka_control</exec_depend>
   <exec_depend>franka_description</exec_depend>
+  <exec_depend>franka_example_controllers</exec_depend>
   <exec_depend>franka_gripper</exec_depend>
   <exec_depend>franka_hw</exec_depend>
   <exec_depend>franka_msgs</exec_depend>
   <exec_depend>franka_visualization</exec_depend>
+  <exec_depend>franka_gazebo</exec_depend>
+  <exec_depend>panda_moveit_config</exec_depend>
 
   <export>
     <metapackage />

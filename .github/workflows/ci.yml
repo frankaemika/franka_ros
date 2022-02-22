@@ -1,0 +1,118 @@
+name: CI
+
+on:
+  push:
+   branches:
+    - develop
+
+  pull_request:
+    branches:
+    - melodic-devel
+    - noetic-devel
+    - develop
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ros_distro: [ melodic, noetic ]
+    steps:
+    - name: Prepare
+      # Keep the compilation outputs persitant outside the docker container to use for the other steps
+      run: |
+        mkdir -p ${{github.workspace}}/src       # where the repo will be cloned into
+        mkdir -p ${{github.workspace}}/build     # compilation cache for formatter & linter
+        mkdir -p ${{github.workspace}}/devel     # compilation cache for formatter & linter
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: src/franka_ros
+
+    - name: Parse ROS Distro
+      run:  echo "FLAVOR=$(echo ${{ github.event.pull_request.base.ref }} | sed 's/-devel//')" >> $GITHUB_ENV
+
+    - name: Build Docker Image
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: docker/build-push-action@v2
+      with:
+        tags: franka_ros:${{matrix.ros_distro}}
+        file: .ci/Dockerfile.${{matrix.ros_distro}}
+        push: false
+
+    - name: Compile with Catkin Tools
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}/src:/ros/src/  # only mount source here
+        run: |
+          catkin config --workspace /ros/ --init --extend /opt/ros/${{matrix.ros_distro}} --cmake-args -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          catkin build --workspace /ros/ --interleave-output --verbose
+
+    - name: Compile with Catkin Make
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros
+        shell:    bash
+        run: |
+          source /opt/ros/${{matrix.ros_distro}}/setup.bash
+          catkin_init_workspace /ros/src
+          cd /ros
+          catkin_make -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+    - name: Check C++ Format
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cmake --build /ros/build --target check-format
+    
+    - name: Check Python Format
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cmake --build /ros/build --target check-pyformat
+
+    - name: Check Linting
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cmake --build /ros/build --target check-tidy
+
+    - name: Run Tests
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      uses: addnab/docker-run-action@v3
+      with:
+        image:    franka_ros:${{matrix.ros_distro}}
+        options:  -v ${{github.workspace}}:/ros/
+        shell:    bash
+        run: |
+          source /ros/devel/setup.bash
+          cd /ros
+          catkin_make run_tests -j1 # gazebo tests cannot run in parallel
+          catkin_test_results
+
+    - name: Upload Tests to Artifacts
+      uses: actions/upload-artifact@v2
+      if:   github.ref == 'refs/heads/develop' || ${{env.FLAVOR == matrix.ros_distro}}
+      with:
+        name: test-results
+        path: build/test_results/*/rosunit-*.xml

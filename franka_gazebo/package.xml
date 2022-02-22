@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_gazebo</name>
-  <version>0.8.1</version>
+  <version>0.8.2</version>
   <description>This package offers the FrankaHWSim Class to simulate a Franka Robot in Gazebo</description>
 
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
@@ -39,9 +39,15 @@
 
   <test_depend>gtest</test_depend>
   <test_depend>rostest</test_depend>
+  <test_depend>sensor_msgs</test_depend>
+  <test_depend>geometry_msgs</test_depend>
 
   <export>
     <controller_interface plugin="${prefix}/franka_gripper_sim_plugin.xml"/>
     <gazebo_ros_control   plugin="${prefix}/franka_hw_sim_plugin.xml"/>
+
+    <!--Export gazebo models and worlds-->
+    <gazebo_ros gazebo_model_path="${prefix}/models"/>
+    <gazebo_ros gazebo_resource_path="${prefix}/world"/>
   </export>
 </package>

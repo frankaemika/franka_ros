@@ -5,7 +5,7 @@
   <arg name="robot_ip" />
   <arg name="publish_rate" default="30" />
 
-  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find franka_description)/robots/panda_arm.urdf.xacro hand:=$(arg load_gripper)" />
+  <param name="robot_description" command="$(find xacro)/xacro $(find franka_description)/robots/panda_arm.urdf.xacro hand:=$(arg load_gripper)" />
 
   <node name="robot_joint_state_publisher" pkg="franka_visualization" type="robot_joint_state_publisher" output="screen">
     <rosparam command="load" file="$(find franka_visualization)/config/robot_settings.yaml" />
@@ -24,6 +24,6 @@
     <rosparam param="source_list">[robot_joint_state_publisher/joint_states, gripper_joint_state_publisher/joint_states]</rosparam>
   </node>
 
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
   <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_visualization)/launch/franka_visualization.rviz"/>
 </launch>

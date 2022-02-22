@@ -1,11 +1,11 @@
 include(CMakeParseArguments)
 
-find_program(CLANG_FORMAT_PROG clang-format-6.0 DOC "'clang-format' executable")
+find_program(CLANG_FORMAT_PROG clang-format-7 DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG AND NOT TARGET format)
   add_custom_target(format)
   add_custom_target(check-format)
 endif()
-find_program(CLANG_TIDY_PROG clang-tidy-6.0 DOC "'clang-tidy' executable")
+find_program(CLANG_TIDY_PROG clang-tidy-7 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG AND NOT TARGET tidy)
   if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
     message(WARNING "Invoke Catkin/CMake with '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'

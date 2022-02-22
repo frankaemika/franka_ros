@@ -32,6 +32,16 @@ int ModelKDL::segment(franka::Frame frame) {
   // clang-format on
 }
 
+bool ModelKDL::isCloseToSingularity(const KDL::Jacobian& jacobian) const {
+  if (this->singularity_threshold_ < 0) {
+    return false;
+  }
+  Eigen::Matrix<double, 6, 6> mat = jacobian.data * jacobian.data.transpose();
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(mat, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  double critical = svd.singularValues().tail(1)(0);
+  return critical < this->singularity_threshold_;
+}
+
 // Implementation copied from <kdl/isolveri.hpp> because
 // KDL::ChainDynSolver inherits *privately* from SolverI ... -.-'
 std::string ModelKDL::strError(const int error) {
@@ -54,7 +64,11 @@ std::string ModelKDL::strError(const int error) {
   }
   // clang-format on
 }
-ModelKDL::ModelKDL(const urdf::Model& model, const std::string& root, const std::string& tip) {
+ModelKDL::ModelKDL(const urdf::Model& model,
+                   const std::string& root,
+                   const std::string& tip,
+                   double singularity_threshold)
+    : singularity_threshold_(singularity_threshold) {
   KDL::Tree tree;
   if (not kdl_parser::treeFromUrdfModel(model, tree)) {
     throw std::invalid_argument("Cannot construct KDL tree from URDF");
@@ -156,6 +170,11 @@ std::array<double, 42> ModelKDL::bodyJacobian(
 
   J.changeBase(f.M.Inverse());
 
+  // Singularity check
+  if (isCloseToSingularity(J)) {
+    ROS_WARN_STREAM_THROTTLE(1, "Body Jacobian close to singularity");
+  }
+
   std::array<double, 42> result;
   Eigen::MatrixXd::Map(&result[0], 6, 7) = J.data;
 
@@ -182,6 +201,11 @@ std::array<double, 42> ModelKDL::zeroJacobian(
   int error = solver.JntToJac(kq, J, segment(frame));
   if (error != KDL::SolverI::E_NOERROR) {
     throw std::logic_error("KDL zero jacobian calculation failed with error: " + strError(error));
+  }
+
+  // Singularity Check
+  if (isCloseToSingularity(J)) {
+    ROS_WARN_STREAM_THROTTLE(1, "Zero Jacobian close to singularity");
   }
 
   std::array<double, 42> result;

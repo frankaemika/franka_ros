@@ -7,7 +7,7 @@
   <!-- || PandaRobot With Retrieval of Feasible Parameters Using    || -->
   <!-- || Penalty-Based Optimization                                || -->
   <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,         || -->
-  <!-- || Paolo Robuffo Giordano,Alessandro de Lucaa third-party    || -->
+  <!-- || Paolo Robuffo Giordano, Alessandro de Luca third-party    || -->
   <!-- =============================================================== -->
   <link name="world"/>
   <joint name="panda_joint_panda_mount" type="fixed">
