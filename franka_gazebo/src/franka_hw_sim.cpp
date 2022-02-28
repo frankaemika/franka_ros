@@ -1,7 +1,7 @@
-#include <franka_gazebo/franka_hw_sim.h>
-
+#include <angles/angles.h>
 #include <franka/duration.h>
 #include <franka_example_controllers/pseudo_inversion.h>
+#include <franka_gazebo/franka_hw_sim.h>
 #include <franka_gazebo/model_kdl.h>
 #include <franka_hw/franka_hw.h>
 #include <franka_hw/services.h>
@@ -13,6 +13,7 @@
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <Eigen/Dense>
 #include <boost/algorithm/clamp.hpp>
+#include <boost/optional.hpp>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -99,6 +100,10 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
       return false;
     }
     joint->handle = handle;
+    // set the control method for finger joints to effort
+    if (joint->name.find(arm_id_ + "_finger_joint") != std::string::npos) {
+      joint->control_method = EFFORT;
+    }
     this->joints_.emplace(joint->name, joint);
   }
 
@@ -110,40 +115,34 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   }
 
   // Register all supported command interfaces
-  for (auto& transmission : transmissions) {
+  for (const auto& transmission : transmissions) {
     for (const auto& k_interface : transmission.joints_[0].hardware_interfaces_) {
       auto joint = this->joints_[transmission.joints_[0].name_];
       if (transmission.type_ == "transmission_interface/SimpleTransmission") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                    << joint->name << "': " << k_interface);
         if (k_interface == "hardware_interface/EffortJointInterface") {
-          this->joint_control_methods_.emplace(joint->name, EFFORT);
-
           initEffortCommandHandle(joint);
           continue;
         }
         if (k_interface == "hardware_interface/PositionJointInterface") {
-          this->joint_control_methods_.emplace(joint->name, POSITION);
-
           // Initiate position motion generator (PID controller)
           const ros::NodeHandle kPosPidGainsNh(robot_namespace +
                                                "/motion_generators/position/gains/" + joint->name);
           control_toolbox::Pid pid;
-          this->pid_controllers_.emplace(joint->name, pid);
-          this->pid_controllers_[joint->name].init(kPosPidGainsNh);
+          this->position_pid_controllers_.emplace(joint->name, pid);
+          this->position_pid_controllers_[joint->name].init(kPosPidGainsNh);
 
           initPositionCommandHandle(joint);
           continue;
         }
         if (k_interface == "hardware_interface/VelocityJointInterface") {
-          this->joint_control_methods_.emplace(joint->name, VELOCITY);
-
           // Initiate velocity motion generator (PID controller)
           const ros::NodeHandle kVelPidGainsNh(robot_namespace +
                                                "/motion_generators/velocity/gains/" + joint->name);
-          control_toolbox::Pid pid;
-          this->pid_controllers_.emplace(joint->name, pid);
-          this->pid_controllers_[joint->name].init(kVelPidGainsNh);
+          control_toolbox::Pid pid_velocity;
+          this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
+          this->velocity_pid_controllers_[joint->name].init(kVelPidGainsNh);
 
           initVelocityCommandHandle(joint);
           continue;
@@ -183,6 +182,13 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   }
 
   // After all handles have been assigned to interfaces, register them
+  assert(this->eji_.getNames().size() >= 7);
+  assert(this->pji_.getNames().size() == 7);
+  assert(this->vji_.getNames().size() == 7);
+  assert(this->jsi_.getNames().size() >= 7);
+  assert(this->fsi_.getNames().size() == 1);
+  assert(this->fmi_.getNames().size() == 1);
+
   registerInterface(&this->eji_);
   registerInterface(&this->pji_);
   registerInterface(&this->vji_);
@@ -208,12 +214,12 @@ void FrankaHWSim::initEffortCommandHandle(const std::shared_ptr<franka_gazebo::J
 
 void FrankaHWSim::initPositionCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
   this->pji_.registerHandle(
-      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->desired_position));
 }
 
 void FrankaHWSim::initVelocityCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint) {
   this->vji_.registerHandle(
-      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->command));
+      hardware_interface::JointHandle(this->jsi_.getHandle(joint->name), &joint->desired_velocity));
 }
 
 void FrankaHWSim::initFrankaStateHandle(
@@ -365,52 +371,52 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
     auto joint = pair.second;
 
     // Retrieve effort control command
-    double effort;
-    switch (joint_control_methods_[joint->name]) {
-      case EFFORT: {
-        // Check if this joint is affected by gravity compensation
-        std::string prefix = this->arm_id_ + "_joint";
-        if (pair.first.rfind(prefix, 0) != std::string::npos) {
-          int i = std::stoi(pair.first.substr(prefix.size())) - 1;
-          joint->gravity = g.at(i);
-        }
-        effort = joint->command + joint->gravity;
-      } break;
-      case POSITION: {
-        // Use position motion generator
-        double error;
-        const double kJointLowerLimit = joint->limits.min_position;
-        const double kJointUpperLimit = joint->limits.max_position;
-        switch (joint->type) {
-          case urdf::Joint::REVOLUTE:
-            angles::shortest_angular_distance_with_limits(
-                joint->position, joint->command, kJointLowerLimit, kJointUpperLimit, error);
-            break;
-          case urdf::Joint::CONTINUOUS:
-            error = angles::shortest_angular_distance(joint->position, joint->command);
-            break;
-          default:
-            error = joint->command - joint->position;
-        }
-        const double kEffortLimit = joint->limits.max_effort;
-        effort =
-            boost::algorithm::clamp(pid_controllers_[joint->name].computeCommand(error, period),
-                                    -kEffortLimit, kEffortLimit);
-      } break;
-      case VELOCITY: {
-        // Use velocity motion generator
-        const double kError = joint->command - joint->velocity;
-        const double kEffortLimit = joint->limits.max_effort;
-        effort =
-            boost::algorithm::clamp(pid_controllers_[joint->name].computeCommand(kError, period),
-                                    -kEffortLimit, kEffortLimit);
-      } break;
+    double effort = 0;
+    // Check if this joint is affected by gravity compensation
+    std::string prefix = this->arm_id_ + "_joint";
+    if (pair.first.rfind(prefix, 0) != std::string::npos) {
+      int i = std::stoi(pair.first.substr(prefix.size())) - 1;
+      joint->gravity = g.at(i);
+    }
+    auto& control_method = joint->control_method;
+    if (control_method == EFFORT) {
+      effort = joint->command + joint->gravity;
+    } else if (control_method == POSITION) {
+      // Use position motion generator
+      double error;
+      const double kJointLowerLimit = joint->limits.min_position;
+      const double kJointUpperLimit = joint->limits.max_position;
+      switch (joint->type) {
+        case urdf::Joint::REVOLUTE:
+          angles::shortest_angular_distance_with_limits(joint->position, joint->desired_position,
+                                                        kJointLowerLimit, kJointUpperLimit, error);
+          break;
+        case urdf::Joint::CONTINUOUS:
+          error = angles::shortest_angular_distance(joint->position, joint->desired_position);
+          break;
+        default:
+          error = joint->desired_position - joint->position;
+      }
+
+      const double kEffortLimit = joint->limits.max_effort;
+      effort = boost::algorithm::clamp(
+                   position_pid_controllers_[joint->name].computeCommand(error, period),
+                   -kEffortLimit, kEffortLimit) +
+               joint->gravity;
+    } else if (control_method == VELOCITY) {
+      // Use velocity motion generator
+      const double kError = joint->desired_velocity - joint->velocity;
+      const double kEffortLimit = joint->limits.max_effort;
+      effort = boost::algorithm::clamp(
+                   velocity_pid_controllers_[joint->name].computeCommand(kError, period),
+                   -kEffortLimit, kEffortLimit) +
+               joint->gravity;
     }
 
     // Send control effort control command
-    if (std::isnan(effort)) {
+    if (not std::isfinite(effort)) {
       ROS_WARN_STREAM_NAMED("franka_hw_sim",
-                            "Command for " << joint->name << "is NaN, won't send to robot");
+                            "Command for " << joint->name << "is not finite, won't send to robot");
       continue;
     }
     joint->handle->SetForce(0, effort);
@@ -567,6 +573,11 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.theta[i] = joint->position;
     this->robot_state_.dtheta[i] = joint->velocity;
 
+    // first time initialization of the desired position
+    if (not this->efforts_initialized_) {
+      joint->desired_position = joint->position;
+    }
+
     if (this->efforts_initialized_) {
       double tau_ext = joint->effort - joint->command + joint->gravity;
 
@@ -610,6 +621,82 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
 
   this->efforts_initialized_ = true;
+}
+
+void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                           const std::list<hardware_interface::ControllerInfo>& stop_list) {
+  auto determine_control_method =
+      [](const std::string& hardware_interface) -> boost::optional<ControlMethod> {
+    if (hardware_interface.find("hardware_interface::PositionJointInterface") !=
+        std::string::npos) {
+      return POSITION;
+    }
+    if (hardware_interface.find("hardware_interface::VelocityJointInterface") !=
+        std::string::npos) {
+      return VELOCITY;
+    }
+    if (hardware_interface.find("hardware_interface::EffortJointInterface") != std::string::npos) {
+      return EFFORT;
+    }
+    return boost::none;
+  };
+
+  // checks if a controller that uses the joints of the arm (not gripper joints) claims a
+  // position, velocity or effort interface.
+  auto claims_interface =
+      [this, determine_control_method](const hardware_interface::ControllerInfo& info) {
+        for (const auto& claimed_resource : info.claimed_resources) {
+          auto control_method = determine_control_method(claimed_resource.hardware_interface);
+          if (control_method.is_initialized()) {
+            // Check if joints are the arm joints
+            if (claimed_resource.resources.size() == 7) {
+              std::vector<std::string> joint_names;
+              for (int i = 1; i < 8; i++) {
+                joint_names.push_back(arm_id_ + "_joint" + std::to_string(i));
+              }
+              for (const auto& joint_name : claimed_resource.resources) {
+                if (std::find(joint_names.begin(), joint_names.end(), joint_name) ==
+                    joint_names.end()) {
+                  return false;
+                }
+              }
+              return true;
+            }
+          }
+        }
+        return false;
+      };
+
+  for (const auto& stop_interface : stop_list) {
+    // if a controller that claims hardware interfaces is stopped we go into position control
+    if (claims_interface(stop_interface)) {
+      for (const auto& claimed_resource : stop_interface.claimed_resources) {
+        auto control_method = determine_control_method(claimed_resource.hardware_interface);
+        // set control method to position if no controller is running
+        for (const auto& joint_name : claimed_resource.resources) {
+          assert(control_method.is_initialized());
+          auto& joint = joints_.at(joint_name);
+          joint->control_method = POSITION;
+          joint->desired_position = joint->position;
+          joint->desired_velocity = 0;
+        }
+      }
+    }
+  }
+
+  for (const auto& start_interface : start_list) {
+    // if a valid controller claims a hardware interface we set the appropriate control method for
+    // the joint.
+    if (claims_interface(start_interface)) {
+      for (const auto& claimed_resource : start_interface.claimed_resources) {
+        auto control_method = determine_control_method(claimed_resource.hardware_interface);
+        for (const auto& joint_name : claimed_resource.resources) {
+          assert(control_method.is_initialized());
+          joints_.at(joint_name)->control_method = control_method.value();
+        }
+      }
+    }
+  }
 }
 
 }  // namespace franka_gazebo

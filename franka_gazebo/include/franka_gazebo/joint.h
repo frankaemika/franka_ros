@@ -9,6 +9,11 @@
 namespace franka_gazebo {
 
 /**
+ *  Specifies the current control method of the joint {EFFORT, POSITION, VELOCITY}.
+ */
+enum ControlMethod { EFFORT, POSITION, VELOCITY };
+
+/**
  * A data container holding all relevant information about a robotic joint.
  *
  * Calling @ref update on this object will compute its internal state based on the all currenlty
@@ -46,6 +51,18 @@ struct Joint {
   /// The currently applied command from a controller acting on this joint either in \f$N\f$ or
   /// \f$Nm\f$ without gravity
   double command = 0;
+
+  /// The current desired position that is used for the PID controller when the joints control
+  /// method is "POSITION".
+  double desired_position = 0;
+
+  /// The current desired velocity that is used for the PID controller when the joints control
+  /// method is "VELOCITY".
+  double desired_velocity = 0;
+
+  /// Decides whether the joint is doing pure torque control or if the position or velocity should
+  /// be controlled.
+  ControlMethod control_method = POSITION;
 
   /// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
   double gravity = 0;

@@ -13,8 +13,6 @@ franka_gripper:
     gains: { p: 100, i: 0, d: 1.0 }
 
 # Motion generators PID gains
-# NOTE: Needed since the gazebo_ros_control currently only directly support effort hardware
-# interfaces (see #161).
 motion_generators:
   position:
     gains:

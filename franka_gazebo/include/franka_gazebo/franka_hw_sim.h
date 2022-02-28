@@ -94,6 +94,14 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
    */
   void eStopActive(const bool active) override;
 
+  /**
+   * Switches the control mode of the robot arm and the gripper
+   * @param start_list list of controllers to start
+   * @param stop_list list of controllers to stop
+   */
+  void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+
  private:
   /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
   bool efforts_initialized_;
@@ -104,9 +112,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
 
-  enum ControlMethod { EFFORT, POSITION, VELOCITY };
-  std::map<std::string, ControlMethod> joint_control_methods_;
-  std::map<std::string, control_toolbox::Pid> pid_controllers_;
+  std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
+  std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
 
   hardware_interface::JointStateInterface jsi_;
   hardware_interface::EffortJointInterface eji_;
