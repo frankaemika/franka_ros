@@ -130,22 +130,19 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
         if (k_interface == "hardware_interface/PositionJointInterface") {
           // Initiate position motion generator (PID controller)
-          const ros::NodeHandle kPosPidGainsNh(robot_namespace +
-                                               "/motion_generators/position/gains/" + joint->name);
           control_toolbox::Pid pid;
+          pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
           this->position_pid_controllers_.emplace(joint->name, pid);
-          this->position_pid_controllers_[joint->name].init(kPosPidGainsNh);
 
           initPositionCommandHandle(joint);
           continue;
         }
         if (k_interface == "hardware_interface/VelocityJointInterface") {
           // Initiate velocity motion generator (PID controller)
-          const ros::NodeHandle kVelPidGainsNh(robot_namespace +
-                                               "/motion_generators/velocity/gains/" + joint->name);
           control_toolbox::Pid pid_velocity;
+          pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" +
+                                 joint->name);
           this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
-          this->velocity_pid_controllers_[joint->name].init(kVelPidGainsNh);
 
           initVelocityCommandHandle(joint);
           continue;
