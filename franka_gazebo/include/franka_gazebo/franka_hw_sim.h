@@ -13,6 +13,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
+#include <boost/optional.hpp>
 #include <cmath>
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
@@ -111,6 +112,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   std::string arm_id_;
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
+  std::vector<std::string> joint_names_arm_;
 
   std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
   std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
@@ -154,6 +156,10 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   bool readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf);
 
   void guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf);
+
+  /// checks if a controller that uses the joints of the arm (not gripper joints) claims a position,
+  /// velocity or effort interface.
+  bool claimsInterface(const hardware_interface::ControllerInfo& info);
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
@@ -210,6 +216,9 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
     Eigen::Matrix3d Ip = I + m * P.transpose() * P;
     return Ip;
   }
+
+  static boost::optional<ControlMethod> determineControlMethod(
+      const std::string& hardware_interface);
 };
 
 }  // namespace franka_gazebo

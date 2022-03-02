@@ -33,6 +33,9 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
             << this->arm_id_ << "' from parameter server but URDF defines '<robotNamespace>"
             << robot_namespace << "</robotNamespace>'. Will use '" << this->arm_id_ << "'!");
   }
+  for (int i = 1; i < 8; i++) {
+    joint_names_arm_.push_back(arm_id_ + "_joint" + std::to_string(i));
+  }
 
   this->robot_ = parent;
   this->efforts_initialized_ = false;
@@ -625,60 +628,19 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
 void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                            const std::list<hardware_interface::ControllerInfo>& stop_list) {
-  auto determine_control_method =
-      [](const std::string& hardware_interface) -> boost::optional<ControlMethod> {
-    if (hardware_interface.find("hardware_interface::PositionJointInterface") !=
-        std::string::npos) {
-      return POSITION;
-    }
-    if (hardware_interface.find("hardware_interface::VelocityJointInterface") !=
-        std::string::npos) {
-      return VELOCITY;
-    }
-    if (hardware_interface.find("hardware_interface::EffortJointInterface") != std::string::npos) {
-      return EFFORT;
-    }
-    return boost::none;
-  };
-
-  // checks if a controller that uses the joints of the arm (not gripper joints) claims a
-  // position, velocity or effort interface.
-  auto claims_interface =
-      [this, determine_control_method](const hardware_interface::ControllerInfo& info) {
-        for (const auto& claimed_resource : info.claimed_resources) {
-          auto control_method = determine_control_method(claimed_resource.hardware_interface);
-          if (control_method.is_initialized()) {
-            // Check if joints are the arm joints
-            if (claimed_resource.resources.size() == 7) {
-              std::vector<std::string> joint_names;
-              for (int i = 1; i < 8; i++) {
-                joint_names.push_back(arm_id_ + "_joint" + std::to_string(i));
-              }
-              for (const auto& joint_name : claimed_resource.resources) {
-                if (std::find(joint_names.begin(), joint_names.end(), joint_name) ==
-                    joint_names.end()) {
-                  return false;
-                }
-              }
-              return true;
-            }
-          }
-        }
-        return false;
-      };
-
   for (const auto& stop_interface : stop_list) {
     // if a controller that claims hardware interfaces is stopped we go into position control
-    if (claims_interface(stop_interface)) {
+    if (claimsInterface(stop_interface)) {
       for (const auto& claimed_resource : stop_interface.claimed_resources) {
-        auto control_method = determine_control_method(claimed_resource.hardware_interface);
+        auto control_method = determineControlMethod(claimed_resource.hardware_interface);
         // set control method to position if no controller is running
-        for (const auto& joint_name : claimed_resource.resources) {
-          assert(control_method.is_initialized());
-          auto& joint = joints_.at(joint_name);
-          joint->control_method = POSITION;
-          joint->desired_position = joint->position;
-          joint->desired_velocity = 0;
+        if (control_method.is_initialized()) {
+          for (const auto& joint_name : claimed_resource.resources) {
+            auto& joint = joints_.at(joint_name);
+            joint->control_method = POSITION;
+            joint->desired_position = joint->position;
+            joint->desired_velocity = 0;
+          }
         }
       }
     }
@@ -687,16 +649,50 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
   for (const auto& start_interface : start_list) {
     // if a valid controller claims a hardware interface we set the appropriate control method for
     // the joint.
-    if (claims_interface(start_interface)) {
+    if (claimsInterface(start_interface)) {
       for (const auto& claimed_resource : start_interface.claimed_resources) {
-        auto control_method = determine_control_method(claimed_resource.hardware_interface);
-        for (const auto& joint_name : claimed_resource.resources) {
-          assert(control_method.is_initialized());
-          joints_.at(joint_name)->control_method = control_method.value();
+        auto control_method = determineControlMethod(claimed_resource.hardware_interface);
+        if (control_method.is_initialized()) {
+          for (const auto& joint_name : claimed_resource.resources) {
+            joints_.at(joint_name)->control_method = control_method.value();
+          }
         }
       }
     }
   }
+}
+
+boost::optional<ControlMethod> FrankaHWSim::determineControlMethod(
+    const std::string& hardware_interface) {
+  if (hardware_interface.find("hardware_interface::PositionJointInterface") != std::string::npos) {
+    return POSITION;
+  }
+  if (hardware_interface.find("hardware_interface::VelocityJointInterface") != std::string::npos) {
+    return VELOCITY;
+  }
+  if (hardware_interface.find("hardware_interface::EffortJointInterface") != std::string::npos) {
+    return EFFORT;
+  }
+  return boost::none;
+}
+
+bool FrankaHWSim::claimsInterface(const hardware_interface::ControllerInfo& info) {
+  for (const auto& claimed_resource : info.claimed_resources) {
+    auto control_method = FrankaHWSim::determineControlMethod(claimed_resource.hardware_interface);
+    if (control_method.is_initialized()) {
+      // Check if joints are the arm joints
+      if (claimed_resource.resources.size() == 7) {
+        for (const auto& joint_name : claimed_resource.resources) {
+          if (std::find(joint_names_arm_.begin(), joint_names_arm_.end(), joint_name) ==
+              joint_names_arm_.end()) {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace franka_gazebo
