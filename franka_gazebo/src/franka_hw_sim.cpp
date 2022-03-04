@@ -38,7 +38,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   }
 
   this->robot_ = parent;
-  this->efforts_initialized_ = false;
+  this->robot_initialized_ = false;
 
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -574,11 +574,11 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.dtheta[i] = joint->velocity;
 
     // first time initialization of the desired position
-    if (not this->efforts_initialized_) {
+    if (not this->robot_initialized_) {
       joint->desired_position = joint->position;
     }
 
-    if (this->efforts_initialized_) {
+    if (this->robot_initialized_) {
       double tau_ext = joint->effort - joint->command + joint->gravity;
 
       // Exponential moving average filter from tau_ext -> tau_ext_hat_filtered
@@ -620,7 +620,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
 
-  this->efforts_initialized_ = true;
+  this->robot_initialized_ = true;
 }
 
 void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,

@@ -105,7 +105,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
  private:
   /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
-  bool efforts_initialized_;
+  bool robot_initialized_;
 
   std::array<double, 3> gravity_earth_;
 

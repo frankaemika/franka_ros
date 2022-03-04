@@ -9,7 +9,7 @@
 namespace franka_gazebo {
 
 /**
- *  Specifies the current control method of the joint {EFFORT, POSITION, VELOCITY}.
+ *  Specifies the current control method of the joint.
  */
 enum ControlMethod { EFFORT, POSITION, VELOCITY };
 
@@ -60,7 +60,7 @@ struct Joint {
   /// method is "VELOCITY".
   double desired_velocity = 0;
 
-  /// Decides whether the joint is doing pure torque control or if the position or velocity should
+  /// Decides whether the joint is doing torque control or if the position or velocity should
   /// be controlled.
   ControlMethod control_method = POSITION;
 
