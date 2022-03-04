@@ -9,14 +9,14 @@
 namespace franka_gazebo {
 
 /**
- *  Specifies the current control method of the joint.
+ * Specifies the current control method of the joint.
  */
 enum ControlMethod { EFFORT, POSITION, VELOCITY };
 
 /**
  * A data container holding all relevant information about a robotic joint.
  *
- * Calling @ref update on this object will compute its internal state based on the all currenlty
+ * Calling @ref update on this object will compute its internal state based on the all currently
  * supplied information such as position, efforts etc.
  */
 struct Joint {
@@ -26,7 +26,7 @@ struct Joint {
   Joint(const Joint&) = delete;
 
   /**
-   * Calculate all members such as accelerations, jerks velocities by differention
+   * Calculate all members such as accelerations, jerks velocities by differentiation
    * @param[in] dt the current time step since last time this method was called
    */
   void update(const ros::Duration& dt);
@@ -53,11 +53,14 @@ struct Joint {
   double command = 0;
 
   /// The current desired position that is used for the PID controller when the joints control
-  /// method is "POSITION".
+  /// method is "POSITION". When the control method is not "POSITION", this value will only be
+  /// updated once at the start of the controller and stay the same until a new controller is
+  /// started.
   double desired_position = 0;
 
   /// The current desired velocity that is used for the PID controller when the joints control
-  /// method is "VELOCITY".
+  /// method is "VELOCITY". When the control method is not "VELOCITY", this value will be set to
+  /// zero.
   double desired_velocity = 0;
 
   /// Decides whether the joint is doing torque control or if the position or velocity should
@@ -80,7 +83,7 @@ struct Joint {
   /// \f$\frac{rad}{s^3}\f$
   double jerk = 0;
 
-  /// The currenlty acting acceleration on this joint in either \f$\frac{m}{s^2}\f$ or
+  /// The currently acting acceleration on this joint in either \f$\frac{m}{s^2}\f$ or
   /// \f$\frac{rad}{s^2}\f$
   double acceleration = 0;
 

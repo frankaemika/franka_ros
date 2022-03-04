@@ -564,10 +564,17 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.tau_J[i] = joint->effort;
     this->robot_state_.dtau_J[i] = joint->jerk;
 
-    this->robot_state_.q_d[i] = joint->position;
-    this->robot_state_.dq_d[i] = joint->velocity;
-    this->robot_state_.ddq_d[i] = joint->acceleration;
-    this->robot_state_.tau_J_d[i] = joint->command;
+    if (joint->control_method == EFFORT) {
+      this->robot_state_.q_d[i] = joint->desired_position;
+      this->robot_state_.dq_d[i] = 0;
+      this->robot_state_.ddq_d[i] = 0;
+      this->robot_state_.tau_J_d[i] = joint->command;
+    } else {
+      this->robot_state_.q_d[i] = joint->position;
+      this->robot_state_.dq_d[i] = joint->velocity;
+      this->robot_state_.ddq_d[i] = joint->acceleration;
+      this->robot_state_.tau_J_d[i] = 0;
+    }
 
     // For now we assume no flexible joints
     this->robot_state_.theta[i] = joint->position;
@@ -651,7 +658,10 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
         auto control_method = determineControlMethod(claimed_resource.hardware_interface);
         if (control_method.is_initialized()) {
           for (const auto& joint_name : claimed_resource.resources) {
-            joints_.at(joint_name)->control_method = control_method.value();
+            auto& joint = joints_.at(joint_name);
+            joint->control_method = control_method.value();
+            // sets the desired joint position once for the effort interface
+            joint->desired_position = joint->position;
           }
         }
       }
