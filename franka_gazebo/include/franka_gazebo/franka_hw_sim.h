@@ -96,7 +96,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   void eStopActive(const bool active) override;
 
   /**
-   * Switches the control mode of the robot arm and the gripper
+   * Switches the control mode of the robot arm
    * @param start_list list of controllers to start
    * @param stop_list list of controllers to stop
    */

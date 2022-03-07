@@ -11,7 +11,7 @@
   <!-- Robot Customization -->
   <arg name="arm_id"      default="panda" doc="Name of the panda robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
-  <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force}_example_controller)" />
+  <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
   <arg name="y"           default="0"     doc="How far leftwards to place the base of the robot in [m]?" />
   <arg name="z"           default="0"     doc="How far upwards to place the base of the robot in [m]?" />
@@ -70,8 +70,9 @@
         respawn="false"
   />
 
-  <node pkg="controller_manager"
-        type="spawner"
+  <!-- spawns the controller after the robot was put into its initial joint pose -->
+  <node pkg="franka_gazebo"
+        type="delayed_controller_spawner.py"
         name="$(arg arm_id)_controller_spawner"
         respawn="false" output="screen"
         args="franka_state_controller $(arg controller)"
