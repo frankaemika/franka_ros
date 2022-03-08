@@ -388,11 +388,10 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
           angles::shortest_angular_distance_with_limits(joint->position, joint->desired_position,
                                                         kJointLowerLimit, kJointUpperLimit, error);
           break;
-        case urdf::Joint::CONTINUOUS:
-          error = angles::shortest_angular_distance(joint->position, joint->desired_position);
-          break;
         default:
-          error = joint->desired_position - joint->position;
+          ROS_FATAL("Only revolute joints are allowed for position control right now");
+          throw std::invalid_argument(
+              "Only revolute joints are allowed for position control right now");
       }
 
       const double kEffortLimit = joint->limits.max_effort;
