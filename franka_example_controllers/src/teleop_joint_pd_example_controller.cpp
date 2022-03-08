@@ -1,10 +1,13 @@
 // Copyright (c) 2020 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka_example_controllers/teleop_joint_pd_example_controller.h>
+#include <franka_example_controllers/virtual_joint_position_walls.h>
 
 #include <hardware_interface/hardware_interface.h>
+#include <joint_limits_interface/joint_limits_urdf.h>
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
+#include <urdf/model.h>
 
 #include <Eigen/Dense>
 #include <algorithm>
@@ -17,116 +20,49 @@ namespace franka_example_controllers {
 
 bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
-  auto get_joint_params = [&node_handle](const std::string& key, auto& vec) {
-    if (!node_handle.getParam(key, vec) || vec.size() != 7) {
-      ROS_ERROR(
-          "TeleopJointPDExampleController: Invalid or no parameter %s provided, "
-          "aborting controller init!",
-          key.c_str());
-      return false;
-    }
-    return true;
-  };
-
   std::string leader_arm_id;
-  if (!node_handle.getParam("leader/arm_id", leader_arm_id)) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Could not read parameter leader_arm_id, aborting "
-        "controller init!");
-    return false;
-  }
+  std::string follower_arm_id;
 
   std::vector<std::string> leader_joint_names;
-  if (!get_joint_params("leader/joint_names", leader_joint_names)) {
-    return false;
-  }
-
-  std::string follower_arm_id;
-  if (!node_handle.getParam("follower/arm_id", follower_arm_id)) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Could not read parameter follower_arm_id, aborting "
-        "controller init!");
-    return false;
-  }
-
   std::vector<std::string> follower_joint_names;
-  if (!get_joint_params("follower/joint_names", follower_joint_names)) {
-    return false;
-  }
 
-  std::vector<double> k_d_leader;
-  if (!get_joint_params("leader/d_gains", k_d_leader)) {
-    return false;
-  }
-  k_d_leader_ = Eigen::Map<Vector7d>(k_d_leader.data());
+  try {
+    get7dParam("joint_teleop/leader/d_gains_lower", node_handle, k_d_leader_lower_);
+    get7dParam("joint_teleop/leader/d_gains_upper", node_handle, k_d_leader_upper_);
+    get7dParam("joint_teleop/leader/dq_max_lower", node_handle, dq_max_leader_lower_);
+    get7dParam("joint_teleop/leader/dq_max_upper", node_handle, dq_max_leader_upper_);
 
-  std::vector<double> k_p_follower;
-  if (!get_joint_params("follower/p_gains", k_p_follower)) {
-    return false;
-  }
-  k_p_follower_ = Eigen::Map<Vector7d>(k_p_follower.data());
+    get7dParam("joint_teleop/follower/p_gains", node_handle, k_p_follower_);
+    get7dParam("joint_teleop/follower/d_gains", node_handle, k_d_follower_);
+    get7dParam("joint_teleop/follower/drift_comp_gains", node_handle, k_dq_);
+    get7dParam("joint_teleop/follower/dq_max_lower", node_handle, dq_max_lower_);
+    get7dParam("joint_teleop/follower/dq_max_upper", node_handle, dq_max_upper_);
+    get7dParam("joint_teleop/follower/ddq_max_lower", node_handle, ddq_max_lower_);
+    get7dParam("joint_teleop/follower/ddq_max_upper", node_handle, ddq_max_upper_);
 
-  std::vector<double> k_d_follower;
-  if (!get_joint_params("follower/d_gains", k_d_follower)) {
-    return false;
-  }
-  k_d_follower_ = Eigen::Map<Vector7d>(k_d_follower.data());
+    get1dParam("joint_teleop/leader/contact_force_threshold", node_handle,
+               leader_data_.contact_force_threshold);
+    get1dParam("joint_teleop/follower/contact_force_threshold", node_handle,
+               follower_data_.contact_force_threshold);
 
-  std::vector<double> k_dq;
-  if (!get_joint_params("follower/drift_comp_gains", k_dq)) {
-    return false;
-  }
-  k_dq_ = Eigen::Map<Vector7d>(k_dq.data());
+    get1dParam("leader/arm_id", node_handle, leader_arm_id);
+    get1dParam("follower/arm_id", node_handle, follower_arm_id);
 
-  std::vector<double> dq_max_lower;
-  if (!get_joint_params("follower/dq_max_lower", dq_max_lower)) {
-    return false;
-  }
-  dq_max_lower_ = Eigen::Map<Vector7d>(dq_max_lower.data());
+    getJointParams("leader/joint_names", node_handle, leader_joint_names);
+    getJointParams("follower/joint_names", node_handle, follower_joint_names);
 
-  std::vector<double> dq_max_upper;
-  if (!get_joint_params("follower/dq_max_upper", dq_max_upper)) {
-    return false;
-  }
-  dq_max_upper_ = Eigen::Map<Vector7d>(dq_max_upper.data());
+    if (!node_handle.getParam("debug", debug_)) {
+      ROS_INFO_STREAM(
+          "TeleopJointPDExampleController: Could not find parameter debug. Defaulting to "
+          << std::boolalpha << debug_);
+    }
 
-  std::vector<double> ddq_max_lower;
-  if (!get_joint_params("follower/ddq_max_lower", ddq_max_lower)) {
-    return false;
-  }
-  ddq_max_lower_ = Eigen::Map<Vector7d>(ddq_max_lower.data());
+    // Init for each arm
+    initArm(robot_hw, node_handle, leader_data_, leader_arm_id, leader_joint_names);
+    initArm(robot_hw, node_handle, follower_data_, follower_arm_id, follower_joint_names);
 
-  std::vector<double> ddq_max_upper;
-  if (!get_joint_params("follower/ddq_max_upper", ddq_max_upper)) {
-    return false;
-  }
-  ddq_max_upper_ = Eigen::Map<Vector7d>(ddq_max_upper.data());
-
-  if (!node_handle.getParam("leader/contact_force_threshold",
-                            leader_data_.contact_force_threshold)) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no leader/contact_force_threshold provided, "
-        "aborting controller init!");
-    return false;
-  }
-
-  if (!node_handle.getParam("follower/contact_force_threshold",
-                            follower_data_.contact_force_threshold)) {
-    ROS_ERROR(
-        "TeleopJointPDExampleController: Invalid or no follower/contact_force_threshold provided, "
-        "aborting controller init!");
-    return false;
-  }
-
-  debug_ = false;
-  if (!node_handle.getParam("debug", debug_)) {
-    ROS_INFO_STREAM("TeleopJointPDExampleController: Could not find parameter debug. Defaulting to "
-                    << std::boolalpha << debug_);
-  }
-
-  // Init for each arm
-  if (!initArm(robot_hw, leader_data_, leader_arm_id, leader_joint_names) ||
-      !initArm(robot_hw, follower_data_, follower_arm_id, follower_joint_names)) {
+  } catch (const std::invalid_argument& ex) {
+    ROS_ERROR("%s", ex.what());
     return false;
   }
 
@@ -157,6 +93,63 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   }
 
   return true;
+}
+
+void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_hw,
+                                             ros::NodeHandle& node_handle,
+                                             FrankaDataContainer& arm_data,
+                                             const std::string& arm_id,
+                                             const std::vector<std::string>& joint_names) {
+  auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
+  if (effort_joint_interface == nullptr) {
+    throw std::invalid_argument(
+        "TeleopJointPDExampleController: Error getting effort joint interface from hardware of " +
+        arm_id + ".");
+  }
+
+  arm_data.joint_handles.clear();
+  for (size_t i = 0; i < 7; ++i) {
+    try {
+      arm_data.joint_handles.push_back(effort_joint_interface->getHandle(joint_names[i]));
+    } catch (const hardware_interface::HardwareInterfaceException& e) {
+      throw std::invalid_argument(
+          "TeleopJointPDExampleController: Exception getting joint handles: " +
+          std::string(e.what()));
+    }
+  }
+
+  // Get state interface.
+  auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
+  if (state_interface == nullptr) {
+    throw std::invalid_argument(
+        "TeleopJointPDExampleController: Error getting state interface from hardware");
+  }
+
+  try {
+    arm_data.state_handle = std::make_unique<franka_hw::FrankaStateHandle>(
+        state_interface->getHandle(arm_id + "_robot"));
+  } catch (hardware_interface::HardwareInterfaceException& ex) {
+    throw std::invalid_argument(
+        "TeleopJointPDExampleController: Exception getting state handle from interface: " +
+        std::string(ex.what()));
+  }
+
+  // Setup joint walls
+  // Virtual joint position wall parameters
+  const std::array<double, 7> kPDZoneWidth = {{0.12, 0.09, 0.09, 0.09, 0.0349, 0.0349, 0.0349}};
+  const std::array<double, 7> kDZoneWidth = {{0.12, 0.09, 0.09, 0.09, 0.0349, 0.0349, 0.0349}};
+  const std::array<double, 7> kPDZoneStiffness = {
+      {2000.0, 2000.0, 1000.0, 1000.0, 500.0, 200.0, 200.0}};
+  const std::array<double, 7> kPDZoneDamping = {{30.0, 30.0, 30.0, 10.0, 5.0, 5.0, 5.0}};
+  const std::array<double, 7> kDZoneDamping = {{30.0, 30.0, 30.0, 10.0, 5.0, 5.0, 5.0}};
+
+  std::array<double, 7> upper_joint_soft_limit;
+  std::array<double, 7> lower_joint_soft_limit;
+  getJointLimits(node_handle, joint_names, upper_joint_soft_limit, lower_joint_soft_limit);
+
+  arm_data.virtual_joint_wall = std::make_unique<VirtualJointPositionWalls<7>>(
+      upper_joint_soft_limit, lower_joint_soft_limit, kPDZoneWidth, kDZoneWidth, kPDZoneStiffness,
+      kPDZoneDamping, kDZoneDamping);
 }
 
 void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
@@ -214,10 +207,13 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
     // robot. Add a slight damping to reduce vibrations.
     // The force feedback is applied when the external forces on the follower arm exceed a
     // threshold. While the leader arm is unguided (not in contact), the force-feedback is reduced.
+    // When the leader robot exceeds the soft limit velocities dq_max_leader_lower damping is
+    // increased gradually until it saturates when reaching dq_max_leader_upper to maxmimum damping.
+
     Vector7d follower_tau_ext_hat =
         Eigen::Map<Vector7d>(follower_robot_state.tau_ext_hat_filtered.data());
     Vector7d leader_damping_torque =
-        leader_damping_scaling_ * k_d_leader_.asDiagonal() * leader_data_.dq;
+        leader_damping_scaling_ * leaderDamping(leader_data_.dq).asDiagonal() * leader_data_.dq;
     Vector7d leader_force_feedback =
         follower_data_.contact *
         (force_feedback_idle_ +
@@ -225,22 +221,38 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
         (-follower_tau_ext_hat);
 
     leader_data_.tau_target = leader_force_feedback - leader_damping_torque;
-    leader_data_.tau_target_last = leader_data_.tau_target;
 
     // Compute PD control for the follower arm to track the leader's motions.
     follower_data_.tau_target =
         follower_stiffness_scaling_ * k_p_follower_.asDiagonal() * (q_target_ - follower_data_.q) +
         sqrt(follower_stiffness_scaling_) * k_d_follower_.asDiagonal() *
             (dq_target_ - follower_data_.dq);
-    follower_data_.tau_target_last = follower_data_.tau_target;
 
   } else {
     // Control target torques to zero if any arm is in error state.
     leader_data_.tau_target = decrease_factor_ * leader_data_.tau_target_last;
-    leader_data_.tau_target_last = leader_data_.tau_target;
     follower_data_.tau_target = decrease_factor_ * follower_data_.tau_target_last;
-    follower_data_.tau_target_last = follower_data_.tau_target;
   }
+
+  // Add torques from joint walls to the torque commands.
+  auto to_eigen = [](const std::array<double, 7>& data) { return Vector7d(data.data()); };
+  auto from_eigen = [](const Vector7d& data) {
+    return std::array<double, 7>{data(0), data(1), data(2), data(3), data(4), data(5), data(6)};
+  };
+  std::array<double, 7> virtual_wall_tau_leader;
+  leader_data_.virtual_joint_wall->computeTorque(
+      from_eigen(leader_data_.q), from_eigen(leader_data_.dq), virtual_wall_tau_leader);
+
+  std::array<double, 7> virtual_wall_tau_follower;
+  follower_data_.virtual_joint_wall->computeTorque(
+      from_eigen(follower_data_.q), from_eigen(follower_data_.dq), virtual_wall_tau_follower);
+
+  leader_data_.tau_target += to_eigen(virtual_wall_tau_leader);
+  follower_data_.tau_target += to_eigen(virtual_wall_tau_follower);
+
+  // Store torques for next time step
+  leader_data_.tau_target_last = leader_data_.tau_target;
+  follower_data_.tau_target_last = follower_data_.tau_target;
 
   updateArm(leader_data_);
   updateArm(follower_data_);
@@ -251,47 +263,6 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
     publishLeaderContact();
     publishFollowerContact();
   }
-}
-
-bool TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_hw,
-                                             FrankaDataContainer& arm_data,
-                                             const std::string& arm_id,
-                                             const std::vector<std::string>& joint_names) {
-  auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
-  if (effort_joint_interface == nullptr) {
-    ROS_ERROR_STREAM(
-        "TeleopJointPDExampleController: Error getting effort joint interface from hardware of "
-        << arm_id << ".");
-    return false;
-  }
-  arm_data.joint_handles.clear();
-  for (size_t i = 0; i < 7; ++i) {
-    try {
-      arm_data.joint_handles.push_back(effort_joint_interface->getHandle(joint_names[i]));
-    } catch (const hardware_interface::HardwareInterfaceException& e) {
-      ROS_ERROR_STREAM(
-          "TeleopJointPDExampleController: Exception getting joint handles: " << e.what());
-      return false;
-    }
-  }
-
-  // Get state interface.
-  auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
-  if (state_interface == nullptr) {
-    ROS_ERROR_STREAM("TeleopJointPDExampleController: Error getting state interface from hardware");
-    return false;
-  }
-  try {
-    arm_data.state_handle = std::make_unique<franka_hw::FrankaStateHandle>(
-        state_interface->getHandle(arm_id + "_robot"));
-  } catch (hardware_interface::HardwareInterfaceException& ex) {
-    ROS_ERROR_STREAM(
-        "TeleopJointPDExampleController: Exception getting state handle from interface: "
-        << ex.what());
-    return false;
-  }
-
-  return true;
 }
 
 void TeleopJointPDExampleController::updateArm(FrankaDataContainer& arm_data) {
@@ -373,6 +344,50 @@ void TeleopJointPDExampleController::teleopParamCallback(
     ROS_INFO("Dynamic reconfigure: Controller params set.");
   }
   dynamic_reconfigure_mutex_.unlock();
+}
+
+void TeleopJointPDExampleController::getJointLimits(ros::NodeHandle& nh,
+                                                    const std::vector<std::string>& joint_names,
+                                                    std::array<double, 7>& upper_joint_soft_limit,
+                                                    std::array<double, 7>& lower_joint_soft_limit) {
+  const std::string& node_namespace = nh.getNamespace();
+  std::size_t found = node_namespace.find_last_of('/');
+  std::string parent_namespace = node_namespace.substr(0, found);
+
+  if (!nh.hasParam(parent_namespace + "/robot_description")) {
+    throw std::invalid_argument(
+        "JointTeleopPDExampleController: No parameter robot_description (namespace: " +
+        parent_namespace + ")found to set joint limits!");
+  }
+
+  urdf::Model urdf_model;
+  if (!urdf_model.initParamWithNodeHandle(parent_namespace + "/robot_description", nh)) {
+    throw std::invalid_argument(
+        "JointTeleopPDExampleController: Could not initialize urdf model from robot_description "
+        "(namespace: " +
+        parent_namespace + ").");
+  }
+  joint_limits_interface::SoftJointLimits soft_limits;
+  std::size_t i = 0;
+  for (const auto& joint_name : joint_names) {
+    auto urdf_joint = urdf_model.getJoint(joint_name);
+    if (!urdf_joint) {
+      ROS_ERROR_STREAM("JointTeleopPDExampleController: Could not get joint " << joint_name
+                                                                              << " from urdf");
+    }
+    if (!urdf_joint->safety) {
+      ROS_ERROR_STREAM("JointTeleopPDExampleController: Joint " << joint_name << " has no limits");
+    }
+    if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
+      upper_joint_soft_limit[i] = soft_limits.max_position;
+      lower_joint_soft_limit[i] = soft_limits.min_position;
+
+    } else {
+      ROS_ERROR_STREAM("JointTeleopPDExampleController: Could not parse joint limit for joint "
+                       << joint_name << " for joint limit interfaces");
+    }
+    ++i;
+  }
 }
 
 void TeleopJointPDExampleController::publishLeaderTarget() {

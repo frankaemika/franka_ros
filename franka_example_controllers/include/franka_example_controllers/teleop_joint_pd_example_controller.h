@@ -23,6 +23,10 @@
 
 namespace franka_example_controllers {
 
+// Forward declaration of joint walls type.
+template <size_t num_dof>
+class VirtualJointPositionWalls;
+
 /**
  * Controller class for ros_control that allows force-feedback teleoperation of a follower arm from
  * a leader arm. Smooth tracking is implemented by integrating a velocity signal, which is
@@ -68,6 +72,9 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     std::unique_ptr<franka_hw::FrankaStateHandle> state_handle;
     std::vector<hardware_interface::JointHandle> joint_handles;
 
+    // A virtual wall to avoint joint limits.
+    std::unique_ptr<VirtualJointPositionWalls<7>> virtual_joint_wall;
+
     Vector7d tau_target;       // Target effort of each joint [Nm, Nm, Nm, Nm, Nm, Nm, Nm]
     Vector7d tau_target_last;  // Last target effort of each joint [Nm, ...]
     Vector7d q;                // Measured position of each joint [rad, ...]
@@ -97,15 +104,21 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
 
   Vector7d k_p_follower_;  // p-gain for follower arm
   Vector7d k_d_follower_;  // d-gain for follower arm
-  Vector7d k_d_leader_;    // d-gain for leader arm
-  Vector7d k_dq_;          // gain for drift compensation in follower arm
+
+  Vector7d dq_max_leader_lower_;  // Soft max velocities of the leader arm [rad/s, ...]
+  Vector7d dq_max_leader_upper_;  // Hard max velocities of the leader arm [rad/s, ...]
+  Vector7d k_d_leader_lower_;     // d-gain for leader arm when under soft-limit
+  Vector7d k_d_leader_upper_;     // d-gain for leader arm when hard limit is reached
+
+  Vector7d k_dq_;  // gain for drift compensation in follower arm
 
   double force_feedback_idle_{0.5};      // Applied force-feedback, when leader arm is not guided
   double force_feedback_guiding_{0.95};  // Applied force-feeback, when leader arm is guided
 
   double decrease_factor_{0.95};  // Param, used when (in error state) controlling torques to zero
 
-  bool initArm(hardware_interface::RobotHW* robot_hw,
+  void initArm(hardware_interface::RobotHW* robot_hw,
+               ros::NodeHandle& node_handle,
                FrankaDataContainer& arm_data,
                const std::string& arm_id,
                const std::vector<std::string>& joint_names);
@@ -124,8 +137,41 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
                        const double& shift_along_x,
                        const double& increase_factor);
 
+  template <typename T>
+  void getJointParams(const std::string& param_name,
+                      ros::NodeHandle& node_handle,
+                      std::vector<T>& vec) {
+    if (!node_handle.getParam(param_name, vec) || vec.size() != 7) {
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter" +
+                                  param_name + " provided, aborting controller init!");
+    }
+  }
+
+  void get7dParam(const std::string& param_name, ros::NodeHandle& nh, Vector7d& out);
+
+  void getJointNames(const std::string& param_name,
+                     ros::NodeHandle& nh,
+                     std::vector<std::string>& names);
+
+  template <typename T>
+  void get1dParam(const std::string& param_name, ros::NodeHandle& nh, T& out) {
+    if (!nh.getParam(param_name, out)) {
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter" +
+                                  param_name +
+                                  " provided, "
+                                  "aborting controller init!");
+    }
+  }
+
+  void getJointLimits(ros::NodeHandle& nh,
+                      const std::vector<std::string>& joint_names,
+                      std::array<double, 7>& upper_joint_soft_limit,
+                      std::array<double, 7>& lower_joint_soft_limit);
+
+  Vector7d leaderDamping(const Vector7d& dq);
+
   // Debug tool
-  bool debug_;
+  bool debug_{false};
   std::mutex dynamic_reconfigure_mutex_;
   double leader_damping_scaling_{1.0};
   double follower_stiffness_scaling_{1.0};
