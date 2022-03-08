@@ -33,9 +33,6 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
             << this->arm_id_ << "' from parameter server but URDF defines '<robotNamespace>"
             << robot_namespace << "</robotNamespace>'. Will use '" << this->arm_id_ << "'!");
   }
-  for (int i = 1; i < 8; i++) {
-    joint_names_arm_.push_back(arm_id_ + "_joint" + std::to_string(i));
-  }
 
   this->robot_ = parent;
   this->robot_initialized_ = false;
@@ -700,8 +697,17 @@ bool FrankaHWSim::hasControlMethodAndValidSize(
 
 bool FrankaHWSim::areArmJoints(const std::set<std::string>& resources) const {
   return std::all_of(resources.begin(), resources.end(), [this](const std::string& joint_name) {
-    return std::find(joint_names_arm_.begin(), joint_names_arm_.end(), joint_name) !=
-           joint_names_arm_.end();
+    return std::find_if(
+               joints_.begin(), joints_.end(),
+               [&joint_name,
+                this](const std::pair<std::string, std::shared_ptr<franka_gazebo::Joint>>& pair) {
+                 const auto& joint = pair.first;
+                 // make sure that the joint is not a finger joint
+                 if (joint.find(arm_id_ + "finger_joint") != std::string::npos) {
+                   return false;
+                 }
+                 return joint == joint_name;
+               }) != joints_.end();
   });
 }
 
