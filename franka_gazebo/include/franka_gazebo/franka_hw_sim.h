@@ -159,7 +159,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   /// checks if a controller that uses the joints of the arm (not gripper joints) claims a position,
   /// velocity or effort interface.
-  bool claimsInterface(const hardware_interface::ControllerInfo& info);
+  bool claimsInterface(const hardware_interface::ControllerInfo& info) const;
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
@@ -219,6 +219,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   static boost::optional<ControlMethod> determineControlMethod(
       const std::string& hardware_interface);
+  static bool hasControlMethodAndValidSize(const hardware_interface::InterfaceResources& resource);
+  bool areArmJoints(const std::set<std::string>& resources) const;
 };
 
 }  // namespace franka_gazebo

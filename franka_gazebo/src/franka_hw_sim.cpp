@@ -683,23 +683,26 @@ boost::optional<ControlMethod> FrankaHWSim::determineControlMethod(
   return boost::none;
 }
 
-bool FrankaHWSim::claimsInterface(const hardware_interface::ControllerInfo& info) {
+bool FrankaHWSim::claimsInterface(const hardware_interface::ControllerInfo& info) const {
   for (const auto& claimed_resource : info.claimed_resources) {
-    auto control_method = FrankaHWSim::determineControlMethod(claimed_resource.hardware_interface);
-    if (control_method.is_initialized()) {
-      // Check if joints are the arm joints
-      if (claimed_resource.resources.size() == 7) {
-        for (const auto& joint_name : claimed_resource.resources) {
-          if (std::find(joint_names_arm_.begin(), joint_names_arm_.end(), joint_name) ==
-              joint_names_arm_.end()) {
-            return false;
-          }
-        }
-        return true;
-      }
+    if (hasControlMethodAndValidSize(claimed_resource)) {
+      return areArmJoints(claimed_resource.resources);
     }
   }
   return false;
+}
+
+bool FrankaHWSim::hasControlMethodAndValidSize(
+    const hardware_interface::InterfaceResources& resource) {
+  return FrankaHWSim::determineControlMethod(resource.hardware_interface).is_initialized() and
+         resource.resources.size() == 7;
+}
+
+bool FrankaHWSim::areArmJoints(const std::set<std::string>& resources) const {
+  return std::all_of(resources.begin(), resources.end(), [this](const std::string& joint_name) {
+    return std::find(joint_names_arm_.begin(), joint_names_arm_.end(), joint_name) !=
+           joint_names_arm_.end();
+  });
 }
 
 }  // namespace franka_gazebo
