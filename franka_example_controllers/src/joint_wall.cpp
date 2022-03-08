@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-using franka_example_controllers::JointWall;
+namespace franka_example_controllers {
 
 JointWall::JointWall(const double& soft_upper_joint_position_limit,
                      const double& soft_lower_joint_position_limit,
@@ -150,3 +150,5 @@ JointWall::MotionInWall JointWall::getMotionInWall(const double& q, const double
   }
   return MotionInWall::EnteringNormal;
 }
+
+}  // namespace franka_example_controllers
