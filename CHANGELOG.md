@@ -1,24 +1,28 @@
 # CHANGELOG
 
-## 0.x - UNRELEASED
+## 0.8.2 - 2022-02-22
 
-* `franka_gazebo`:
-  - Fix: homing action works again
-  - Fix: move action can fail instead of blocking indefinitely
-  - Fix: align behavior of grasping action with `franka_gripper`
-* Fix: Allow interactive marker server to shut down if not initialized
-* Add realistic hand/finger collision geometries to the Gazebo robot description
-* Add `joint_state_desired` publisher to `franka_gazebo`
-* No further ROS Kinetic support, since [End-of-Life was in April 2021](http://wiki.ros.org/Distributions)
-* Make position + orientation targets threadsafe in cartesian example controller
-* Add singularity warning to `franka_gazebo` if Jacobian becomes singular
-* **BREAKING** Make `/panda` namespace of `franka_gazebo` optional
-* Add effort joint trajectory controller to be used by MoveIT
-* Make finger collisions primitive in `franka_gazebo`
-* add 'gravity_vector' gravity ROS parameter to FrankaHWSim
-* Fix "Failed to create robot simulation interface loader" bug when installing from APT
-* Improve Gazebo 'stone' world objects
-* Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
+Requires `libfranka` >= 0.8.0
+
+  * `franka_gazebo`:
+    - Fix: homing action works again
+    - Fix: move action can fail instead of blocking indefinitely
+    - Fix: align behavior of grasping action with `franka_gripper`
+    - Add `joint_state_desired` publisher
+    - Add singularity warning  if Jacobian becomes singular
+    - Make `/panda` namespace optional
+    - Make finger collisions primitive in `franka_gazebo`
+    - Add 'gravity_vector' gravity ROS parameter to FrankaHWSim
+    - Improve Gazebo 'stone' world objects
+    - Introduce new `tau_ext_lowpass_filter` parameter for `franka_gazebo` to configure the filtering of `tau_ext_hat_filtered`
+    - Add realistic hand/finger collision geometries to the Gazebo robot description
+  * Fix: Allow interactive marker server to shut down if not initialized
+  * No further ROS Kinetic support, since [End-of-Life was in April 2021](http://wiki.ros.org/Distributions)
+  * Make position + orientation targets threadsafe in cartesian example controller
+  * Add effort joint trajectory controller to be used by MoveIT
+  * Fix "Failed to create robot simulation interface loader" bug when installing from APT
+  * Add `connected_to` option to `panda_gazebo.xacro` macro, similar to `panda_arm.xacro`
+  * Rename `ns` -> `arm_id` in `hand.xacro` macros to be consistent with the other xacro files
 
 ## 0.8.1 - 2021-09-08
 

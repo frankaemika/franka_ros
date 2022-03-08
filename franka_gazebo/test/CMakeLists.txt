@@ -22,6 +22,25 @@ target_include_directories(franka_hw_sim_test PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
 
+add_rostest_gtest(franka_hw_sim_gazebo_test
+  launch/franka_hw_sim_gazebo.test
+  franka_hw_sim_gazebo_test.cpp
+)
+
+add_dependencies(franka_hw_sim_gazebo_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(franka_hw_sim_gazebo_test
+  ${CATKIN_LIBRARIES}
+  franka_hw_sim
+)
+
+target_include_directories(franka_hw_sim_gazebo_test PUBLIC
+  ${catkin_INCLUDE_DIRS}
+)
+
 add_rostest_gtest(franka_gripper_sim_test launch/franka_gripper_sim.test
   franka_gripper_sim_test.cpp
   gripper_sim_test_setup.cpp
