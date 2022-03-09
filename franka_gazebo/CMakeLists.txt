@@ -80,6 +80,7 @@ add_library(franka_hw_sim
   src/franka_hw_sim.cpp
   src/joint.cpp
   src/model_kdl.cpp
+  src/controller_verifier.cpp
   )
 target_link_libraries(franka_hw_sim
   ${catkin_LIBRARIES}

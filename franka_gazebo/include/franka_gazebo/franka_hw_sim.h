@@ -2,6 +2,7 @@
 
 #include <control_toolbox/pid.h>
 #include <franka/robot_state.h>
+#include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
@@ -104,16 +105,19 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
                 const std::list<hardware_interface::ControllerInfo>& stop_list) override;
 
   /**
-   * Check (in non-realtime) if given controllers could be started and stopped from the current state of the RobotHW
-   * with regard to necessary hardware interface switches and prepare the switching. Start and stop list are disjoint.
-   * This handles the check and preparation, the actual switch is commited in doSwitch().
+   * Check (in non-realtime) if given controllers could be started and stopped from the current
+   * state of the RobotHW with regard to necessary hardware interface switches and prepare the
+   * switching. Start and stop list are disjoint. This handles the check and preparation, the actual
+   * switch is commited in doSwitch().
    */
   bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
-                     const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+                     const std::list<hardware_interface::ControllerInfo>& /*stop_list*/) override;
 
  private:
   /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
   bool robot_initialized_;
+
+  std::unique_ptr<ControllerVerifier> verifier_;
 
   std::array<double, 3> gravity_earth_;
 
@@ -163,10 +167,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   bool readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf);
 
   void guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf);
-
-  /// checks if a controller that uses the joints of the arm (not gripper joints) claims a position,
-  /// velocity or effort interface.
-  bool isArmController(const hardware_interface::ControllerInfo& info) const;
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
@@ -223,14 +223,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
     Eigen::Matrix3d Ip = I + m * P.transpose() * P;
     return Ip;
   }
-
-  static boost::optional<ControlMethod> determineControlMethod(
-      const std::string& hardware_interface);
-  static bool hasControlMethodAndValidSize(const hardware_interface::InterfaceResources& resource);
-  bool areArmJoints(const std::set<std::string>& resources) const;
-  bool isValidController(const hardware_interface::ControllerInfo& controller) const;
-  bool areFingerJoints(const std::set<std::string>& resources) const;
-  bool isGripperController(const hardware_interface::ControllerInfo& info) const;
 };
 
 }  // namespace franka_gazebo
