@@ -637,38 +637,33 @@ bool FrankaHWSim::prepareSwitch(
 
 void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                            const std::list<hardware_interface::ControllerInfo>& stop_list) {
-  for (const auto& stop_interface : stop_list) {
-    // if a controller that claims hardware interfaces is stopped we go into position control
-    if (verifier_->isClaimingArmController(stop_interface)) {
-      for (const auto& claimed_resource : stop_interface.claimed_resources) {
-        // set control method to position if no controller is running
-        if (ControllerVerifier::determineControlMethod(claimed_resource.hardware_interface)) {
-          for (const auto& joint_name : claimed_resource.resources) {
-            auto& joint = joints_.at(joint_name);
-            joint->control_method = POSITION;
-            joint->desired_position = joint->position;
-            joint->desired_velocity = 0;
-          }
-        }
-      }
-    }
-  }
+  forControlledJoint(stop_list, [](franka_gazebo::Joint& joint, const ControlMethod& method) {
+    joint.control_method = POSITION;
+    joint.desired_position = joint.position;
+    joint.desired_velocity = 0;
+  });
+  forControlledJoint(start_list, [](franka_gazebo::Joint& joint, const ControlMethod& method) {
+    joint.control_method = method;
+    // sets the desired joint position once for the effort interface
+    joint.desired_position = joint.position;
+  });
+}
 
-  for (const auto& start_interface : start_list) {
-    // if a valid controller claims a hardware interface we set the appropriate control method for
-    // the joint.
-    if (verifier_->isClaimingArmController(start_interface)) {
-      for (const auto& claimed_resource : start_interface.claimed_resources) {
-        auto control_method =
-            ControllerVerifier::determineControlMethod(claimed_resource.hardware_interface);
-        if (control_method) {
-          for (const auto& joint_name : claimed_resource.resources) {
-            auto& joint = joints_.at(joint_name);
-            joint->control_method = control_method.value();
-            // sets the desired joint position once for the effort interface
-            joint->desired_position = joint->position;
-          }
-        }
+void FrankaHWSim::forControlledJoint(
+    const std::list<hardware_interface::ControllerInfo>& controllers,
+    const std::function<void(franka_gazebo::Joint& joint, const ControlMethod&)>& f) {
+  for (const auto& controller : controllers) {
+    if (not verifier_->isClaimingArmController(controller)) {
+      continue;
+    }
+    for (const auto& resource : controller.claimed_resources) {
+      auto control_method = ControllerVerifier::determineControlMethod(resource.hardware_interface);
+      if (not control_method) {
+        continue;
+      }
+      for (const auto& joint_name : resource.resources) {
+        auto& joint = joints_.at(joint_name);
+        f(*joint, control_method.value());
       }
     }
   }

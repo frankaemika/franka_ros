@@ -223,6 +223,10 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
     Eigen::Matrix3d Ip = I + m * P.transpose() * P;
     return Ip;
   }
+
+  void forControlledJoint(
+      const std::list<hardware_interface::ControllerInfo>& controllers,
+      const std::function<void(franka_gazebo::Joint& joint, const ControlMethod&)>& f);
 };
 
 }  // namespace franka_gazebo
