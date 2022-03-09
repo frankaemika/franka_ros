@@ -567,8 +567,10 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
       this->robot_state_.ddq_d[i] = 0;
       this->robot_state_.tau_J_d[i] = joint->command;
     } else {
-      this->robot_state_.q_d[i] = joint->position;
-      this->robot_state_.dq_d[i] = joint->velocity;
+      this->robot_state_.q_d[i] =
+          joint->control_method == POSITION ? joint->desired_position : joint->position;
+      this->robot_state_.dq_d[i] =
+          joint->control_method == VELOCITY ? joint->desired_velocity : joint->velocity;
       this->robot_state_.ddq_d[i] = joint->acceleration;
       this->robot_state_.tau_J_d[i] = 0;
     }
@@ -646,6 +648,7 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
     joint.control_method = method;
     // sets the desired joint position once for the effort interface
     joint.desired_position = joint.position;
+    joint.desired_velocity = 0;
   });
 }
 
