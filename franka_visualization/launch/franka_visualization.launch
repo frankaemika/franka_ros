@@ -11,17 +11,14 @@
     <rosparam command="load" file="$(find franka_visualization)/config/robot_settings.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
     <param name="publish_rate" value="$(arg publish_rate)" />
+    <remap from="~/joint_states" to="joint_states" />
   </node>
 
   <node name="gripper_joint_state_publisher" pkg="franka_visualization" type="gripper_joint_state_publisher" output="screen" if="$(arg load_gripper)">
     <rosparam command="load" file="$(find franka_visualization)/config/gripper_settings.yaml" />
     <param name="robot_ip" value="$(arg robot_ip)" />
     <param name="publish_rate" value="$(arg publish_rate)" />
-  </node>
-
-  <node name="joint_state_publisher" type="joint_state_publisher" pkg="joint_state_publisher" output="screen">
-    <param name="rate" value="$(arg publish_rate)" />
-    <rosparam param="source_list">[robot_joint_state_publisher/joint_states, gripper_joint_state_publisher/joint_states]</rosparam>
+    <remap from="~/joint_states" to="joint_states" />
   </node>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
