@@ -6,7 +6,7 @@
   <!-- name:     Name of the robot link (without prefix)            -->
   <!-- inertial: Dictionary of inertia properties                   -->
   <!-- ============================================================ -->
-  <xacro:macro name="inertial" params="inertial:=^ name:=^">
+  <xacro:macro name="inertial_props" params="inertial:=^ name:=^">
     <xacro:if value="$(arg gazebo)">
       <xacro:unless value="${name in inertial}">${xacro.warning('No inertia properties defined for: ' + name)}</xacro:unless>
       <xacro:if value="${name in inertial}">
@@ -30,7 +30,7 @@
   <!-- name:  Name of the robot link (without prefix)             -->
   <!-- self_collision_geometries:  self <collision> models        -->
   <!-- ========================================================== -->
-  <xacro:macro name="link" params="name prefix=${arm_id}_ **self_collision_geometries">
+  <xacro:macro name="link_detailed_coarse" params="name prefix=${arm_id}_ **self_collision_geometries">
     <!-- sub-link defining detailed meshes for collision with environment -->
     <link name="${prefix}${name}">
       <visual>
@@ -43,7 +43,7 @@
           <mesh filename="package://franka_description/meshes/collision/${name}.stl" />
         </geometry>
       </collision>
-      <xacro:inertial />
+      <xacro:inertial_props />
     </link>
     <!-- sub-link defining coarse geometries of real robot's internal self-collision -->
     <link name="${prefix}${name}_sc">
