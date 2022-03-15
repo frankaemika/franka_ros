@@ -133,6 +133,10 @@ install(TARGETS franka_hw_sim franka_gripper_sim
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 install(DIRECTORY launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
