@@ -80,6 +80,7 @@ add_library(franka_hw_sim
   src/franka_hw_sim.cpp
   src/joint.cpp
   src/model_kdl.cpp
+  src/controller_verifier.cpp
   )
 target_link_libraries(franka_hw_sim
   ${catkin_LIBRARIES}
@@ -130,6 +131,10 @@ install(TARGETS franka_hw_sim franka_gripper_sim
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch
