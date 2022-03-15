@@ -138,27 +138,26 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
                        const double& increase_factor);
 
   template <typename T>
-  std::vector<T> getJointParams(const std::string& param_name,
-                      ros::NodeHandle& nh) {
-    std::vector<T> vec;                    
+  std::vector<T> getJointParams(const std::string& param_name, ros::NodeHandle& nh) {
+    std::vector<T> vec;
     if (!nh.getParam(param_name, vec) || vec.size() != 7) {
-      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " + nh.getNamespace() + "/" +
-                                  param_name + " provided, aborting controller init!");
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " +
+                                  nh.getNamespace() + "/" + param_name +
+                                  " provided, aborting controller init!");
     }
     return vec;
   }
 
   Vector7d get7dParam(const std::string& param_name, ros::NodeHandle& nh);
 
-  std::vector<std::string> getJointNames(const std::string& param_name,
-                     ros::NodeHandle& nh);
+  std::vector<std::string> getJointNames(const std::string& param_name, ros::NodeHandle& nh);
 
   template <typename T>
   T get1dParam(const std::string& param_name, ros::NodeHandle& nh) {
     T out;
     if (!nh.getParam(param_name, out)) {
-      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " + nh.getNamespace() + "/" +
-                                  param_name +
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " +
+                                  nh.getNamespace() + "/" + param_name +
                                   " provided, "
                                   "aborting controller init!");
     }

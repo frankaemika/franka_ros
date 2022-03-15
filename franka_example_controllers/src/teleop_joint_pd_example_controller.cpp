@@ -42,8 +42,10 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     ddq_max_lower_ = get7dParam("follower/ddq_max_lower", node_handle);
     ddq_max_upper_ = get7dParam("follower/ddq_max_upper", node_handle);
 
-    leader_data_.contact_force_threshold = get1dParam<double>("leader/contact_force_threshold", node_handle);
-    follower_data_.contact_force_threshold = get1dParam<double>("follower/contact_force_threshold", node_handle);
+    leader_data_.contact_force_threshold =
+        get1dParam<double>("leader/contact_force_threshold", node_handle);
+    follower_data_.contact_force_threshold =
+        get1dParam<double>("follower/contact_force_threshold", node_handle);
 
     leader_arm_id = get1dParam<std::string>("leader/arm_id", node_handle);
     follower_arm_id = get1dParam<std::string>("follower/arm_id", node_handle);
@@ -428,7 +430,8 @@ void TeleopJointPDExampleController::publishFollowerContact() {
   }
 }
 
-Vector7d TeleopJointPDExampleController::get7dParam(const std::string& param_name, ros::NodeHandle& nh) {
+Vector7d TeleopJointPDExampleController::get7dParam(const std::string& param_name,
+                                                    ros::NodeHandle& nh) {
   auto buffer = getJointParams<double>(param_name, nh);
   return Vector7d(Eigen::Map<Vector7d>(buffer.data()));
 }
