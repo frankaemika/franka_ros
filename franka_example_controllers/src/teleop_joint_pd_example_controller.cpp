@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+using Vector7d = Eigen::Matrix<double, 7, 1>;
+
 namespace franka_example_controllers {
 
 bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
@@ -27,29 +29,27 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
   std::vector<std::string> follower_joint_names;
 
   try {
-    get7dParam("joint_teleop/leader/d_gains_lower", node_handle, k_d_leader_lower_);
-    get7dParam("joint_teleop/leader/d_gains_upper", node_handle, k_d_leader_upper_);
-    get7dParam("joint_teleop/leader/dq_max_lower", node_handle, dq_max_leader_lower_);
-    get7dParam("joint_teleop/leader/dq_max_upper", node_handle, dq_max_leader_upper_);
+    k_d_leader_lower_ = get7dParam("leader/d_gains_lower", node_handle);
+    k_d_leader_upper_ = get7dParam("leader/d_gains_upper", node_handle);
+    dq_max_leader_lower_ = get7dParam("leader/dq_max_lower", node_handle);
+    dq_max_leader_upper_ = get7dParam("leader/dq_max_upper", node_handle);
 
-    get7dParam("joint_teleop/follower/p_gains", node_handle, k_p_follower_);
-    get7dParam("joint_teleop/follower/d_gains", node_handle, k_d_follower_);
-    get7dParam("joint_teleop/follower/drift_comp_gains", node_handle, k_dq_);
-    get7dParam("joint_teleop/follower/dq_max_lower", node_handle, dq_max_lower_);
-    get7dParam("joint_teleop/follower/dq_max_upper", node_handle, dq_max_upper_);
-    get7dParam("joint_teleop/follower/ddq_max_lower", node_handle, ddq_max_lower_);
-    get7dParam("joint_teleop/follower/ddq_max_upper", node_handle, ddq_max_upper_);
+    k_p_follower_ = get7dParam("follower/p_gains", node_handle);
+    k_d_follower_ = get7dParam("follower/d_gains", node_handle);
+    k_dq_ = get7dParam("follower/drift_comp_gains", node_handle);
+    dq_max_lower_ = get7dParam("follower/dq_max_lower", node_handle);
+    dq_max_upper_ = get7dParam("follower/dq_max_upper", node_handle);
+    ddq_max_lower_ = get7dParam("follower/ddq_max_lower", node_handle);
+    ddq_max_upper_ = get7dParam("follower/ddq_max_upper", node_handle);
 
-    get1dParam("joint_teleop/leader/contact_force_threshold", node_handle,
-               leader_data_.contact_force_threshold);
-    get1dParam("joint_teleop/follower/contact_force_threshold", node_handle,
-               follower_data_.contact_force_threshold);
+    leader_data_.contact_force_threshold = get1dParam<double>("leader/contact_force_threshold", node_handle);
+    follower_data_.contact_force_threshold = get1dParam<double>("follower/contact_force_threshold", node_handle);
 
-    get1dParam("leader/arm_id", node_handle, leader_arm_id);
-    get1dParam("follower/arm_id", node_handle, follower_arm_id);
+    leader_arm_id = get1dParam<std::string>("leader/arm_id", node_handle);
+    follower_arm_id = get1dParam<std::string>("follower/arm_id", node_handle);
 
-    getJointParams("leader/joint_names", node_handle, leader_joint_names);
-    getJointParams("follower/joint_names", node_handle, follower_joint_names);
+    leader_joint_names = getJointParams<std::string>("leader/joint_names", node_handle);
+    follower_joint_names = getJointParams<std::string>("follower/joint_names", node_handle);
 
     if (!node_handle.getParam("debug", debug_)) {
       ROS_INFO_STREAM(
@@ -426,6 +426,30 @@ void TeleopJointPDExampleController::publishFollowerContact() {
     follower_contact_pub_.msg_.data = follower_data_.contact;
     follower_contact_pub_.unlockAndPublish();
   }
+}
+
+Vector7d TeleopJointPDExampleController::get7dParam(const std::string& param_name, ros::NodeHandle& nh) {
+  auto buffer = getJointParams<double>(param_name, nh);
+  return Vector7d(Eigen::Map<Vector7d>(buffer.data()));
+}
+
+Vector7d TeleopJointPDExampleController::leaderDamping(const Vector7d& dq) {
+  auto simple_ramp = [](const double min, const double max, const double value) -> double {
+    if (value >= max) {
+      return 1.0;
+    }
+    if (value <= min) {
+      return 0.0;
+    }
+    return (value - min) / (max - min);
+  };
+  Vector7d damping;
+  for (size_t i = 0; i < 7; ++i) {
+    damping(i) = k_d_leader_lower_(i) +
+                 simple_ramp(dq_max_leader_lower_(i), dq_max_leader_upper_(i), std::abs(dq(i))) *
+                     (k_d_leader_upper_(i) - k_d_leader_lower_(i));
+  }
+  return damping;
 }
 
 }  // namespace franka_example_controllers

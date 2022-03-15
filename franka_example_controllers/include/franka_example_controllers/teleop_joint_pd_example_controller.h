@@ -138,29 +138,31 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
                        const double& increase_factor);
 
   template <typename T>
-  void getJointParams(const std::string& param_name,
-                      ros::NodeHandle& node_handle,
-                      std::vector<T>& vec) {
-    if (!node_handle.getParam(param_name, vec) || vec.size() != 7) {
-      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter" +
+  std::vector<T> getJointParams(const std::string& param_name,
+                      ros::NodeHandle& nh) {
+    std::vector<T> vec;                    
+    if (!nh.getParam(param_name, vec) || vec.size() != 7) {
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " + nh.getNamespace() + "/" +
                                   param_name + " provided, aborting controller init!");
     }
+    return vec;
   }
 
-  void get7dParam(const std::string& param_name, ros::NodeHandle& nh, Vector7d& out);
+  Vector7d get7dParam(const std::string& param_name, ros::NodeHandle& nh);
 
-  void getJointNames(const std::string& param_name,
-                     ros::NodeHandle& nh,
-                     std::vector<std::string>& names);
+  std::vector<std::string> getJointNames(const std::string& param_name,
+                     ros::NodeHandle& nh);
 
   template <typename T>
-  void get1dParam(const std::string& param_name, ros::NodeHandle& nh, T& out) {
+  T get1dParam(const std::string& param_name, ros::NodeHandle& nh) {
+    T out;
     if (!nh.getParam(param_name, out)) {
-      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter" +
+      throw std::invalid_argument("TeleopJointPDExampleController: Invalid or no parameter " + nh.getNamespace() + "/" +
                                   param_name +
                                   " provided, "
                                   "aborting controller init!");
     }
+    return out;
   }
 
   void getJointLimits(ros::NodeHandle& nh,
