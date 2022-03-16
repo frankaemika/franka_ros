@@ -1,6 +1,8 @@
 #pragma once
 
+#include <control_toolbox/pid.h>
 #include <franka/robot_state.h>
+#include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
@@ -12,6 +14,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
+#include <boost/optional.hpp>
 #include <cmath>
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
@@ -31,6 +34,8 @@ const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of 
  * ### transmission_interface/SimpleTransmission
  * - hardware_interface/JointStateInterface
  * - hardware_interface/EffortJointInterface
+ * - hardware_interface/PositionJointInterface
+ * - hardware_interface/VelocityJointInterface
  *
  * ### franka_hw/FrankaStateInterface
  * ### franka_hw/FrankaModelInterface
@@ -91,9 +96,28 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
    */
   void eStopActive(const bool active) override;
 
+  /**
+   * Switches the control mode of the robot arm
+   * @param start_list list of controllers to start
+   * @param stop_list list of controllers to stop
+   */
+  void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                const std::list<hardware_interface::ControllerInfo>& stop_list) override;
+
+  /**
+   * Check (in non-realtime) if given controllers could be started and stopped from the current
+   * state of the RobotHW with regard to necessary hardware interface switches and prepare the
+   * switching. Start and stop list are disjoint. This handles the check and preparation, the actual
+   * switch is commited in doSwitch().
+   */
+  bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
+                     const std::list<hardware_interface::ControllerInfo>& /*stop_list*/) override;
+
  private:
   /// If gazebo::Joint::GetForceTorque() yielded already a non-zero value
-  bool efforts_initialized_;
+  bool robot_initialized_;
+
+  std::unique_ptr<ControllerVerifier> verifier_;
 
   std::array<double, 3> gravity_earth_;
 
@@ -101,8 +125,13 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
 
+  std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
+  std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
+
   hardware_interface::JointStateInterface jsi_;
   hardware_interface::EffortJointInterface eji_;
+  hardware_interface::PositionJointInterface pji_;
+  hardware_interface::VelocityJointInterface vji_;
   franka_hw::FrankaStateInterface fsi_;
   franka_hw::FrankaModelInterface fmi_;
 
@@ -121,6 +150,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   void initJointStateHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
   void initEffortCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
+  void initPositionCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
+  void initVelocityCommandHandle(const std::shared_ptr<franka_gazebo::Joint>& joint);
   void initFrankaStateHandle(const std::string& robot,
                              const urdf::Model& urdf,
                              const transmission_interface::TransmissionInfo& transmission);
@@ -192,6 +223,10 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
     Eigen::Matrix3d Ip = I + m * P.transpose() * P;
     return Ip;
   }
+
+  void forControlledJoint(
+      const std::list<hardware_interface::ControllerInfo>& controllers,
+      const std::function<void(franka_gazebo::Joint& joint, const ControlMethod&)>& f);
 };
 
 }  // namespace franka_gazebo

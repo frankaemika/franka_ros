@@ -81,3 +81,22 @@ target_link_libraries(franka_gripper_sim_test_with_object
 target_include_directories(franka_gripper_sim_test_with_object PUBLIC
   ${catkin_INCLUDE_DIRS}
 )
+
+catkin_add_gtest(franka_hw_sim_controller_verifier_test
+  main.cpp
+  controller_verifier_test.cpp
+)
+
+add_dependencies(franka_hw_sim_controller_verifier_test
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+
+target_link_libraries(franka_hw_sim_controller_verifier_test
+  ${catkin_LIBRARIES}
+  franka_hw_sim
+)
+
+target_include_directories(franka_hw_sim_controller_verifier_test PUBLIC
+  ${catkin_INCLUDE_DIRS}
+)
