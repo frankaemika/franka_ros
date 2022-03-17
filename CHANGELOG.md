@@ -2,11 +2,13 @@
 
 ## 0.x - UNRELEASED
 
-* `franka_gazebo`:
-  - Add JointPosition and JointVelocity Interface
-  - Fix: Robot now keeps position when no controller is running
-  - joint_{position,velocity}_example controller are now available in `franka_gazebo`
-    
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
+
+  * `franka_gazebo`:
+    - Add JointPosition and JointVelocity Interface
+    - Fix: Robot now keeps position when no controller is running
+    - joint_{position,velocity}_example controller are now available in `franka_gazebo`
+
 
 ## 0.8.2 - 2022-02-22
 
