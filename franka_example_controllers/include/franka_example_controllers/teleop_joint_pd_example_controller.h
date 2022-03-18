@@ -72,7 +72,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     std::unique_ptr<franka_hw::FrankaStateHandle> state_handle;
     std::vector<hardware_interface::JointHandle> joint_handles;
 
-    // A virtual wall to avoint joint limits.
+    // A virtual wall to avoid joint limits.
     std::unique_ptr<VirtualJointPositionWalls<7>> virtual_joint_wall;
 
     Vector7d tau_target;       // Target effort of each joint [Nm, Nm, Nm, Nm, Nm, Nm, Nm]
@@ -164,10 +164,10 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     return out;
   }
 
-  void getJointLimits(ros::NodeHandle& nh,
-                      const std::vector<std::string>& joint_names,
-                      std::array<double, 7>& upper_joint_soft_limit,
-                      std::array<double, 7>& lower_joint_soft_limit);
+  static void getJointLimits(ros::NodeHandle& nh,
+                             const std::vector<std::string>& joint_names,
+                             std::array<double, 7>& upper_joint_soft_limit,
+                             std::array<double, 7>& lower_joint_soft_limit);
 
   Vector7d leaderDamping(const Vector7d& dq);
 
