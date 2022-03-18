@@ -15,6 +15,7 @@
 
 namespace franka_example_controllers {
 
+/// A class that offers an implementation of a virtual wall for a single joint.
 class JointWall {
  public:
   /**
@@ -23,7 +24,7 @@ class JointWall {
   JointWall() = delete;
 
   /**
-   * Creates a JointWall instance with configuable params.
+   * Creates a JointWall instance with configurable parameters.
    * @param[in] soft_upper_joint_position_limit (rad)
    * @param[in] soft_lower_joint_position_limit (rad)
    * @param[in] PD_zone_width (meter)
@@ -32,22 +33,22 @@ class JointWall {
    * @param[in] PD_zone_damping (N*meter*s/rad)
    * @param[in] D_zone_damping (N*meter*s/rad)
    */
-  JointWall(const double& soft_upper_joint_position_limit,
-            const double& soft_lower_joint_position_limit,
-            const double& PD_zone_width,
-            const double& D_zone_width,
-            const double& PD_zone_stiffness,
-            const double& PD_zone_damping,
-            const double& D_zone_damping);
+  JointWall(const double soft_upper_joint_position_limit,
+            const double soft_lower_joint_position_limit,
+            const double PD_zone_width,
+            const double D_zone_width,
+            const double PD_zone_stiffness,
+            const double PD_zone_damping,
+            const double D_zone_damping);
 
   /**
    * Computes the torque with given q and dq. Be aware that the torque is also affected by previous
    * states.
-   * @param[in] q
-   * @param[in] dq
+   * @param[in] q current joint position.
+   * @param[in] dq the current joint velocity.
    * @return the resulting torque
    */
-  double computeTorque(const double& q, const double& dq);
+  double computeTorque(const double q, const double dq);
 
   /**
    * Resets the initialized flag
@@ -66,7 +67,7 @@ class JointWall {
     LeavingUpperLimit
   };
 
-  //! Joint wall parameters
+  // Joint wall parameters
   double soft_upper_joint_position_limit_{0};
   double soft_lower_joint_position_limit_{0};
   double PD_zone_width_{0};
@@ -75,30 +76,49 @@ class JointWall {
   double PD_zone_damping_{0};
   double D_zone_damping_{0};
 
-  //! Indicates whether the instance has been initialized
-  bool initialized_{false};
+  bool initialized_{false};  // Indicates whether the instance has been initialized
 
-  /* Indicates whether the joint wall is still moving, which occurs after initializing the state
-   * inside joint wall.
-   */
+  // Indicates whether the joint wall is still moving, which occurs after initializing the state
+  // inside joint wall.
   bool moving_wall_{false};
 
-  //! Zone width scale
-  double zone_width_scale_{1};
+  double zone_width_scale_{1};  // Zone width scale
 
-  //! Checks if x is in range [low, high]
+  /**
+   * Checks if x is in range [low, high]
+   * @param[in] low lower limit of the range.
+   * @param[in] high upper limit of the range.
+   * @param[in] x value to check.
+   * @return true if in range, false otherwise.
+   */
   static bool inRange(double low, double high, double x);
 
-  //! Check if the input is positive number, if not print error and return its abs
+  /**
+   * Check if the input is positive number, if not print error and return its abs
+   * @param[in] value The value to check.
+   * @return the absolute value of the value.
+   */
   static double positiveCheck(double value);
 
-  //! Initializes the computation
-  void init(const double& q, const double& dq);
+  /**
+   * Initializes the joint wall computation with initial states.
+   * @param[in] q the current joint position.
+   * @param[in] dq the current joint velocity.
+   */
+  void init(const double q, const double dq);
 
-  //! Moves the wall with given state if the state is initialized inside the wall
-  void adjustMovingWall(const double& q, const double& dq);
+  /**
+   * Moves the wall with given state if the state is initialized inside the wall
+   * @param[in] q the current joint position.
+   * @param[in] dq the current joint velocity.
+   */
+  void adjustMovingWall(const double q, const double dq);
 
-  //! Checks the motion type in joint wall
-  MotionInWall getMotionInWall(const double& q, const double& dq) const;
+  /**
+   * Checks the motion type in joint wall
+   * @param[in] q the current joint position.
+   * @param[in] dq the current joint velocity.
+   */
+  MotionInWall getMotionInWall(const double q, const double dq) const;
 };
 }  // namespace franka_example_controllers
