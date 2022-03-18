@@ -103,7 +103,7 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
                                              const std::string& arm_id,
                                              const std::vector<std::string>& joint_names) {
   auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
-  if (effort_joint_interface == nullptr) {
+  if (not effort_joint_interface) {
     throw std::invalid_argument(
         "TeleopJointPDExampleController: Error getting effort joint interface from hardware of " +
         arm_id + ".");
@@ -122,7 +122,7 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
 
   // Get state interface.
   auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
-  if (state_interface == nullptr) {
+  if (not state_interface) {
     throw std::invalid_argument(
         "TeleopJointPDExampleController: Error getting state interface from hardware");
   }
@@ -210,7 +210,7 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
     // The force feedback is applied when the external forces on the follower arm exceed a
     // threshold. While the leader arm is unguided (not in contact), the force-feedback is reduced.
     // When the leader robot exceeds the soft limit velocities dq_max_leader_lower damping is
-    // increased gradually until it saturates when reaching dq_max_leader_upper to maxmimum damping.
+    // increased gradually until it saturates when reaching dq_max_leader_upper to maximum damping.
 
     Vector7d follower_tau_ext_hat =
         Eigen::Map<Vector7d>(follower_robot_state.tau_ext_hat_filtered.data());
@@ -241,13 +241,12 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
   auto from_eigen = [](const Vector7d& data) {
     return std::array<double, 7>{data(0), data(1), data(2), data(3), data(4), data(5), data(6)};
   };
-  std::array<double, 7> virtual_wall_tau_leader;
-  leader_data_.virtual_joint_wall->computeTorque(
-      from_eigen(leader_data_.q), from_eigen(leader_data_.dq), virtual_wall_tau_leader);
+  std::array<double, 7> virtual_wall_tau_leader = leader_data_.virtual_joint_wall->computeTorque(
+      from_eigen(leader_data_.q), from_eigen(leader_data_.dq));
 
-  std::array<double, 7> virtual_wall_tau_follower;
-  follower_data_.virtual_joint_wall->computeTorque(
-      from_eigen(follower_data_.q), from_eigen(follower_data_.dq), virtual_wall_tau_follower);
+  std::array<double, 7> virtual_wall_tau_follower =
+      follower_data_.virtual_joint_wall->computeTorque(from_eigen(follower_data_.q),
+                                                       from_eigen(follower_data_.dq));
 
   leader_data_.tau_target += to_eigen(virtual_wall_tau_leader);
   follower_data_.tau_target += to_eigen(virtual_wall_tau_follower);

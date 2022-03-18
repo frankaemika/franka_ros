@@ -7,13 +7,13 @@
 
 namespace franka_example_controllers {
 
-JointWall::JointWall(const double& soft_upper_joint_position_limit,
-                     const double& soft_lower_joint_position_limit,
-                     const double& PD_zone_width,      // NOLINT (readability-identifier-naming)
-                     const double& D_zone_width,       // NOLINT (readability-identifier-naming)
-                     const double& PD_zone_stiffness,  // NOLINT (readability-identifier-naming)
-                     const double& PD_zone_damping,    // NOLINT (readability-identifier-naming)
-                     const double& D_zone_damping)     // NOLINT (readability-identifier-naming)
+JointWall::JointWall(const double soft_upper_joint_position_limit,
+                     const double soft_lower_joint_position_limit,
+                     const double PD_zone_width,      // NOLINT (readability-identifier-naming)
+                     const double D_zone_width,       // NOLINT (readability-identifier-naming)
+                     const double PD_zone_stiffness,  // NOLINT (readability-identifier-naming)
+                     const double PD_zone_damping,    // NOLINT (readability-identifier-naming)
+                     const double D_zone_damping)     // NOLINT (readability-identifier-naming)
     : soft_upper_joint_position_limit_(soft_upper_joint_position_limit),
       soft_lower_joint_position_limit_(soft_lower_joint_position_limit),
       PD_zone_width_(PD_zone_width),
@@ -28,7 +28,7 @@ JointWall::JointWall(const double& soft_upper_joint_position_limit,
   D_zone_damping_ = positiveCheck(D_zone_damping);
 };
 
-double JointWall::computeTorque(const double& q, const double& dq) {
+double JointWall::computeTorque(const double q, const double dq) {
   init(q, dq);
   adjustMovingWall(q, dq);
 
@@ -65,7 +65,7 @@ bool JointWall::inRange(double low, double high, double x) {
   return (low <= x && x <= high);
 };
 
-void JointWall::init(const double& q, const double& dq) {
+void JointWall::init(const double q, const double dq) {
   if (initialized_) {
     return;
   }
@@ -97,7 +97,7 @@ void JointWall::init(const double& q, const double& dq) {
   initialized_ = true;
 }
 
-void JointWall::adjustMovingWall(const double& q, const double& dq) {
+void JointWall::adjustMovingWall(const double q, const double dq) {
   if (!moving_wall_) {
     return;
   }
@@ -131,7 +131,7 @@ double JointWall::positiveCheck(double value) {
   return value;
 }
 
-JointWall::MotionInWall JointWall::getMotionInWall(const double& q, const double& dq) const {
+JointWall::MotionInWall JointWall::getMotionInWall(const double q, const double dq) const {
   double D_zone_boundary_max =  // NOLINT (readability-identifier-naming)
       soft_upper_joint_position_limit_ - PD_zone_width_ - D_zone_width_;
   double D_zone_boundary_min =  // NOLINT (readability-identifier-naming)
