@@ -1,5 +1,7 @@
-// Copyright (c) 2019 Franka Emika GmbH
+// Copyright (c) 2022 Franka Emika GmbH
 #include <franka_example_controllers/joint_wall.h>
+
+#include <ros/ros.h>
 
 #include <cmath>
 #include <iostream>
@@ -42,15 +44,15 @@ double JointWall::computeTorque(const double q, const double dq) {
       soft_lower_joint_position_limit_ + zone_width_scale_ * PD_zone_width_;
 
   double torque = 0;
-  // In D zone
   if (inRange(D_zone_boundary_max, PD_zone_boundary_max, q) ||
       inRange(PD_zone_boundary_min, D_zone_boundary_min, q)) {
+    // In D zone
     torque = -D_zone_damping_ * dq;
-    // PD zone max
   } else if (q > PD_zone_boundary_max) {
+    // In PD zone max
     torque = -PD_zone_damping_ * dq + PD_zone_stiffness_ * (PD_zone_boundary_max - q);
-    // PD zone min
   } else if (q < PD_zone_boundary_min) {
+    // In PD zone min
     torque = -PD_zone_damping_ * dq + PD_zone_stiffness_ * (PD_zone_boundary_min - q);
   }
 
@@ -123,9 +125,8 @@ void JointWall::adjustMovingWall(const double q, const double dq) {
 
 double JointWall::positiveCheck(double value) {
   if (value < 0) {
-    printf(
-        "ERROR: JointWall expects positive parameters, but got negative. Using its absolute "
-        "value.");
+    ROS_WARN_THROTTLE(
+        1, "JointWall expects positive parameters, but got negative.Using its absolute value.");
     value = fabs(value);
   }
   return value;

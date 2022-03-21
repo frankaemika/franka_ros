@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
+#include <franka_example_controllers/joint_wall.h>
 #include <franka_example_controllers/teleop_paramConfig.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/trigger_rate.h>
@@ -22,10 +23,6 @@
 #include <vector>
 
 namespace franka_example_controllers {
-
-// Forward declaration of joint walls type.
-template <size_t num_dof>
-class VirtualJointPositionWalls;
 
 /**
  * Controller class for ros_control that allows force-feedback teleoperation of a follower arm from
@@ -73,7 +70,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
     std::vector<hardware_interface::JointHandle> joint_handles;
 
     // A virtual wall to avoid joint limits.
-    std::unique_ptr<VirtualJointPositionWalls<7>> virtual_joint_wall;
+    std::unique_ptr<JointWallContainer<7>> virtual_joint_wall;
 
     Vector7d tau_target;       // Target effort of each joint [Nm, Nm, Nm, Nm, Nm, Nm, Nm]
     Vector7d tau_target_last;  // Last target effort of each joint [Nm, ...]

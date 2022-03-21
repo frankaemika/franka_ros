@@ -1,7 +1,7 @@
 // Copyright (c) 2020 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#include <franka_example_controllers/joint_wall.h>
 #include <franka_example_controllers/teleop_joint_pd_example_controller.h>
-#include <franka_example_controllers/virtual_joint_position_walls.h>
 
 #include <hardware_interface/hardware_interface.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
@@ -149,12 +149,17 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
   std::array<double, 7> lower_joint_soft_limit;
   getJointLimits(node_handle, joint_names, upper_joint_soft_limit, lower_joint_soft_limit);
 
-  arm_data.virtual_joint_wall = std::make_unique<VirtualJointPositionWalls<7>>(
+  arm_data.virtual_joint_wall = std::make_unique<JointWallContainer<7>>(
       upper_joint_soft_limit, lower_joint_soft_limit, kPDZoneWidth, kDZoneWidth, kPDZoneStiffness,
       kPDZoneDamping, kDZoneDamping);
 }
 
 void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
+  // Reset joint walls to start from the current q, dq
+  leader_data_.virtual_joint_wall->reset();
+  follower_data_.virtual_joint_wall->reset();
+
+  // Reset stored states to the current states.
   franka::RobotState follower_robot_state = follower_data_.state_handle->getRobotState();
   q_target_last_ = Eigen::Map<Vector7d>(follower_robot_state.q.data());
   dq_target_last_.setZero();
