@@ -16,19 +16,19 @@ franka_gripper:
 motion_generators:
   position:
     gains:
-      panda_joint1: { p: 600, d: 30, i: 0 }
-      panda_joint2: { p: 600, d: 30, i: 0 }
-      panda_joint3: { p: 600, d: 30, i: 0 }
-      panda_joint4: { p: 600, d: 30, i: 0 }
-      panda_joint5: { p: 250, d: 10, i: 0 }
-      panda_joint6: { p: 150, d: 10, i: 0 }
-      panda_joint7: { p:  50, d:  5, i: 0 }
+      $(arg arm_id)_joint1: { p: 600, d: 30, i: 0 }
+      $(arg arm_id)_joint2: { p: 600, d: 30, i: 0 }
+      $(arg arm_id)_joint3: { p: 600, d: 30, i: 0 }
+      $(arg arm_id)_joint4: { p: 600, d: 30, i: 0 }
+      $(arg arm_id)_joint5: { p: 250, d: 10, i: 0 }
+      $(arg arm_id)_joint6: { p: 150, d: 10, i: 0 }
+      $(arg arm_id)_joint7: { p:  50, d:  5, i: 0 }
   velocity:
     gains:
-      panda_joint1: { p: 30, d: 0, i: 0 }
-      panda_joint2: { p: 30, d: 0, i: 0 }
-      panda_joint3: { p: 30, d: 0, i: 0 }
-      panda_joint4: { p: 30, d: 0, i: 0 }
-      panda_joint5: { p: 10, d: 0, i: 0 }
-      panda_joint6: { p: 10, d: 0, i: 0 }
-      panda_joint7: { p:  5, d:  0, i: 0 }
+      $(arg arm_id)_joint1: { p: 30, d: 0, i: 0 }
+      $(arg arm_id)_joint2: { p: 30, d: 0, i: 0 }
+      $(arg arm_id)_joint3: { p: 30, d: 0, i: 0 }
+      $(arg arm_id)_joint4: { p: 30, d: 0, i: 0 }
+      $(arg arm_id)_joint5: { p: 10, d: 0, i: 0 }
+      $(arg arm_id)_joint6: { p: 10, d: 0, i: 0 }
+      $(arg arm_id)_joint7: { p:  5, d:  0, i: 0 }
