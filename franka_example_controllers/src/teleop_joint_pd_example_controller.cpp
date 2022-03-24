@@ -277,12 +277,11 @@ void TeleopJointPDExampleController::updateArm(FrankaDataContainer& arm_data) {
   }
 }
 
-Eigen::Matrix<double, 7, 1> TeleopJointPDExampleController::saturateAndLimit(
-    const Vector7d& x_calc,
-    const Vector7d& x_last,
-    const Vector7d& x_max,
-    const Vector7d& dx_max,
-    const double& delta_t) {
+Eigen::Matrix<double, 7, 1> TeleopJointPDExampleController::saturateAndLimit(const Vector7d& x_calc,
+                                                                             const Vector7d& x_last,
+                                                                             const Vector7d& x_max,
+                                                                             const Vector7d& dx_max,
+                                                                             const double delta_t) {
   Vector7d x_limited;
   for (size_t i = 0; i < 7; i++) {
     double delta_x_max = dx_max[i] * delta_t;
@@ -293,11 +292,11 @@ Eigen::Matrix<double, 7, 1> TeleopJointPDExampleController::saturateAndLimit(
   return x_limited;
 }
 
-double TeleopJointPDExampleController::rampParameter(const double& x,
-                                                     const double& neg_x_asymptote,
-                                                     const double& pos_x_asymptote,
-                                                     const double& shift_along_x,
-                                                     const double& increase_factor) {
+double TeleopJointPDExampleController::rampParameter(const double x,
+                                                     const double neg_x_asymptote,
+                                                     const double pos_x_asymptote,
+                                                     const double shift_along_x,
+                                                     const double increase_factor) {
   double ramp =
       0.5 * (pos_x_asymptote + neg_x_asymptote -
              (pos_x_asymptote - neg_x_asymptote) * tanh(increase_factor * (x - shift_along_x)));

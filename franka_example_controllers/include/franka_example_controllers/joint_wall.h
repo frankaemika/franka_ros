@@ -36,13 +36,13 @@ class JointWall {
    * @param[in] PD_zone_damping (N*meter*s/rad)
    * @param[in] D_zone_damping (N*meter*s/rad)
    */
-  JointWall(const double soft_upper_joint_position_limit,
-            const double soft_lower_joint_position_limit,
-            const double PD_zone_width,
-            const double D_zone_width,
-            const double PD_zone_stiffness,
-            const double PD_zone_damping,
-            const double D_zone_damping);
+  JointWall(double soft_upper_joint_position_limit,
+            double soft_lower_joint_position_limit,
+            double PD_zone_width,
+            double D_zone_width,
+            double PD_zone_stiffness,
+            double PD_zone_damping,
+            double D_zone_damping);
 
   /**
    * Computes the torque with given q and dq. Be aware that the torque is also affected by previous
@@ -51,7 +51,7 @@ class JointWall {
    * @param[in] dq the current joint velocity.
    * @return the resulting torque
    */
-  double computeTorque(const double q, const double dq);
+  double computeTorque(double q, double dq);
 
   /**
    * Resets the initialized flag to false. After calling reset, the next call to computeTorque
@@ -112,21 +112,21 @@ class JointWall {
    * @param[in] q the current joint position.
    * @param[in] dq the current joint velocity.
    */
-  void init(const double q, const double dq);
+  void init(double q, double dq);
 
   /**
    * Moves the wall with given state if the state is initialized inside the wall
    * @param[in] q the current joint position.
    * @param[in] dq the current joint velocity.
    */
-  void adjustMovingWall(const double q, const double dq);
+  void adjustMovingWall(double q, double dq);
 
   /**
    * Checks the motion type in joint wall
    * @param[in] q the current joint position.
    * @param[in] dq the current joint velocity.
    */
-  MotionInWall getMotionInWall(const double q, const double dq) const;
+  MotionInWall getMotionInWall(double q, double dq) const;
 };
 
 /**

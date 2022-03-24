@@ -126,13 +126,13 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
                             const Vector7d& x_last,
                             const Vector7d& x_max,
                             const Vector7d& dx_max,
-                            const double& delta_t);
+                            double delta_t);
 
-  double rampParameter(const double& x,
-                       const double& neg_x_asymptote,
-                       const double& pos_x_asymptote,
-                       const double& shift_along_x,
-                       const double& increase_factor);
+  double rampParameter(double x,
+                       double neg_x_asymptote,
+                       double pos_x_asymptote,
+                       double shift_along_x,
+                       double increase_factor);
 
   template <typename T>
   std::vector<T> getJointParams(const std::string& param_name, ros::NodeHandle& nh) {
