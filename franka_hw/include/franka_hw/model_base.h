@@ -234,7 +234,11 @@ class ModelBase {
    * @return Gravity vector.
    */
   std::array<double, 7> gravity(const franka::RobotState& robot_state) const {
+#ifdef ENABLE_BASE_ACCELERATION
+    return gravity(robot_state.q, robot_state.m_total, robot_state.F_x_Ctotal, robot_state.O_ddP_O);
+#else
     return gravity(robot_state.q, robot_state.m_total, robot_state.F_x_Ctotal, {0, 0, -9.81});
+#endif
   }
 
   /**
