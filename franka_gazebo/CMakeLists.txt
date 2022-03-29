@@ -36,8 +36,10 @@ find_package(catkin REQUIRED COMPONENTS
   franka_gripper
   franka_example_controllers
 )
-
-find_package(Franka 0.7.0 REQUIRED)
+find_package(Franka 0.9.0 QUIET)
+if(NOT Franka_FOUND)
+  find_package(Franka 0.8.0 REQUIRED)
+endif()
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
 
@@ -80,7 +82,12 @@ add_library(franka_hw_sim
   src/franka_hw_sim.cpp
   src/joint.cpp
   src/model_kdl.cpp
+  src/controller_verifier.cpp
   )
+if (Franka_VERSION GREATER_EQUAL 0.9)
+  target_compile_definitions(franka_hw_sim PUBLIC ENABLE_BASE_ACCELERATION)
+endif()
+
 target_link_libraries(franka_hw_sim
   ${catkin_LIBRARIES}
   ${Franka_LIBRARIES}
@@ -130,6 +137,10 @@ install(TARGETS franka_hw_sim franka_gripper_sim
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch
