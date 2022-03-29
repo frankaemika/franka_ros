@@ -625,6 +625,10 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
+#ifdef ENABLE_BASE_ACCELERATION
+  // This will always be {0,0,-9.81} on the real robot as it cannot be mounted differently for now
+  this->robot_state_.O_ddP_O = this->gravity_earth_;
+#endif
 
   this->robot_initialized_ = true;
 }

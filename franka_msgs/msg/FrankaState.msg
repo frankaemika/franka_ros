@@ -21,6 +21,7 @@ float64[7] joint_collision
 float64[7] joint_contact
 float64[6] O_F_ext_hat_K
 float64[6] O_dP_EE_d
+float64[3] O_ddP_O
 float64[6] O_dP_EE_c
 float64[6] O_ddP_EE_c
 float64[7] tau_ext_hat_filtered
