@@ -1,8 +1,10 @@
 # CHANGELOG
 
-## 0.9.0 - UNRELEASED
+## 0.9.0 - 2022-03-29
 
 Requires `libfranka` >= 0.8.0
+
+  * Added support for libfranka 0.9.0
   * **BREAKING** add base acceleration `O_ddP_O` (will for now always be {0,0,-9.81}) to `FrankaState.msg`
   * **BREAKING** add  following errors to `Errors.msg`:
     * `joint_move_in_wrong_direction`
@@ -10,7 +12,6 @@ Requires `libfranka` >= 0.8.0
     * `joint_via_motion_generator_planning_joint_limit_violation`
     * `base_acceleration_initialization_timeout`
     * `base_acceleration_invalid_reading`
-  * Added support for libfranka 0.9.0
   * `franka_gazebo`:
     - Add JointPosition and JointVelocity Interface
     - Fix: Robot now keeps position when no controller is running
