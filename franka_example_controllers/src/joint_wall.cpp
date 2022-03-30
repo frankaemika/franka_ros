@@ -126,7 +126,7 @@ void JointWall::adjustMovingWall(const double q, const double dq) {
 double JointWall::positiveCheck(double value) {
   if (value < 0) {
     ROS_WARN_THROTTLE(
-        1, "JointWall expects positive parameters, but got negative.Using its absolute value.");
+        1, "JointWall expects positive parameters, but got negative. Using its absolute value.");
     value = fabs(value);
   }
   return value;

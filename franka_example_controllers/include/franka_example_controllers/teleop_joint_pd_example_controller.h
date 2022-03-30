@@ -147,8 +147,6 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
 
   Vector7d get7dParam(const std::string& param_name, ros::NodeHandle& nh);
 
-  std::vector<std::string> getJointNames(const std::string& param_name, ros::NodeHandle& nh);
-
   template <typename T>
   T get1dParam(const std::string& param_name, ros::NodeHandle& nh) {
     T out;
