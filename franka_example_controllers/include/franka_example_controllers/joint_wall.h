@@ -62,8 +62,8 @@ class JointWall {
   void reset();
 
  private:
-  /* Indicates the status of moving wall, which occurs after initializing the state inside joint
-   * wall.
+  /**
+   * Indicates the status of moving wall, which occurs after initializing the state inside a wall.
    */
   enum class MotionInWall {
     EnteringNormal,
