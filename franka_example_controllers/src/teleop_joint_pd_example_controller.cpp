@@ -18,7 +18,7 @@
 
 using Vector7d = Eigen::Matrix<double, 7, 1>;
 
-const std::string controller_name = "TeleopJointPDExampleController";
+const std::string kControllerName = "TeleopJointPDExampleController";
 
 namespace franka_example_controllers {
 
@@ -56,7 +56,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     follower_joint_names = getJointParams<std::string>("follower/joint_names", node_handle);
 
     if (!node_handle.getParam("debug", debug_)) {
-      ROS_INFO_STREAM_NAMED(controller_name, "Could not find parameter debug.Defaulting to "
+      ROS_INFO_STREAM_NAMED(kControllerName, "Could not find parameter debug.Defaulting to "
                                                  << std::boolalpha << debug_);
     }
 
@@ -65,7 +65,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     initArm(robot_hw, node_handle, follower_data_, follower_arm_id, follower_joint_names);
 
   } catch (const std::invalid_argument& ex) {
-    ROS_ERROR_NAMED(controller_name, "%s", ex.what());
+    ROS_ERROR_NAMED(kControllerName, "%s", ex.what());
     return false;
   }
 
@@ -105,7 +105,7 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
                                              const std::vector<std::string>& joint_names) {
   auto* effort_joint_interface = robot_hw->get<hardware_interface::EffortJointInterface>();
   if (not effort_joint_interface) {
-    throw std::invalid_argument(controller_name +
+    throw std::invalid_argument(kControllerName +
                                 ": Error getting effort joint interface from hardware of " +
                                 arm_id + ".");
   }
@@ -115,15 +115,15 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
     try {
       arm_data.joint_handles.push_back(effort_joint_interface->getHandle(name));
     } catch (const hardware_interface::HardwareInterfaceException& e) {
-      throw std::invalid_argument(controller_name + ": Exception getting joint handle " + name +
-                                  ": " + std::string(e.what()));
+      throw std::invalid_argument(kControllerName +
+                                  ": Exception getting joint handle: " + std::string(e.what()));
     }
   }
 
   // Get state interface.
   auto* state_interface = robot_hw->get<franka_hw::FrankaStateInterface>();
   if (not state_interface) {
-    throw std::invalid_argument(controller_name + ": Error getting state interface from hardware.");
+    throw std::invalid_argument(kControllerName + ": Error getting state interface from hardware.");
   }
 
   try {
@@ -131,7 +131,7 @@ void TeleopJointPDExampleController::initArm(hardware_interface::RobotHW* robot_
         state_interface->getHandle(arm_id + "_robot"));
   } catch (hardware_interface::HardwareInterfaceException& ex) {
     throw std::invalid_argument(
-        controller_name +
+        kControllerName +
         ": Exception getting state handle from interface: " + std::string(ex.what()));
   }
 
@@ -345,7 +345,7 @@ void TeleopJointPDExampleController::teleopParamCallback(
     ddq_max_upper_[5] = config.ddq_u_6;
     ddq_max_upper_[6] = config.ddq_u_7;
 
-    ROS_INFO_NAMED(controller_name, "Dynamic reconfigure: Controller params set.");
+    ROS_INFO_NAMED(kControllerName, "Dynamic reconfigure: Controller params set.");
   }
   dynamic_reconfigure_mutex_.unlock();
 }
@@ -359,13 +359,13 @@ void TeleopJointPDExampleController::getJointLimits(ros::NodeHandle& nh,
   std::string parent_namespace = node_namespace.substr(0, found);
 
   if (!nh.hasParam(parent_namespace + "/robot_description")) {
-    throw std::invalid_argument(controller_name + ": No parameter robot_description (namespace: " +
+    throw std::invalid_argument(kControllerName + ": No parameter robot_description (namespace: " +
                                 parent_namespace + ")found to set joint limits!");
   }
 
   urdf::Model urdf_model;
   if (!urdf_model.initParamWithNodeHandle(parent_namespace + "/robot_description", nh)) {
-    throw std::invalid_argument(controller_name +
+    throw std::invalid_argument(kControllerName +
                                 ": Could not initialize urdf model from robot_description "
                                 "(namespace: " +
                                 parent_namespace + ").");
@@ -375,18 +375,18 @@ void TeleopJointPDExampleController::getJointLimits(ros::NodeHandle& nh,
     const std::string& joint_name = joint_names.at(i);
     auto urdf_joint = urdf_model.getJoint(joint_name);
     if (!urdf_joint) {
-      ROS_ERROR_STREAM_NAMED(controller_name,
+      ROS_ERROR_STREAM_NAMED(kControllerName,
                              ": Could not get joint " << joint_name << " from urdf");
     }
     if (!urdf_joint->safety) {
-      ROS_ERROR_STREAM_NAMED(controller_name, ": Joint " << joint_name << " has no limits");
+      ROS_ERROR_STREAM_NAMED(kControllerName, ": Joint " << joint_name << " has no limits");
     }
     if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
       upper_joint_soft_limit[i] = soft_limits.max_position;
       lower_joint_soft_limit[i] = soft_limits.min_position;
 
     } else {
-      ROS_ERROR_STREAM_NAMED(controller_name, ": Could not parse joint limit for joint "
+      ROS_ERROR_STREAM_NAMED(kControllerName, ": Could not parse joint limit for joint "
                                                   << joint_name << " for joint limit interfaces");
     }
   }
