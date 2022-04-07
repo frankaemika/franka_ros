@@ -25,6 +25,17 @@
 namespace franka_example_controllers {
 
 /**
+ * Finite state machine that defines the states of the teleoperation phases.
+ * ALIGN is the initial phase, when the leader and follower align. During this phase the leader
+ * cannot be moved.
+ * TRACK is the tracking phase.
+ */
+enum TeleopStateMachine {
+  ALIGN,
+  TRACK,
+};
+
+/**
  * Controller class for ros_control that allows force-feedback teleoperation of a follower arm from
  * a leader arm. Smooth tracking is implemented by integrating a velocity signal, which is
  * calculated by limiting and saturating the velocity of the leader arm and a drift compensation.
@@ -92,6 +103,8 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   Vector7d dq_target_;       // Target velocities of the follower arm [rad/s, ...]
   Vector7d dq_target_last_;  // Last target velocities of the follower arm [rad/s, ...]
 
+  Vector7d init_leader_q_;  // Measured q of leader arm during alignment [rad]
+
   Vector7d dq_max_lower_;              // Lower max velocities of the follower arm [rad/s, ...]
   Vector7d dq_max_upper_;              // Upper max velocities of the follower arm [rad/s, ...]
   Vector7d ddq_max_lower_;             // Lower max accelerations of the follower arm [rad/s², ...]
@@ -99,8 +112,16 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   double velocity_ramp_shift_{0.25};   // parameter for ramping dq_max and ddq_max [rad]
   double velocity_ramp_increase_{20};  // parameter for ramping dq_max and ddq_max
 
-  Vector7d k_p_follower_;  // p-gain for follower arm
-  Vector7d k_d_follower_;  // d-gain for follower arm
+  Vector7d dq_max_align_;   // Max velocities of the follower arm during alignment [rad/s, ...]
+  Vector7d ddq_max_align_;  // Max accelerations of the follower arm during alignment [rad/s, ...]
+
+  Vector7d alignment_error_;  // Diff between follower and leader q during alignment [rad/s, ...]
+  Vector7d prev_alignment_error_;  // alignment_error_ in previous control loop [rad/s, ...]
+
+  Vector7d k_p_follower_;        // p-gain for follower arm
+  Vector7d k_d_follower_;        // d-gain for follower arm
+  Vector7d k_p_follower_align_;  // p-gain for follower arm during alignment
+  Vector7d k_d_follower_align_;  // d-gain for follower arm during alignment
 
   Vector7d dq_max_leader_lower_;  // Soft max velocities of the leader arm [rad/s, ...]
   Vector7d dq_max_leader_upper_;  // Hard max velocities of the leader arm [rad/s, ...]
@@ -113,6 +134,10 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   double force_feedback_guiding_{0.95};  // Applied force-feeback, when leader arm is guided
 
   double decrease_factor_{0.95};  // Param, used when (in error state) controlling torques to zero
+
+  TeleopStateMachine current_state_{TeleopStateMachine::ALIGN};  // Current state in teleoperation
+
+  const double kAlignmentTolerance_{1e-2};  // Tolerance to consider a joint aligned [rad]
 
   void initArm(hardware_interface::RobotHW* robot_hw,
                ros::NodeHandle& node_handle,
