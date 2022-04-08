@@ -112,16 +112,20 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   double velocity_ramp_shift_{0.25};   // parameter for ramping dq_max and ddq_max [rad]
   double velocity_ramp_increase_{20};  // parameter for ramping dq_max and ddq_max
 
-  Vector7d dq_max_align_;   // Max velocities of the follower arm during alignment [rad/s, ...]
-  Vector7d ddq_max_align_;  // Max accelerations of the follower arm during alignment [rad/s, ...]
+  // Max velocities of the follower arm during alignment [rad/s, ...]
+  Vector7d dq_max_align_{(Vector7d() << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1).finished()};
+  // Max accelerations of the follower arm during alignment [rad/s², ...]
+  Vector7d ddq_max_align_{(Vector7d() << 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5).finished()};
 
   Vector7d alignment_error_;  // Diff between follower and leader q during alignment [rad/s, ...]
   Vector7d prev_alignment_error_;  // alignment_error_ in previous control loop [rad/s, ...]
 
-  Vector7d k_p_follower_;        // p-gain for follower arm
-  Vector7d k_d_follower_;        // d-gain for follower arm
-  Vector7d k_p_follower_align_;  // p-gain for follower arm during alignment
-  Vector7d k_d_follower_align_;  // d-gain for follower arm during alignment
+  Vector7d k_p_follower_;  // p-gain for follower arm
+  Vector7d k_d_follower_;  // d-gain for follower arm
+  // p-gain for follower arm during alignment
+  Vector7d k_p_follower_align_{(Vector7d() << 90.0, 90.0, 90.0, 90.0, 37.0, 22.0, 10.0).finished()};
+  // d-gain for follower arm during alignment
+  Vector7d k_d_follower_align_{(Vector7d() << 4.5, 4.5, 4.5, 4.5, 1.5, 1.5, 1.0).finished()};
 
   Vector7d dq_max_leader_lower_;  // Soft max velocities of the leader arm [rad/s, ...]
   Vector7d dq_max_leader_upper_;  // Hard max velocities of the leader arm [rad/s, ...]

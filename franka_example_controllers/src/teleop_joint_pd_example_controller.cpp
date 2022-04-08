@@ -44,11 +44,6 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     ddq_max_lower_ = get7dParam("follower/ddq_max_lower", node_handle);
     ddq_max_upper_ = get7dParam("follower/ddq_max_upper", node_handle);
 
-    dq_max_align_ = get7dParam("follower/dq_max_align", node_handle);
-    ddq_max_align_ = get7dParam("follower/ddq_max_align", node_handle);
-    k_p_follower_align_ = get7dParam("follower/p_gains_align", node_handle);
-    k_d_follower_align_ = get7dParam("follower/d_gains_align", node_handle);
-
     leader_data_.contact_force_threshold =
         get1dParam<double>("leader/contact_force_threshold", node_handle);
     follower_data_.contact_force_threshold =

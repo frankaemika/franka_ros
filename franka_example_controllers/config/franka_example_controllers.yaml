@@ -153,8 +153,4 @@ teleop_joint_pd_example_controller:
        dq_max_upper: [2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5] # [rad/s]
        ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s²]
        ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s²]
-       dq_max_align: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]  # [rad/s]
-       ddq_max_align: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] # [rad/s²]
-       p_gains_align: [90.0, 90.0, 90.0, 90.0, 37.0, 22.0, 10.0]
-       d_gains_align: [4.5, 4.5, 4.5, 4.5, 1.5, 1.5, 1.0]
        contact_force_threshold: 5.0 # [N]
