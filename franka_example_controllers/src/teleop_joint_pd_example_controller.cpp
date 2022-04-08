@@ -168,6 +168,7 @@ void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
   // Store alignment position from leader
   franka::RobotState leader_robot_state = leader_data_.state_handle->getRobotState();
   init_leader_q_ = Eigen::Map<Vector7d>(leader_robot_state.q.data());
+  current_state_ = TeleopStateMachine::ALIGN;
 }
 
 void TeleopJointPDExampleController::update(const ros::Time& /*time*/,

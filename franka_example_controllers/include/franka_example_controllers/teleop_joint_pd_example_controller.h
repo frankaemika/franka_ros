@@ -123,7 +123,7 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   Vector7d k_p_follower_;  // p-gain for follower arm
   Vector7d k_d_follower_;  // d-gain for follower arm
   // p-gain for follower arm during alignment
-  Vector7d k_p_follower_align_{(Vector7d() << 90.0, 90.0, 90.0, 90.0, 37.0, 22.0, 10.0).finished()};
+  Vector7d k_p_follower_align_{(Vector7d() << 45.0, 45.0, 45.0, 45.0, 18.0, 11.0, 5.0).finished()};
   // d-gain for follower arm during alignment
   Vector7d k_d_follower_align_{(Vector7d() << 4.5, 4.5, 4.5, 4.5, 1.5, 1.5, 1.0).finished()};
 
