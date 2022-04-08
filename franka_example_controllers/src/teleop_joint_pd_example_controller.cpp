@@ -56,7 +56,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     follower_joint_names = getJointParams<std::string>("follower/joint_names", node_handle);
 
     if (!node_handle.getParam("debug", debug_)) {
-      ROS_INFO_STREAM_NAMED(kControllerName, "Could not find parameter debug.Defaulting to "
+      ROS_INFO_STREAM_NAMED(kControllerName, "Could not find parameter debug. Defaulting to "
                                                  << std::boolalpha << debug_);
     }
 
@@ -164,6 +164,11 @@ void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
   dq_target_last_.setZero();
   leader_data_.tau_target_last.setZero();
   follower_data_.tau_target_last.setZero();
+
+  // Store alignment position from leader
+  franka::RobotState leader_robot_state = leader_data_.state_handle->getRobotState();
+  init_leader_q_ = Eigen::Map<Vector7d>(leader_robot_state.q.data());
+  current_state_ = TeleopStateMachine::ALIGN;
 }
 
 void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
@@ -174,6 +179,15 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
   leader_data_.dq = Eigen::Map<Vector7d>(leader_robot_state.dq.data());
   follower_data_.q = Eigen::Map<Vector7d>(follower_robot_state.q.data());
   follower_data_.dq = Eigen::Map<Vector7d>(follower_robot_state.dq.data());
+
+  if (current_state_ == TeleopStateMachine::ALIGN) {
+    // Check coefficient-wise if the two robots are aligned
+    const auto kNorm = (leader_data_.q - follower_data_.q).cwiseAbs().array();
+    if ((kNorm < kAlignmentTolerance_).all()) {
+      current_state_ = TeleopStateMachine::TRACK;
+      ROS_INFO_STREAM_NAMED(kControllerName, "Leader and follower are aligned");
+    }
+  }
 
   // Determine contact scaling factor depending on the external cartesian forces applied on the
   // endeffector.
@@ -194,39 +208,57 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
   Vector7d q_deviation = (q_target_last_ - leader_data_.q).cwiseAbs();
   Vector7d dq_max;
   Vector7d ddq_max;
-  for (size_t i = 0; i < 7; ++i) {
-    dq_max[i] = rampParameter(q_deviation[i], dq_max_lower_[i], dq_max_upper_[i],
-                              velocity_ramp_shift_, velocity_ramp_increase_);
-    ddq_max[i] = rampParameter(q_deviation[i], ddq_max_lower_[i], ddq_max_upper_[i],
-                               velocity_ramp_shift_, velocity_ramp_increase_);
+
+  if (current_state_ == TeleopStateMachine::ALIGN) {
+    dq_max = dq_max_align_;
+    ddq_max = ddq_max_align_;
+    prev_alignment_error_ = alignment_error_;
+    alignment_error_ = (init_leader_q_ - follower_data_.q);
+    Vector7d dalignment_error = (alignment_error_ - prev_alignment_error_) / period.toSec();
+
+    dq_unsaturated_ = k_p_follower_align_.asDiagonal() * alignment_error_ +
+                      k_d_follower_align_.asDiagonal() * dalignment_error;
+  } else {
+    for (size_t i = 0; i < 7; ++i) {
+      dq_max[i] = rampParameter(q_deviation[i], dq_max_lower_[i], dq_max_upper_[i],
+                                velocity_ramp_shift_, velocity_ramp_increase_);
+      ddq_max[i] = rampParameter(q_deviation[i], ddq_max_lower_[i], ddq_max_upper_[i],
+                                 velocity_ramp_shift_, velocity_ramp_increase_);
+    }
+    dq_unsaturated_ = k_dq_.asDiagonal() * (leader_data_.q - q_target_last_) + leader_data_.dq;
   }
 
   // Calculate target postions and velocities for follower arm
-  dq_unsaturated_ = k_dq_.asDiagonal() * (leader_data_.q - q_target_last_) + leader_data_.dq;
   dq_target_ = saturateAndLimit(dq_unsaturated_, dq_target_last_, dq_max, ddq_max, period.toSec());
   dq_target_last_ = dq_target_;
   q_target_ = q_target_last_ + (dq_target_ * period.toSec());
   q_target_last_ = q_target_;
 
   if (!leader_robot_state.current_errors && !follower_robot_state.current_errors) {
-    // Compute force-feedback for the leader arm to render the haptic interaction of the follower
-    // robot. Add a slight damping to reduce vibrations.
-    // The force feedback is applied when the external forces on the follower arm exceed a
-    // threshold. While the leader arm is unguided (not in contact), the force-feedback is reduced.
-    // When the leader robot exceeds the soft limit velocities dq_max_leader_lower damping is
-    // increased gradually until it saturates when reaching dq_max_leader_upper to maximum damping.
+    if (current_state_ == TeleopStateMachine::ALIGN) {
+      // Compute P control for the leader arm to stay in position.
+      leader_data_.tau_target = k_p_follower_.asDiagonal() * (init_leader_q_ - leader_data_.q);
+    } else {
+      // Compute force-feedback for the leader arm to render the haptic interaction of the follower
+      // robot. Add a slight damping to reduce vibrations.
+      // The force feedback is applied when the external forces on the follower arm exceed a
+      // threshold. While the leader arm is unguided (not in contact), the force-feedback is
+      // reduced. When the leader robot exceeds the soft limit velocities dq_max_leader_lower
+      // damping is increased gradually until it saturates when reaching dq_max_leader_upper to
+      // maximum damping.
 
-    Vector7d follower_tau_ext_hat =
-        Eigen::Map<Vector7d>(follower_robot_state.tau_ext_hat_filtered.data());
-    Vector7d leader_damping_torque =
-        leader_damping_scaling_ * leaderDamping(leader_data_.dq).asDiagonal() * leader_data_.dq;
-    Vector7d leader_force_feedback =
-        follower_data_.contact *
-        (force_feedback_idle_ +
-         leader_data_.contact * (force_feedback_guiding_ - force_feedback_idle_)) *
-        (-follower_tau_ext_hat);
+      Vector7d follower_tau_ext_hat =
+          Eigen::Map<Vector7d>(follower_robot_state.tau_ext_hat_filtered.data());
+      Vector7d leader_damping_torque =
+          leader_damping_scaling_ * leaderDamping(leader_data_.dq).asDiagonal() * leader_data_.dq;
+      Vector7d leader_force_feedback =
+          follower_data_.contact *
+          (force_feedback_idle_ +
+           leader_data_.contact * (force_feedback_guiding_ - force_feedback_idle_)) *
+          (-follower_tau_ext_hat);
 
-    leader_data_.tau_target = leader_force_feedback - leader_damping_torque;
+      leader_data_.tau_target = leader_force_feedback - leader_damping_torque;
+    }
 
     // Compute PD control for the follower arm to track the leader's motions.
     follower_data_.tau_target =
