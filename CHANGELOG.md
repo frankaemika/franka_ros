@@ -2,6 +2,7 @@
 
 ## 0.X.Y - UNRELEASED
 
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
 
 ## 0.9.0 - 2022-03-29
