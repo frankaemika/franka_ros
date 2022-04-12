@@ -117,6 +117,7 @@
     <xacro:link_detailed_coarse name="link7" rpy="0 0 ${pi/4}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0.01" direction="z" radius="${0.04+safety_distance}" length="0.14" />
+        <xacro:collision_capsule xyz="0.06 0 0.082" direction="x" radius="${0.03+safety_distance}"  length="0.01" />
       </self_collision_geometries>
     </xacro:link_detailed_coarse>
 
@@ -131,26 +132,8 @@
     </joint>
 
     <link name="${arm_id}_link8"/>
-    <link name="${arm_id}_link8_sc">
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.0250" rpy="${pi} ${pi/2} ${pi/2}"/>
-        <geometry>
-          <cylinder radius="${0.03+safety_distance}"  length="0.01" />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.02" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.03+safety_distance}"  />
-        </geometry>
-      </collision>
-      <collision>
-        <origin xyz="0.0424 0.0424 -0.03" rpy="0 0 0"/>
-        <geometry>
-          <sphere radius="${0.03+safety_distance}"  />
-        </geometry>
-      </collision>
-    </link>
+    <link name="${arm_id}_link8_sc"/>
+
     <joint name="${arm_id}_link8_sc_joint" type="fixed">
       <parent link="${arm_id}_link8" />
       <child link="${arm_id}_link8_sc" />
