@@ -28,9 +28,10 @@
   <!--  * and coarse geometry models for self-collision checking  -->
   <!--                                                            -->
   <!-- name:  Name of the robot link (without prefix)             -->
+  <!-- rpy:   Rotation of the *_sc link relative to parent [rad]  -->
   <!-- self_collision_geometries:  self <collision> models        -->
   <!-- ========================================================== -->
-  <xacro:macro name="link_detailed_coarse" params="name prefix=${arm_id}_ **self_collision_geometries">
+  <xacro:macro name="link_detailed_coarse" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries">
     <!-- sub-link defining detailed meshes for collision with environment -->
     <link name="${prefix}${name}">
       <visual>
@@ -53,6 +54,7 @@
     </link>
     <!-- fixed joint between both sub-links -->
     <joint name="${prefix}${name}_sc_joint" type="fixed">
+      <origin rpy="${rpy}" />
       <parent link="${prefix}${name}" />
       <child link="${prefix}${name}_sc" />
     </joint>
