@@ -60,6 +60,48 @@
     </joint>
   </xacro:macro>
 
+  <!-- =========================================================== -->
+  <!-- Add a <collision> tag with a capsule, made from a cylinder  -->
+  <!-- with two spheres at its caps. The capsule will always be    -->
+  <!-- aligned with the axis of 'direction' you pass along.        -->
+  <!--                                                             -->
+  <!-- radius: Radii of both the cylinder and both spheres [m]     -->
+  <!-- length: Length of the cylinder/distance between the centers -->
+  <!--         of the spheres. NOT overall length of capsule!      -->
+  <!-- xyz:    Position of the center of the capsule/cylinder      -->
+  <!-- direction: One of { x, y, z, -x, -y, -z }                   -->
+  <!-- =========================================================== -->
+  <xacro:macro name="collision_capsule" params="radius length xyz:='0 0 0' direction:='z'">
+    <xacro:property name="r" value="${pi/2.0 if 'y' in direction else 0}" />
+    <xacro:property name="p" value="${pi/2.0 if 'x' in direction else 0}" />
+    <xacro:property name="y" value="0" />
+    <xacro:property name="x" value="${xyz.split(' ')[0]}" />
+    <xacro:property name="y" value="${xyz.split(' ')[1]}" />
+    <xacro:property name="z" value="${xyz.split(' ')[2]}" />
+    <xacro:property name="sx" value="${length / 2.0 if 'x' in direction else 0}" />
+    <xacro:property name="sy" value="${length / 2.0 if 'y' in direction else 0}" />
+    <xacro:property name="sz" value="${length / 2.0 if 'z' in direction else 0}" />
+
+    <collision>
+      <origin xyz="${x} ${y} ${z}" rpy="${r} ${p} ${y}"/>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="${x+sx} ${y+sy} ${z+sz}" />
+      <geometry>
+        <sphere radius="${radius}" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="${x-sx} ${y-sy} ${z-sz}" />
+      <geometry>
+        <sphere radius="${radius}" />
+      </geometry>
+    </collision>
+  </xacro:macro>
+
   <!-- ========================================================== -->
   <!-- Adds the required tags to simulate one joint in gazebo     -->
   <!--                                                            -->
