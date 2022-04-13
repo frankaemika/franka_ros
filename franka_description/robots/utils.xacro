@@ -78,6 +78,7 @@
     <xacro:property name="x" value="${xyz.split(' ')[0]}" />
     <xacro:property name="y" value="${xyz.split(' ')[1]}" />
     <xacro:property name="z" value="${xyz.split(' ')[2]}" />
+    <!-- Sphere center offsets from center of cylinder -->
     <xacro:property name="sx" value="${length / 2.0 if 'x' in direction else 0}" />
     <xacro:property name="sy" value="${length / 2.0 if 'y' in direction else 0}" />
     <xacro:property name="sz" value="${length / 2.0 if 'z' in direction else 0}" />
