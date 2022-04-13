@@ -1,12 +1,13 @@
+arm_id: $(arg arm_id)
 joint_names:
-  - panda_joint1
-  - panda_joint2
-  - panda_joint3
-  - panda_joint4
-  - panda_joint5
-  - panda_joint6
-  - panda_joint7
-arm_id: panda
+  - $(arg arm_id)_joint1
+  - $(arg arm_id)_joint2
+  - $(arg arm_id)_joint3
+  - $(arg arm_id)_joint4
+  - $(arg arm_id)_joint5
+  - $(arg arm_id)_joint6
+  - $(arg arm_id)_joint7
+
 # Configure the threshold angle for printing joint limit warnings.
 joint_limit_warning_threshold: 0.1 # [rad]
 # Activate rate limiter? [true|false]

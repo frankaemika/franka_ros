@@ -1,60 +1,60 @@
 position_joint_trajectory_controller:
   type: position_controllers/JointTrajectoryController
   joints:
-    - panda_joint1
-    - panda_joint2
-    - panda_joint3
-    - panda_joint4
-    - panda_joint5
-    - panda_joint6
-    - panda_joint7
+    - $(arg arm_id)_joint1
+    - $(arg arm_id)_joint2
+    - $(arg arm_id)_joint3
+    - $(arg arm_id)_joint4
+    - $(arg arm_id)_joint5
+    - $(arg arm_id)_joint6
+    - $(arg arm_id)_joint7
   constraints:
     goal_time: 0.5
-    panda_joint1: { goal: 0.05}
-    panda_joint2: { goal: 0.05}
-    panda_joint3: { goal: 0.05}
-    panda_joint4: { goal: 0.05}
-    panda_joint5: { goal: 0.05}
-    panda_joint6: { goal: 0.05}
-    panda_joint7: { goal: 0.05}
+    $(arg arm_id)_joint1: { goal: 0.05}
+    $(arg arm_id)_joint2: { goal: 0.05}
+    $(arg arm_id)_joint3: { goal: 0.05}
+    $(arg arm_id)_joint4: { goal: 0.05}
+    $(arg arm_id)_joint5: { goal: 0.05}
+    $(arg arm_id)_joint6: { goal: 0.05}
+    $(arg arm_id)_joint7: { goal: 0.05}
 
 effort_joint_trajectory_controller:
   type: effort_controllers/JointTrajectoryController
   joints:
-    - panda_joint1
-    - panda_joint2
-    - panda_joint3
-    - panda_joint4
-    - panda_joint5
-    - panda_joint6
-    - panda_joint7
+    - $(arg arm_id)_joint1
+    - $(arg arm_id)_joint2
+    - $(arg arm_id)_joint3
+    - $(arg arm_id)_joint4
+    - $(arg arm_id)_joint5
+    - $(arg arm_id)_joint6
+    - $(arg arm_id)_joint7
   gains:
-    panda_joint1: { p: 600, d: 30, i: 0 }
-    panda_joint2: { p: 600, d: 30, i: 0 }
-    panda_joint3: { p: 600, d: 30, i: 0 }
-    panda_joint4: { p: 600, d: 30, i: 0 }
-    panda_joint5: { p: 250, d: 10, i: 0 }
-    panda_joint6: { p: 150, d: 10, i: 0 }
-    panda_joint7: { p: 50, d: 5, i: 0 }
+    $(arg arm_id)_joint1: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint2: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint3: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint4: { p: 600, d: 30, i: 0 }
+    $(arg arm_id)_joint5: { p: 250, d: 10, i: 0 }
+    $(arg arm_id)_joint6: { p: 150, d: 10, i: 0 }
+    $(arg arm_id)_joint7: { p: 50, d: 5, i: 0 }
   constraints:
     goal_time: 0.5
-    panda_joint1: { goal: 0.05}
-    panda_joint2: { goal: 0.05}
-    panda_joint3: { goal: 0.05}
-    panda_joint4: { goal: 0.05}
-    panda_joint5: { goal: 0.05}
-    panda_joint6: { goal: 0.05}
-    panda_joint7: { goal: 0.05}
+    $(arg arm_id)_joint1: { goal: 0.05}
+    $(arg arm_id)_joint2: { goal: 0.05}
+    $(arg arm_id)_joint3: { goal: 0.05}
+    $(arg arm_id)_joint4: { goal: 0.05}
+    $(arg arm_id)_joint5: { goal: 0.05}
+    $(arg arm_id)_joint6: { goal: 0.05}
+    $(arg arm_id)_joint7: { goal: 0.05}
 
 franka_state_controller:
   type: franka_control/FrankaStateController
+  arm_id: $(arg arm_id)
   publish_rate: 30  # [Hz]
   joint_names:
-    - panda_joint1
-    - panda_joint2
-    - panda_joint3
-    - panda_joint4
-    - panda_joint5
-    - panda_joint6
-    - panda_joint7
-  arm_id: panda
+    - $(arg arm_id)_joint1
+    - $(arg arm_id)_joint2
+    - $(arg arm_id)_joint3
+    - $(arg arm_id)_joint4
+    - $(arg arm_id)_joint5
+    - $(arg arm_id)_joint6
+    - $(arg arm_id)_joint7
