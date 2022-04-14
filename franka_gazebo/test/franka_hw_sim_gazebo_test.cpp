@@ -8,7 +8,7 @@ TEST(
 #else
     DISABLED_TestSuite, /* melodic */
 #endif
-    franka_hw_sim_compensates_gravity_on_F_ext) {
+    DISABLED_franka_hw_sim_compensates_gravity_on_F_ext) {  // TODO(goll_th) enable again when not flaky anymore
   ros::NodeHandle n;
 
   for (int i = 0; i < 50; i++) {

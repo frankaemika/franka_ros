@@ -181,7 +181,8 @@ TEST_P(GripperGraspZeroFixtureTest, CanSucceedGraspGoesToClosedState) {  // NOLI
   EXPECT_TRUE(grasp_client->getResult()->success);
 }
 
-INSTANTIATE_TEST_CASE_P(GripperMoveFixtureTest,  // NOLINT(cert-err58-cpp)
+// TODO(goll_th): Enable again, when not flaky anymore
+INSTANTIATE_TEST_CASE_P(DISABLED_GripperMoveFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperMoveFixtureTest,
                         ::testing::Values(std::make_tuple(0.06, 0.1, 0.1),
                                           std::make_tuple(0.01, 0.1, 0.1),
@@ -191,25 +192,25 @@ INSTANTIATE_TEST_CASE_P(GripperMoveFixtureTest,  // NOLINT(cert-err58-cpp)
                                           std::make_tuple(0.0, 0.01, 0.6)));
 
 INSTANTIATE_TEST_CASE_P(  // NOLINT(cert-err58-cpp)
-    GripperFailMoveFixtureTest,
+    DISABLED_GripperFailMoveFixtureTest,
     GripperFailMoveFixtureTest,
     ::testing::Values(std::make_tuple(0.09, 0.1, 0),
                       std::make_tuple(std::numeric_limits<double>::quiet_NaN(), 0.1, 0),
                       std::make_tuple(-0.08, 0.1, 0),
                       std::make_tuple(-0.0001, 0.1, 0)));
 
-INSTANTIATE_TEST_CASE_P(GripperHomingFixtureTest,  // NOLINT(cert-err58-cpp)
+INSTANTIATE_TEST_CASE_P(DISABLED_GripperHomingFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperHomingFixtureTest,
                         ::testing::Values(0.06, 0.01, 0.03, 0.08, 0.0));
 
-INSTANTIATE_TEST_CASE_P(GripperGraspFixtureTest,  // NOLINT(cert-err58-cpp)
+INSTANTIATE_TEST_CASE_P(DISABLED_GripperGraspFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperGraspFixtureTest,
                         ::testing::Values(std::make_tuple(0.03, 0.1, 0., 0.1),
                                           std::make_tuple(0.02, 0.1, 5., 0.1),
                                           std::make_tuple(0.03, 0.01, 0., 0.6),
                                           std::make_tuple(0.07, 0.01, 5., 0.6)));
 
-INSTANTIATE_TEST_CASE_P(GripperGraspZeroFixtureTest,  // NOLINT(cert-err58-cpp)
+INSTANTIATE_TEST_CASE_P(DISABLED_GripperGraspZeroFixtureTest,  // NOLINT(cert-err58-cpp)
                         GripperGraspZeroFixtureTest,
                         ::testing::Combine(::testing::Values(std::make_tuple(0.0, 0.1, 0., 0.1),
                                                              std::make_tuple(0.0, 0.1, 5., 0.1),
