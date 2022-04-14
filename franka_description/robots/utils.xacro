@@ -26,12 +26,13 @@
   <!-- Macro to add a single link, both with                      -->
   <!--  * detailed meshes for environmental collision checking    -->
   <!--  * and coarse geometry models for self-collision checking  -->
+  <!--    (only if 'gazebo' arg is set)                           -->
   <!--                                                            -->
   <!-- name:  Name of the robot link (without prefix)             -->
   <!-- rpy:   Rotation of the *_sc link relative to parent [rad]  -->
   <!-- self_collision_geometries:  self <collision> models        -->
   <!-- ========================================================== -->
-  <xacro:macro name="link_detailed_coarse" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries">
+  <xacro:macro name="link_with_sc" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries">
     <!-- sub-link defining detailed meshes for collision with environment -->
     <link name="${prefix}${name}">
       <visual>

@@ -10,12 +10,12 @@
       </joint>
     </xacro:unless>
 
-    <xacro:link_detailed_coarse name="hand">
+    <xacro:link_with_sc name="hand">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0.04" direction="y" radius="${0.04+safety_distance}" length="0.1" />
         <xacro:collision_capsule xyz="0 0 0.10" direction="y" radius="${0.02+safety_distance}" length="0.1" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <!-- Define the hand_tcp frame -->
     <link name="${arm_id}_hand_tcp" />

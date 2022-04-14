@@ -11,17 +11,17 @@
       </joint>
     </xacro:unless>
 
-    <xacro:link_detailed_coarse name="link0">
+    <xacro:link_with_sc name="link0">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="-0.075 0 0.06" direction="x" radius="${0.06+safety_distance}" length="0.03" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
-    <xacro:link_detailed_coarse name="link1">
+    <xacro:link_with_sc name="link1">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -191.5e-3" radius="${0.06+safety_distance}" length="0.283" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint1" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973" />
@@ -33,11 +33,11 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link2">
+    <xacro:link_with_sc name="link2">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0" radius="${0.06+safety_distance}" length="0.12" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint2" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-1.7628" soft_upper_limit="1.7628" />
@@ -49,11 +49,11 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link3">
+    <xacro:link_with_sc name="link3">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.145" radius="${0.06+safety_distance}" length="0.15" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint3" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973" />
@@ -65,11 +65,11 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link4">
+    <xacro:link_with_sc name="link4">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0" radius="${0.06+safety_distance}" length="0.12" />
      </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint4" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-3.0718" soft_upper_limit="-0.0698" />
@@ -81,12 +81,12 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link5">
+    <xacro:link_with_sc name="link5">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.26"    radius="${0.060+safety_distance}" length="0.10" />
         <xacro:collision_capsule xyz="0 0.08 -0.13" radius="${0.025+safety_distance}" length="0.14" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint5" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973" />
@@ -98,11 +98,11 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link6">
+    <xacro:link_with_sc name="link6">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.03" radius="${0.05+safety_distance}" length="0.08" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint6" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-0.0175" soft_upper_limit="3.7525" />
@@ -114,12 +114,12 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_detailed_coarse name="link7" rpy="0 0 ${pi/4}">
+    <xacro:link_with_sc name="link7" rpy="0 0 ${pi/4}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0.01" direction="z" radius="${0.04+safety_distance}" length="0.14" />
         <xacro:collision_capsule xyz="0.06 0 0.082" direction="x" radius="${0.03+safety_distance}"  length="0.01" />
       </self_collision_geometries>
-    </xacro:link_detailed_coarse>
+    </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint7" type="revolute">
       <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="-2.8973" soft_upper_limit="2.8973"/>
