@@ -28,11 +28,11 @@ class TestURDF(TestCase):
     def test_generate_urdf_without_xacro_args_dont_use_gripper(self):
         urdf = xacro()
         self.assertFalse(
-            filter(lambda link: 'hand' in link, urdf.link_map.keys()),
+            list(filter(lambda link: 'hand' in link, urdf.link_map.keys())),
             'Found one or more links containing "hand", probably URDF contains a franka_gripper'
         )
         self.assertFalse(
-            filter(lambda joint: 'hand' in joint, urdf.joint_map.keys()),
+            list(filter(lambda joint: 'hand' in joint, urdf.joint_map.keys())),
             'Found one or more joints containing "hand", probably URDF contains a franka_gripper'
         )
 
