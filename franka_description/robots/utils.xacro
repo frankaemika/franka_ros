@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- ============================================================ -->
-  <!-- Macro to add an <interial> tag based on yaml-load properties -->
-  <!--                                                              -->
-  <!-- name:     Name of the robot link (without prefix)            -->
-  <!-- inertial: Dictionary of inertia properties                   -->
-  <!-- ============================================================ -->
+  <!-- ============================================================== -->
+  <!-- Macro to add an <interial> tag based on yaml-load properties   -->
+  <!--                                                                -->
+  <!-- name:     Name of the robot link (without prefix)              -->
+  <!-- inertial: Dictionary of inertia properties (see inertial.yaml) -->
+  <!-- ============================================================== -->
   <xacro:macro name="inertial_props" params="inertial:=^ name:=^">
     <xacro:if value="$(arg gazebo)">
       <xacro:unless value="${name in inertial}">${xacro.warning('No inertia properties defined for: ' + name)}</xacro:unless>
