@@ -9,46 +9,14 @@
         <origin xyz="${xyz}" rpy="${rpy}" />
       </joint>
     </xacro:unless>
+
     <xacro:link_detailed_coarse name="hand">
       <self_collision_geometries>
-        <collision>
-          <origin xyz="0 0 0.04" rpy="0 ${pi/2} ${pi/2}" />
-          <geometry>
-            <cylinder radius="${0.04+safety_distance}" length="0.1" />
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 -0.05 0.04" rpy="0 0 0" />
-          <geometry>
-            <sphere radius="${0.04+safety_distance}" />
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 0.05 0.04" rpy="0 0 0" />
-          <geometry>
-            <sphere radius="${0.04+safety_distance}" />
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 0 0.1" rpy="0 ${pi/2} ${pi/2}" />
-          <geometry>
-            <cylinder radius="${0.02+safety_distance}" length="0.1" />
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 -0.05 0.1" rpy="0 0 0" />
-          <geometry>
-            <sphere radius="${0.02+safety_distance}" />
-          </geometry>
-        </collision>
-        <collision>
-          <origin xyz="0 0.05 0.1" rpy="0 0 0" />
-          <geometry>
-            <sphere radius="${0.02+safety_distance}" />
-          </geometry>
-        </collision>
+        <xacro:collision_capsule xyz="0 0 0.04" direction="y" radius="${0.04+safety_distance}" length="0.1" />
+        <xacro:collision_capsule xyz="0 0 0.10" direction="y" radius="${0.02+safety_distance}" length="0.1" />
       </self_collision_geometries>
     </xacro:link_detailed_coarse>
+
     <!-- Define the hand_tcp frame -->
     <link name="${arm_id}_hand_tcp" />
     <joint name="${arm_id}_hand_tcp_joint" type="fixed">
