@@ -422,13 +422,15 @@ void FrankaGripperSim::onGripperActionGoal(const control_msgs::GripperCommandGoa
   double width_d = goal->command.position * 2.0;
 
   ROS_INFO_STREAM_NAMED("FrankaGripperSim", "New Gripper Command Action Goal received: "
-                                                << width_d << "m, " << goal->command.max_effort
-                                                << "N");
+                                                << goal->command.position << "m, "
+                                                << goal->command.max_effort << "N");
 
   if (width_d > kMaxFingerWidth || width_d < 0.0) {
     std::string error =
-        "Commanding out of range width! max_width = " + std::to_string(kMaxFingerWidth) +
-        " command = " + std::to_string(width_d);
+        "Commanding out of range position! max_position = " + std::to_string(kMaxFingerWidth / 2) +
+        ", commanded position = " + std::to_string(goal->command.position) +
+        ". Be aware that you command the position of"
+        " each finger which is half of the total opening width!";
     ROS_ERROR_STREAM_NAMED("FrankaGripperSim", error);
     result.reached_goal = static_cast<decltype(result.reached_goal)>(false);
     action_gc_->setAborted(result, error);
