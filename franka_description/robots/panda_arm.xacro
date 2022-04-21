@@ -132,12 +132,6 @@
     </joint>
 
     <link name="${arm_id}_link8"/>
-    <link name="${arm_id}_link8_sc"/>
-
-    <joint name="${arm_id}_link8_sc_joint" type="fixed">
-      <parent link="${arm_id}_link8" />
-      <child link="${arm_id}_link8_sc" />
-    </joint>
 
     <joint name="${arm_id}_joint8" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.107"/>
