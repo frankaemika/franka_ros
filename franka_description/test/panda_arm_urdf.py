@@ -11,7 +11,7 @@ def xacro(args=''):
         shell=True)
     )
 
-class TestURDF(TestCase):
+class TestPandaArmURDF(TestCase):
 
     def test_generate_urdf_without_xacro_args_contains_link0_up_to_link8(self):
         urdf = xacro()
@@ -197,4 +197,4 @@ class TestURDF(TestCase):
 
 if __name__ == '__main__':
     import rosunit
-    rosunit.unitrun(PKG, 'URDF', TestURDF)
+    rosunit.unitrun(PKG, 'URDF', TestPandaArmURDF)
