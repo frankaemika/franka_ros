@@ -10,3 +10,5 @@ install(DIRECTORY meshes
 install(DIRECTORY robots
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+catkin_add_nosetests(test/urdf.py)
