@@ -10,8 +10,7 @@
   <!-- name:     Name of the robot link (without prefix)              -->
   <!-- inertial: Dictionary of inertia properties (see inertial.yaml) -->
   <!-- ============================================================== -->
-  <xacro:macro name="inertial_props" params="inertial:=^ name:=^">
-    <xacro:if value="$(arg gazebo)">
+  <xacro:macro name="inertial_props" params="name inertial:=^">
       <xacro:unless value="${name in inertial}">${xacro.warning('No inertia properties defined for: ' + name)}</xacro:unless>
       <xacro:if value="${name in inertial}">
         <!-- Access inertia properties of link 'name' -->
@@ -23,20 +22,19 @@
           <inertia ixx="${I.xx}" ixy="${I.xy}" ixz="${I.xz}" iyy="${I.yy}" iyz="${I.yz}" izz="${I.zz}" />
         </inertial>
       </xacro:if>
-    </xacro:if>
   </xacro:macro>
 
   <!-- ========================================================== -->
   <!-- Macro to add a single link, both with                      -->
   <!--  * detailed meshes for environmental collision checking    -->
   <!--  * and coarse geometry models for self-collision checking  -->
-  <!--    (only if 'gazebo' arg is set)                           -->
+  <!--    (only if 'gazebo' param is set)                         -->
   <!--                                                            -->
   <!-- name:  Name of the robot link (without prefix)             -->
   <!-- rpy:   Rotation of the *_sc link relative to parent [rad]  -->
   <!-- self_collision_geometries:  self <collision> models        -->
   <!-- ========================================================== -->
-  <xacro:macro name="link_with_sc" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries">
+  <xacro:macro name="link_with_sc" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries gazebo:=false">
     <!-- sub-link defining detailed meshes for collision with environment -->
     <link name="${prefix}${name}">
       <visual>
@@ -49,11 +47,13 @@
           <mesh filename="package://franka_description/meshes/collision/${name}.stl" />
         </geometry>
       </collision>
-      <xacro:inertial_props />
+      <xacro:if value="${gazebo}">
+        <xacro:inertial_props name="${name}" />
+      </xacro:if>
     </link>
     <!-- sub-link defining coarse geometries of real robot's internal self-collision -->
     <link name="${prefix}${name}_sc">
-      <xacro:unless value="$(arg gazebo)">
+      <xacro:unless value="${gazebo}">
         <xacro:insert_block name="self_collision_geometries" />
       </xacro:unless>
     </link>

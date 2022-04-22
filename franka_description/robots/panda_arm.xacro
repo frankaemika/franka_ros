@@ -5,7 +5,7 @@
 
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
   <!-- arm_id: Namespace of the panda arm. Serves to differentiate between arms in case of multiple instances. -->
-  <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' safety_distance:=0">
+  <xacro:macro name="panda_arm" params="arm_id:='panda' description_pkg:='franka_description' connected_to:='' xyz:='0 0 0' rpy:='0 0 0' gazebo:=false safety_distance:=0">
     <xacro:unless value="${not connected_to}">
       <joint name="${arm_id}_joint_${connected_to}" type="fixed">
         <parent link="${connected_to}"/>
@@ -14,13 +14,13 @@
       </joint>
     </xacro:unless>
 
-    <xacro:link_with_sc name="link0">
+    <xacro:link_with_sc name="link0" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="-0.075 0 0.06" direction="x" radius="${0.06+safety_distance}" length="0.03" />
       </self_collision_geometries>
     </xacro:link_with_sc>
 
-    <xacro:link_with_sc name="link1">
+    <xacro:link_with_sc name="link1" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -191.5e-3" radius="${0.06+safety_distance}" length="0.283" />
       </self_collision_geometries>
@@ -36,7 +36,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link2">
+    <xacro:link_with_sc name="link2" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0" radius="${0.06+safety_distance}" length="0.12" />
       </self_collision_geometries>
@@ -52,7 +52,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link3">
+    <xacro:link_with_sc name="link3" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.145" radius="${0.06+safety_distance}" length="0.15" />
       </self_collision_geometries>
@@ -68,7 +68,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link4">
+    <xacro:link_with_sc name="link4" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0" radius="${0.06+safety_distance}" length="0.12" />
      </self_collision_geometries>
@@ -84,7 +84,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link5">
+    <xacro:link_with_sc name="link5" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.26"    radius="${0.060+safety_distance}" length="0.10" />
         <xacro:collision_capsule xyz="0 0.08 -0.13" radius="${0.025+safety_distance}" length="0.14" />
@@ -101,7 +101,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link6">
+    <xacro:link_with_sc name="link6" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 -0.03" radius="${0.05+safety_distance}" length="0.08" />
       </self_collision_geometries>
@@ -117,7 +117,7 @@
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
-    <xacro:link_with_sc name="link7" rpy="0 0 ${pi/4}">
+    <xacro:link_with_sc name="link7" gazebo="${gazebo}" rpy="0 0 ${pi/4}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0.01" direction="z" radius="${0.04+safety_distance}" length="0.14" />
         <xacro:collision_capsule xyz="0.06 0 0.082" direction="x" radius="${0.03+safety_distance}"  length="0.01" />
