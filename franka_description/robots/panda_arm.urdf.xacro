@@ -8,9 +8,6 @@
   <!-- Is the robot being simulated in gazebo?" -->
   <xacro:arg name="gazebo" default="false" />
 
-  <!-- Load interial properties. Property is implicitly passed to macros. -->
-  <xacro:property name="inertial" value="${xacro.load_yaml('inertial.yaml')}" />
-
   <xacro:include filename="utils.xacro" />
   <xacro:include filename="panda_arm.xacro" />
 

@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Load interial properties. Property is implicitly passed to macros. -->
+  <xacro:property name="inertial" value="${xacro.load_yaml('inertial.yaml')}" />
+
   <!-- ============================================================== -->
   <!-- Macro to add an <interial> tag based on yaml-load properties   -->
   <!--                                                                -->
