@@ -13,3 +13,4 @@ install(DIRECTORY robots
 
 catkin_add_nosetests(test/panda_arm_urdf.py)
 catkin_add_nosetests(test/hand_urdf.py)
+catkin_add_nosetests(test/dual_panda_example_urdf.py)
