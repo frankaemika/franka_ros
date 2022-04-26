@@ -55,6 +55,22 @@ class TestPandaArmURDF(UrdfTestCase):
                     "Link '%s' is expected to define only a capsule <collision> geometry (made from Cylinders and Spheres, not '%s')" % (name, geometry.__class__.__name__)
                 )
 
+    def test_generate_urdf_without_xacro_args_doesnt_insert_inertial_tags_for_any_link(self):
+        urdf = self.xacro(file)
+        for name, link in urdf.link_map.items():
+            self.assertIsNone(
+                link.inertial,
+                "Link '%s' is expected to have no <inertial> defined but actually has one:\n%s" % (name, link.inertial)
+            )
+
+    def test_generate_urdf_with_hand_but_not_gazebo_doesnt_insert_inertial_tags_for_any_link(self):
+        urdf = self.xacro(file, args='hand:=true')
+        for name, link in urdf.link_map.items():
+            self.assertIsNone(
+                link.inertial,
+                "Link '%s' is expected to have no <inertial> defined but actually has one:\n%s" % (name, link.inertial)
+            )
+
     def test_custom_arm_id_renames_links(self):
         arm_id = 'foo'
         urdf = self.xacro(file, args='arm_id:=%s' % arm_id)
