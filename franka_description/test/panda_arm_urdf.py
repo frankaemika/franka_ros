@@ -176,6 +176,16 @@ class TestPandaArmURDF(UrdfTestCase):
                 "Link '%s' is expected to have no <collision> tags defined but has %s" % (name, len(link.collisions))
             )
 
+    def test_setting_gazebo_arg_with_hand_forces_to_have_no_geometries_inside_sc_links(self):
+        urdf = self.xacro(file, args='gazebo:=true hand:=true')
+        for name, link in urdf.link_map.items():
+            if not name.endswith('_sc'): continue
+            self.assertEqual(
+                len(link.collisions), 0,
+                "Link '%s' is expected to have no <collision> tags defined but has %s" % (name, len(link.collisions))
+            )
+
+
 
 if __name__ == '__main__':
     import rosunit

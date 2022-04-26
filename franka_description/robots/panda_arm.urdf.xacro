@@ -15,7 +15,7 @@
 
   <xacro:if value="$(arg hand)">
     <xacro:include filename="hand.xacro"/>
-    <xacro:hand arm_id="$(arg arm_id)" rpy="0 0 ${-pi/4}" connected_to="$(arg arm_id)_link8" safety_distance="0.03"/>
+    <xacro:hand arm_id="$(arg arm_id)" rpy="0 0 ${-pi/4}" connected_to="$(arg arm_id)_link8" safety_distance="0.03" gazebo="$(arg gazebo)"/>
   </xacro:if>
 
   <!-- Define additional Gazebo tags -->
