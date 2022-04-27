@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
-  <xacro:macro name="hand" params="connected_to:='' arm_id:='panda' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 description_pkg:=franka_description">
+  <xacro:macro name="hand" params="connected_to:='' arm_id:='panda' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 gazebo:=false description_pkg:=franka_description">
     <xacro:unless value="${connected_to == ''}">
       <joint name="${arm_id}_hand_joint" type="fixed">
         <parent link="${connected_to}" />
@@ -10,7 +10,7 @@
       </joint>
     </xacro:unless>
 
-    <xacro:link_with_sc name="hand">
+    <xacro:link_with_sc name="hand" gazebo="${gazebo}">
       <self_collision_geometries>
         <xacro:collision_capsule xyz="0 0 0.04" direction="y" radius="${0.04+safety_distance}" length="0.1" />
         <xacro:collision_capsule xyz="0 0 0.10" direction="y" radius="${0.02+safety_distance}" length="0.1" />
@@ -58,7 +58,9 @@
           <box size="17.5e-3 15.2e-3 18.5e-3" />
         </geometry>
       </collision>
-      <xacro:inertial_props name="leftfinger" />
+      <xacro:if value="${gazebo}">
+        <xacro:inertial_props name="leftfinger" />
+      </xacro:if>
     </link>
     <link name="${arm_id}_rightfinger">
       <visual>
@@ -95,7 +97,9 @@
           <box size="17.5e-3 15.2e-3 18.5e-3" />
         </geometry>
       </collision>
-      <xacro:inertial_props name="rightfinger" />
+      <xacro:if value="${gazebo}">
+        <xacro:inertial_props name="rightfinger" />
+      </xacro:if>
     </link>
     <joint name="${arm_id}_finger_joint1" type="prismatic">
       <parent link="${arm_id}_hand" />
