@@ -21,7 +21,6 @@ using Vector7d = Eigen::Matrix<double, 7, 1>;
 const std::string kControllerName = "TeleopJointPDExampleController";
 
 namespace franka_example_controllers {
-
 bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
   std::string leader_arm_id;
@@ -63,7 +62,6 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     // Init for each arm
     initArm(robot_hw, node_handle, leader_data_, leader_arm_id, leader_joint_names);
     initArm(robot_hw, node_handle, follower_data_, follower_arm_id, follower_joint_names);
-
   } catch (const std::invalid_argument& ex) {
     ROS_ERROR_NAMED(kControllerName, "%s", ex.what());
     return false;
@@ -93,6 +91,42 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
     init_publisher(follower_target_pub_, "follower_target");
     leader_contact_pub_.init(node_handle, "leader_contact", 1);
     follower_contact_pub_.init(node_handle, "follower_contact", 1);
+    marker_pub_.init(node_handle, "marker_labels", 1, true);
+
+    auto get_marker = [](const std::string& arm_id, int32_t id, const std::string& text) {
+      visualization_msgs::Marker marker;
+      marker.header.frame_id = "/" + arm_id + "_link0";
+      marker.header.stamp = ros::Time::now();
+      marker.ns = "basic_shapes";
+      marker.id = id;
+      marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+      marker.action = visualization_msgs::Marker::ADD;
+
+      marker.pose.position.x = 0.0;
+      marker.pose.position.y = 0.0;
+      marker.pose.position.z = 1.0;
+      marker.pose.orientation.x = 0.0;
+      marker.pose.orientation.y = 0.0;
+      marker.pose.orientation.z = 0.0;
+      marker.pose.orientation.w = 1.0;
+
+      marker.text = text;
+
+      marker.scale.x = 0.3;
+      marker.scale.y = 0.3;
+      marker.scale.z = 0.1;
+
+      marker.color.r = 0.0f;
+      marker.color.g = 1.0f;
+      marker.color.b = 0.0f;
+      marker.color.a = 1.0;
+      return marker;
+    };
+
+    marker_pub_.lock();
+    marker_pub_.msg_.markers.push_back(get_marker(leader_arm_id, 1, "leader"));
+    marker_pub_.msg_.markers.push_back(get_marker(follower_arm_id, 2, "follower"));
+    marker_pub_.unlockAndPublish();
   }
 
   return true;
@@ -169,6 +203,9 @@ void TeleopJointPDExampleController::starting(const ros::Time& /*time*/) {
   franka::RobotState leader_robot_state = leader_data_.state_handle->getRobotState();
   init_leader_q_ = Eigen::Map<Vector7d>(leader_robot_state.q.data());
   current_state_ = TeleopStateMachine::ALIGN;
+  if (debug_) {
+    publishMarkers();
+  }
 }
 
 void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
@@ -265,7 +302,6 @@ void TeleopJointPDExampleController::update(const ros::Time& /*time*/,
         follower_stiffness_scaling_ * k_p_follower_.asDiagonal() * (q_target_ - follower_data_.q) +
         sqrt(follower_stiffness_scaling_) * k_d_follower_.asDiagonal() *
             (dq_target_ - follower_data_.dq);
-
   } else {
     // Control target torques to zero if any arm is in error state.
     leader_data_.tau_target = decrease_factor_ * leader_data_.tau_target_last;
@@ -416,7 +452,6 @@ void TeleopJointPDExampleController::getJointLimits(ros::NodeHandle& nh,
     if (joint_limits_interface::getSoftJointLimits(urdf_joint, soft_limits)) {
       upper_joint_soft_limit[i] = soft_limits.max_position;
       lower_joint_soft_limit[i] = soft_limits.min_position;
-
     } else {
       ROS_ERROR_STREAM_NAMED(kControllerName, ": Could not parse joint limit for joint "
                                                   << joint_name << " for joint limit interfaces");
@@ -485,6 +520,11 @@ Vector7d TeleopJointPDExampleController::leaderDamping(const Vector7d& dq) {
                      (k_d_leader_upper_(i) - k_d_leader_lower_(i));
   }
   return damping;
+}
+
+void TeleopJointPDExampleController::publishMarkers() {
+  marker_pub_.lock();
+  marker_pub_.unlockAndPublish();
 }
 
 }  // namespace franka_example_controllers
