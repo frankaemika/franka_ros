@@ -15,16 +15,21 @@
 
   <include file="$(find franka_control)/launch/franka_combined_control.launch" >
     <arg name="robot_id" value="$(arg robot_id)" />
-    <arg name="robot_ips" value="{panda_1/robot_ip: $(arg leader_ip), panda_2/robot_ip: $(arg follower_ip)}" />
+    <arg name="robot_ips" value="{leader/robot_ip: $(arg leader_ip), follower/robot_ip: $(arg follower_ip)}" />
     <arg name="hw_config_file" value="$(find franka_example_controllers)/config/teleop_joint_pd_example_control_node.yaml" />
+    <arg name="robot" value="$(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+    <arg name="args" value="arm_id1:=leader arm_id2:=follower" />
+    <arg name="controllers_file" value="$(find franka_example_controllers)/config/teleop_state_controllers.yaml" />
+    <arg name="controllers_to_start" value="leader_state_controller follower_state_controller" />
+    <arg name="joint_states_source_list" value="[leader_state_controller/joint_states, follower_state_controller/joint_states, leader/franka_gripper/joint_states, follower/franka_gripper/joint_states]" />
   </include>
 
   <group ns="$(arg robot_id)">
     <include file="$(find franka_example_controllers)/launch/teleop_gripper.launch" if="$(arg load_gripper)">
       <arg name="leader_ip" value="$(arg leader_ip)" />
       <arg name="follower_ip" value="$(arg follower_ip)" />
-      <arg name="leader_id" value="panda_1" />
-      <arg name="follower_id" value="panda_2" />
+      <arg name="leader_id" value="leader" />
+      <arg name="follower_id" value="follower" />
       <arg name="gripper_homed" value="$(arg gripper_homed)" />
     </include>
 
