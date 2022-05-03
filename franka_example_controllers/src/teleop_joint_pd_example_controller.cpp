@@ -21,6 +21,7 @@ using Vector7d = Eigen::Matrix<double, 7, 1>;
 const std::string kControllerName = "TeleopJointPDExampleController";
 
 namespace franka_example_controllers {
+
 bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
                                           ros::NodeHandle& node_handle) {
   std::string leader_arm_id;
