@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="leader_ip" doc="left robot from user persepective for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
-  <arg name="follower_ip" doc="right robot from user persepective for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+  <arg name="leader_ip" doc="left robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+  <arg name="follower_ip" doc="right robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
 
   <arg name="robot_id" default="panda_teleop" doc="name of the 2-arm robot" />
   <arg name="debug" default="false" doc="publish debug information and enable dynamic parameter tuning" />

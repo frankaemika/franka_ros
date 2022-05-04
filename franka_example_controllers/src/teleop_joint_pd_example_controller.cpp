@@ -96,7 +96,7 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
 
     auto get_marker = [](const std::string& arm_id, int32_t id, const std::string& text) {
       visualization_msgs::Marker marker;
-      marker.header.frame_id = "/" + arm_id + "_link0";
+      marker.header.frame_id = arm_id + "_link0";
       marker.header.stamp = ros::Time::now();
       marker.ns = "basic_shapes";
       marker.id = id;
@@ -124,10 +124,13 @@ bool TeleopJointPDExampleController::init(hardware_interface::RobotHW* robot_hw,
       return marker;
     };
 
-    marker_pub_.lock();
-    marker_pub_.msg_.markers.push_back(get_marker(leader_arm_id, 1, "leader"));
-    marker_pub_.msg_.markers.push_back(get_marker(follower_arm_id, 2, "follower"));
-    marker_pub_.unlockAndPublish();
+    {
+      std::lock_guard<realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray>> lock(
+          marker_pub_);
+      marker_pub_.msg_.markers.push_back(get_marker(leader_arm_id, 1, "leader"));
+      marker_pub_.msg_.markers.push_back(get_marker(follower_arm_id, 2, "follower"));
+    }
+    publishMarkers();
   }
 
   return true;
