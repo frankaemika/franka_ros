@@ -27,7 +27,7 @@ def main():
             break
 
     rospy.loginfo('Waking up. Spawning controller...')
-    node = roslaunch.core.Node(package, node_type, name=node_type, args=args)
+    node = roslaunch.core.Node(package, node_type, name=node_type, namespace=rospy.get_namespace(), args=args)
     launch = roslaunch.scriptapi.ROSLaunch()
     launch.start()
     launch.launch(node)
