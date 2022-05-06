@@ -16,6 +16,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include <Eigen/Dense>
 #include <memory>
@@ -23,7 +24,6 @@
 #include <vector>
 
 namespace franka_example_controllers {
-
 /**
  * Finite state machine that defines the states of the teleoperation phases.
  * ALIGN is the initial phase, when the leader and follower align. During this phase the leader
@@ -211,10 +211,12 @@ class TeleopJointPDExampleController : public controller_interface::MultiInterfa
   realtime_tools::RealtimePublisher<sensor_msgs::JointState> follower_target_pub_;
   realtime_tools::RealtimePublisher<std_msgs::Float64> leader_contact_pub_;
   realtime_tools::RealtimePublisher<std_msgs::Float64> follower_contact_pub_;
+  realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray> marker_pub_;
 
   void publishLeaderTarget();
   void publishFollowerTarget();
   void publishLeaderContact();
   void publishFollowerContact();
+  void publishMarkers();
 };
 }  // namespace franka_example_controllers

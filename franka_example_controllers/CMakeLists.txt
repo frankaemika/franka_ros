@@ -22,6 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   urdf
+  visualization_msgs
 )
 
 find_package(Eigen3 REQUIRED)
@@ -63,6 +64,7 @@ catkin_package(
     realtime_tools
     roscpp
     urdf
+    visualization_msgs
   DEPENDS Franka
 )
 

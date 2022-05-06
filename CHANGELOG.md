@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 0.X.Y - UNRELEASED
-
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example. 
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
   * `franka_control`: Configurable `arm_id` in launch & config files

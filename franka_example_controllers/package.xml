@@ -33,6 +33,7 @@
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>
   <depend>urdf</depend>
+  <depend>visualization_msgs</depend>
 
   <exec_depend>franka_control</exec_depend>
   <exec_depend>franka_description</exec_depend>
@@ -42,6 +43,6 @@
   <exec_depend>rospy</exec_depend>
 
   <export>
-    <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml"/>
+    <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml" />
   </export>
 </package>

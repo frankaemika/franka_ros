@@ -1,18 +1,18 @@
 robot_hardware:
-  - panda_1
-  - panda_2
+  - leader
+  - follower
 
-panda_1:
+leader:
   type: franka_hw/FrankaCombinableHW
-  arm_id: panda_1
+  arm_id: leader
   joint_names:
-    - panda_1_joint1
-    - panda_1_joint2
-    - panda_1_joint3
-    - panda_1_joint4
-    - panda_1_joint5
-    - panda_1_joint6
-    - panda_1_joint7
+    - leader_joint1
+    - leader_joint2
+    - leader_joint3
+    - leader_joint4
+    - leader_joint5
+    - leader_joint6
+    - leader_joint7
   # Configure the threshold angle for printing joint limit warnings.
   joint_limit_warning_threshold: 0.1 # [rad]
   # Activate rate limiter? [true|false]
@@ -35,17 +35,17 @@ panda_1:
     lower_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
     upper_force_thresholds_nominal:   [40.0, 40.0, 40.0, 40.0, 40.0, 40.0] # [N, N, N, Nm, Nm, Nm]
 
-panda_2:
+follower:
   type: franka_hw/FrankaCombinableHW
-  arm_id: panda_2
+  arm_id: follower
   joint_names:
-    - panda_2_joint1
-    - panda_2_joint2
-    - panda_2_joint3
-    - panda_2_joint4
-    - panda_2_joint5
-    - panda_2_joint6
-    - panda_2_joint7
+    - follower_joint1
+    - follower_joint2
+    - follower_joint3
+    - follower_joint4
+    - follower_joint5
+    - follower_joint6
+    - follower_joint7
   # Configure the threshold angle for printing joint limit warnings.
   joint_limit_warning_threshold: 0.1 # [rad]
   # Activate rate limiter? [true|false]
