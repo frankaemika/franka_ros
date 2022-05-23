@@ -140,6 +140,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   double tau_ext_lowpass_filter_;
 
+  ros::Publisher robot_initialized_pub_;
   ros::ServiceServer service_set_ee_;
   ros::ServiceServer service_set_k_;
   ros::ServiceServer service_set_load_;

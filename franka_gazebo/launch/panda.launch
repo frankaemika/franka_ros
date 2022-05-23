@@ -71,11 +71,11 @@
   />
 
   <!-- spawns the controller after the robot was put into its initial joint pose -->
-  <node pkg="franka_gazebo"
-        type="delayed_controller_spawner.py"
+  <node pkg="controller_manager"
+        type="spawner"
         name="$(arg arm_id)_controller_spawner"
         respawn="false" output="screen"
-        args="franka_state_controller $(arg controller)"
+        args="--wait-for initialized franka_state_controller $(arg controller)"
   />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />

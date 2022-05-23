@@ -9,6 +9,7 @@
   * `franka_description`: Unit test suite for URDFs
   * `franka_gazebo`: Fix motion generator config respects `arm_id`
   *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
+  * `franka_gazebo`: Drop `delayed_controller_spawner.py` script in favor of `--wait-for TOPIC` flag from controller_manager
 
 ## 0.9.0 - 2022-03-29
 
