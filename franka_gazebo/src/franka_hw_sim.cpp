@@ -11,6 +11,7 @@
 #include <franka_msgs/SetLoad.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
+#include <std_msgs/Bool.h>
 #include <Eigen/Dense>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/optional.hpp>
@@ -36,6 +37,12 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   this->robot_ = parent;
   this->robot_initialized_ = false;
+
+  this->robot_initialized_pub_ = model_nh.advertise<std_msgs::Bool>("initialized", 1);
+  std_msgs::Bool msg;
+  msg.data = static_cast<decltype(msg.data)>(false);
+  ;
+  this->robot_initialized_pub_.publish(msg);
 
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -630,7 +637,10 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.O_ddP_O = this->gravity_earth_;
 #endif
 
+  std_msgs::Bool msg;
+  msg.data = static_cast<decltype(msg.data)>(true);
   this->robot_initialized_ = true;
+  this->robot_initialized_pub_.publish(msg);
 }
 
 bool FrankaHWSim::prepareSwitch(
