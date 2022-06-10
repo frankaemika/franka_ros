@@ -2,8 +2,8 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- Load interial properties. Property is implicitly passed to macros. -->
-  <xacro:property name="interial_config" value="$(find franka_description)/robots/inertial.yaml"/>
-  <xacro:property name="inertial" value="${xacro.load_yaml(interial_config)}"/>
+  <xacro:property name="inertial_config" value="$(find franka_description)/robots/inertial.yaml"/>
+  <xacro:property name="inertial" value="${xacro.load_yaml(inertial_config)}"/>
 
   <!-- ============================================================== -->
   <!-- Macro to add an <interial> tag based on yaml-load properties   -->
