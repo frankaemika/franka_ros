@@ -464,9 +464,9 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
         "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
 
     this->lower_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
-        "lower_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+        "lower_force_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
     this->upper_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
-        "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+        "upper_force_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
 
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
