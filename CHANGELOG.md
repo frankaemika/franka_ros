@@ -9,6 +9,8 @@
   * `franka_description`: Unit test suite for URDFs
   * `franka_description`: Make `util.xacro` be includable from other packages
   * `franka_description`: Add `tcp_xyz` & `tcp_rpy` offsets to specify a custom TCP for MoveIT's `$(arm_id)_manipulator` move group
+  * `franka_control`: `franka_control.launch` accepts `xacro_args` to pass down additional arguments to URDF
+  * `franka_gazebo`: `panda.launch` accepts `xacro_args` to pass down additional arguments to URDF
   * `franka_gazebo`: Fix motion generator config respects `arm_id`
   *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
   * `franka_gazebo`: Drop `delayed_controller_spawner.py` script in favor of `--wait-for TOPIC` flag from controller_manager
