@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hand">
   <!-- safety_distance: Minimum safety distance in [m] by which the collision volumes are expanded and which is enforced during robot motions -->
-  <xacro:macro name="hand" params="connected_to:='' arm_id:='panda' rpy:='0 0 0' xyz:='0 0 0' safety_distance:=0 gazebo:=false description_pkg:=franka_description">
+  <xacro:macro name="hand" params="connected_to:='' arm_id:='panda' rpy:='0 0 0' xyz:='0 0 0' tcp_xyz:='0 0 0.1034' tcp_rpy:='0 0 0' safety_distance:=0 gazebo:=false description_pkg:=franka_description">
     <xacro:unless value="${connected_to == ''}">
       <joint name="${arm_id}_hand_joint" type="fixed">
         <parent link="${connected_to}" />
@@ -20,7 +20,7 @@
     <!-- Define the hand_tcp frame -->
     <link name="${arm_id}_hand_tcp" />
     <joint name="${arm_id}_hand_tcp_joint" type="fixed">
-      <origin xyz="0 0 0.1034" rpy="0 0 0" />
+      <origin xyz="${tcp_xyz}" rpy="${tcp_rpy}" />
       <parent link="${arm_id}_hand" />
       <child link="${arm_id}_hand_tcp" />
     </joint>

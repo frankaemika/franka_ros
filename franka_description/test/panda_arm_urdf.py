@@ -201,6 +201,21 @@ class TestPandaArmURDF(UrdfTestCase):
                 "Link '%s' is expected to have no <collision> tags defined but has %s" % (name, len(link.collisions))
             )
 
+    def test_generate_urdf_without_tcp_args_uses_default_10_34_cm_hand_tcp_offset(self):
+        urdf = self.xacro(file, args='hand:=true')
+        joint = urdf.joint_map['panda_hand_tcp_joint']
+        self.assertListEqual(joint.origin.xyz, [0, 0, 0.1034])
+        self.assertListEqual(joint.origin.rpy, [0, 0, 0])
+
+    def test_setting_tcp_xyz_arg_moves_the_hand_tcp_link(self):
+        urdf = self.xacro(file, args='hand:=true tcp_xyz:="1 2 3"')
+        joint = urdf.joint_map['panda_hand_tcp_joint']
+        self.assertListEqual(joint.origin.xyz, [1, 2, 3])
+
+    def test_setting_tcp_rpy_arg_rotates_the_hand_tcp_link(self):
+        urdf = self.xacro(file, args='hand:=true tcp_rpy:="3.1415 0.123 42"')
+        joint = urdf.joint_map['panda_hand_tcp_joint']
+        self.assertListEqual(joint.origin.rpy, [3.1415, 0.123, 42])
 
 
 if __name__ == '__main__':
