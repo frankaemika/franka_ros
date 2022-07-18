@@ -232,6 +232,9 @@ void FrankaHWSim::initFrankaStateHandle(
         " joints were found beneath the <transmission> tag, but 7 are required.");
   }
 
+  // Initialize robot_mode to "Idle". Once a controller is started, we will switch to "Move"
+  this->robot_state_.robot_mode = franka::RobotMode::kIdle;
+
   // Check if all joints defined in the <transmission> actually exist in the URDF
   for (const auto& joint : transmission.joints_) {
     if (not urdf.getJoint(joint.name_)) {
