@@ -3,6 +3,7 @@
 #include <franka/robot_state.h>
 #include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
+#include <franka_gazebo/statemachine.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/model_base.h>
@@ -14,11 +15,13 @@
 #include <ros/ros.h>
 #include <urdf/model.h>
 #include <boost/optional.hpp>
+#include <boost_sml/sml.hpp>
 #include <cmath>
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace franka_gazebo {
 
@@ -44,6 +47,11 @@ const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of 
  */
 class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
  public:
+  /**
+   * Create a new FrankaHWSim instance
+   */
+  FrankaHWSim();
+
   /**
    * Initialize the simulated robot hardware and parse all supported transmissions.
    *
@@ -131,6 +139,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   franka_hw::FrankaStateInterface fsi_;
   franka_hw::FrankaModelInterface fmi_;
 
+  boost::sml::sm<franka_gazebo::StateMachine, boost::sml::thread_safe<std::mutex>> sm_;
   franka::RobotState robot_state_;
   std::unique_ptr<franka_hw::ModelBase> model_;
 

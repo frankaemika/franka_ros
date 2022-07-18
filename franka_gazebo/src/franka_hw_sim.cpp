@@ -21,6 +21,10 @@
 
 namespace franka_gazebo {
 
+using boost::sml::state;
+
+FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_) {}
+
 bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           ros::NodeHandle model_nh,
                           gazebo::physics::ModelPtr parent,
