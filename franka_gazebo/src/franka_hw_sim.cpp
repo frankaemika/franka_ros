@@ -134,20 +134,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
         if (k_interface == "hardware_interface/PositionJointInterface") {
           // Initiate position motion generator (PID controller)
-          control_toolbox::Pid pid;
-          pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
-          this->position_pid_controllers_.emplace(joint->name, pid);
-
+          joint->position_controller.initParam(robot_namespace +
+                                               "/motion_generators/position/gains/" + joint->name);
           initPositionCommandHandle(joint);
           continue;
         }
         if (k_interface == "hardware_interface/VelocityJointInterface") {
           // Initiate velocity motion generator (PID controller)
-          control_toolbox::Pid pid_velocity;
-          pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" +
-                                 joint->name);
-          this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
-
+          joint->velocity_controller.initParam(robot_namespace +
+                                               "/motion_generators/velocity/gains/" + joint->name);
           initVelocityCommandHandle(joint);
           continue;
         }
@@ -403,17 +398,15 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
       }
 
       const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(
-                   position_pid_controllers_[joint->name].computeCommand(error, period),
-                   -kEffortLimit, kEffortLimit) +
+      effort = boost::algorithm::clamp(joint->position_controller.computeCommand(error, period),
+                                       -kEffortLimit, kEffortLimit) +
                joint->gravity;
     } else if (control_method == VELOCITY) {
       // Use velocity motion generator
       const double kError = joint->desired_velocity - joint->velocity;
       const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(
-                   velocity_pid_controllers_[joint->name].computeCommand(kError, period),
-                   -kEffortLimit, kEffortLimit) +
+      effort = boost::algorithm::clamp(joint->velocity_controller.computeCommand(kError, period),
+                                       -kEffortLimit, kEffortLimit) +
                joint->gravity;
     }
 

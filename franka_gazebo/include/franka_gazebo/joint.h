@@ -1,6 +1,7 @@
 #pragma once
 
 #include <angles/angles.h>
+#include <control_toolbox/pid.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
@@ -111,6 +112,14 @@ struct Joint {
    * @return `true` if @ref effort > @ref collision_threshold
    */
   bool isInCollision() const;
+
+  /// The PID gains used for the controller, when in "position" control mode. In other modes these
+  /// gains are ignored.
+  control_toolbox::Pid position_controller;
+
+  /// The PID gains used for the controller, when in "velocity" control mode. In other modes these
+  /// gains are ignored.
+  control_toolbox::Pid velocity_controller;
 
  private:
   double lastVelocity = std::numeric_limits<double>::quiet_NaN();

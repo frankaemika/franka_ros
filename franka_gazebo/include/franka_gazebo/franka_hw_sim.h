@@ -1,6 +1,5 @@
 #pragma once
 
-#include <control_toolbox/pid.h>
 #include <franka/robot_state.h>
 #include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
@@ -124,9 +123,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   std::string arm_id_;
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
-
-  std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
-  std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
 
   hardware_interface::JointStateInterface jsi_;
   hardware_interface::EffortJointInterface eji_;
