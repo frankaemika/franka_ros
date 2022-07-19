@@ -394,9 +394,13 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
           angles::shortest_angular_distance_with_limits(joint->position, setpoint, kJointLowerLimit,
                                                         kJointUpperLimit, error);
           break;
+        case urdf::Joint::PRISMATIC:
+          error = boost::algorithm::clamp(setpoint - joint->position, kJointLowerLimit,
+                                          kJointUpperLimit);
+          break;
         default:
           std::string error_message =
-              "Only revolute joints are allowed for position control right now";
+              "Only revolute or prismatic joints are allowed for position control right now";
           ROS_FATAL("%s", error_message.c_str());
           throw std::invalid_argument(error_message);
       }
