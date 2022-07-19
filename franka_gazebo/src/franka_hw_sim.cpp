@@ -12,6 +12,7 @@
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
 #include <std_msgs/Bool.h>
+#include <std_srvs/SetBool.h>
 #include <Eigen/Dense>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/optional.hpp>
@@ -359,6 +360,13 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             response.success = true;
             return true;
           });
+  this->service_user_stop_ =
+      nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
+          "set_user_stop", [&](auto& request, auto& response) {
+            this->sm_.process_event(UserStop{request.data});
+            response.success = true;
+            return true;
+          });
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
@@ -668,6 +676,25 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
     joint.desired_position = joint.position;
     joint.desired_velocity = 0;
   });
+
+  auto contains = [&](const auto& haystack, const auto& needle) {
+    return haystack.find(needle) != std::string::npos;
+  };
+
+  bool is_any_arm_joint_controlled = false;
+  for (auto& joint : joints_) {
+    if (contains(joint.first, "_finger_joint")) {
+      continue;
+    }
+    is_any_arm_joint_controlled |= joint.second->control_method != boost::none;
+  }
+  if (is_any_arm_joint_controlled) {
+    ROS_INFO("Starting control");
+    this->sm_.process_event(StartControl());
+  } else {
+    ROS_INFO("Stopping control");
+    this->sm_.process_event(StopControl());
+  }
 }
 
 void FrankaHWSim::forControlledJoint(
