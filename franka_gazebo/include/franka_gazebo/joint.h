@@ -5,6 +5,7 @@
 #include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <boost/optional.hpp>
 #include <gazebo/physics/Joint.hh>
 
 namespace franka_gazebo {
@@ -65,8 +66,8 @@ struct Joint {
   double desired_velocity = 0;
 
   /// Decides whether the joint is doing torque control or if the position or velocity should
-  /// be controlled.
-  ControlMethod control_method = POSITION;
+  /// be controlled, or if the joint is entirely uncontrolled
+  boost::optional<ControlMethod> control_method = boost::none;
 
   /// The currently acting gravity force or torque acting on this joint in \f$N\f$ or \f$Nm\f$
   double gravity = 0;
@@ -95,6 +96,8 @@ struct Joint {
   /// isInCollision
   double collision_threshold = std::numeric_limits<double>::infinity();
 
+  /// Position used as desired position if `control_method` is none
+  double stop_position = 0;
   /**
    * Get the total link mass of this joint's child
    * @return the mass in \f$kg\f$

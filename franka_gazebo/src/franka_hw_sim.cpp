@@ -45,7 +45,6 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   this->robot_initialized_pub_ = model_nh.advertise<std_msgs::Bool>("initialized", 1);
   std_msgs::Bool msg;
   msg.data = static_cast<decltype(msg.data)>(false);
-  ;
   this->robot_initialized_pub_.publish(msg);
 
 #if GAZEBO_MAJOR_VERSION >= 8
@@ -384,18 +383,16 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
       joint->gravity = g.at(i);
     }
-    auto& control_method = joint->control_method;
-    if (control_method == EFFORT) {
-      effort = joint->command + joint->gravity;
-    } else if (control_method == POSITION) {
+    if (not joint->control_method or joint->control_method == POSITION) {
       // Use position motion generator
       double error;
+      double setpoint = joint->control_method ? joint->desired_position : joint->stop_position;
       const double kJointLowerLimit = joint->limits.min_position;
       const double kJointUpperLimit = joint->limits.max_position;
       switch (joint->type) {
         case urdf::Joint::REVOLUTE:
-          angles::shortest_angular_distance_with_limits(joint->position, joint->desired_position,
-                                                        kJointLowerLimit, kJointUpperLimit, error);
+          angles::shortest_angular_distance_with_limits(joint->position, setpoint, kJointLowerLimit,
+                                                        kJointUpperLimit, error);
           break;
         default:
           std::string error_message =
@@ -408,13 +405,15 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
       effort = boost::algorithm::clamp(joint->position_controller.computeCommand(error, period),
                                        -kEffortLimit, kEffortLimit) +
                joint->gravity;
-    } else if (control_method == VELOCITY) {
+    } else if (joint->control_method == VELOCITY) {
       // Use velocity motion generator
       const double kError = joint->desired_velocity - joint->velocity;
       const double kEffortLimit = joint->limits.max_effort;
       effort = boost::algorithm::clamp(joint->velocity_controller.computeCommand(kError, period),
                                        -kEffortLimit, kEffortLimit) +
                joint->gravity;
+    } else if (joint->control_method == EFFORT) {
+      effort = joint->command + joint->gravity;
     }
 
     // Send control effort control command
@@ -588,7 +587,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
     // first time initialization of the desired position
     if (not this->robot_initialized_) {
-      joint->desired_position = joint->position;
+      joint->stop_position = joint->position;
     }
 
     if (this->robot_initialized_) {
@@ -653,8 +652,9 @@ bool FrankaHWSim::prepareSwitch(
 
 void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                            const std::list<hardware_interface::ControllerInfo>& stop_list) {
-  forControlledJoint(stop_list, [](franka_gazebo::Joint& joint, const ControlMethod& method) {
-    joint.control_method = POSITION;
+  forControlledJoint(stop_list, [](franka_gazebo::Joint& joint, const ControlMethod& /*method*/) {
+    joint.control_method = boost::none;
+    joint.stop_position = joint.position;
     joint.desired_position = joint.position;
     joint.desired_velocity = 0;
   });
