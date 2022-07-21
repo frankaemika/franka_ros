@@ -24,7 +24,7 @@ namespace franka_gazebo {
 
 using boost::sml::state;
 
-FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_) {}
+FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
 
 bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           ros::NodeHandle model_nh,
@@ -677,24 +677,7 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
     joint.desired_velocity = 0;
   });
 
-  auto contains = [&](const auto& haystack, const auto& needle) {
-    return haystack.find(needle) != std::string::npos;
-  };
-
-  bool is_any_arm_joint_controlled = false;
-  for (auto& joint : joints_) {
-    if (contains(joint.first, "_finger_joint")) {
-      continue;
-    }
-    is_any_arm_joint_controlled |= joint.second->control_method != boost::none;
-  }
-  if (is_any_arm_joint_controlled) {
-    ROS_INFO("Starting control");
-    this->sm_.process_event(StartControl());
-  } else {
-    ROS_INFO("Stopping control");
-    this->sm_.process_event(StopControl());
-  }
+  this->sm_.process_event(SwitchControl());
 }
 
 void FrankaHWSim::forControlledJoint(
