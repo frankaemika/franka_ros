@@ -377,6 +377,36 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   this->updateRobotState(time);
 }
 
+double FrankaHWSim::positionControl(Joint& joint, double setpoint, ros::Duration period) {
+  double error;
+  const double kJointLowerLimit = joint.limits.min_position;
+  const double kJointUpperLimit = joint.limits.max_position;
+  switch (joint.type) {
+    case urdf::Joint::REVOLUTE:
+      angles::shortest_angular_distance_with_limits(joint.position, setpoint, kJointLowerLimit,
+                                                    kJointUpperLimit, error);
+      break;
+    case urdf::Joint::PRISMATIC:
+      error =
+          boost::algorithm::clamp(setpoint - joint.position, kJointLowerLimit, kJointUpperLimit);
+      break;
+    default:
+      std::string error_message =
+          "Only revolute or prismatic joints are allowed for position control right now";
+      ROS_FATAL("%s", error_message.c_str());
+      throw std::invalid_argument(error_message);
+  }
+
+  return boost::algorithm::clamp(joint.position_controller.computeCommand(error, period),
+                                 -joint.limits.max_effort, joint.limits.max_effort);
+}
+
+double FrankaHWSim::velocityControl(Joint& joint, double setpoint, ros::Duration period) {
+  return boost::algorithm::clamp(
+      joint.velocity_controller.computeCommand(setpoint - joint.velocity, period),
+      -joint.limits.max_effort, joint.limits.max_effort);
+}
+
 void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
   auto g = this->model_->gravity(this->robot_state_, this->gravity_earth_);
 
@@ -385,48 +415,25 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
 
     // Retrieve effort control command
     double effort = 0;
+
+    if (not sm_.is(state<Move>)) {
+      effort = positionControl(*joint, joint->stop_position, period);
+    } else if (joint->control_method == POSITION) {
+      effort = positionControl(*joint, joint->desired_position, period);
+    } else if (joint->control_method == VELOCITY) {
+      velocityControl(*joint, joint->desired_velocity, period);
+    } else if (joint->control_method == EFFORT) {
+      // Feed-forward commands in effort control
+      effort = joint->command;
+    }
+
     // Check if this joint is affected by gravity compensation
     std::string prefix = this->arm_id_ + "_joint";
     if (pair.first.rfind(prefix, 0) != std::string::npos) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
       joint->gravity = g.at(i);
     }
-    if (not joint->control_method or joint->control_method == POSITION) {
-      // Use position motion generator
-      double error;
-      double setpoint = joint->control_method ? joint->desired_position : joint->stop_position;
-      const double kJointLowerLimit = joint->limits.min_position;
-      const double kJointUpperLimit = joint->limits.max_position;
-      switch (joint->type) {
-        case urdf::Joint::REVOLUTE:
-          angles::shortest_angular_distance_with_limits(joint->position, setpoint, kJointLowerLimit,
-                                                        kJointUpperLimit, error);
-          break;
-        case urdf::Joint::PRISMATIC:
-          error = boost::algorithm::clamp(setpoint - joint->position, kJointLowerLimit,
-                                          kJointUpperLimit);
-          break;
-        default:
-          std::string error_message =
-              "Only revolute or prismatic joints are allowed for position control right now";
-          ROS_FATAL("%s", error_message.c_str());
-          throw std::invalid_argument(error_message);
-      }
-
-      const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(joint->position_controller.computeCommand(error, period),
-                                       -kEffortLimit, kEffortLimit) +
-               joint->gravity;
-    } else if (joint->control_method == VELOCITY) {
-      // Use velocity motion generator
-      const double kError = joint->desired_velocity - joint->velocity;
-      const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(joint->velocity_controller.computeCommand(kError, period),
-                                       -kEffortLimit, kEffortLimit) +
-               joint->gravity;
-    } else if (joint->control_method == EFFORT) {
-      effort = joint->command + joint->gravity;
-    }
+    effort += joint->gravity;
 
     // Send control effort control command
     if (not std::isfinite(effort)) {
@@ -599,6 +606,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
 
     // first time initialization of the desired position
     if (not this->robot_initialized_) {
+      joint->desired_position = joint->position;
       joint->stop_position = joint->position;
     }
 
