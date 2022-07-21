@@ -1,5 +1,6 @@
 #pragma once
 
+#include <actionlib/server/simple_action_server.h>
 #include <franka/robot_state.h>
 #include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
@@ -7,6 +8,7 @@
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/model_base.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -151,6 +153,7 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   ros::ServiceServer service_set_load_;
   ros::ServiceServer service_collision_behavior_;
   ros::ServiceServer service_user_stop_;
+  std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>> action_recovery_;
 
   std::vector<double> lower_force_thresholds_nominal_;
   std::vector<double> upper_force_thresholds_nominal_;

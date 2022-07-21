@@ -22,6 +22,7 @@
 
 namespace franka_gazebo {
 
+using actionlib::SimpleActionServer;
 using boost::sml::state;
 
 FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
@@ -47,6 +48,16 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   std_msgs::Bool msg;
   msg.data = static_cast<decltype(msg.data)>(false);
   this->robot_initialized_pub_.publish(msg);
+
+  this->action_recovery_ = std::make_unique<SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
+      model_nh, "franka_control/error_recovery",
+      [&](const franka_msgs::ErrorRecoveryGoalConstPtr& goal) {
+        ROS_INFO_NAMED("franka_hw_sim", "Recovered from error");
+        this->sm_.process_event(ErrorRecovery());
+        this->action_recovery_->setSucceeded();
+      },
+      false);
+  this->action_recovery_->start();
 
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
