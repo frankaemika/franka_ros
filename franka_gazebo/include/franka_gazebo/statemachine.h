@@ -57,7 +57,6 @@ auto stop = [](franka::RobotState& state, JointMap& joints) {
   state.ddq_d = {0};
 
   for (auto& joint : joints) {
-    joint.second->control_method = boost::none;
     joint.second->stop_position = joint.second->position;
     joint.second->desired_position = joint.second->position;
     joint.second->desired_velocity = 0;
