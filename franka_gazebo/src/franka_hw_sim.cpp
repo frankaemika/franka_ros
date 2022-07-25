@@ -1,4 +1,6 @@
 #include <angles/angles.h>
+#include <controller_manager_msgs/ListControllers.h>
+#include <controller_manager_msgs/SwitchController.h>
 #include <franka/duration.h>
 #include <franka_example_controllers/pseudo_inversion.h>
 #include <franka_gazebo/franka_hw_sim.h>
@@ -52,9 +54,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   this->action_recovery_ = std::make_unique<SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
       model_nh, "franka_control/error_recovery",
       [&](const franka_msgs::ErrorRecoveryGoalConstPtr& goal) {
-        ROS_INFO_NAMED("franka_hw_sim", "Recovered from error");
-        this->sm_.process_event(ErrorRecovery());
-        this->action_recovery_->setSucceeded();
+        try {
+          restartControllers();
+          ROS_INFO_NAMED("franka_hw_sim", "Recovered from error");
+          this->sm_.process_event(ErrorRecovery());
+          this->action_recovery_->setSucceeded();
+        } catch (const std::runtime_error& e) {
+          ROS_WARN_STREAM_NAMED("franka_hw_sim", "Error recovery failed: " << e.what());
+          this->action_recovery_->setAborted();
+        }
       },
       false);
   this->action_recovery_->start();
@@ -378,6 +386,39 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             response.success = true;
             return true;
           });
+  this->service_controller_list_ = nh.serviceClient<controller_manager_msgs::ListControllers>(
+      "controller_manager/list_controllers");
+  this->service_controller_switch_ = nh.serviceClient<controller_manager_msgs::SwitchController>(
+      "controller_manager/switch_controller");
+}
+
+void FrankaHWSim::restartControllers() {
+  // Restart controllers by stopping and starting all running ones
+  auto name = this->service_controller_list_.getService();
+  if (not this->service_controller_list_.waitForExistence(ros::Duration(3))) {
+    throw std::runtime_error("Cannot find service '" + name +
+                             "'. Is the controller_manager running?");
+  }
+
+  controller_manager_msgs::ListControllers list;
+  if (not this->service_controller_list_.call(list)) {
+    throw std::runtime_error("Service call '" + name + "' failed");
+  }
+
+  controller_manager_msgs::SwitchController swtch;
+  for (const auto& controller : list.response.controller) {
+    if (controller.state != "running") {
+      continue;
+    }
+    swtch.request.stop_controllers.push_back(controller.name);
+    swtch.request.start_controllers.push_back(controller.name);
+  }
+  swtch.request.start_asap = true;
+  swtch.request.strictness = controller_manager_msgs::SwitchControllerRequest::STRICT;
+  if (not this->service_controller_switch_.call(swtch) or not swtch.response.ok) {
+    throw std::runtime_error("Service call '" + this->service_controller_switch_.getService() +
+                             "' failed");
+  }
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {

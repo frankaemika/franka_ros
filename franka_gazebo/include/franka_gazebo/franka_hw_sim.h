@@ -153,6 +153,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   ros::ServiceServer service_set_load_;
   ros::ServiceServer service_collision_behavior_;
   ros::ServiceServer service_user_stop_;
+  ros::ServiceClient service_controller_list_;
+  ros::ServiceClient service_controller_switch_;
   std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>> action_recovery_;
 
   std::vector<double> lower_force_thresholds_nominal_;
@@ -170,6 +172,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
                              const transmission_interface::TransmissionInfo& transmission,
                              double singularity_threshold);
   void initServices(ros::NodeHandle& nh);
+
+  void restartControllers();
 
   void updateRobotState(ros::Time time);
   void updateRobotStateDynamics();
