@@ -2,6 +2,7 @@
 
 #include <angles/angles.h>
 #include <control_toolbox/pid.h>
+#include <franka/robot_state.h>
 #include <joint_limits_interface/joint_limits.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
@@ -98,6 +99,48 @@ struct Joint {
 
   /// Position used as desired position if `control_method` is none
   double stop_position = 0;
+
+  /**
+   * Decide what the desired position of this joint is based on:
+   * 1. If a reflex is present, return `position`
+   * 2. ...otherwise if the control method is POSITION, return `desired_position`
+   * 3. ...otherwise if the control method is EFFORT return `desired_position`
+   * 3. ...otherwise return `position`
+   * @param[in] mode - the current mode the robot is in
+   * @return either `position` or `desired_position`
+   */
+  double getDesiredPosition(const franka::RobotMode& mode) const;
+
+  /**
+   * Decide what the desired velocity of this joint is based on:
+   * 1. If a reflex is present, return `velocity`
+   * 2. ...otherwise if the control method is not VELOCITY, return `velocity`
+   * 3. ...otherwise return `desired_velocity`
+   * @param[in] mode - the current mode the robot is in
+   * @return either `velocity` or `desired_velocity`
+   */
+  double getDesiredVelocity(const franka::RobotMode& mode) const;
+
+  /**
+   * Decide what the desired acceleration of this joint is based on:
+   * 1. If a reflex is present, return `acceleration`
+   * 2. ...otherwise if the control method is EFFORT, return 0
+   * 3. ...otherwise return `acceleration`
+   * @param[in] mode - the current mode the robot is in
+   * @return either `acceleration` or `0`
+   */
+  double getDesiredAcceleration(const franka::RobotMode& mode) const;
+
+  /**
+   * Decide what the desired torque of this joint is:
+   * 1. If a reflex is present, return 0
+   * 2. ... otherwise if the control method is not EFFORT return 0
+   * 3. ... otherwise return `command`
+   * @param[in] mode - the current mode the robot is in
+   * @return either `command` or zero
+   */
+  double getDesiredTorque(const franka::RobotMode& mode) const;
+
   /**
    * Get the total link mass of this joint's child
    * @return the mass in \f$kg\f$

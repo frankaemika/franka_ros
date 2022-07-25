@@ -589,6 +589,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   // This is ensured, because a FrankaStateInterface checks for at least seven joints in the URDF
   assert(this->joints_.size() >= 7);
 
+  auto mode = this->robot_state_.robot_mode;
   for (int i = 0; i < 7; i++) {
     std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
     const auto& joint = this->joints_.at(name);
@@ -597,19 +598,10 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.tau_J[i] = joint->effort;
     this->robot_state_.dtau_J[i] = joint->jerk;
 
-    if (joint->control_method == EFFORT) {
-      this->robot_state_.q_d[i] = joint->desired_position;
-      this->robot_state_.dq_d[i] = 0;
-      this->robot_state_.ddq_d[i] = 0;
-      this->robot_state_.tau_J_d[i] = joint->command;
-    } else {
-      this->robot_state_.q_d[i] =
-          joint->control_method == POSITION ? joint->desired_position : joint->position;
-      this->robot_state_.dq_d[i] =
-          joint->control_method == VELOCITY ? joint->desired_velocity : joint->velocity;
-      this->robot_state_.ddq_d[i] = joint->acceleration;
-      this->robot_state_.tau_J_d[i] = 0;
-    }
+    this->robot_state_.q_d[i] = joint->getDesiredPosition(mode);
+    this->robot_state_.dq_d[i] = joint->getDesiredVelocity(mode);
+    this->robot_state_.ddq_d[i] = joint->getDesiredAcceleration(mode);
+    this->robot_state_.tau_J_d[i] = joint->getDesiredTorque(mode);
 
     // For now we assume no flexible joints
     this->robot_state_.theta[i] = joint->position;
