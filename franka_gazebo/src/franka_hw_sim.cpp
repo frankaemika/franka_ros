@@ -54,10 +54,13 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   this->action_recovery_ = std::make_unique<SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
       model_nh, "franka_control/error_recovery",
       [&](const franka_msgs::ErrorRecoveryGoalConstPtr& goal) {
+        if (this->robot_state_.robot_mode == franka::RobotMode::kUserStopped) {
+          ROS_WARN_STREAM_NAMED("franka_hw_sim",
+                                "Cannot recover errors since the user stop seems still pressed");
+          this->action_recovery_->setSucceeded();
+          return;
+        }
         try {
-          ROS_WARN_STREAM_COND_NAMED(
-              this->robot_state_.robot_mode == franka::RobotMode::kUserStopped, "franka_hw_sim",
-              "Cannot recover errors since the user stop seems still pressed");
           restartControllers();
           ROS_INFO_NAMED("franka_hw_sim", "Recovered from error");
           this->sm_.process_event(ErrorRecovery());
