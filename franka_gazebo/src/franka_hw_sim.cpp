@@ -385,7 +385,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
   this->service_user_stop_ =
       nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
           "set_user_stop", [&](auto& request, auto& response) {
-            this->sm_.process_event(UserStop{request.data});
+            this->sm_.process_event(UserStop{static_cast<bool>(request.data)});
             response.success = true;
             return true;
           });
@@ -416,9 +416,10 @@ void FrankaHWSim::restartControllers() {
     swtch.request.stop_controllers.push_back(controller.name);
     swtch.request.start_controllers.push_back(controller.name);
   }
-  swtch.request.start_asap = true;
+  swtch.request.start_asap = static_cast<decltype(swtch.request.start_asap)>(true);
   swtch.request.strictness = controller_manager_msgs::SwitchControllerRequest::STRICT;
-  if (not this->service_controller_switch_.call(swtch) or not swtch.response.ok) {
+  if (not this->service_controller_switch_.call(swtch) or
+      not static_cast<bool>(swtch.response.ok)) {
     throw std::runtime_error("Service call '" + this->service_controller_switch_.getService() +
                              "' failed");
   }
@@ -432,7 +433,7 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   this->updateRobotState(time);
 }
 
-double FrankaHWSim::positionControl(Joint& joint, double setpoint, ros::Duration period) {
+double FrankaHWSim::positionControl(Joint& joint, double setpoint, const ros::Duration& period) {
   double error;
   const double kJointLowerLimit = joint.limits.min_position;
   const double kJointUpperLimit = joint.limits.max_position;
@@ -456,7 +457,7 @@ double FrankaHWSim::positionControl(Joint& joint, double setpoint, ros::Duration
                                  -joint.limits.max_effort, joint.limits.max_effort);
 }
 
-double FrankaHWSim::velocityControl(Joint& joint, double setpoint, ros::Duration period) {
+double FrankaHWSim::velocityControl(Joint& joint, double setpoint, const ros::Duration& period) {
   return boost::algorithm::clamp(
       joint.velocity_controller.computeCommand(setpoint - joint.velocity, period),
       -joint.limits.max_effort, joint.limits.max_effort);

@@ -182,8 +182,8 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
 
   void guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf);
 
-  static double positionControl(Joint& joint, double setpoint, ros::Duration period);
-  static double velocityControl(Joint& joint, double setpoint, ros::Duration period);
+  static double positionControl(Joint& joint, double setpoint, const ros::Duration& period);
+  static double velocityControl(Joint& joint, double setpoint, const ros::Duration& period);
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {
