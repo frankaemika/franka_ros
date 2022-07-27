@@ -26,12 +26,12 @@ struct UserStop {
 };
 
 // Guards
+auto contains = [](const auto& haystack, const auto& needle) {
+  return haystack.find(needle) != std::string::npos;
+};
 auto isPressed = [](const UserStop& event) { return event.pressed; };
 auto isReleased = [](const UserStop& event, const JointMap& joints) { return not event.pressed; };
 auto isStarting = [](const SwitchControl& event, const JointMap& joints) {
-  auto contains = [](const auto& haystack, const auto& needle) {
-    return haystack.find(needle) != std::string::npos;
-  };
   for (auto& joint : joints) {
     if (contains(joint.first, "_finger_joint")) {
       continue;
@@ -57,6 +57,9 @@ auto stop = [](franka::RobotState& state, JointMap& joints) {
   state.ddq_d = {0};
 
   for (auto& joint : joints) {
+    if (contains(joint.first, "_finger_joint")) {
+      continue;
+    }
     joint.second->stop_position = joint.second->position;
     joint.second->desired_position = joint.second->position;
     joint.second->desired_velocity = 0;
