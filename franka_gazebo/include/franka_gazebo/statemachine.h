@@ -50,7 +50,7 @@ auto isStopping = [](const SwitchControl& event, const JointMap& joints) {
 auto start = [](franka::RobotState& state) { state.robot_mode = franka::RobotMode::kMove; };
 auto idle = [](franka::RobotState& state) { state.robot_mode = franka::RobotMode::kIdle; };
 auto stop = [](franka::RobotState& state, JointMap& joints) {
-  ROS_WARN("E-Stop pressed, stopping robot");
+  ROS_WARN("User stop pressed, stopping robot");
   state.robot_mode = franka::RobotMode::kUserStopped;
   state.q_d = state.q;
   state.dq_d = {0};
