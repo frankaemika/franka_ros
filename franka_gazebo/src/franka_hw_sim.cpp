@@ -475,7 +475,8 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
     // Retrieve effort control command
     double effort = 0;
 
-    if (not sm_.is(state<Move>)) {
+    // Finger joints must still be controllable from franka_gripper_sim controller
+    if (not sm_.is(state<Move>) and not contains(pair.first, "finger_joint")) {
       effort = positionControl(*joint, joint->stop_position, period);
     } else if (joint->control_method == POSITION) {
       effort = positionControl(*joint, joint->desired_position, period);
