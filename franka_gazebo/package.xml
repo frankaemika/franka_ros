@@ -20,6 +20,7 @@
   <depend>gazebo_ros_control</depend>
   <depend>roscpp</depend>
   <depend>std_msgs</depend>
+  <depend>boost_sml</depend>
   <depend>control_msgs</depend>
   <depend>control_toolbox</depend>
   <depend>controller_manager</depend>

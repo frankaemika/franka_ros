@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   gazebo_ros_control
   kdl_parser
+  boost_sml
   control_toolbox
   controller_manager
   controller_interface
@@ -49,6 +50,7 @@ catkin_package(
     std_msgs
     gazebo_ros_control
     kdl_parser
+    boost_sml
     controller_manager
     controller_interface
     control_toolbox

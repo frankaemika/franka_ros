@@ -15,6 +15,8 @@
   *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
   * `franka_gazebo`: Drop `delayed_controller_spawner.py` script in favor of `--wait-for TOPIC` flag from controller_manager
   * `franka_gazebo`: Properly calculate inertial properties of `world/stone/model.sdf`
+  * `franka_gazebo`: `set_user_stop` service to simulate User stop in Gazebo
+  * `franka_gazebo`: `error_recovery` action similar to `franka_control`
 
 ## 0.9.0 - 2022-03-29
 
