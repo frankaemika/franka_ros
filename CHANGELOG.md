@@ -18,6 +18,7 @@
   * `franka_gazebo`: Properly calculate inertial properties of `world/stone/model.sdf`
   * `franka_gazebo`: `set_user_stop` service to simulate User stop in Gazebo
   * `franka_gazebo`: `error_recovery` action similar to `franka_control`
+  * `franka_gazebo`: Move services like `set_EE_frame`, `set_K_frame` ... into `franka_control` namespace to be more consistent with real robot
 
 ## 0.9.0 - 2022-03-29
 

@@ -23,7 +23,8 @@ using franka::RobotMode;
 namespace sml = boost::sml;
 
 // NOTE: Keep a global node handle in memory in order for all tests to be executed sequentially
-// If each test or fixture declares its own node handle only the first test will be executed correctly
+// If each test or fixture declares its own node handle only the first test will be executed
+// correctly
 std::unique_ptr<ros::NodeHandle> nh;
 
 TEST(
@@ -302,7 +303,7 @@ struct FrankaHWSimFixture : public ::testing::Test {
 
   virtual void SetUp() {
     start_ = ros::Time::now().toSec();
-    user_stop = nh->serviceClient<std_srvs::SetBool>("set_user_stop");
+    user_stop = nh->serviceClient<std_srvs::SetBool>("/franka_control/set_user_stop");
     gripper = std::make_unique<actionlib::SimpleActionClient<franka_gripper::MoveAction>>(
         "/franka_gripper/move");
     error_recovery =
@@ -324,9 +325,9 @@ struct FrankaHWSimFixture : public ::testing::Test {
     franka_gripper::MoveGoal goal;
     goal.speed = 0.1;
     goal.width = 0.0;
-      gripper->sendGoalAndWait(goal, ros::Duration(5));
-      auto result = gripper->getResult();
-      ASSERT_TRUE(result->success) << "Failed to close the gripper, error: " << result->error;
+    gripper->sendGoalAndWait(goal, ros::Duration(5));
+    auto result = gripper->getResult();
+    ASSERT_TRUE(result->success) << "Failed to close the gripper, error: " << result->error;
   }
 
   void errorRecovery() {
