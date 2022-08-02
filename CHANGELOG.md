@@ -4,6 +4,7 @@
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example. 
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
+  * `franka_example_controllers`: Fix namespacing of dynamic reconfigure node of cartesian impedance example controller
   * `franka_control`: Configurable `arm_id` in launch & config files
   * `franka_description`: URDF now contains `$(arm_id)_linkN_sc` links containing the capsule collision modules used for self-collision avoidance (MoveIt).
   * `franka_description`: Unit test suite for URDFs
