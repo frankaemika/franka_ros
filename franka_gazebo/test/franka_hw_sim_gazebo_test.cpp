@@ -361,7 +361,7 @@ TEST_F(FrankaHWSimFixture, pressing_user_stop_stops_the_arm_joints) {
   double user_stop_time = 3;
   double assert_start_time = 3.5;
   double assert_end_time = 4.5;
-  double stop_speed_tolerance = 1e-2;  // [rad/s]
+  double stop_speed_tolerance = 15e-3;  // [rad/s]
 
   ros::Duration timeout(5);
 
