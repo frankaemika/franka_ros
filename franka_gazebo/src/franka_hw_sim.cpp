@@ -332,7 +332,7 @@ void FrankaHWSim::initFrankaModelHandle(
 void FrankaHWSim::initServices(ros::NodeHandle& nh) {
   this->service_set_ee_ =
       nh.advertiseService<franka_msgs::SetEEFrame::Request, franka_msgs::SetEEFrame::Response>(
-          "set_EE_frame", [&](auto& request, auto& response) {
+          "franka_control/set_EE_frame", [&](auto& request, auto& response) {
             ROS_INFO_STREAM_NAMED("franka_hw_sim",
                                   this->arm_id_ << ": Setting NE_T_EE transformation");
             std::copy(request.NE_T_EE.cbegin(), request.NE_T_EE.cend(),
@@ -342,7 +342,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             return true;
           });
   this->service_set_k_ = franka_hw::advertiseService<franka_msgs::SetKFrame>(
-      nh, "set_K_frame", [&](auto& request, auto& response) {
+      nh, "franka_control/set_K_frame", [&](auto& request, auto& response) {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting EE_T_K transformation");
         std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
                   this->robot_state_.EE_T_K.begin());
@@ -351,7 +351,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
         return true;
       });
   this->service_set_load_ = franka_hw::advertiseService<franka_msgs::SetLoad>(
-      nh, "set_load", [&](auto& request, auto& response) {
+      nh, "franka_control/set_load", [&](auto& request, auto& response) {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
         this->robot_state_.m_load = request.mass;
         std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
@@ -364,7 +364,8 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
       });
   this->service_collision_behavior_ =
       franka_hw::advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
-          nh, "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
+          nh, "franka_control/set_force_torque_collision_behavior",
+          [&](auto& request, auto& response) {
             ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Collision Behavior");
 
             for (int i = 0; i < 7; i++) {
@@ -387,7 +388,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
           });
   this->service_user_stop_ =
       nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
-          "set_user_stop", [&](auto& request, auto& response) {
+          "franka_control/set_user_stop", [&](auto& request, auto& response) {
             this->sm_.process_event(UserStop{static_cast<bool>(request.data)});
             response.success = true;
             return true;
