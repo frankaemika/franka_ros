@@ -4,7 +4,7 @@ from unittest import TestCase
 from .urdf_test_case import UrdfTestCase, PKG
 from urdf_parser_py.urdf import URDF, Mesh, Cylinder, Sphere
 
-file = 'panda_arm.urdf.xacro'
+file = 'panda/panda.urdf.xacro'
 
 class TestPandaArmURDF(UrdfTestCase):
 

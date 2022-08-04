@@ -3,7 +3,7 @@ import subprocess
 from .urdf_test_case import UrdfTestCase, PKG
 from urdf_parser_py.urdf import URDF, Mesh, Cylinder, Sphere
 
-file = 'dual_panda_example.urdf.xacro'
+file = 'dual_panda/dual_panda_example.urdf.xacro'
 
 class TestPandaArmExampleURDF(UrdfTestCase):
 
