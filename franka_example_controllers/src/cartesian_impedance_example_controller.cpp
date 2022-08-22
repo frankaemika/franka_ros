@@ -23,6 +23,14 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
       "equilibrium_pose", 20, &CartesianImpedanceExampleController::equilibriumPoseCallback, this,
       ros::TransportHints().reliable().tcpNoDelay());
 
+  sub_desired_transl_stiffness_ = node_handle.subscribe(
+      "desired_transl_stiffness", 20, &CartesianImpedanceExampleController::desiredTranslStiffnessCallback, this,
+      ros::TransportHints().reliable().tcpNoDelay());
+
+  sub_desired_rot_stiffness_ = node_handle.subscribe(
+      "desired_rot_stiffness", 20, &CartesianImpedanceExampleController::desiredRotStiffnessCallback, this,
+      ros::TransportHints().reliable().tcpNoDelay());
+
   std::string arm_id;
   if (!node_handle.getParam("arm_id", arm_id)) {
     ROS_ERROR_STREAM("CartesianImpedanceExampleController: Could not read parameter arm_id");
@@ -224,6 +232,20 @@ void CartesianImpedanceExampleController::complianceParamCallback(
   cartesian_damping_target_.bottomRightCorner(3, 3)
       << 2.0 * sqrt(config.rotational_stiffness) * Eigen::Matrix3d::Identity();
   nullspace_stiffness_target_ = config.nullspace_stiffness;
+}
+
+void CartesianImpedanceExampleController::desiredTranslStiffnessCallback(const std_msgs::Float64Ptr& msg) {
+  cartesian_stiffness_target_.topLeftCorner(3, 3)
+      << msg->data * Eigen::Matrix3d::Identity();
+  cartesian_damping_target_.topLeftCorner(3, 3)
+      << 2.0 * sqrt(msg->data) * Eigen::Matrix3d::Identity();
+}
+
+void CartesianImpedanceExampleController::desiredRotStiffnessCallback(const std_msgs::Float64Ptr& msg) {
+  cartesian_stiffness_target_.bottomRightCorner(3, 3)
+      << msg->data * Eigen::Matrix3d::Identity();
+  cartesian_damping_target_.bottomRightCorner(3, 3)
+      << 2.0 * sqrt(msg->data) * Eigen::Matrix3d::Identity();
 }
 
 void CartesianImpedanceExampleController::equilibriumPoseCallback(
