@@ -10,6 +10,7 @@
 #include <controller_interface/multi_interface_controller.h>
 #include <dynamic_reconfigure/server.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <std_msgs/Float64.h>
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/robot_hw.h>
 #include <ros/node_handle.h>
@@ -65,7 +66,11 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
 
   // Equilibrium pose subscriber
   ros::Subscriber sub_equilibrium_pose_;
+  ros::Subscriber sub_desired_transl_stiffness_;
+  ros::Subscriber sub_desired_rot_stiffness_;
   void equilibriumPoseCallback(const geometry_msgs::PoseStampedConstPtr& msg);
+  void desiredTranslStiffnessCallback(const std_msgs::Float64Ptr& msg);
+  void desiredRotStiffnessCallback(const std_msgs::Float64Ptr& msg);
 };
 
 }  // namespace franka_example_controllers
