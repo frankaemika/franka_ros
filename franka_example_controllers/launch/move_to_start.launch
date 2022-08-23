@@ -1,13 +1,20 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_ip" />
+  <arg name="load_gripper" default="false" />
+  <arg name="transmission" default="effort" />
 
   <include file="$(find franka_control)/launch/franka_control.launch">
     <arg name="robot_ip" value="$(arg robot_ip)" />
-    <arg name="load_gripper" value="false" />
+    <arg name="load_gripper" default="$(arg load_gripper)" />
   </include>
-  <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
-    <arg name="load_gripper" value="false" />
+  <!-- Start controllers required by MoveIt -->
+  <include file="$(find panda_moveit_config)/launch/ros_controllers.launch" pass_all_args="true" />
+  <!-- Start MoveIt's move_group node -->
+  <include file="$(find panda_moveit_config)/launch/move_group.launch" pass_all_args="true">
+    <!-- robot description is loaded by franka_control.launch -->
+    <arg name="load_robot_description" value="false" />
+    <arg name="moveit_controller_manager" value="ros_control" />
   </include>
   <node name="move_to_start" pkg="franka_example_controllers" type="move_to_start.py" output="screen" required="true" />
 </launch>
