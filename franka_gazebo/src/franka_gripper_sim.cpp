@@ -119,8 +119,8 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
   this->mutex_.unlock();
   if (state == State::IDLE) {
     // Track position of other finger to simulate mimicked joints + high damping
-    control(this->finger1_, this->pid1_, this->finger2_.getPosition(), 0, 0, period);
-    control(this->finger2_, this->pid2_, this->finger1_.getPosition(), 0, 0, period);
+    control(this->finger1_, this->pid1_, w_d / 2.0, 0, 0, period);
+    control(this->finger2_, this->pid2_, w_d / 2.0, 0, 0, period);
     return;
   }
 
@@ -135,8 +135,10 @@ void FrankaGripperSim::update(const ros::Time& now, const ros::Duration& period)
   if (state == State::HOLDING) {
     // When an object is grasped, next to the force to apply, also track the other finger
     // to not make both fingers drift away from middle simultaneously
-    w1_d = this->finger2_.getPosition();
-    w2_d = this->finger1_.getPosition();
+    // w1_d = this->finger2_.getPosition();
+    // w2_d = this->finger1_.getPosition();
+    w1_d = w_d / 2.0;
+    w2_d = w_d / 2.0;
     std::lock_guard<std::mutex> lock(this->mutex_);
     f_d = -this->config_.force_desired / 2.0;
   }

@@ -36,7 +36,7 @@
               <!-- Usually you want no "snap out" velocity and a generous -->
               <!-- penetration depth to keep the grasping stable -->
               <max_vel>0</max_vel>
-              <min_depth>0.003</min_depth>
+              <min_depth>0.001</min_depth>
             </ode>
           </contact>
           <friction>

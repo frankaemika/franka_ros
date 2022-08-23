@@ -314,12 +314,40 @@
         <geometry>
           <box size="0.03 0.005 0.047" />
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>2.0</mu>
+              <mu2>2.0</mu2>
+            </ode>
+          </friction>
+          <!-- <contact>
+            <ode>
+              <kp>1e15</kp>
+              <kd>1e13</kd>
+            </ode>
+          </contact> -->
+        </surface>
       </collision>
       <collision>
         <origin xyz="0 0.007 0.045" rpy="0 0 0"/>
         <geometry>
           <box size="0.03 0.015 0.017" />
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>2.0</mu>
+              <mu2>2.0</mu2>
+            </ode>
+          </friction>
+          <!-- <contact>
+            <ode>
+              <kp>1e15</kp>
+              <kd>1e13</kd>
+            </ode>
+          </contact> -->
+        </surface>
       </collision>
     </link>
 
@@ -336,12 +364,40 @@
         <geometry>
           <box size="0.03 0.005 0.047" />
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>2.0</mu>
+              <mu2>2.0</mu2>
+            </ode>
+          </friction>
+          <!-- <contact>
+            <ode>
+              <kp>1e15</kp>
+              <kd>1e13</kd>
+            </ode>
+          </contact> -->
+        </surface>
       </collision>
       <collision>
         <origin xyz="0 -0.007 0.045" rpy="0 0 0"/>
         <geometry>
           <box size="0.03 0.015 0.017" />
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>2.0</mu>
+              <mu2>2.0</mu2>
+            </ode>
+          </friction>
+          <!-- <contact>
+            <ode>
+              <kp>1e15</kp>
+              <kd>1e13</kd>
+            </ode>
+          </contact> -->
+        </surface>
       </collision>
     </link>
 
