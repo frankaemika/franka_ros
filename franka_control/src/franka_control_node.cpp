@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
       }
     }
 
+    ROS_INFO_THROTTLE(1, "franka_control: controller activated");
     if (franka_control.connected()) {
       try {
         // Run control loop. Will exit if the controller is switched.
@@ -160,7 +161,7 @@ int main(int argc, char** argv) {
         has_error = true;
       }
     }
-    ROS_INFO_THROTTLE(1, "franka_control, main loop");
+    ROS_INFO_THROTTLE(1, "franka_control: main loop");
   }
 
   return 0;
