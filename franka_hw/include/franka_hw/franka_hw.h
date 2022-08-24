@@ -295,6 +295,8 @@ class FrankaHW : public hardware_interface::RobotHW {
                                                     const ros::NodeHandle& robot_hw_nh,
                                                     const std::vector<double>& defaults);
 
+  franka::RobotMode robotMode() const { return robot_state_ros_.robot_mode; }
+
  protected:
   /**
    * Checks whether an array of doubles contains NaN values.

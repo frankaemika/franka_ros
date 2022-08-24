@@ -124,6 +124,10 @@ int main(int argc, char** argv) {
           control_manager.update(now, now - last_time);
           franka_control.checkJointLimits();
           last_time = now;
+
+          if (has_error && franka_control.robotMode() == franka::RobotMode::kIdle) {
+            has_error = false;
+          }
         } catch (const std::logic_error& e) {
         }
       } else {
