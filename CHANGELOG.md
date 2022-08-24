@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## 0.XX.YY - UNRELEASED
+## 0.10.0 - UNRELEASED
+
+  * `franka_example_controllers`: Normalize rotations before usage
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
 
 ## 0.9.1 - 2022-08-29
 
