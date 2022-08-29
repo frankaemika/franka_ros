@@ -7,9 +7,11 @@ RUN apt-get update -y && apt-get install -y \
     pycodestyle \
     python3-catkin-tools \
     ros-melodic-libfranka \
+    ros-melodic-boost-sml \
     ros-melodic-ros-control \
     ros-melodic-eigen-conversions \
     ros-melodic-gazebo-dev \
     ros-melodic-gazebo-ros-control \
     ros-melodic-orocos-kdl \
+    ros-melodic-urdfdom-py \
     && rm -rf /var/lib/apt/lists/*

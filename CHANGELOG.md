@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.XX.YY - UNRELEASED
+
+## 0.9.1 - 2022-08-29
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
+  * `franka_example_controllers`: Fix namespacing of dynamic reconfigure node of cartesian impedance example controller
+  * `franka_control`: Configurable `arm_id` in launch & config files
+  * `franka_description`: URDF now contains `$(arm_id)_linkN_sc` links containing the capsule collision modules used for self-collision avoidance (MoveIt).
+  * `franka_description`: Unit test suite for URDFs
+  * `franka_description`: Make `util.xacro` be includable from other packages
+  * `franka_description`: Add `tcp_xyz` & `tcp_rpy` offsets to specify a custom TCP for MoveIT's `$(arm_id)_manipulator` move group
+  * `franka_control`: `franka_control.launch` accepts `xacro_args` to pass down additional arguments to URDF
+  * `franka_gazebo`: `panda.launch` accepts `xacro_args` to pass down additional arguments to URDF
+  * `franka_gazebo`: Fix motion generator config respects `arm_id`
+  *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
+  * `franka_gazebo`: Drop `delayed_controller_spawner.py` script in favor of `--wait-for TOPIC` flag from controller_manager
+  * `franka_gazebo`: Properly calculate inertial properties of `world/stone/model.sdf`
+  * `franka_gazebo`: `set_user_stop` service to simulate User stop in Gazebo
+  * `franka_gazebo`: `error_recovery` action similar to `franka_control`
+  * **BREAKING**: `franka_gazebo`: Move services like `set_EE_frame`, `set_K_frame` ... into `franka_control` namespace to be more consistent with real robot
+
 ## 0.9.0 - 2022-03-29
 
 Requires `libfranka` >= 0.8.0
@@ -16,7 +41,6 @@ Requires `libfranka` >= 0.8.0
     - Add JointPosition and JointVelocity Interface
     - Fix: Robot now keeps position when no controller is running
     - joint_{position,velocity}_example controller are now available in `franka_gazebo`
-    
 
 ## 0.8.2 - 2022-02-22
 

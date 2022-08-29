@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   gazebo_ros_control
   kdl_parser
+  boost_sml
   control_toolbox
   controller_manager
   controller_interface
@@ -49,6 +50,7 @@ catkin_package(
     std_msgs
     gazebo_ros_control
     kdl_parser
+    boost_sml
     controller_manager
     controller_interface
     control_toolbox
@@ -137,10 +139,6 @@ install(TARGETS franka_hw_sim franka_gripper_sim
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch

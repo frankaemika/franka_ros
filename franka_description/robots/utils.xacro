@@ -1,6 +1,113 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- Load interial properties. Property is implicitly passed to macros. -->
+  <xacro:property name="inertial_config" value="$(find franka_description)/robots/inertial.yaml"/>
+  <xacro:property name="inertial" value="${xacro.load_yaml(inertial_config)}"/>
+
+  <!-- ============================================================== -->
+  <!-- Macro to add an <interial> tag based on yaml-load properties   -->
+  <!--                                                                -->
+  <!-- name:     Name of the robot link (without prefix)              -->
+  <!-- inertial: Dictionary of inertia properties (see inertial.yaml) -->
+  <!-- ============================================================== -->
+  <xacro:macro name="inertial_props" params="name inertial:=^">
+      <xacro:unless value="${name in inertial}">${xacro.warning('No inertia properties defined for: ' + name)}</xacro:unless>
+      <xacro:if value="${name in inertial}">
+        <!-- Access inertia properties of link 'name' -->
+        <xacro:property name="inertial" value="${inertial[name]}" lazy_eval="false" />
+        <inertial>
+          <origin rpy="${inertial.origin.rpy}" xyz="${inertial.origin.xyz}" />
+          <mass value="${inertial.mass}" />
+          <xacro:property name="I" value="${inertial.inertia}" />
+          <inertia ixx="${I.xx}" ixy="${I.xy}" ixz="${I.xz}" iyy="${I.yy}" iyz="${I.yz}" izz="${I.zz}" />
+        </inertial>
+      </xacro:if>
+  </xacro:macro>
+
+  <!-- ========================================================== -->
+  <!-- Macro to add a single link, both with                      -->
+  <!--  * detailed meshes for environmental collision checking    -->
+  <!--  * and coarse geometry models for self-collision checking  -->
+  <!--    (only if 'gazebo' param is set)                         -->
+  <!--                                                            -->
+  <!-- name:  Name of the robot link (without prefix)             -->
+  <!-- rpy:   Rotation of the *_sc link relative to parent [rad]  -->
+  <!-- self_collision_geometries:  self <collision> models        -->
+  <!-- ========================================================== -->
+  <xacro:macro name="link_with_sc" params="name prefix=${arm_id}_ rpy:='0 0 0' **self_collision_geometries gazebo:=false">
+    <!-- sub-link defining detailed meshes for collision with environment -->
+    <link name="${prefix}${name}">
+      <visual>
+        <geometry>
+          <mesh filename="package://${description_pkg}/meshes/visual/${name}.dae" />
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <mesh filename="package://franka_description/meshes/collision/${name}.stl" />
+        </geometry>
+      </collision>
+      <xacro:if value="${gazebo}">
+        <xacro:inertial_props name="${name}" />
+      </xacro:if>
+    </link>
+    <!-- sub-link defining coarse geometries of real robot's internal self-collision -->
+    <link name="${prefix}${name}_sc">
+      <xacro:unless value="${gazebo}">
+        <xacro:insert_block name="self_collision_geometries" />
+      </xacro:unless>
+    </link>
+    <!-- fixed joint between both sub-links -->
+    <joint name="${prefix}${name}_sc_joint" type="fixed">
+      <origin rpy="${rpy}" />
+      <parent link="${prefix}${name}" />
+      <child link="${prefix}${name}_sc" />
+    </joint>
+  </xacro:macro>
+
+  <!-- =========================================================== -->
+  <!-- Add a <collision> tag with a capsule, made from a cylinder  -->
+  <!-- with two spheres at its caps. The capsule will always be    -->
+  <!-- aligned with the axis of 'direction' you pass along.        -->
+  <!--                                                             -->
+  <!-- radius: Radii of both the cylinder and both spheres [m]     -->
+  <!-- length: Length of the cylinder/distance between the centers -->
+  <!--         of the spheres. NOT overall length of capsule!      -->
+  <!-- xyz:    Position of the center of the capsule/cylinder      -->
+  <!-- direction: One of { x, y, z, -x, -y, -z }                   -->
+  <!-- =========================================================== -->
+  <xacro:macro name="collision_capsule" params="radius length xyz:='0 0 0' direction:='z'">
+    <xacro:property name="r" value="${pi/2.0 if 'y' in direction else 0}" />
+    <xacro:property name="p" value="${pi/2.0 if 'x' in direction else 0}" />
+    <xacro:property name="y" value="0" />
+    <xacro:property name="x" value="${xyz.split(' ')[0]}" />
+    <xacro:property name="y" value="${xyz.split(' ')[1]}" />
+    <xacro:property name="z" value="${xyz.split(' ')[2]}" />
+    <!-- Sphere center offsets from center of cylinder -->
+    <xacro:property name="sx" value="${length / 2.0 if 'x' in direction else 0}" />
+    <xacro:property name="sy" value="${length / 2.0 if 'y' in direction else 0}" />
+    <xacro:property name="sz" value="${length / 2.0 if 'z' in direction else 0}" />
+
+    <collision>
+      <origin xyz="${x} ${y} ${z}" rpy="${r} ${p} ${y}"/>
+      <geometry>
+        <cylinder radius="${radius}" length="${length}" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="${x+sx} ${y+sy} ${z+sz}" />
+      <geometry>
+        <sphere radius="${radius}" />
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="${x-sx} ${y-sy} ${z-sz}" />
+      <geometry>
+        <sphere radius="${radius}" />
+      </geometry>
+    </collision>
+  </xacro:macro>
 
   <!-- ========================================================== -->
   <!-- Adds the required tags to simulate one joint in gazebo     -->

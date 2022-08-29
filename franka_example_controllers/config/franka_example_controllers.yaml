@@ -119,28 +119,32 @@ dual_arm_cartesian_impedance_example_controller:
 teleop_joint_pd_example_controller:
    type: franka_example_controllers/TeleopJointPDExampleController
    leader:
-       arm_id: panda_1
+       arm_id: leader
        joint_names:
-            - panda_1_joint1
-            - panda_1_joint2
-            - panda_1_joint3
-            - panda_1_joint4
-            - panda_1_joint5
-            - panda_1_joint6
-            - panda_1_joint7
+            - leader_joint1
+            - leader_joint2
+            - leader_joint3
+            - leader_joint4
+            - leader_joint5
+            - leader_joint6
+            - leader_joint7
        # WARNING: Varying the following parameters may result in instability!
-       d_gains: [1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17]
+       d_gains_lower: [1.0, 1.0, 1.0, 1.0, 0.33, 0.33, 0.17]
+       d_gains_upper: [35.0, 35.0, 35.0, 35.0, 10.0, 10.0, 8.0]
+       dq_max_lower: [1.3, 1.3, 1.3, 1.3, 1.4, 1.4, 1.4] # [rad/s]
+       dq_max_upper: [1.9, 1.9, 1.9, 1.9, 2.2, 2.2, 2.2] # [rad/s]
        contact_force_threshold: 4.0 # [N]
+
    follower:
-       arm_id: panda_2
+       arm_id: follower
        joint_names:
-            - panda_2_joint1
-            - panda_2_joint2
-            - panda_2_joint3
-            - panda_2_joint4
-            - panda_2_joint5
-            - panda_2_joint6
-            - panda_2_joint7
+            - follower_joint1
+            - follower_joint2
+            - follower_joint3
+            - follower_joint4
+            - follower_joint5
+            - follower_joint6
+            - follower_joint7
        # WARNING: Varying the following parameters may result in instability!
        p_gains: [900.0, 900.0, 900.0, 900.0, 375.0, 225.0, 100.0]
        d_gains: [45.0, 45.0, 45.0, 45.0, 15.0, 15.0, 10.0]

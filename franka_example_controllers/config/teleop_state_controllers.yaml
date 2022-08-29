@@ -1,0 +1,25 @@
+leader_state_controller:
+  type: franka_control/FrankaStateController
+  arm_id: leader
+  joint_names:
+    - leader_joint1
+    - leader_joint2
+    - leader_joint3
+    - leader_joint4
+    - leader_joint5
+    - leader_joint6
+    - leader_joint7
+  publish_rate: 30  # [Hz]
+
+follower_state_controller:
+  type: franka_control/FrankaStateController
+  arm_id: follower
+  joint_names:
+    - follower_joint1
+    - follower_joint2
+    - follower_joint3
+    - follower_joint4
+    - follower_joint5
+    - follower_joint6
+    - follower_joint7
+  publish_rate: 30  # [Hz]

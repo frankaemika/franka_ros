@@ -8,8 +8,10 @@ RUN apt-get update -y && apt-get install -y \
     liborocos-kdl-dev \
     python3-catkin-tools \
     ros-noetic-libfranka \
+    ros-noetic-boost-sml \
     ros-noetic-ros-control \
     ros-noetic-eigen-conversions \
     ros-noetic-gazebo-dev \
     ros-noetic-gazebo-ros-control \
+    ros-noetic-urdfdom-py \
     && rm -rf /var/lib/apt/lists/*

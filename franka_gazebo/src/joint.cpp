@@ -52,6 +52,47 @@ void Joint::update(const ros::Duration& dt) {
   this->lastAcceleration = this->acceleration;
 }
 
+double Joint::getDesiredPosition(const franka::RobotMode& mode) const {
+  if (mode != franka::RobotMode::kMove) {
+    return this->position;
+  }
+  if (this->control_method == ControlMethod::POSITION or
+      this->control_method != ControlMethod::EFFORT) {
+    return this->desired_position;
+  }
+  return this->position;
+}
+
+double Joint::getDesiredVelocity(const franka::RobotMode& mode) const {
+  if (mode != franka::RobotMode::kMove) {
+    return this->velocity;
+  }
+  if (this->control_method != ControlMethod::VELOCITY) {
+    return this->velocity;
+  }
+  return this->desired_velocity;
+}
+
+double Joint::getDesiredAcceleration(const franka::RobotMode& mode) const {
+  if (mode != franka::RobotMode::kMove) {
+    return this->acceleration;
+  }
+  if (this->control_method == ControlMethod::EFFORT) {
+    return 0;
+  }
+  return this->acceleration;
+}
+
+double Joint::getDesiredTorque(const franka::RobotMode& mode) const {
+  if (mode != franka::RobotMode::kMove) {
+    return 0;
+  }
+  if (this->control_method != ControlMethod::EFFORT) {
+    return 0;
+  }
+  return command;
+}
+
 double Joint::getLinkMass() const {
   if (not this->handle) {
     return std::numeric_limits<double>::quiet_NaN();
