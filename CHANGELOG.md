@@ -1,7 +1,12 @@
 # CHANGELOG
 
-## 0.X.Y - UNRELEASED
-  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example. 
+## 0.XX.YY - UNRELEASED
+
+## 0.9.1 - 2022-08-29
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
   * `franka_example_controllers`: Fix namespacing of dynamic reconfigure node of cartesian impedance example controller
