@@ -4,9 +4,7 @@
   <arg name="arm_id" default="panda" />
   <arg name="transmission" default="effort" doc="The type of position control to use (either 'position' or 'effort')" />
 
-  <include file="$(find franka_control)/launch/franka_control.launch">
-    <arg name="robot_ip" value="$(arg robot_ip)" />
-    <arg name="arm_id"   value="$(arg arm_id)" />
+  <include file="$(find franka_control)/launch/franka_control.launch" pass_all_args="true">
     <arg name="load_gripper" value="false" />
   </include>
 
