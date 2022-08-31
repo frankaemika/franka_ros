@@ -26,6 +26,7 @@ point.time_from_start = ros.Duration.from_sec(ros.get_param('~duration', 5.))
 goal = FollowJointTrajectoryGoal()
 
 goal.trajectory.joint_names, point.positions = [list(x) for x in zip(*pose.items())]
+point.velocities = [0] * len(pose)
 
 goal.trajectory.points.append(point)
 goal.goal_time_tolerance = ros.Duration.from_sec(0.5)
