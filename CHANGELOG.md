@@ -7,6 +7,8 @@ Requires `libfranka` >= 0.8.0
   * `franka_example_controllers`: Normalize rotations before usage
   * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
   * `franka_example_controllers`: Don't require MoveIt for `move_to_start.launch`
+  * **BREAKING** `franka_description`: Refactor URDF files to also support FR3
+  * `franka_control`: Introduce optional `robot` argument in the `franka_control.launch` launch file that chooses either the URDF for panda or fr3. This argument can also be used in the launch files of `franka_examples`. The default is "panda".
 
 ## 0.9.1 - 2022-08-29
 
