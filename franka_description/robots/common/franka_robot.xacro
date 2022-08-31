@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <xacro:macro name="franka_robot" params="name joint_limits">
+  <xacro:macro name="franka_robot" params="arm_id joint_limits">
     <!-- Name of this panda -->
-    <xacro:arg name="arm_id" default="panda" />
+    <xacro:arg name="arm_id" default="${arm_id}" />
     <!-- Should a franka_gripper be mounted at the flange?" -->
     <xacro:arg name="hand" default="false" />
     <!-- Positional offset between $(arm_id)_hand -> $(arm_id)_hand_tcp [m]. Only used when hand:=true -->
