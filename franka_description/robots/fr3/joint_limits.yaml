@@ -1,37 +1,36 @@
-# TODO(bone_ma) define limits
 joint1:
-  max_position: 2.8973
-  min_position: -2.8973
-  max_velocity: 2.1750
+  max_position: 2.3093
+  min_position: -2.3093
+  max_velocity: 2.00
   max_torque: 87
 joint2:
-  max_position: 1.7628
-  min_position: -1.7628
-  max_velocity: 2.1750
+  max_position: 1.5133
+  min_position: -1.5133
+  max_velocity: 1.00
   max_torque: 87
 joint3:
-  max_position: 2.8973
-  min_position: -2.8973
-  max_velocity: 2.1750
+  max_position: 2.4937
+  min_position: -2.4937
+  max_velocity: 1.50
   max_torque: 87
 joint4:
-  max_position: -0.0698
-  min_position: -3.0718
-  max_velocity: 2.1750
+  max_position: -0.4461
+  min_position: -2.7478
+  max_velocity: 1.25
   max_torque: 87
 joint5:
-  max_position: 2.8973
-  min_position: -2.8973
-  max_velocity: 2.6100
+  max_position: 2.4800
+  min_position: -2.4800
+  max_velocity: 3.00
   max_torque: 12
 joint6:
-  max_position: 3.7525
-  min_position: -0.0175
-  max_velocity: 2.6100
+  max_position: 4.2094
+  min_position: 0.8521
+  max_velocity: 1.50
   max_torque: 12
 joint7:
-  max_position: 2.8973
-  min_position: -2.8973
-  max_velocity: 2.6100
+  max_position: 2.6895
+  min_position: -2.6895
+  max_velocity: 3.00
   max_torque: 12
 
