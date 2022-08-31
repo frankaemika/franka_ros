@@ -4,6 +4,7 @@ import sys
 import rospy as ros
 
 from actionlib import SimpleActionClient
+from sensor_msgs.msg import JointState
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from control_msgs.msg import FollowJointTrajectoryAction, \
                              FollowJointTrajectoryGoal, FollowJointTrajectoryResult
@@ -21,8 +22,19 @@ if pose is None:
     ros.logerr('move_to_start: Could not find required parameter "' + param + '"')
     sys.exit(1)
 
+topic = ros.resolve_name('~joint_states')
+ros.loginfo("move_to_start: Waiting for message on topic '" + topic + "'")
+joint_state = ros.wait_for_message(topic, JointState)
+initial_pose = dict(zip(joint_state.name, joint_state.position))
+
+max_movement = max(abs(pose[joint] - initial_pose[joint]) for joint in pose)
+
 point = JointTrajectoryPoint()
-point.time_from_start = ros.Duration.from_sec(ros.get_param('~duration', 5.))
+point.time_from_start = ros.Duration.from_sec(
+    # Use either the time to move the furthest joint with 'max_dq' or 500ms,
+    # whatever is greater
+    max(max_movement / ros.get_param('~max_dq', 0.5), 0.5)
+)
 goal = FollowJointTrajectoryGoal()
 
 goal.trajectory.joint_names, point.positions = [list(x) for x in zip(*pose.items())]

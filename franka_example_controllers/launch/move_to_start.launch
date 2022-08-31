@@ -25,7 +25,8 @@
         required="true">
     <rosparam file="$(find franka_control)/config/start_pose.yaml" subst_value="true" />
     <remap from="~follow_joint_trajectory" to="$(arg transmission)_joint_trajectory_controller/follow_joint_trajectory" />
-    <param name="duration" value="5.0" />
+    <remap from="~joint_states" to="franka_state_controller/joint_states" />
+    <param name="max_dq" value="0.2" /> <!-- [rad/s] -->
   </node>
 
 </launch>
