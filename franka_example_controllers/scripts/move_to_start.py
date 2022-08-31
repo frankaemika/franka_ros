@@ -3,12 +3,12 @@
 import sys
 import rospy as ros
 
-ros.init_node('move_to_start')
-
 from actionlib import SimpleActionClient
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal, FollowJointTrajectoryResult
+from control_msgs.msg import FollowJointTrajectoryAction, \
+                             FollowJointTrajectoryGoal, FollowJointTrajectoryResult
 
+ros.init_node('move_to_start')
 
 action = ros.resolve_name('~follow_joint_trajectory')
 client = SimpleActionClient(action, FollowJointTrajectoryAction)
@@ -37,10 +37,29 @@ client.send_goal_and_wait(goal)
 result = client.get_result()
 if result.error_code != FollowJointTrajectoryResult.SUCCESSFUL:
     ros.logerr('move_to_start: Movement was not successful: ' + {
-        FollowJointTrajectoryResult.INVALID_GOAL: "The joint pose you want to move to is invalid (e.g. unreachable, singularity...). Is the 'joint_pose' reachable?",
-        FollowJointTrajectoryResult.INVALID_JOINTS: "The joint pose you specified is for different joints than the joint trajectory controller is claiming. Does you 'joint_pose' include all 7 joints of the robot?",
-        FollowJointTrajectoryResult.PATH_TOLERANCE_VIOLATED: "During the motion the robot deviated from the planned path too much. Is something blocking the robot?",
-        FollowJointTrajectoryResult.GOAL_TOLERANCE_VIOLATED: "After the motion the robot deviated from the desired goal pose too much. Probably the robot didn't reach the joint_pose properly",
+        FollowJointTrajectoryResult.INVALID_GOAL:
+        """
+        The joint pose you want to move to is invalid (e.g. unreachable, singularity...).
+        Is the 'joint_pose' reachable?
+        """,
+
+        FollowJointTrajectoryResult.INVALID_JOINTS:
+        """
+        The joint pose you specified is for different joints than the joint trajectory controller
+        is claiming. Does you 'joint_pose' include all 7 joints of the robot?
+        """,
+
+        FollowJointTrajectoryResult.PATH_TOLERANCE_VIOLATED:
+        """
+        During the motion the robot deviated from the planned path too much. Is something blocking
+        the robot?
+        """,
+
+        FollowJointTrajectoryResult.GOAL_TOLERANCE_VIOLATED:
+        """
+        After the motion the robot deviated from the desired goal pose too much. Probably the robot
+        didn't reach the joint_pose properly
+        """,
     }[result.error_code])
 
 else:
