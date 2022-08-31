@@ -243,7 +243,7 @@ void DualArmCartesianImpedanceExampleController::updateArm(FrankaDataContainer& 
       robot_state.tau_J_d.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
-  Eigen::Quaterniond orientation(transform.rotation());  // NOLINT
+  Eigen::Quaterniond orientation(transform.rotation());
 
   // compute error to desired pose
   // position error
@@ -364,7 +364,7 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
         Ol_T_C * EEl_T_C_.inverse();  // NOLINT (readability-identifier-naming)
     left_arm_data.position_d_target_ = Ol_T_EEl_d.translation();
     Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
-    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.rotation());  // NOLINT
+    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.rotation());
     if (last_orientation_d_target.coeffs().dot(new_orientation_target.coeffs()) < 0.0) {
       new_orientation_target.coeffs() << -new_orientation_target.coeffs();
     }
