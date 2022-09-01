@@ -28,13 +28,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint1" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint1']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="0 0 0" xyz="0 0 0.333" />
       <parent link="${arm_id}_link0" />
       <child link="${arm_id}_link1" />
       <axis xyz="0 0 1" />
-      <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint1" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -45,13 +43,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint2" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint2']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${-pi/2} 0 0" xyz="0 0 0" />
       <parent link="${arm_id}_link1" />
       <child link="${arm_id}_link2" />
       <axis xyz="0 0 1" />
-      <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint2" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -62,13 +58,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint3" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint3']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${pi/2} 0 0" xyz="0 -0.316 0" />
       <parent link="${arm_id}_link2" />
       <child link="${arm_id}_link3" />
       <axis xyz="0 0 1" />
-     <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint3" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -79,13 +73,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint4" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint4']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${pi/2} 0 0" xyz="0.0825 0 0" />
       <parent link="${arm_id}_link3" />
       <child link="${arm_id}_link4" />
       <axis xyz="0 0 1" />
-      <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint4" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -97,13 +89,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint5" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint5']}" lazy_eval="false" />
-     <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${-pi/2} 0 0" xyz="-0.0825 0.384 0" />
       <parent link="${arm_id}_link4" />
       <child link="${arm_id}_link5" />
       <axis xyz="0 0 1" />
-      <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint5" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -114,13 +104,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint6" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint6']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${pi/2} 0 0" xyz="0 0 0" />
       <parent link="${arm_id}_link5" />
       <child link="${arm_id}_link6" />
       <axis xyz="0 0 1" />
-     <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint6" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16" />
     </joint>
 
@@ -132,13 +120,11 @@
     </xacro:link_with_sc>
 
     <joint name="${arm_id}_joint7" type="revolute">
-      <xacro:property name="limits" value="${joint_limits['joint7']}" lazy_eval="false" />
-      <safety_controller k_position="100.0" k_velocity="40.0" soft_lower_limit="${limits.min_position}" soft_upper_limit="${limits.max_position}" />
       <origin rpy="${pi/2} 0 0" xyz="0.088 0 0"/>
       <parent link="${arm_id}_link6"/>
       <child link="${arm_id}_link7"/>
       <axis xyz="0 0 1"/>
-     <limit effort="${limits.max_torque}" lower="${limits.min_position}" upper="${limits.max_position}" velocity="${limits.max_velocity}" />
+      <xacro:franka-limits name="joint7" config="${joint_limits}" />
       <dynamics D="1" K="7000" damping="0.003" friction="0.0" mu_coulomb="0" mu_viscous="16"/>
     </joint>
 

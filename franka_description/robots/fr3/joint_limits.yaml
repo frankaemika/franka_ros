@@ -1,36 +1,48 @@
 joint1:
-  max_position: 2.3093
-  min_position: -2.3093
-  max_velocity: 2.00
-  max_torque: 87
-joint2:
-  max_position: 1.5133
-  min_position: -1.5133
-  max_velocity: 1.00
-  max_torque: 87
-joint3:
-  max_position: 2.4937
-  min_position: -2.4937
-  max_velocity: 1.50
-  max_torque: 87
-joint4:
-  max_position: -0.4461
-  min_position: -2.7478
-  max_velocity: 1.25
-  max_torque: 87
-joint5:
-  max_position: 2.4800
-  min_position: -2.4800
-  max_velocity: 3.00
-  max_torque: 12
-joint6:
-  max_position: 4.2094
-  min_position: 0.8521
-  max_velocity: 1.50
-  max_torque: 12
-joint7:
-  max_position: 2.6895
-  min_position: -2.6895
-  max_velocity: 3.00
-  max_torque: 12
+  limit:
+    lower:      -2.3093
+    upper:       2.3093
+    velocity:    2.0
+    effort:     87.0
 
+joint2:
+  limit:
+    lower:     -1.5133
+    upper:      1.5133
+    velocity:   1.0
+    effort:    87.0
+
+joint3:
+  limit:
+    lower:     -2.4937
+    upper:      2.4937
+    velocity:   1.50
+    effort:    87.0
+
+joint4:
+  limit:
+    lower:     -2.7478
+    upper:     -0.4461
+    velocity:   1.25
+    effort:    87.0
+
+joint5:
+  limit:
+    lower:     -2.4800
+    upper:      2.4800
+    velocity:   3.00
+    effort:    12.0
+
+joint6:
+  limit:
+    lower:      0.8521
+    upper:      4.2094
+    velocity:   1.50
+    effort:    12.0
+
+joint7:
+  limit:
+    lower:     -2.6895
+    upper:      2.6895
+    velocity:   3.00
+    effort:    12.0

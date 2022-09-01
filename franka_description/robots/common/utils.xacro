@@ -219,4 +219,23 @@
     </inertial>
   </xacro:macro>
 
+  <!-- ========================================================================= -->
+  <!-- Adds the <limit ... /> & <safety_controller/> tags given a config file    -->
+  <!-- of joint limits                                                           -->
+  <!--                                                                           -->
+  <!-- config - YAML struct defining joint limits (e.g. panda/joint_limits.yaml) -->
+  <!-- name   - Name of the joint for which to add limits to                     -->
+  <!-- ========================================================================= -->
+  <xacro:macro name="franka-limits" params="config name">
+      <xacro:property name="limits" value="${config[name]['limit']}" lazy_eval="false" />
+      <limit lower="${limits.lower}"
+             upper="${limits.upper}"
+             effort="${limits.effort}"
+             velocity="${limits.velocity}" />
+      <safety_controller k_position="100.0"
+                         k_velocity="40.0"
+                         soft_lower_limit="${limits.lower}"
+                         soft_upper_limit="${limits.upper}" />
+  </xacro:macro>
+
 </robot>
