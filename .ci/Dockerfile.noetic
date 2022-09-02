@@ -6,6 +6,7 @@ RUN apt-get update -y && apt-get install -y \
     clang-tidy-7 \
     pycodestyle \
     liborocos-kdl-dev \
+    python3-pip \
     python3-catkin-tools \
     ros-noetic-libfranka \
     ros-noetic-boost-sml \
@@ -15,3 +16,5 @@ RUN apt-get update -y && apt-get install -y \
     ros-noetic-gazebo-ros-control \
     ros-noetic-urdfdom-py \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install parameterized
