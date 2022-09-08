@@ -6,9 +6,9 @@ from urdf_parser_py.urdf import URDF, Mesh, Cylinder, Sphere
 
 class TestHandURDF(UrdfTestCase):
     def test_generate_urdf_without_args_is_possible(self):
-        self.xacro('hand.urdf.xacro') # does not throw
+        self.xacro('common/hand.urdf.xacro') # does not throw
 
 
 if __name__ == '__main__':
     import rosunit
-    rosunit.unitrun(PKG, 'hand.urdf.xacro', TestHandURDF)
+    rosunit.unitrun(PKG, 'common/hand.urdf.xacro', TestHandURDF)

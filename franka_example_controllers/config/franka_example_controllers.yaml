@@ -1,64 +1,65 @@
 joint_velocity_example_controller:
     type: franka_example_controllers/JointVelocityExampleController
+    arm_id: $(arg arm_id)
     joint_names:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
+        - $(arg arm_id)_joint1
+        - $(arg arm_id)_joint2
+        - $(arg arm_id)_joint3
+        - $(arg arm_id)_joint4
+        - $(arg arm_id)_joint5
+        - $(arg arm_id)_joint6
+        - $(arg arm_id)_joint7
 
 joint_position_example_controller:
     type: franka_example_controllers/JointPositionExampleController
     joint_names:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
+        - $(arg arm_id)_joint1
+        - $(arg arm_id)_joint2
+        - $(arg arm_id)_joint3
+        - $(arg arm_id)_joint4
+        - $(arg arm_id)_joint5
+        - $(arg arm_id)_joint6
+        - $(arg arm_id)_joint7
 
 cartesian_pose_example_controller:
     type: franka_example_controllers/CartesianPoseExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
 
 elbow_example_controller:
     type: franka_example_controllers/ElbowExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
 
 cartesian_velocity_example_controller:
     type: franka_example_controllers/CartesianVelocityExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
 
 model_example_controller:
     type: franka_example_controllers/ModelExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
 
 force_example_controller:
     type: franka_example_controllers/ForceExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
     joint_names:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
+        - $(arg arm_id)_joint1
+        - $(arg arm_id)_joint2
+        - $(arg arm_id)_joint3
+        - $(arg arm_id)_joint4
+        - $(arg arm_id)_joint5
+        - $(arg arm_id)_joint6
+        - $(arg arm_id)_joint7
 
 joint_impedance_example_controller:
     type: franka_example_controllers/JointImpedanceExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
     joint_names:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
+        - $(arg arm_id)_joint1
+        - $(arg arm_id)_joint2
+        - $(arg arm_id)_joint3
+        - $(arg arm_id)_joint4
+        - $(arg arm_id)_joint5
+        - $(arg arm_id)_joint6
+        - $(arg arm_id)_joint7
     k_gains:
         - 600.0
         - 600.0
@@ -83,15 +84,15 @@ joint_impedance_example_controller:
 
 cartesian_impedance_example_controller:
     type: franka_example_controllers/CartesianImpedanceExampleController
-    arm_id: panda
+    arm_id: $(arg arm_id)
     joint_names:
-        - panda_joint1
-        - panda_joint2
-        - panda_joint3
-        - panda_joint4
-        - panda_joint5
-        - panda_joint6
-        - panda_joint7
+        - $(arg arm_id)_joint1
+        - $(arg arm_id)_joint2
+        - $(arg arm_id)_joint3
+        - $(arg arm_id)_joint4
+        - $(arg arm_id)_joint5
+        - $(arg arm_id)_joint6
+        - $(arg arm_id)_joint7
 
 dual_arm_cartesian_impedance_example_controller:
     type: franka_example_controllers/DualArmCartesianImpedanceExampleController

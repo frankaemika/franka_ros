@@ -18,7 +18,7 @@
   <arg name="roll"        default="0"     doc="How much to rotate the base of the robot around its X-axis in [rad]?" />
   <arg name="pitch"       default="0"     doc="How much to rotate the base of the robot around its Y-axis in [rad]?" />
   <arg name="yaw"         default="0"     doc="How much to rotate the base of the robot around its Z-axis in [rad]?" />
-  <arg name="xacro_args"  default=""      doc="Additional arguments to pass to panda_arm.urdf.xacro" />
+  <arg name="xacro_args"  default=""      doc="Additional arguments to pass to panda.urdf.xacro" />
   <arg name="initial_joint_positions"
        doc="Initial joint configuration of the panda. Specify as a list of name/value pairs in form of '-J [name-of-joint] [value-in-rad]'. Default is a 90 degree bend in the elbow"
        default="-J $(arg arm_id)_joint1 0
@@ -42,7 +42,7 @@
   </include>
 
   <param name="robot_description"
-         command="xacro $(find franka_description)/robots/panda_arm.urdf.xacro
+         command="xacro $(find franka_description)/robots/panda/panda.urdf.xacro
                   gazebo:=true
                   hand:=$(arg use_gripper)
                   arm_id:=$(arg arm_id)

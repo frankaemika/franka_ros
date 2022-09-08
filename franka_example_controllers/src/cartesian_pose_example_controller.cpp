@@ -77,7 +77,7 @@ void CartesianPoseExampleController::update(const ros::Time& /* time */,
                                             const ros::Duration& period) {
   elapsed_time_ += period;
 
-  double radius = 0.3;
+  double radius = 0.15;
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_.toSec()));
   double delta_x = radius * std::sin(angle);
   double delta_z = radius * (std::cos(angle) - 1);

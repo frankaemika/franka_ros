@@ -4,8 +4,9 @@
   <arg name="load_gripper" default="true" />
   <arg name="robot_ip" />
   <arg name="publish_rate" default="30" />
+  <arg name="robot" default="panda" doc="choose your robot. Possible values: [panda, fr3]"/>
 
-  <param name="robot_description" command="$(find xacro)/xacro $(find franka_description)/robots/panda_arm.urdf.xacro hand:=$(arg load_gripper)" />
+  <param name="robot_description" command="$(find xacro)/xacro $(find franka_description)/robots/$(arg robot)/$(arg robot).urdf.xacro arm_id:=panda hand:=$(arg load_gripper)" />
 
   <node name="robot_joint_state_publisher" pkg="franka_visualization" type="robot_joint_state_publisher" output="screen">
     <rosparam command="load" file="$(find franka_visualization)/config/robot_settings.yaml" />

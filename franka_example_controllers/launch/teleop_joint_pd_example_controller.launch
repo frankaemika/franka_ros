@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="leader_ip" doc="left robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
-  <arg name="follower_ip" doc="right robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+  <arg name="leader_ip" doc="left robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda/dual_panda_example.urdf.xacro" />
+  <arg name="follower_ip" doc="right robot from user persepective standing in front of the robots for a robot setup according to $(find franka_description)/robots/dual_panda/dual_panda_example.urdf.xacro" />
 
   <arg name="robot_id" default="panda_teleop" doc="name of the 2-arm robot" />
   <arg name="debug" default="false" doc="publish debug information and enable dynamic parameter tuning" />
@@ -17,7 +17,7 @@
     <arg name="robot_id" value="$(arg robot_id)" />
     <arg name="robot_ips" value="{leader/robot_ip: $(arg leader_ip), follower/robot_ip: $(arg follower_ip)}" />
     <arg name="hw_config_file" value="$(find franka_example_controllers)/config/teleop_joint_pd_example_control_node.yaml" />
-    <arg name="robot" value="$(find franka_description)/robots/dual_panda_example.urdf.xacro" />
+    <arg name="robot" value="$(find franka_description)/robots/dual_panda/dual_panda_example.urdf.xacro" />
     <arg name="args" value="arm_id_1:=leader arm_id_2:=follower" />
     <arg name="controllers_file" value="$(find franka_example_controllers)/config/teleop_state_controllers.yaml" />
     <arg name="controllers_to_start" value="leader_state_controller follower_state_controller" />

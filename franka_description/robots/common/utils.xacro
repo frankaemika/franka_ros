@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <!-- Load interial properties. Property is implicitly passed to macros. -->
-  <xacro:property name="inertial_config" value="$(find franka_description)/robots/inertial.yaml"/>
+  <!-- Load inertial properties. Property is implicitly passed to macros. -->
+  <xacro:property name="inertial_config" value="$(find franka_description)/robots/common/inertial.yaml"/>
   <xacro:property name="inertial" value="${xacro.load_yaml(inertial_config)}"/>
 
   <!-- ============================================================== -->
-  <!-- Macro to add an <interial> tag based on yaml-load properties   -->
+  <!-- Macro to add an <inertial> tag based on yaml-load properties   -->
   <!--                                                                -->
   <!-- name:     Name of the robot link (without prefix)              -->
   <!-- inertial: Dictionary of inertia properties (see inertial.yaml) -->
@@ -217,6 +217,25 @@
                iyy="${1./12 * mass * (3 * radius**2 + h**2)}" iyz = "0"
                izz="${1./2  * mass * radius**2}" />
     </inertial>
+  </xacro:macro>
+
+  <!-- ========================================================================= -->
+  <!-- Adds the <limit ... /> & <safety_controller/> tags given a config file    -->
+  <!-- of joint limits                                                           -->
+  <!--                                                                           -->
+  <!-- config - YAML struct defining joint limits (e.g. panda/joint_limits.yaml) -->
+  <!-- name   - Name of the joint for which to add limits to                     -->
+  <!-- ========================================================================= -->
+  <xacro:macro name="franka-limits" params="config name">
+      <xacro:property name="limits" value="${config[name]['limit']}" lazy_eval="false" />
+      <limit lower="${limits.lower}"
+             upper="${limits.upper}"
+             effort="${limits.effort}"
+             velocity="${limits.velocity}" />
+      <safety_controller k_position="100.0"
+                         k_velocity="40.0"
+                         soft_lower_limit="${limits.lower}"
+                         soft_upper_limit="${limits.upper}" />
   </xacro:macro>
 
 </robot>
