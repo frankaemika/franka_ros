@@ -29,6 +29,8 @@
                 -J $(arg arm_id)_joint7 0.785398163397"
        />
 
+  <arg name="launch_interactive_marker" default="false"/>
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg gazebo)">
     <arg name="world_name" value="$(arg world)"/>
     <arg name="paused" value="true"/>
@@ -43,8 +45,7 @@
                     hand:=$(arg use_gripper)
                     arm_id:=$(arg arm_id)
                     xyz:='$(arg x) $(arg y) $(arg z)'
-                    rpy:='$(arg roll) $(arg pitch) $(arg yaw)'">
-    </param>
+                    rpy:='$(arg roll) $(arg pitch) $(arg yaw)'"/>
 
     <rosparam file="$(find franka_gazebo)/config/franka_hw_sim.yaml" subst_value="true" />
     <rosparam file="$(find franka_gazebo)/config/sim_controllers.yaml" subst_value="true" />
@@ -92,15 +93,18 @@
     </node>
 
     <!-- Start only if cartesian_impedance_example_controller -->
-    <node name="interactive_marker"
-          pkg="franka_example_controllers"
-          type="interactive_marker.py"
-          if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
-      <param name="link_name" value="$(arg arm_id)_link0" />
-    </node>
+    <group if="$(arg launch_interactive_marker)">
+      <node name="interactive_marker"
+            pkg="franka_example_controllers"
+            type="interactive_marker.py"
+            if="$(eval arg('controller') == 'cartesian_impedance_example_controller')">
+        <param name="link_name" value="$(arg arm_id)_link0" />
+      </node>
+    </group>
+
+    <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find teleimpedance-m5core2)/rviz/new_config.rviz" if="$(arg rviz)"/>
 
   </group>
 
-  <node  pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_gazebo)/config/franka_sim_description_with_marker.rviz" if="$(arg rviz)"/>
 
 </launch>

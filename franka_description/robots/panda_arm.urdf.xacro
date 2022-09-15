@@ -35,6 +35,16 @@
       <xacro:gazebo-joint joint="${arm_id}_finger_joint2" transmission="hardware_interface/EffortJointInterface" />
     </xacro:if>
 
+    <xacro:include filename="$(find open_vico_cameras)/urdf/realsense_d435.xacro"/>
+
+    <xacro:realsense_d435 parent="${arm_id}_link8"
+        camera_name_prefix="realsense_d435_camera1"
+        enable_pointCloud="true"
+        align_depth="false"
+        enable_gazebo_plugin="true">
+        <origin xyz="-0.045 0.025 -0.04" rpy="0.0 -1.3 -0.75"/>
+    </xacro:realsense_d435>
+
     <!-- Gazebo requires a joint to a link called "world" for statically mounted robots -->
     <link name="world" />
     <joint name="world_joint" type="fixed">
@@ -65,6 +75,24 @@
         <robotSimType>franka_gazebo/FrankaHWSim</robotSimType>
       </plugin>
       <self_collide>true</self_collide>
+    </gazebo>
+
+    <gazebo>
+      <plugin name="gazebo_grasp_fix" filename="libgazebo_grasp_fix.so">
+       <arm>
+          <arm_name>panda</arm_name>
+          <palm_link> panda_link7  </palm_link>
+          <gripper_link> panda_leftfinger </gripper_link>
+          <gripper_link> panda_rightfinger </gripper_link>
+        </arm>
+      <forces_angle_tolerance>90</forces_angle_tolerance>
+      <update_rate>4</update_rate>
+      <grip_count_threshold>4</grip_count_threshold>
+      <max_grip_count>8</max_grip_count> <!-- this should be at least double than grip_count_threshold -->
+      <release_tolerance>0.00001</release_tolerance>
+      <disable_collisions_on_attach>false</disable_collisions_on_attach>
+      <contact_topic>_default_topic_</contact_topic>
+      </plugin>
     </gazebo>
   </xacro:if>
 
