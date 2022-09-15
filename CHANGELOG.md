@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.10.1 - 2022-09-15
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Fix examples not working on melodic due to non-ascii symbols in comments of `franka_example_controllers.yaml`.
+  * `franka_example_controllers`: The `link_name` in  `cartesian_impedance_example_controller.launch` is now determined over the `arm_id`.
+
 ## 0.10.0 - 2022-09-02
 
 Requires `libfranka` >= 0.8.0
