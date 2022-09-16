@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_gazebo</name>
-  <version>0.10.0</version>
+  <version>0.10.1</version>
   <description>This package offers the FrankaHWSim Class to simulate a Franka Robot in Gazebo</description>
 
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>

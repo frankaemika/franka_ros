@@ -152,6 +152,6 @@ teleop_joint_pd_example_controller:
        drift_comp_gains: [4.3, 4.3, 4.3, 4.3, 4.3, 4.3, 4.3]
        dq_max_lower: [0.8, 0.8, 0.8, 0.8, 2.5, 2.5, 2.5] # [rad/s]
        dq_max_upper: [2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5] # [rad/s]
-       ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s²]
-       ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s²]
+       ddq_max_lower: [0.8, 0.8, 0.8, 0.8, 10.0, 10.0, 10.0] # [rad/s^2]
+       ddq_max_upper: [6.0, 6.0, 6.0, 6.0, 15.0, 20.0, 20.0] # [rad/s^2]
        contact_force_threshold: 5.0 # [N]
