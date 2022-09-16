@@ -126,6 +126,15 @@ pipeline {
                             }
                         }
                     }
+                    stage('Check for Non-ASCII') {
+                        when {
+                            environment name: 'DISTRO', value: 'melodic'
+                        }
+                        steps {
+                            // Melodic has problems with non-ascii chars in YAML files
+                            sh '! grep -rIP -n "[\\x80-\\xFF]" --include="*.yaml" src/franka_ros'
+                        }
+                    }
                     stage('Check commit history sync') {
                         when {
                             allOf {
