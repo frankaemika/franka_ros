@@ -37,7 +37,7 @@ bool ModelKDL::isCloseToSingularity(const KDL::Jacobian& jacobian) const {
     return false;
   }
   Eigen::Matrix<double, 6, 6> mat = jacobian.data * jacobian.data.transpose();
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd(mat, Eigen::ComputeFullU | Eigen::ComputeFullV);
+  Eigen::JacobiSVD<Eigen::Matrix<double, 6, 6>> svd(mat);
   double critical = svd.singularValues().tail(1)(0);
   return critical < this->singularity_threshold_;
 }
