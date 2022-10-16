@@ -7,7 +7,7 @@ namespace franka_hw {
 TriggerRate::TriggerRate(double rate) : period_(1.0 / rate), time_stamp_(ros::Time::now()) {}
 
 bool TriggerRate::operator()() {
-  if ((ros::Time::now() - time_stamp_).toSec() > period_) {
+  if ((ros::Time::now() - time_stamp_).toSec() >= period_) {
     time_stamp_ = ros::Time::now();
     return true;
   }
