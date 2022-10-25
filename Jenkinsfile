@@ -3,6 +3,9 @@ pipeline {
     triggers {
         pollSCM('H/5 * * * *')
     }
+    libraries {
+        lib('fe-pipeline-steps@1.5.0')
+    }
     options {
         checkoutToSubdirectory('src/franka_ros')
         parallelsAlwaysFailFast()
@@ -114,7 +117,7 @@ pipeline {
                             HOME=sh(script: 'pwd', returnStdout: true).trim()
                         }
                         steps {
-                            sh ''' 
+                            sh '''
                                 . /opt/ros/${DISTRO}/setup.sh
                                 ${BUILD_TOOL} run_tests -j1
                                 catkin_test_results
@@ -128,11 +131,13 @@ pipeline {
                     }
                     stage('Check for Non-ASCII') {
                         when {
+                            // Melodic has problems with non-ascii chars in YAML files
                             environment name: 'DISTRO', value: 'melodic'
                         }
                         steps {
-                            // Melodic has problems with non-ascii chars in YAML files
-                            sh '! grep -rIP -n "[\\x80-\\xFF]" --include="*.yaml" src/franka_ros'
+                            dir('src/franka_ros') {
+                                feEnsureAsciiFileContents('*.yaml')
+                            }
                         }
                     }
                     stage('Check commit history sync') {
