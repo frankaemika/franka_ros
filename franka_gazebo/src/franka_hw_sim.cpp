@@ -482,7 +482,7 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
     } else if (joint->control_method == POSITION) {
       effort = positionControl(*joint, joint->desired_position, period);
     } else if (joint->control_method == VELOCITY) {
-      velocityControl(*joint, joint->desired_velocity, period);
+      effort = velocityControl(*joint, joint->desired_velocity, period);
     } else if (joint->control_method == EFFORT) {
       // Feed-forward commands in effort control
       effort = joint->command;
