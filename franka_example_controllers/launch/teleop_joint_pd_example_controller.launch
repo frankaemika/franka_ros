@@ -39,6 +39,6 @@
 
     <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(eval arg('debug') or arg('load_gripper'))" />
 
-    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/teleop_joint_pd_example.rviz" if="$(arg rviz)" />
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/teleop_joint_pd_example.rviz --splash-screen $(find franka_visualization)/splash.png" if="$(arg rviz)" />
   </group>
 </launch>
