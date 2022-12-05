@@ -26,5 +26,5 @@
   </node>
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-  <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_visualization)/launch/franka_visualization.rviz"/>
+  <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_visualization)/launch/franka_visualization.rviz -f $(arg robot)_link0 --splash-screen $(find franka_visualization)/splash.png"/>
 </launch>

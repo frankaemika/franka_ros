@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.10.2 - UNRELEASED
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_gazebo`: Offer both `panda.launch` and `fr3.launch`
+
 ## 0.10.1 - 2022-09-15
 
 Requires `libfranka` >= 0.8.0

@@ -8,7 +8,7 @@
   <arg name="rviz"        default="false" doc="Should RVIz be launched?" />
 
   <!-- Robot Customization -->
-  <arg name="arm_id"      default="panda" doc="Name of the robot to spawn" />
+  <arg name="arm_id"      default="fr3"   doc="Name of the robot to spawn" />
   <arg name="use_gripper" default="true"  doc="Should a franka hand be mounted on the flange?" />
   <arg name="controller"  default=" "     doc="Which example controller should be started? (One of {cartesian_impedance,model,force,joint_position,joint_velocity}_example_controller)" />
   <arg name="x"           default="0"     doc="How far forward to place the base of the robot in [m]?" />
@@ -39,7 +39,7 @@
     <arg name="world" value="$(arg world)" />
     <arg name="rviz" value="$(arg rviz)" />
 
-    <arg name="robot" value="panda" />
+    <arg name="robot" value="fr3" />
     <arg name="arm_id" value="$(arg arm_id)" />
     <arg name="use_gripper" value="$(arg use_gripper)" />
     <arg name="controller" value="$(arg controller)" />

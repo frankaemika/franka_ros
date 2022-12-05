@@ -18,6 +18,6 @@
     <node name="interactive_marker_left" pkg="franka_example_controllers" type="dual_arm_interactive_marker.py"
       args="--right_arm_id panda_1 --left_arm_id panda_2" required="false" output="screen" />
     <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" required="false" if="$(arg rqt)"/>
-    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_dual_description_with_marker.rviz" if="$(arg rviz)"/>
+    <node pkg="rviz" type="rviz" output="screen" name="rviz" args="-d $(find franka_example_controllers)/launch/rviz/franka_dual_description_with_marker.rviz --splash-screen $(find franka_visualization)/splash.png" if="$(arg rviz)"/>
   </group>
 </launch>
