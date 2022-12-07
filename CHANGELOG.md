@@ -4,7 +4,8 @@
 
 Requires `libfranka` >= 0.8.0
 
-  * `franka_gazebo`: Offer both `panda.launch` and `fr3.launch`
+  * `franka_gazebo`: Offer both `panda.launch` and `fr3.launch`.
+  * `franka_gazebo`: Fix velocity control by adding the missing effort.
 
 ## 0.10.1 - 2022-09-15
 
