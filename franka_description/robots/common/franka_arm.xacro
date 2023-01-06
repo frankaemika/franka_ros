@@ -135,5 +135,14 @@
       <parent link="${arm_id}_link7"/>
       <child link="${arm_id}_link8"/>
     </joint>
+
+    <link name="${arm_id}_link9"/>
+
+    <joint name="${arm_id}_link9_joint" type="fixed">
+      <origin xyz="0 0 0.103" rpy="0 0 0" />
+      <parent link="${arm_id}_link8" />
+      <child link="${arm_id}_link9" />
+    </joint>
+
   </xacro:macro>
 </robot>
