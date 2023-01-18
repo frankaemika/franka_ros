@@ -124,6 +124,10 @@ int main(int argc, char** argv) {
           control_manager.update(now, now - last_time);
           franka_control.checkJointLimits();
           last_time = now;
+
+          if (has_error && franka_control.robotMode() == franka::RobotMode::kIdle) {
+            has_error = false;
+          }
         } catch (const std::logic_error& e) {
         }
       } else {
@@ -135,6 +139,7 @@ int main(int argc, char** argv) {
       }
     }
 
+    ROS_INFO_THROTTLE(1, "franka_control: controller activated");
     if (franka_control.connected()) {
       try {
         // Run control loop. Will exit if the controller is switched.
@@ -156,7 +161,7 @@ int main(int argc, char** argv) {
         has_error = true;
       }
     }
-    ROS_INFO_THROTTLE(1, "franka_control, main loop");
+    ROS_INFO_THROTTLE(1, "franka_control: main loop");
   }
 
   return 0;
