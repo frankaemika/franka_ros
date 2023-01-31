@@ -19,8 +19,7 @@ if(NOT Franka_FOUND)
   find_package(Franka 0.8.0 REQUIRED)
 endif()
 
-# merge Franka + catkin LIBRARIES/INCLUDE_DIRS in topological order
-list_insert_in_workspace_order(catkin_LIBRARIES ${Franka_LIBRARIES} ${catkin_LIBRARIES})
+# merge Franka + catkin INCLUDE_DIRS in topological order
 list_insert_in_workspace_order(catkin_INCLUDE_DIRS ${Franka_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_action_files(
