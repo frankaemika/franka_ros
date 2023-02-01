@@ -124,6 +124,31 @@ class FrankaRobotUrdfTest(UrdfTestCase):
         # Check if robot is directly connected to the world link
         self.assertJointBetween(urdf, 'world', arm_id + '_link0', type="fixed")
 
+    def test_parent_arg_will_add_fixed_joint(self):
+        arm_id = self.robot
+        parent = "foo"
+        urdf = self.xacro(self.file, args="gazebo:=true parent:=%s" % parent)
+        self.assertJointBetween(urdf, parent, arm_id + "_link0", type="fixed")
+
+    def test_parent_arg_will_not_top_level_link(self):
+        arm_id = self.robot
+        parent = "foo"
+        urdf = self.xacro(self.file, args="gazebo:=true parent:=%s" % parent)
+        with self.assertRaises(AssertionError):
+            urdf.get_root()
+
+    def test_xyz_will_apply_fixed_offset_to_parent(self):
+        xyz = [0, 1, 2]
+        urdf = self.xacro(self.file, args="gazebo:=true xyz:='%s'" % " ".join(str(x) for x in xyz))
+        joint = urdf.joint_map['world_joint']
+        self.assertListEqual(joint.origin.xyz, xyz)
+
+    def test_rpy_will_apply_fixed_offset_to_parent(self):
+        rpy = [3, 4, 5]
+        urdf = self.xacro(self.file, args="gazebo:=true rpy:='%s'" % " ".join(str(x) for x in rpy))
+        joint = urdf.joint_map['world_joint']
+        self.assertListEqual(joint.origin.rpy, rpy)
+
     def test_gazebo_arg_will_insert_gazebo_ros_control_plugin(self):
         urdf = self.xacro(self.file, args='gazebo:=true')
 
