@@ -16,6 +16,7 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
+#include <array>
 #include <boost/optional.hpp>
 #include <boost_sml/sml.hpp>
 #include <cmath>
@@ -24,10 +25,14 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
 
 namespace franka_gazebo {
 
 const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of tau_ext_hat_filtered
+const std::array<std::string, 9> kRobotJointSuffixes = {
+    "_joint1", "_joint2", "_joint3",        "_joint4",       "_joint5",
+    "_joint6", "_joint7", "_finger_joint1", "_finger_joint2"};
 
 /**
  * A custom implementation of a [gazebo_ros_control](http://wiki.ros.org/gazebo_ros_control) plugin,

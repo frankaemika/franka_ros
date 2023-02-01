@@ -16,6 +16,7 @@
 #include <std_msgs/Bool.h>
 #include <std_srvs/SetBool.h>
 #include <Eigen/Dense>
+#include <algorithm>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/optional.hpp>
 #include <iostream>
@@ -112,6 +113,16 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
     // Fill a 'Joint' struct which holds all necessary data
     auto joint = std::make_shared<franka_gazebo::Joint>();
     joint->name = transmission.joints_[0].name_;
+
+    if (std::none_of(kRobotJointSuffixes.begin(), kRobotJointSuffixes.end(),
+                     [&](auto suffix) { return joint->name == arm_id_ + suffix; })) {
+      ROS_WARN_STREAM_NAMED("franka_hw_sim",
+                            "Joint '" << joint->name << "' contains a '" << transmission.type_
+                                      << "' transmission, but it's not part of the Franka robot. "
+                                         "Ignoring this joint in FrankaHWSim");
+      continue;
+    }
+
     if (urdf == nullptr) {
       ROS_ERROR_STREAM_NAMED(
           "franka_hw_sim", "Could not find any URDF model. Was it loaded on the parameter server?");
@@ -153,7 +164,11 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   // Register all supported command interfaces
   for (const auto& transmission : transmissions) {
     for (const auto& k_interface : transmission.joints_[0].hardware_interfaces_) {
-      auto joint = this->joints_[transmission.joints_[0].name_];
+      auto name = transmission.joints_[0].name_;
+      if (this->joints_.count(name) == 0) {
+        continue;
+      }
+      auto joint = this->joints_[name];
       if (transmission.type_ == "transmission_interface/SimpleTransmission") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                    << joint->name << "': " << k_interface);
