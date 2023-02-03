@@ -31,6 +31,9 @@ if(NOT Franka_FOUND)
   find_package(Franka 0.8.0 REQUIRED)
 endif()
 
+# merge Franka + INCLUDE_DIRS in topological order
+list_insert_in_workspace_order(catkin_INCLUDE_DIRS ${Franka_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
 add_message_files(FILES
   JointTorqueComparison.msg
 )
@@ -97,7 +100,6 @@ target_link_libraries(franka_example_controllers PUBLIC
 )
 
 target_include_directories(franka_example_controllers SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
