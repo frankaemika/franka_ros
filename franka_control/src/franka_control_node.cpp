@@ -137,6 +137,7 @@ int main(int argc, char** argv) {
           }
         } catch (const std::logic_error& e) {
         }
+        std::this_thread::yield();
       } else {
         std::this_thread::sleep_for(1ms);
       }
