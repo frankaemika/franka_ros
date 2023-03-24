@@ -48,6 +48,13 @@ int main(int argc, char** argv) {
         std::make_unique<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
             node_handle, "error_recovery",
             [&](const franka_msgs::ErrorRecoveryGoalConstPtr&) {
+              if (!has_error) {
+                recovery_action_server->setSucceeded();
+                ROS_WARN(
+                    "Error recovery is unnecessary as no errors have been detected currently.");
+                return;
+              }
+
               try {
                 std::lock_guard<std::mutex> lock(franka_control.robotMutex());
                 robot.automaticErrorRecovery();
