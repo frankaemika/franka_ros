@@ -8,6 +8,7 @@ Requires `libfranka` >= 0.8.0
   * `franka_gazebo`: Fix velocity control by adding the missing effort.
   * `franka_control`: Clear the error flag if the robot is in `kIdle` mode, i.e. ready to move.
   * Fix a possible compilation error by sorting include directories by topological order ([#319](https://github.com/frankaemika/franka_ros/issues/319)).
+  * `franka_control`: Fix a bug where `error_recovery` actions recover future errors ([#316](https://github.com/frankaemika/franka_ros/issues/316)).
 
 ## 0.10.1 - 2022-09-15
 
