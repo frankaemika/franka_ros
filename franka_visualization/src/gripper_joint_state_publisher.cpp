@@ -21,10 +21,8 @@ int main(int argc, char** argv) {
   ros::Rate rate(publish_rate);
 
   sensor_msgs::JointState states;
-  states.effort.resize(joint_names.size());
   states.name.resize(joint_names.size());
   states.position.resize(joint_names.size());
-  states.velocity.resize(joint_names.size());
 
   for (size_t i = 0; i < joint_names.size(); i++) {
     states.name[i] = joint_names[i];
@@ -39,9 +37,8 @@ int main(int argc, char** argv) {
       franka::GripperState gripper_state = gripper.readOnce();
       states.header.stamp = ros::Time::now();
       for (size_t i = 0; i < joint_names.size(); i++) {
+        // can only report gripper joint positions: neither velocity nor effort are available
         states.position[i] = gripper_state.width * 0.5;
-        states.velocity[i] = 0.0;
-        states.effort[i] = 0.0;
       }
       publisher.publish(states);
       ros::spinOnce();
