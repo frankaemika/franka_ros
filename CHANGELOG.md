@@ -10,6 +10,8 @@ Requires `libfranka` >= 0.8.0
   * `franka_control`: Fix unexpected long delay when calling error recovery ([#317](https://github.com/frankaemika/franka_ros/issues/317))
   * Fix a possible compilation error by sorting include directories by topological order ([#319](https://github.com/frankaemika/franka_ros/issues/319)).
   * `franka_control`: Fix a bug where `error_recovery` actions recover future errors ([#316](https://github.com/frankaemika/franka_ros/issues/316)).
+  * `franka_gazebo`: `FrankaHWSim` only acts on joints belonging to a Franka robot. This allows to combine a Franka robot and others (like mobile platforms) in same URDF ([#313](https://github.com/frankaemika/franka_ros/issues/313))
+  * `franka_description`: `<xacro:franka_robot/>` macro now supports to customize the `parent` frame and its `xyz` + `rpy` offset
 
 ## 0.10.1 - 2022-09-15
 
