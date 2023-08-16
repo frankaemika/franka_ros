@@ -12,6 +12,7 @@ Requires `libfranka` >= 0.8.0
   * `franka_control`: Fix a bug where `error_recovery` actions recover future errors ([#316](https://github.com/frankaemika/franka_ros/issues/316)).
   * `franka_gazebo`: `FrankaHWSim` only acts on joints belonging to a Franka robot. This allows to combine a Franka robot and others (like mobile platforms) in same URDF ([#313](https://github.com/frankaemika/franka_ros/issues/313))
   * `franka_description`: `<xacro:franka_robot/>` macro now supports to customize the `parent` frame and its `xyz` + `rpy` offset
+  * `franka_hw`: Fix the bug where the previous controller is still running after switching the controller. ([#326](https://github.com/frankaemika/franka_ros/issues/326))
 
 ## 0.10.1 - 2022-09-15
 
