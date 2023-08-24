@@ -4,10 +4,11 @@ import rospy
 import tf.transformations
 import numpy as np
 
-from interactive_markers.interactive_marker_server import \
-    InteractiveMarkerServer, InteractiveMarkerFeedback
-from visualization_msgs.msg import InteractiveMarker, \
-    InteractiveMarkerControl
+from interactive_markers.interactive_marker_server import (
+    InteractiveMarkerServer,
+    InteractiveMarkerFeedback,
+)
+from visualization_msgs.msg import InteractiveMarker, InteractiveMarkerControl
 from geometry_msgs.msg import PoseStamped
 from franka_msgs.msg import FrankaState
 
@@ -25,29 +26,37 @@ def publisher_callback(msg, link_name):
 
 def process_feedback(feedback):
     if feedback.event_type == InteractiveMarkerFeedback.POSE_UPDATE:
-        marker_pose.pose.position.x = max([min([feedback.pose.position.x,
-                                          position_limits[0][1]]),
-                                          position_limits[0][0]])
-        marker_pose.pose.position.y = max([min([feedback.pose.position.y,
-                                          position_limits[1][1]]),
-                                          position_limits[1][0]])
-        marker_pose.pose.position.z = max([min([feedback.pose.position.z,
-                                          position_limits[2][1]]),
-                                          position_limits[2][0]])
+        marker_pose.pose.position.x = max(
+            [
+                min([feedback.pose.position.x, position_limits[0][1]]),
+                position_limits[0][0],
+            ]
+        )
+        marker_pose.pose.position.y = max(
+            [
+                min([feedback.pose.position.y, position_limits[1][1]]),
+                position_limits[1][0],
+            ]
+        )
+        marker_pose.pose.position.z = max(
+            [
+                min([feedback.pose.position.z, position_limits[2][1]]),
+                position_limits[2][0],
+            ]
+        )
         marker_pose.pose.orientation = feedback.pose.orientation
     server.applyChanges()
 
 
 def wait_for_initial_pose():
-    msg = rospy.wait_for_message("franka_state_controller/franka_states",
-                                 FrankaState)  # type: FrankaState
+    msg = rospy.wait_for_message(
+        "franka_state_controller/franka_states", FrankaState
+    )  # type: FrankaState
 
-    initial_quaternion = \
-        tf.transformations.quaternion_from_matrix(
-            np.transpose(np.reshape(msg.O_T_EE,
-                                    (4, 4))))
-    initial_quaternion = initial_quaternion / \
-        np.linalg.norm(initial_quaternion)
+    initial_quaternion = tf.transformations.quaternion_from_matrix(
+        np.transpose(np.reshape(msg.O_T_EE, (4, 4)))
+    )
+    initial_quaternion = initial_quaternion / np.linalg.norm(initial_quaternion)
     marker_pose.pose.orientation.x = initial_quaternion[0]
     marker_pose.pose.orientation.y = initial_quaternion[1]
     marker_pose.pose.orientation.z = initial_quaternion[2]
@@ -64,21 +73,21 @@ if __name__ == "__main__":
 
     wait_for_initial_pose()
 
-    pose_pub = rospy.Publisher(
-        "equilibrium_pose", PoseStamped, queue_size=10)
+    pose_pub = rospy.Publisher("equilibrium_pose", PoseStamped, queue_size=10)
     server = InteractiveMarkerServer("equilibrium_pose_marker")
     int_marker = InteractiveMarker()
     int_marker.header.frame_id = link_name
     int_marker.scale = 0.3
     int_marker.name = "equilibrium_pose"
-    int_marker.description = ("Equilibrium Pose\nBE CAREFUL! "
-                              "If you move the \nequilibrium "
-                              "pose the robot will follow it\n"
-                              "so be aware of potential collisions")
+    int_marker.description = (
+        "Equilibrium Pose\nBE CAREFUL! "
+        "If you move the \nequilibrium "
+        "pose the robot will follow it\n"
+        "so be aware of potential collisions"
+    )
     int_marker.pose = marker_pose.pose
     # run pose publisher
-    rospy.Timer(rospy.Duration(0.005),
-                lambda msg: publisher_callback(msg, link_name))
+    rospy.Timer(rospy.Duration(0.005), lambda msg: publisher_callback(msg, link_name))
 
     # insert a box
     control = InteractiveMarkerControl()
