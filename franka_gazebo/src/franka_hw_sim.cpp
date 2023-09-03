@@ -36,7 +36,7 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           const urdf::Model* const urdf,
                           std::vector<transmission_interface::TransmissionInfo> transmissions) {
   model_nh.param<std::string>("arm_id", this->arm_id_, robot_namespace);
-  if (this->arm_id_ != robot_namespace) {
+  if (robot_namespace != "/" && this->arm_id_ != robot_namespace) {
     ROS_WARN_STREAM_NAMED(
         "franka_hw_sim",
         "Caution: Robot names differ! Read 'arm_id: "
