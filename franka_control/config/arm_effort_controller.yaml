@@ -1,0 +1,12 @@
+# Small arm effort controller example config file.
+# NOTE: Joints are expected to be controlled as a group.
+arm_effort_controller:
+  type: effort_controllers/JointGroupEffortController
+  joints:
+    - $(arg arm_id)_joint1
+    - $(arg arm_id)_joint2
+    - $(arg arm_id)_joint3
+    - $(arg arm_id)_joint4
+    - $(arg arm_id)_joint5
+    - $(arg arm_id)_joint6
+    - $(arg arm_id)_joint7
