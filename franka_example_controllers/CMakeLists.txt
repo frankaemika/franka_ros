@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   franka_gripper
   geometry_msgs
   hardware_interface
+  joint_limits_interface
   tf
   tf_conversions
   message_generation
@@ -20,10 +21,18 @@ find_package(catkin REQUIRED COMPONENTS
   realtime_tools
   roscpp
   rospy
+  urdf
+  visualization_msgs
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(Franka 0.7.0 REQUIRED)
+find_package(Franka 0.9.0 QUIET)
+if(NOT Franka_FOUND)
+  find_package(Franka 0.8.0 REQUIRED)
+endif()
+
+# merge Franka + INCLUDE_DIRS in topological order
+list_insert_in_workspace_order(catkin_INCLUDE_DIRS ${Franka_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_message_files(FILES
   JointTorqueComparison.msg
@@ -50,12 +59,15 @@ catkin_package(
     franka_gripper
     geometry_msgs
     hardware_interface
+    joint_limits_interface
     tf
     tf_conversions
     message_runtime
     pluginlib
     realtime_tools
     roscpp
+    urdf
+    visualization_msgs
   DEPENDS Franka
 )
 
@@ -71,6 +83,7 @@ add_library(franka_example_controllers
   src/force_example_controller.cpp
   src/dual_arm_cartesian_impedance_example_controller.cpp
   src/teleop_joint_pd_example_controller.cpp
+  src/joint_wall.cpp
 )
 
 add_dependencies(franka_example_controllers
@@ -87,7 +100,6 @@ target_link_libraries(franka_example_controllers PUBLIC
 )
 
 target_include_directories(franka_example_controllers SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )

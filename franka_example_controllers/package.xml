@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_example_controllers</name>
-  <version>0.8.2</version>
+  <version>0.10.1</version>
   <description>franka_example_controllers provides example code for controlling Franka Emika research robots with ros_control</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -25,21 +25,22 @@
   <depend>franka_gripper</depend>
   <depend>geometry_msgs</depend>
   <depend>hardware_interface</depend>
+  <depend>joint_limits_interface</depend>
   <depend>tf</depend>
   <depend>tf_conversions</depend>
   <depend>libfranka</depend>
   <depend>pluginlib</depend>
   <depend>realtime_tools</depend>
   <depend>roscpp</depend>
+  <depend>urdf</depend>
+  <depend>visualization_msgs</depend>
 
   <exec_depend>franka_control</exec_depend>
   <exec_depend>franka_description</exec_depend>
   <exec_depend>message_runtime</exec_depend>
-  <exec_depend>panda_moveit_config</exec_depend>
-  <exec_depend>moveit_commander</exec_depend>
   <exec_depend>rospy</exec_depend>
 
   <export>
-    <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml"/>
+    <controller_interface plugin="${prefix}/franka_example_controllers_plugin.xml" />
   </export>
 </package>

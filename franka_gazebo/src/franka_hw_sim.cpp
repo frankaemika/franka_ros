@@ -1,4 +1,6 @@
 #include <angles/angles.h>
+#include <controller_manager_msgs/ListControllers.h>
+#include <controller_manager_msgs/SwitchController.h>
 #include <franka/duration.h>
 #include <franka_example_controllers/pseudo_inversion.h>
 #include <franka_gazebo/franka_hw_sim.h>
@@ -11,7 +13,10 @@
 #include <franka_msgs/SetLoad.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <joint_limits_interface/joint_limits_urdf.h>
+#include <std_msgs/Bool.h>
+#include <std_srvs/SetBool.h>
 #include <Eigen/Dense>
+#include <algorithm>
 #include <boost/algorithm/clamp.hpp>
 #include <boost/optional.hpp>
 #include <iostream>
@@ -19,6 +24,11 @@
 #include <string>
 
 namespace franka_gazebo {
+
+using actionlib::SimpleActionServer;
+using boost::sml::state;
+
+FrankaHWSim::FrankaHWSim() : sm_(this->robot_state_, this->joints_) {}
 
 bool FrankaHWSim::initSim(const std::string& robot_namespace,
                           ros::NodeHandle model_nh,
@@ -36,6 +46,33 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
 
   this->robot_ = parent;
   this->robot_initialized_ = false;
+
+  this->robot_initialized_pub_ = model_nh.advertise<std_msgs::Bool>("initialized", 1);
+  std_msgs::Bool msg;
+  msg.data = static_cast<decltype(msg.data)>(false);
+  this->robot_initialized_pub_.publish(msg);
+
+  this->action_recovery_ = std::make_unique<SimpleActionServer<franka_msgs::ErrorRecoveryAction>>(
+      model_nh, "franka_control/error_recovery",
+      [&](const franka_msgs::ErrorRecoveryGoalConstPtr& goal) {
+        if (this->robot_state_.robot_mode == franka::RobotMode::kUserStopped) {
+          ROS_WARN_STREAM_NAMED("franka_hw_sim",
+                                "Cannot recover errors since the user stop seems still pressed");
+          this->action_recovery_->setSucceeded();
+          return;
+        }
+        try {
+          restartControllers();
+          ROS_INFO_NAMED("franka_hw_sim", "Recovered from error");
+          this->sm_.process_event(ErrorRecovery());
+          this->action_recovery_->setSucceeded();
+        } catch (const std::runtime_error& e) {
+          ROS_WARN_STREAM_NAMED("franka_hw_sim", "Error recovery failed: " << e.what());
+          this->action_recovery_->setAborted();
+        }
+      },
+      false);
+  this->action_recovery_->start();
 
 #if GAZEBO_MAJOR_VERSION >= 8
   gazebo::physics::PhysicsEnginePtr physics = gazebo::physics::get_world()->Physics();
@@ -76,6 +113,16 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
     // Fill a 'Joint' struct which holds all necessary data
     auto joint = std::make_shared<franka_gazebo::Joint>();
     joint->name = transmission.joints_[0].name_;
+
+    if (std::none_of(kRobotJointSuffixes.begin(), kRobotJointSuffixes.end(),
+                     [&](auto suffix) { return joint->name == arm_id_ + suffix; })) {
+      ROS_WARN_STREAM_NAMED("franka_hw_sim",
+                            "Joint '" << joint->name << "' contains a '" << transmission.type_
+                                      << "' transmission, but it's not part of the Franka robot. "
+                                         "Ignoring this joint in FrankaHWSim");
+      continue;
+    }
+
     if (urdf == nullptr) {
       ROS_ERROR_STREAM_NAMED(
           "franka_hw_sim", "Could not find any URDF model. Was it loaded on the parameter server?");
@@ -117,7 +164,11 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
   // Register all supported command interfaces
   for (const auto& transmission : transmissions) {
     for (const auto& k_interface : transmission.joints_[0].hardware_interfaces_) {
-      auto joint = this->joints_[transmission.joints_[0].name_];
+      auto name = transmission.joints_[0].name_;
+      if (this->joints_.count(name) == 0) {
+        continue;
+      }
+      auto joint = this->joints_[name];
       if (transmission.type_ == "transmission_interface/SimpleTransmission") {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", "Found transmission interface of joint '"
                                                    << joint->name << "': " << k_interface);
@@ -127,20 +178,15 @@ bool FrankaHWSim::initSim(const std::string& robot_namespace,
         }
         if (k_interface == "hardware_interface/PositionJointInterface") {
           // Initiate position motion generator (PID controller)
-          control_toolbox::Pid pid;
-          pid.initParam(robot_namespace + "/motion_generators/position/gains/" + joint->name);
-          this->position_pid_controllers_.emplace(joint->name, pid);
-
+          joint->position_controller.initParam(robot_namespace +
+                                               "/motion_generators/position/gains/" + joint->name);
           initPositionCommandHandle(joint);
           continue;
         }
         if (k_interface == "hardware_interface/VelocityJointInterface") {
           // Initiate velocity motion generator (PID controller)
-          control_toolbox::Pid pid_velocity;
-          pid_velocity.initParam(robot_namespace + "/motion_generators/velocity/gains/" +
-                                 joint->name);
-          this->velocity_pid_controllers_.emplace(joint->name, pid_velocity);
-
+          joint->velocity_controller.initParam(robot_namespace +
+                                               "/motion_generators/velocity/gains/" + joint->name);
           initVelocityCommandHandle(joint);
           continue;
         }
@@ -230,6 +276,9 @@ void FrankaHWSim::initFrankaStateHandle(
         " joints were found beneath the <transmission> tag, but 7 are required.");
   }
 
+  // Initialize robot_mode to "Idle". Once a controller is started, we will switch to "Move"
+  this->robot_state_.robot_mode = franka::RobotMode::kIdle;
+
   // Check if all joints defined in the <transmission> actually exist in the URDF
   for (const auto& joint : transmission.joints_) {
     if (not urdf.getJoint(joint.name_)) {
@@ -298,7 +347,7 @@ void FrankaHWSim::initFrankaModelHandle(
 void FrankaHWSim::initServices(ros::NodeHandle& nh) {
   this->service_set_ee_ =
       nh.advertiseService<franka_msgs::SetEEFrame::Request, franka_msgs::SetEEFrame::Response>(
-          "set_EE_frame", [&](auto& request, auto& response) {
+          "franka_control/set_EE_frame", [&](auto& request, auto& response) {
             ROS_INFO_STREAM_NAMED("franka_hw_sim",
                                   this->arm_id_ << ": Setting NE_T_EE transformation");
             std::copy(request.NE_T_EE.cbegin(), request.NE_T_EE.cend(),
@@ -308,7 +357,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             return true;
           });
   this->service_set_k_ = franka_hw::advertiseService<franka_msgs::SetKFrame>(
-      nh, "set_K_frame", [&](auto& request, auto& response) {
+      nh, "franka_control/set_K_frame", [&](auto& request, auto& response) {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting EE_T_K transformation");
         std::copy(request.EE_T_K.cbegin(), request.EE_T_K.cend(),
                   this->robot_state_.EE_T_K.begin());
@@ -317,7 +366,7 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
         return true;
       });
   this->service_set_load_ = franka_hw::advertiseService<franka_msgs::SetLoad>(
-      nh, "set_load", [&](auto& request, auto& response) {
+      nh, "franka_control/set_load", [&](auto& request, auto& response) {
         ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Load");
         this->robot_state_.m_load = request.mass;
         std::copy(request.F_x_center_load.cbegin(), request.F_x_center_load.cend(),
@@ -330,7 +379,8 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
       });
   this->service_collision_behavior_ =
       franka_hw::advertiseService<franka_msgs::SetForceTorqueCollisionBehavior>(
-          nh, "set_force_torque_collision_behavior", [&](auto& request, auto& response) {
+          nh, "franka_control/set_force_torque_collision_behavior",
+          [&](auto& request, auto& response) {
             ROS_INFO_STREAM_NAMED("franka_hw_sim", this->arm_id_ << ": Setting Collision Behavior");
 
             for (int i = 0; i < 7; i++) {
@@ -351,6 +401,47 @@ void FrankaHWSim::initServices(ros::NodeHandle& nh) {
             response.success = true;
             return true;
           });
+  this->service_user_stop_ =
+      nh.advertiseService<std_srvs::SetBool::Request, std_srvs::SetBool::Response>(
+          "franka_control/set_user_stop", [&](auto& request, auto& response) {
+            this->sm_.process_event(UserStop{static_cast<bool>(request.data)});
+            response.success = true;
+            return true;
+          });
+  this->service_controller_list_ = nh.serviceClient<controller_manager_msgs::ListControllers>(
+      "controller_manager/list_controllers");
+  this->service_controller_switch_ = nh.serviceClient<controller_manager_msgs::SwitchController>(
+      "controller_manager/switch_controller");
+}
+
+void FrankaHWSim::restartControllers() {
+  // Restart controllers by stopping and starting all running ones
+  auto name = this->service_controller_list_.getService();
+  if (not this->service_controller_list_.waitForExistence(ros::Duration(3))) {
+    throw std::runtime_error("Cannot find service '" + name +
+                             "'. Is the controller_manager running?");
+  }
+
+  controller_manager_msgs::ListControllers list;
+  if (not this->service_controller_list_.call(list)) {
+    throw std::runtime_error("Service call '" + name + "' failed");
+  }
+
+  controller_manager_msgs::SwitchController swtch;
+  for (const auto& controller : list.response.controller) {
+    if (controller.state != "running") {
+      continue;
+    }
+    swtch.request.stop_controllers.push_back(controller.name);
+    swtch.request.start_controllers.push_back(controller.name);
+  }
+  swtch.request.start_asap = static_cast<decltype(swtch.request.start_asap)>(true);
+  swtch.request.strictness = controller_manager_msgs::SwitchControllerRequest::STRICT;
+  if (not this->service_controller_switch_.call(swtch) or
+      not static_cast<bool>(swtch.response.ok)) {
+    throw std::runtime_error("Service call '" + this->service_controller_switch_.getService() +
+                             "' failed");
+  }
 }
 
 void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
@@ -361,6 +452,36 @@ void FrankaHWSim::readSim(ros::Time time, ros::Duration period) {
   this->updateRobotState(time);
 }
 
+double FrankaHWSim::positionControl(Joint& joint, double setpoint, const ros::Duration& period) {
+  double error;
+  const double kJointLowerLimit = joint.limits.min_position;
+  const double kJointUpperLimit = joint.limits.max_position;
+  switch (joint.type) {
+    case urdf::Joint::REVOLUTE:
+      angles::shortest_angular_distance_with_limits(joint.position, setpoint, kJointLowerLimit,
+                                                    kJointUpperLimit, error);
+      break;
+    case urdf::Joint::PRISMATIC:
+      error =
+          boost::algorithm::clamp(setpoint - joint.position, kJointLowerLimit, kJointUpperLimit);
+      break;
+    default:
+      std::string error_message =
+          "Only revolute or prismatic joints are allowed for position control right now";
+      ROS_FATAL("%s", error_message.c_str());
+      throw std::invalid_argument(error_message);
+  }
+
+  return boost::algorithm::clamp(joint.position_controller.computeCommand(error, period),
+                                 -joint.limits.max_effort, joint.limits.max_effort);
+}
+
+double FrankaHWSim::velocityControl(Joint& joint, double setpoint, const ros::Duration& period) {
+  return boost::algorithm::clamp(
+      joint.velocity_controller.computeCommand(setpoint - joint.velocity, period),
+      -joint.limits.max_effort, joint.limits.max_effort);
+}
+
 void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
   auto g = this->model_->gravity(this->robot_state_, this->gravity_earth_);
 
@@ -369,46 +490,26 @@ void FrankaHWSim::writeSim(ros::Time /*time*/, ros::Duration period) {
 
     // Retrieve effort control command
     double effort = 0;
+
+    // Finger joints must still be controllable from franka_gripper_sim controller
+    if (not sm_.is(state<Move>) and not contains(pair.first, "finger_joint")) {
+      effort = positionControl(*joint, joint->stop_position, period);
+    } else if (joint->control_method == POSITION) {
+      effort = positionControl(*joint, joint->desired_position, period);
+    } else if (joint->control_method == VELOCITY) {
+      effort = velocityControl(*joint, joint->desired_velocity, period);
+    } else if (joint->control_method == EFFORT) {
+      // Feed-forward commands in effort control
+      effort = joint->command;
+    }
+
     // Check if this joint is affected by gravity compensation
     std::string prefix = this->arm_id_ + "_joint";
     if (pair.first.rfind(prefix, 0) != std::string::npos) {
       int i = std::stoi(pair.first.substr(prefix.size())) - 1;
       joint->gravity = g.at(i);
     }
-    auto& control_method = joint->control_method;
-    if (control_method == EFFORT) {
-      effort = joint->command + joint->gravity;
-    } else if (control_method == POSITION) {
-      // Use position motion generator
-      double error;
-      const double kJointLowerLimit = joint->limits.min_position;
-      const double kJointUpperLimit = joint->limits.max_position;
-      switch (joint->type) {
-        case urdf::Joint::REVOLUTE:
-          angles::shortest_angular_distance_with_limits(joint->position, joint->desired_position,
-                                                        kJointLowerLimit, kJointUpperLimit, error);
-          break;
-        default:
-          std::string error_message =
-              "Only revolute joints are allowed for position control right now";
-          ROS_FATAL("%s", error_message.c_str());
-          throw std::invalid_argument(error_message);
-      }
-
-      const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(
-                   position_pid_controllers_[joint->name].computeCommand(error, period),
-                   -kEffortLimit, kEffortLimit) +
-               joint->gravity;
-    } else if (control_method == VELOCITY) {
-      // Use velocity motion generator
-      const double kError = joint->desired_velocity - joint->velocity;
-      const double kEffortLimit = joint->limits.max_effort;
-      effort = boost::algorithm::clamp(
-                   velocity_pid_controllers_[joint->name].computeCommand(kError, period),
-                   -kEffortLimit, kEffortLimit) +
-               joint->gravity;
-    }
+    effort += joint->gravity;
 
     // Send control effort control command
     if (not std::isfinite(effort)) {
@@ -457,9 +558,9 @@ bool FrankaHWSim::readParameters(const ros::NodeHandle& nh, const urdf::Model& u
         "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
 
     this->lower_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
-        "lower_torque_thresholds_nominal", nh, {20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0});
+        "lower_force_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
     this->upper_force_thresholds_nominal_ = franka_hw::FrankaHW::getCollisionThresholds(
-        "upper_torque_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
+        "upper_force_thresholds_nominal", nh, {20.0, 20.0, 20.0, 25.0, 25.0, 25.0});
 
     for (int i = 0; i < 7; i++) {
       std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
@@ -553,6 +654,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   // This is ensured, because a FrankaStateInterface checks for at least seven joints in the URDF
   assert(this->joints_.size() >= 7);
 
+  auto mode = this->robot_state_.robot_mode;
   for (int i = 0; i < 7; i++) {
     std::string name = this->arm_id_ + "_joint" + std::to_string(i + 1);
     const auto& joint = this->joints_.at(name);
@@ -561,19 +663,10 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     this->robot_state_.tau_J[i] = joint->effort;
     this->robot_state_.dtau_J[i] = joint->jerk;
 
-    if (joint->control_method == EFFORT) {
-      this->robot_state_.q_d[i] = joint->desired_position;
-      this->robot_state_.dq_d[i] = 0;
-      this->robot_state_.ddq_d[i] = 0;
-      this->robot_state_.tau_J_d[i] = joint->command;
-    } else {
-      this->robot_state_.q_d[i] =
-          joint->control_method == POSITION ? joint->desired_position : joint->position;
-      this->robot_state_.dq_d[i] =
-          joint->control_method == VELOCITY ? joint->desired_velocity : joint->velocity;
-      this->robot_state_.ddq_d[i] = joint->acceleration;
-      this->robot_state_.tau_J_d[i] = 0;
-    }
+    this->robot_state_.q_d[i] = joint->getDesiredPosition(mode);
+    this->robot_state_.dq_d[i] = joint->getDesiredVelocity(mode);
+    this->robot_state_.ddq_d[i] = joint->getDesiredAcceleration(mode);
+    this->robot_state_.tau_J_d[i] = joint->getDesiredTorque(mode);
 
     // For now we assume no flexible joints
     this->robot_state_.theta[i] = joint->position;
@@ -582,6 +675,7 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
     // first time initialization of the desired position
     if (not this->robot_initialized_) {
       joint->desired_position = joint->position;
+      joint->stop_position = joint->position;
     }
 
     if (this->robot_initialized_) {
@@ -625,8 +719,15 @@ void FrankaHWSim::updateRobotState(ros::Time time) {
   this->robot_state_.control_command_success_rate = 1.0;
   this->robot_state_.time = franka::Duration(time.toNSec() / 1e6 /*ms*/);
   this->robot_state_.O_T_EE = this->model_->pose(franka::Frame::kEndEffector, this->robot_state_);
+#ifdef ENABLE_BASE_ACCELERATION
+  // This will always be {0,0,-9.81} on the real robot as it cannot be mounted differently for now
+  this->robot_state_.O_ddP_O = this->gravity_earth_;
+#endif
 
+  std_msgs::Bool msg;
+  msg.data = static_cast<decltype(msg.data)>(true);
   this->robot_initialized_ = true;
+  this->robot_initialized_pub_.publish(msg);
 }
 
 bool FrankaHWSim::prepareSwitch(
@@ -639,8 +740,9 @@ bool FrankaHWSim::prepareSwitch(
 
 void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list,
                            const std::list<hardware_interface::ControllerInfo>& stop_list) {
-  forControlledJoint(stop_list, [](franka_gazebo::Joint& joint, const ControlMethod& method) {
-    joint.control_method = POSITION;
+  forControlledJoint(stop_list, [](franka_gazebo::Joint& joint, const ControlMethod& /*method*/) {
+    joint.control_method = boost::none;
+    joint.stop_position = joint.position;
     joint.desired_position = joint.position;
     joint.desired_velocity = 0;
   });
@@ -650,6 +752,8 @@ void FrankaHWSim::doSwitch(const std::list<hardware_interface::ControllerInfo>& 
     joint.desired_position = joint.position;
     joint.desired_velocity = 0;
   });
+
+  this->sm_.process_event(SwitchControl());
 }
 
 void FrankaHWSim::forControlledJoint(

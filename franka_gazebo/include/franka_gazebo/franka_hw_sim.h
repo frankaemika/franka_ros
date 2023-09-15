@@ -1,12 +1,14 @@
 #pragma once
 
-#include <control_toolbox/pid.h>
+#include <actionlib/server/simple_action_server.h>
 #include <franka/robot_state.h>
 #include <franka_gazebo/controller_verifier.h>
 #include <franka_gazebo/joint.h>
+#include <franka_gazebo/statemachine.h>
 #include <franka_hw/franka_model_interface.h>
 #include <franka_hw/franka_state_interface.h>
 #include <franka_hw/model_base.h>
+#include <franka_msgs/ErrorRecoveryAction.h>
 #include <gazebo_ros_control/robot_hw_sim.h>
 #include <hardware_interface/internal/hardware_resource_manager.h>
 #include <hardware_interface/joint_command_interface.h>
@@ -14,16 +16,23 @@
 #include <pluginlib/class_list_macros.h>
 #include <ros/ros.h>
 #include <urdf/model.h>
+#include <array>
 #include <boost/optional.hpp>
+#include <boost_sml/sml.hpp>
 #include <cmath>
 #include <gazebo/common/common.hh>
 #include <gazebo/physics/physics.hh>
 #include <map>
 #include <memory>
+#include <mutex>
+#include <string>
 
 namespace franka_gazebo {
 
 const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of tau_ext_hat_filtered
+const std::array<std::string, 9> kRobotJointSuffixes = {
+    "_joint1", "_joint2", "_joint3",        "_joint4",       "_joint5",
+    "_joint6", "_joint7", "_finger_joint1", "_finger_joint2"};
 
 /**
  * A custom implementation of a [gazebo_ros_control](http://wiki.ros.org/gazebo_ros_control) plugin,
@@ -45,6 +54,11 @@ const double kDefaultTauExtLowpassFilter = 1.0;  // no filtering per default of 
  */
 class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
  public:
+  /**
+   * Create a new FrankaHWSim instance
+   */
+  FrankaHWSim();
+
   /**
    * Initialize the simulated robot hardware and parse all supported transmissions.
    *
@@ -125,9 +139,6 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   gazebo::physics::ModelPtr robot_;
   std::map<std::string, std::shared_ptr<franka_gazebo::Joint>> joints_;
 
-  std::map<std::string, control_toolbox::Pid> position_pid_controllers_;
-  std::map<std::string, control_toolbox::Pid> velocity_pid_controllers_;
-
   hardware_interface::JointStateInterface jsi_;
   hardware_interface::EffortJointInterface eji_;
   hardware_interface::PositionJointInterface pji_;
@@ -135,15 +146,21 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
   franka_hw::FrankaStateInterface fsi_;
   franka_hw::FrankaModelInterface fmi_;
 
+  boost::sml::sm<franka_gazebo::StateMachine, boost::sml::thread_safe<std::mutex>> sm_;
   franka::RobotState robot_state_;
   std::unique_ptr<franka_hw::ModelBase> model_;
 
   double tau_ext_lowpass_filter_;
 
+  ros::Publisher robot_initialized_pub_;
   ros::ServiceServer service_set_ee_;
   ros::ServiceServer service_set_k_;
   ros::ServiceServer service_set_load_;
   ros::ServiceServer service_collision_behavior_;
+  ros::ServiceServer service_user_stop_;
+  ros::ServiceClient service_controller_list_;
+  ros::ServiceClient service_controller_switch_;
+  std::unique_ptr<actionlib::SimpleActionServer<franka_msgs::ErrorRecoveryAction>> action_recovery_;
 
   std::vector<double> lower_force_thresholds_nominal_;
   std::vector<double> upper_force_thresholds_nominal_;
@@ -161,12 +178,17 @@ class FrankaHWSim : public gazebo_ros_control::RobotHWSim {
                              double singularity_threshold);
   void initServices(ros::NodeHandle& nh);
 
+  void restartControllers();
+
   void updateRobotState(ros::Time time);
   void updateRobotStateDynamics();
 
   bool readParameters(const ros::NodeHandle& nh, const urdf::Model& urdf);
 
   void guessEndEffector(const ros::NodeHandle& nh, const urdf::Model& urdf);
+
+  static double positionControl(Joint& joint, double setpoint, const ros::Duration& period);
+  static double velocityControl(Joint& joint, double setpoint, const ros::Duration& period);
 
   template <int N>
   std::array<double, N> readArray(std::string param, std::string name = "") {

@@ -189,9 +189,9 @@ void DualArmCartesianImpedanceExampleController::startingArm(FrankaDataContainer
 
   // set target point to current state
   arm_data.position_d_ = initial_transform.translation();
-  arm_data.orientation_d_ = Eigen::Quaterniond(initial_transform.linear());
+  arm_data.orientation_d_ = Eigen::Quaterniond(initial_transform.rotation());
   arm_data.position_d_target_ = initial_transform.translation();
-  arm_data.orientation_d_target_ = Eigen::Quaterniond(initial_transform.linear());
+  arm_data.orientation_d_target_ = Eigen::Quaterniond(initial_transform.rotation());
 
   // set nullspace target configuration to initial q
   arm_data.q_d_nullspace_ = q_initial;
@@ -219,7 +219,7 @@ void DualArmCartesianImpedanceExampleController::starting(const ros::Time& /*tim
 void DualArmCartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                                         const ros::Duration& /*period*/) {
   for (auto& arm_data : arms_data_) {
-    updateArm(arm_data.second);
+    updateArm(arm_data.second);  // NOLINT
   }
   if (publish_rate_()) {
     publishCenteringPose();
@@ -243,7 +243,7 @@ void DualArmCartesianImpedanceExampleController::updateArm(FrankaDataContainer& 
       robot_state.tau_J_d.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
-  Eigen::Quaterniond orientation(transform.linear());
+  Eigen::Quaterniond orientation(transform.rotation());
 
   // compute error to desired pose
   // position error
@@ -364,12 +364,12 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
         Ol_T_C * EEl_T_C_.inverse();  // NOLINT (readability-identifier-naming)
     left_arm_data.position_d_target_ = Ol_T_EEl_d.translation();
     Eigen::Quaterniond last_orientation_d_target(left_arm_data.orientation_d_target_);
-    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.linear());  // NOLINT
+    Eigen::Quaterniond new_orientation_target(Ol_T_EEl_d.rotation());
     if (last_orientation_d_target.coeffs().dot(new_orientation_target.coeffs()) < 0.0) {
       new_orientation_target.coeffs() << -new_orientation_target.coeffs();
     }
     Ol_T_EEl_d.linear() = new_orientation_target.matrix();
-    left_arm_data.orientation_d_target_ = Ol_T_EEl_d.linear();
+    left_arm_data.orientation_d_target_ = Ol_T_EEl_d.rotation();
 
     // Compute target for the right endeffector given the static desired transform from left to
     // right endeffector.
@@ -381,7 +381,7 @@ void DualArmCartesianImpedanceExampleController::targetPoseCallback(
         Or_T_EEr_d.translation();  // NOLINT (readability-identifier-naming)
     last_orientation_d_target = Eigen::Quaterniond(right_arm_data.orientation_d_target_);
     right_arm_data.orientation_d_target_ =
-        Or_T_EEr_d.linear();  // NOLINT (readability-identifier-naming)
+        Or_T_EEr_d.rotation();  // NOLINT (readability-identifier-naming)
     if (last_orientation_d_target.coeffs().dot(right_arm_data.orientation_d_target_.coeffs()) <
         0.0) {
       right_arm_data.orientation_d_target_.coeffs()

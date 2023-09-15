@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>franka_description</name>
-  <version>0.8.2</version>
+  <version>0.10.1</version>
   <description>franka_description contains URDF files and meshes of Franka Emika robots</description>
   <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -14,4 +14,5 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <exec_depend>xacro</exec_depend>
+  <test_depend>rosunit</test_depend>
 </package>

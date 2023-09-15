@@ -92,7 +92,7 @@ class TeleopGripperClient {
 
   double grasp_force_;                 // [N]
   double grasp_epsilon_inner_{0.001};  // [m]
-  double grasp_epsilon_outer_scaling_{0.9};
+  double grasp_epsilon_outer_scaling_{100};
   double move_speed_;  // [m/s]
 
   double start_pos_grasping_{0.5};  // Threshold position of leader gripper where to start grasping.

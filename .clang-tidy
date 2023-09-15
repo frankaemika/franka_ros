@@ -50,3 +50,7 @@ CheckOptions:
     value:  lower_case
   - key:    readability-identifier-naming.ConstantParameterPrefix
     value:  ''
+
+# Implicit conversions
+  - key:    readability-implicit-bool-conversion.AllowPointerConditions
+    value:  1

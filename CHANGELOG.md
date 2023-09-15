@@ -1,12 +1,76 @@
 # CHANGELOG
 
-## 0.x - UNRELEASED
+## 0.10.2 - UNRELEASED
 
-* `franka_gazebo`:
-  - Add JointPosition and JointVelocity Interface
-  - Fix: Robot now keeps position when no controller is running
-  - joint_{position,velocity}_example controller are now available in `franka_gazebo`
-    
+Requires `libfranka` >= 0.8.0
+
+  * `franka_gazebo`: Offer both `panda.launch` and `fr3.launch`.
+  * `franka_gazebo`: Fix velocity control by adding the missing effort.
+  * `franka_control`: Clear the error flag if the robot is in `kIdle` mode, i.e. ready to move.
+  * `franka_control`: Fix unexpected long delay when calling error recovery ([#317](https://github.com/frankaemika/franka_ros/issues/317))
+  * Fix a possible compilation error by sorting include directories by topological order ([#319](https://github.com/frankaemika/franka_ros/issues/319)).
+  * `franka_control`: Fix a bug where `error_recovery` actions recover future errors ([#316](https://github.com/frankaemika/franka_ros/issues/316)).
+  * `franka_gazebo`: `FrankaHWSim` only acts on joints belonging to a Franka robot. This allows to combine a Franka robot and others (like mobile platforms) in same URDF ([#313](https://github.com/frankaemika/franka_ros/issues/313))
+  * `franka_description`: `<xacro:franka_robot/>` macro now supports to customize the `parent` frame and its `xyz` + `rpy` offset
+  * `franka_hw`: Fix the bug where the previous controller is still running after switching the controller. ([#326](https://github.com/frankaemika/franka_ros/issues/326))
+
+## 0.10.1 - 2022-09-15
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Fix examples not working on melodic due to non-ascii symbols in comments of `franka_example_controllers.yaml`.
+  * `franka_example_controllers`: The `link_name` in  `cartesian_impedance_example_controller.launch` is now determined over the `arm_id`.
+  * `franka_description`: Fix catkin warning about `catkin_add_nosetests`
+
+## 0.10.0 - 2022-09-02
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Normalize rotations before usage
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
+  * `franka_example_controllers`: Don't require MoveIt for `move_to_start.launch`
+  * **BREAKING** `franka_description`: Refactor URDF files to also support FR3
+  * `franka_control`: Introduce optional `robot` argument in the `franka_control.launch` launch file that chooses either the URDF for panda or fr3. This argument can also be used in the launch files of `franka_examples`. The default is "panda".
+
+## 0.9.1 - 2022-08-29
+
+Requires `libfranka` >= 0.8.0
+
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with markers indicating leader and follower roles + consistently use leader and follower as robot names in the example.
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with a finite state machine that aligns the follower robot before starting to track the leader.
+  * `franka_example_controllers`: Extend the `teleop_joint_pd_example_controller` with joint walls to actively avoid position or velocity limit violations.
+  * `franka_example_controllers`: Fix namespacing of dynamic reconfigure node of cartesian impedance example controller
+  * `franka_control`: Configurable `arm_id` in launch & config files
+  * `franka_description`: URDF now contains `$(arm_id)_linkN_sc` links containing the capsule collision modules used for self-collision avoidance (MoveIt).
+  * `franka_description`: Unit test suite for URDFs
+  * `franka_description`: Make `util.xacro` be includable from other packages
+  * `franka_description`: Add `tcp_xyz` & `tcp_rpy` offsets to specify a custom TCP for MoveIT's `$(arm_id)_manipulator` move group
+  * `franka_control`: `franka_control.launch` accepts `xacro_args` to pass down additional arguments to URDF
+  * `franka_gazebo`: `panda.launch` accepts `xacro_args` to pass down additional arguments to URDF
+  * `franka_gazebo`: Fix motion generator config respects `arm_id`
+  *  **BREAKING**: `gripper_action` goes now to the commanded gripper position when `max_effort` is zero
+  * `franka_gazebo`: Drop `delayed_controller_spawner.py` script in favor of `--wait-for TOPIC` flag from controller_manager
+  * `franka_gazebo`: Properly calculate inertial properties of `world/stone/model.sdf`
+  * `franka_gazebo`: `set_user_stop` service to simulate User stop in Gazebo
+  * `franka_gazebo`: `error_recovery` action similar to `franka_control`
+  * **BREAKING**: `franka_gazebo`: Move services like `set_EE_frame`, `set_K_frame` ... into `franka_control` namespace to be more consistent with real robot
+
+## 0.9.0 - 2022-03-29
+
+Requires `libfranka` >= 0.8.0
+
+  * Added support for libfranka 0.9.0
+  * **BREAKING** add base acceleration `O_ddP_O` (will for now always be {0,0,-9.81}) to `FrankaState.msg`
+  * **BREAKING** add  following errors to `Errors.msg`:
+    * `joint_move_in_wrong_direction`
+    * `cartesian_spline_motion_generator_violation`
+    * `joint_via_motion_generator_planning_joint_limit_violation`
+    * `base_acceleration_initialization_timeout`
+    * `base_acceleration_invalid_reading`
+  * `franka_gazebo`:
+    - Add JointPosition and JointVelocity Interface
+    - Fix: Robot now keeps position when no controller is running
+    - joint_{position,velocity}_example controller are now available in `franka_gazebo`
 
 ## 0.8.2 - 2022-02-22
 

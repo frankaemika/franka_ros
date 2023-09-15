@@ -297,9 +297,13 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
   requested_control_mode &= ~stop_control_mode;
   requested_control_mode |= start_control_mode;
 
-  if (!setRunFunction(requested_control_mode, get_limit_rate_(), get_cutoff_frequency_(),
-                      get_internal_controller_())) {
-    return false;
+  {
+    controller_active_ = false;
+    std::lock_guard<std::mutex> lock(robot_mutex_);
+    if (!setRunFunction(requested_control_mode, get_limit_rate_(), get_cutoff_frequency_(),
+                        get_internal_controller_())) {
+      return false;
+    }
   }
 
   if (current_control_mode_ != requested_control_mode) {
@@ -309,7 +313,6 @@ bool FrankaHW::prepareSwitch(const std::list<hardware_interface::ControllerInfo>
                     << ", cutoff_frequency=" << get_cutoff_frequency_()
                     << ", internal_controller=" << get_internal_controller_());
     current_control_mode_ = requested_control_mode;
-    controller_active_ = false;
   }
 
   return true;

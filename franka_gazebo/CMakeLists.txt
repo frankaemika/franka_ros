@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   gazebo_ros_control
   kdl_parser
+  boost_sml
   control_toolbox
   controller_manager
   controller_interface
@@ -36,10 +37,15 @@ find_package(catkin REQUIRED COMPONENTS
   franka_gripper
   franka_example_controllers
 )
-
-find_package(Franka 0.7.0 REQUIRED)
+find_package(Franka 0.9.0 QUIET)
+if(NOT Franka_FOUND)
+  find_package(Franka 0.8.0 REQUIRED)
+endif()
 find_package(Eigen3 REQUIRED)
 find_package(orocos_kdl REQUIRED)
+
+# merge Franka + catkin INCLUDE_DIRS in topological order
+list_insert_in_workspace_order(catkin_INCLUDE_DIRS ${Franka_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 catkin_package(
   CATKIN_DEPENDS
@@ -47,6 +53,7 @@ catkin_package(
     std_msgs
     gazebo_ros_control
     kdl_parser
+    boost_sml
     controller_manager
     controller_interface
     control_toolbox
@@ -82,13 +89,16 @@ add_library(franka_hw_sim
   src/model_kdl.cpp
   src/controller_verifier.cpp
   )
+if (Franka_VERSION GREATER_EQUAL 0.9)
+  target_compile_definitions(franka_hw_sim PUBLIC ENABLE_BASE_ACCELERATION)
+endif()
+
 target_link_libraries(franka_hw_sim
   ${catkin_LIBRARIES}
   ${Franka_LIBRARIES}
   ${orocos_kdl_LIBRARIES}
   )
 target_include_directories(franka_hw_sim SYSTEM PUBLIC
-  ${Franka_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
@@ -131,10 +141,6 @@ install(TARGETS franka_hw_sim franka_gripper_sim
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
-catkin_install_python(PROGRAMS scripts/delayed_controller_spawner.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY launch

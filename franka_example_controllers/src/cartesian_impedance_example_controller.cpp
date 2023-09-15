@@ -85,7 +85,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   }
 
   dynamic_reconfigure_compliance_param_node_ =
-      ros::NodeHandle(node_handle.getNamespace() + "dynamic_reconfigure_compliance_param_node");
+      ros::NodeHandle(node_handle.getNamespace() + "/dynamic_reconfigure_compliance_param_node");
 
   dynamic_server_compliance_param_ = std::make_unique<
       dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>(
@@ -118,9 +118,9 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
 
   // set equilibrium point to current state
   position_d_ = initial_transform.translation();
-  orientation_d_ = Eigen::Quaterniond(initial_transform.linear());
+  orientation_d_ = Eigen::Quaterniond(initial_transform.rotation());
   position_d_target_ = initial_transform.translation();
-  orientation_d_target_ = Eigen::Quaterniond(initial_transform.linear());
+  orientation_d_target_ = Eigen::Quaterniond(initial_transform.rotation());
 
   // set nullspace equilibrium configuration to initial q
   q_d_nullspace_ = q_initial;
@@ -143,7 +143,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       robot_state.tau_J_d.data());
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
-  Eigen::Quaterniond orientation(transform.linear());
+  Eigen::Quaterniond orientation(transform.rotation());
 
   // compute error to desired pose
   // position error
@@ -158,7 +158,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Quaterniond error_quaternion(orientation.inverse() * orientation_d_);
   error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
   // Transform to base frame
-  error.tail(3) << -transform.linear() * error.tail(3);
+  error.tail(3) << -transform.rotation() * error.tail(3);
 
   // compute control
   // allocate variables

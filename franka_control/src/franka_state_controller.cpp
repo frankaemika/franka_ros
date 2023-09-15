@@ -128,6 +128,23 @@ franka_msgs::Errors errorsToMessage(const franka::Errors& error) {
       static_cast<decltype(message.tau_j_range_violation)>(error.tau_j_range_violation);
   message.instability_detected =
       static_cast<decltype(message.instability_detected)>(error.instability_detected);
+  message.joint_move_in_wrong_direction =
+      static_cast<decltype(message.joint_move_in_wrong_direction)>(
+          error.joint_move_in_wrong_direction);
+#ifdef ENABLE_BASE_ACCELERATION
+  message.cartesian_spline_motion_generator_violation =
+      static_cast<decltype(message.cartesian_spline_motion_generator_violation)>(
+          error.cartesian_spline_motion_generator_violation);
+  message.joint_via_motion_generator_planning_joint_limit_violation =
+      static_cast<decltype(message.joint_via_motion_generator_planning_joint_limit_violation)>(
+          error.joint_via_motion_generator_planning_joint_limit_violation);
+  message.base_acceleration_initialization_timeout =
+      static_cast<decltype(message.base_acceleration_initialization_timeout)>(
+          error.base_acceleration_initialization_timeout);
+  message.base_acceleration_invalid_reading =
+      static_cast<decltype(message.base_acceleration_invalid_reading)>(
+          error.base_acceleration_invalid_reading);
+#endif
   return message;
 }
 
@@ -360,6 +377,13 @@ void FrankaStateController::publishFrankaStates(const ros::Time& time) {
       publisher_franka_states_.msg_.F_x_Cload[i] = robot_state_.F_x_Cload[i];
       publisher_franka_states_.msg_.F_x_Ctotal[i] = robot_state_.F_x_Ctotal[i];
     }
+#ifdef ENABLE_BASE_ACCELERATION
+    for (size_t i = 0; i < robot_state_.O_ddP_O.size(); i++) {
+      publisher_franka_states_.msg_.O_ddP_O[i] = robot_state_.O_ddP_O[i];
+    }
+#else
+    publisher_franka_states_.msg_.O_ddP_O[2] = -9.81;
+#endif
 
     publisher_franka_states_.msg_.time = robot_state_.time.toSec();
     publisher_franka_states_.msg_.control_command_success_rate =

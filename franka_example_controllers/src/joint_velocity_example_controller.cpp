@@ -20,6 +20,13 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
         "JointVelocityExampleController: Error getting velocity joint interface from hardware!");
     return false;
   }
+
+  std::string arm_id;
+  if (!node_handle.getParam("arm_id", arm_id)) {
+    ROS_ERROR("JointVelocityExampleController: Could not get parameter arm_id");
+    return false;
+  }
+
   std::vector<std::string> joint_names;
   if (!node_handle.getParam("joint_names", joint_names)) {
     ROS_ERROR("JointVelocityExampleController: Could not parse joint names");
@@ -47,7 +54,7 @@ bool JointVelocityExampleController::init(hardware_interface::RobotHW* robot_har
   }
 
   try {
-    auto state_handle = state_interface->getHandle("panda_robot");
+    auto state_handle = state_interface->getHandle(arm_id + "_robot");
 
     std::array<double, 7> q_start{{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     for (size_t i = 0; i < q_start.size(); i++) {

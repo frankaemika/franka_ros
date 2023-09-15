@@ -1,13 +1,30 @@
 <?xml version="1.0" ?>
 <launch>
   <arg name="robot_ip" />
+  <arg name="arm_id" default="panda" />
+  <arg name="transmission" default="effort" doc="The type of position control to use (either 'position' or 'effort')" />
 
-  <include file="$(find franka_control)/launch/franka_control.launch">
-    <arg name="robot_ip" value="$(arg robot_ip)" />
+  <include file="$(find franka_control)/launch/franka_control.launch" pass_all_args="true">
     <arg name="load_gripper" value="false" />
   </include>
-  <include file="$(find panda_moveit_config)/launch/panda_moveit.launch">
-    <arg name="load_gripper" value="false" />
-  </include>
-  <node name="move_to_start" pkg="franka_example_controllers" type="move_to_start.py" output="screen" required="true" />
+
+  <node name="controller_spawner"
+        pkg="controller_manager"
+        type="spawner"
+        respawn="false"
+        output="screen"
+        args="$(arg transmission)_joint_trajectory_controller">
+  </node>
+
+  <node name="move_to_start"
+        pkg="franka_example_controllers"
+        type="move_to_start.py"
+        output="screen"
+        required="true">
+    <rosparam file="$(find franka_control)/config/start_pose.yaml" subst_value="true" />
+    <remap from="~follow_joint_trajectory" to="$(arg transmission)_joint_trajectory_controller/follow_joint_trajectory" />
+    <remap from="~joint_states" to="franka_state_controller/joint_states" />
+    <param name="max_dq" value="0.2" /> <!-- [rad/s] -->
+  </node>
+
 </launch>
