@@ -2,14 +2,14 @@
 <package format="2">
   <name>franka_example_controllers</name>
   <version>0.10.1</version>
-  <description>franka_example_controllers provides example code for controlling Franka Emika research robots with ros_control</description>
-  <maintainer email="support@franka.de">Franka Emika GmbH</maintainer>
+  <description>franka_example_controllers provides example code for controlling Franka Robotics research robots with ros_control</description>
+  <maintainer email="support@franka.de">Franka Robotics GmbH</maintainer>
   <license>Apache 2.0</license>
 
   <url type="website">http://wiki.ros.org/franka_example_controllers</url>
   <url type="repository">https://github.com/frankaemika/franka_ros</url>
   <url type="bugtracker">https://github.com/frankaemika/franka_ros/issues</url>
-  <author>Franka Emika GmbH</author>
+  <author>Franka Robotics GmbH</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 

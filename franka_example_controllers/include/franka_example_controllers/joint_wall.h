@@ -1,4 +1,4 @@
-// Copyright (c) 2022 Franka Emika GmbH
+// Copyright (c) 2023 Franka Robotics GmbH
 #pragma once
 
 #include <array>

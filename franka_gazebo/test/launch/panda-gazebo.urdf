@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="panda">
-  <!-- =============================================================== -->
-  <!-- || This file does not contain official inertial properties   || -->
-  <!-- || of panda robot. The values are from the identification    || -->
-  <!-- || results published in: Identification of the Franka Emika  || -->
-  <!-- || PandaRobot With Retrieval of Feasible Parameters Using    || -->
-  <!-- || Penalty-Based Optimization                                || -->
-  <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,         || -->
-  <!-- || Paolo Robuffo Giordano, Alessandro de Luca third-party    || -->
-  <!-- =============================================================== -->
+  <!-- ================================================================== -->
+  <!-- || This file does not contain official inertial properties      || -->
+  <!-- || of panda robot. The values are from the identification       || -->
+  <!-- || results published in: Identification of the Franka Robotics  || -->
+  <!-- || PandaRobot With Retrieval of Feasible Parameters Using       || -->
+  <!-- || Penalty-Based Optimization                                   || -->
+  <!-- || by: Claudio Gaz, Marco Cognetti, Alexander Oliva,            || -->
+  <!-- || Paolo Robuffo Giordano, Alessandro de Luca third-party       || -->
+  <!-- ================================================================== -->
   <link name="world"/>
   <joint name="panda_joint_panda_mount" type="fixed">
     <parent link="panda_mount"/>

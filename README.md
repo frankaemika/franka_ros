@@ -1,4 +1,4 @@
-# ROS integration for Franka Emika research robots
+# ROS integration for Franka Robotics research robots
 
 [![CI](https://github.com/frankaemika/franka_ros/actions/workflows/ci.yml/badge.svg)](https://github.com/frankaemika/franka_ros/actions/workflows/ci.yml)
 

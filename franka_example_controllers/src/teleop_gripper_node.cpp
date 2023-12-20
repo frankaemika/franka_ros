@@ -1,4 +1,4 @@
-// Copyright (c) 2020 Franka Emika GmbH
+// Copyright (c) 2023 Franka Robotics GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/gripper.h>
 #include <franka_example_controllers/teleop_gripper_paramConfig.h>
