@@ -13,6 +13,8 @@ void Joint::update(const ros::Duration& dt) {
   if (this->setPositionRequested_) {
     std::lock_guard<std::mutex> lock(this->requestedPositionMutex_);
     this->position = this->requestedPosition_;
+    this->desired_position = this->requestedPosition_;
+    this->stop_position = this->requestedPosition_;
     this->setPositionRequested_ = false;
   }
 
