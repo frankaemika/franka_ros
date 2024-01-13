@@ -1,10 +1,11 @@
-# This file does not contain official inertial properties
-# of panda robot. The values are from the identification
-# results published in: Identification of the Franka Emika
-# PandaRobot With Retrieval of Feasible Parameters Using
-# Penalty-Based Optimization
-# by: Claudio Gaz, Marco Cognetti, Alexander Oliva,
-# Paolo Robuffo Giordano, Alessandro de Luca
+# NOTE: This file does not contain official inertial properties
+# of panda robot. The values are from the identification results published in:
+#   Claudio Gaz, Marco Cognetti, Alexander Oliva, Paolo Robuffo Giordano, and
+#   Alessandro De Luca, "Dynamic Identification of the Franka Emika Panda Robot
+#   With Retrieval of Feasible Parameters Using Penalty-Based Optimization".
+#   IEEE Robot. Autom. Lett., vol. 4, no. 4, pp. 4147–4154, Oct. 2019,
+#   doi: 10.1109/LRA.2019.2931248.
+#   https://hal.inria.fr/hal-02265293/document
 link0:
   origin:
     xyz: -0.041018 -0.00014 0.049974
